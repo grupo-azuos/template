@@ -72,7 +72,8 @@ git branch --show-current
    ```
    Se o git recusar a troca por causa das alterações não salvas, commite-as primeiro numa
    branch temporária a partir de onde estão (`git switch -c feature/<nome>`) e traga a develop
-   para ela (`git merge develop`) — nunca descarte.
+   para ela (`git merge develop -m "[merge](<escopo>): Traz a develop para a branch"`) — nunca
+   descarte.
    `<nome>` em **inglês**, kebab-case, curto, do resultado: `customer-list`,
    `task-due-date`, `fix-empty-title-error` → `bugfix/empty-title-error`.
 4. Diga à pessoa, sem jargão: *"Criei um espaço de trabalho separado para isso
@@ -109,7 +110,7 @@ git fetch origin              # se houver remoto
 git switch develop
 git pull --ff-only            # se houver remoto
 git switch feature/<nome>
-git merge develop
+git merge develop -m "[merge](<escopo>): Traz a develop para a branch"
 ```
 
 - **Sem conflito** → siga.
@@ -143,9 +144,13 @@ Skill `verificar` inteira. Vermelho → corrija na branch, commite, repita.
 ```bash
 git switch develop
 git pull --ff-only                         # se houver remoto
-git merge --no-ff feature/<nome> -m "Merge branch 'feature/<nome>' into develop"
+git merge --no-ff feature/<nome> -m "[merge](<escopo>): <o que passou a existir>"
 ```
 
+- **Todo merge leva `-m` no formato `[merge](<escopo>): Mensagem`.** O texto automático do git
+  ("Merge branch 'x' into develop") é recusado pelo hook de propósito: o fechamento da feature
+  é a linha que alguém vai ler daqui a seis meses, e ela tem que dizer o que passou a existir
+  no sistema. Escopo é o mesmo do commit (`backend`, `web`, `db`, `deps`…).
 - O Claude Code vai pedir confirmação para o `git merge --no-ff`: é a segunda trava, de
   propósito. Diga à pessoa: *"Vai aparecer um pedido de confirmação — é o merge que você
   aprovou."*

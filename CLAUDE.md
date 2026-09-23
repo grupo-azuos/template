@@ -26,10 +26,12 @@ Siga a skill **`git-fluxo`** sempre, sem exceção e sem a pessoa precisar pedir
 1. **Antes de editar qualquer arquivo**, a mudança ganha uma branch `feature/<nome>` (ou
    `bugfix/<nome>`) criada **a partir da `develop`**.
 2. O trabalho é commitado **nessa branch** (`git-commit`).
-3. No fim: trazer a `develop` para a branch (`git merge develop`), rodar `verificar`, subir o
+3. No fim: trazer a `develop` para a branch (`git merge develop -m "[merge](…): …"` — todo
+   merge leva mensagem no formato, o texto automático do git é recusado), rodar `verificar`, subir o
    sistema e mostrar à pessoa **como conferir**.
 4. Perguntar: **"Está funcionando do jeito que você queria?"** e **esperar**.
-5. **Só com um OK explícito**: `git merge --no-ff` da branch na `develop` e enviar a develop.
+5. **Só com um OK explícito**: `git merge --no-ff -m "[merge](<escopo>): <o que passou a
+   existir>"` da branch na `develop` e enviar a develop.
 6. **A `main` nunca é tocada** — nem checkout, nem commit, nem merge, nem push. Ela é de quem
    administra o projeto. Release e hotfix também. O git recusa (hook `branch-guard.sh`); não
    procure contorno.
