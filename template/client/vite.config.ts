@@ -52,7 +52,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      port: 5173,
+      /* Configurável pelo mesmo motivo da porta da API: com vários projetos abertos, a 5173
+         vive ocupada. O `strictPort` fica ligado de propósito — porta que muda sozinha
+         quebraria o proxy e o CORS em silêncio, e o sintoma seria "erro de rede" numa tela
+         que aparenta estar no ar. */
+      port: Number(env.VITE_DEV_PORT || '5173'),
       strictPort: true,
       proxy: {
         '/api': {
@@ -61,7 +65,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    preview: { port: 5174, strictPort: true },
+    preview: { port: Number(env.VITE_PREVIEW_PORT || '5174'), strictPort: true },
     build: { outDir: 'dist', sourcemap: true },
   };
 });

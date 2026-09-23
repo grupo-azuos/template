@@ -18,6 +18,7 @@
 #   build     build, dependências, empacotamento
 #   ci        pipeline
 #   chore     manutenção que não cabe acima
+#   merge     fechamento de uma branch (todo merge precisa de -m)
 #
 # LOCAL
 #   backend    template/server/

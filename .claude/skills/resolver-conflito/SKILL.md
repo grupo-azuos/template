@@ -11,7 +11,7 @@ tranquilizar, explicar o que aconteceu **na tela**, resolver o que dá para reso
 
 Conflito se resolve **na branch de feature**, nunca na `develop` (ver `git-fluxo`). Se você
 está na develop no meio de um merge com conflito: `git merge --abort`, vá para a feature,
-`git merge develop`, e resolva lá.
+`git merge develop -m "[merge](<escopo>): Traz a develop para a branch"`, e resolva lá.
 
 ## 1. Primeira mensagem (antes de investigar)
 
@@ -135,11 +135,11 @@ Rode a skill **`verificar`** inteira — conflito resolvido que não compila é 
 Depois:
 
 ```bash
-git commit --no-edit
+git commit -m "[merge](<escopo>): Traz a develop para a branch"
 ```
 
-(A mensagem "Merge branch 'develop' into feature/…" é gerada pelo git e aceita pelo
-commitlint.)
+(`--no-edit` **não** serve: ele usa o texto automático do git, que o commitlint recusa. Todo
+merge leva mensagem no formato `[merge](<escopo>): Mensagem`.)
 
 Volte ao ponto do `git-fluxo` de onde veio (normalmente a Fase 3.3). Se o que chegou da develop
 mudou algo que a pessoa já tinha testado, diga isso quando pedir o OK.

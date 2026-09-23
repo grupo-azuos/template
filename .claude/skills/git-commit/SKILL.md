@@ -54,7 +54,8 @@ status, o `.gitignore` está errado — avise.
 [tipo](local): Mensagem
 ```
 
-- **tipo:** `feat` · `fix` · `refactor` · `test` · `docs` · `style` · `perf` · `build` · `ci` · `chore`
+- **tipo:** `feat` · `fix` · `refactor` · `test` · `docs` · `style` · `perf` · `build` · `ci` · `chore` · `merge`
+  (`merge` só no fechamento de branch, sempre com `-m`: o texto automático do git é recusado)
 - **Mensagem em português**, primeira letra maiúscula, **sem ponto final**, até ~90 caracteres.
 - Diga o que a mudança **faz** para quem usa ou mantém, não em que arquivo mexeu.
 
