@@ -398,6 +398,7 @@ Formato obrigatório, sem variação:
 | `build` | Build, dependências, empacotamento |
 | `ci` | Pipeline |
 | `chore` | Manutenção que não cabe acima |
+| `merge` | Fechamento de uma branch (ver abaixo) |
 
 **Local** — onde a mudança aconteceu:
 
@@ -418,6 +419,20 @@ Formato obrigatório, sem variação:
 
 Uma mudança que toca dois locais são dois commits. Se não der para separar, use o local mais
 relevante — nunca `[feat](backend,web)`.
+
+**Merge segue o formato como qualquer outro commit**, com o tipo `merge`:
+
+```text
+[merge](deps): Abaixa o better-sqlite3 para a versão 12.11.1
+[merge](web): Tela de clientes com busca por nome
+```
+
+O fechamento de uma branch é a entrada mais importante do histórico — é ela que diz o que
+passou a existir no sistema —, e o texto automático do git (`Merge branch 'x' into develop`)
+desperdiça justamente a linha que alguém vai ler daqui a seis meses. Por isso o
+`defaultIgnores` do commitlint fica **desligado**: a mensagem automática é recusada, e todo
+`git merge` precisa de `-m`. Recusar é o certo — é exatamente o caso que a regra existe para
+evitar.
 
 O formato é verificado por `commitlint` no hook de `commit-msg`: commit fora do padrão é
 rejeitado antes de entrar. O `pre-commit` roda o lint. **`--no-verify` é proibido** — ele
@@ -450,11 +465,13 @@ Nome de branch em **inglês**, kebab-case, sem o tipo repetido dentro: `feature/
 1. **Toda mudança de código nasce numa `feature/` ou `bugfix/`**, criada a partir da `develop`
    atualizada — antes do primeiro arquivo editado.
 2. O trabalho é **commitado na branch**, em quantos commits for preciso.
-3. No fim, a **`develop` é trazida para a branch** (`git merge develop`). Conflito se resolve
+3. No fim, a **`develop` é trazida para a branch** (`git merge develop -m "[merge](…): …"`).
+   Conflito se resolve
    **aqui**, na branch, nunca na develop.
 4. **Verificação** (§14) e o sistema rodando.
 5. **A pessoa que pediu confere e dá o OK** de que está funcionando. Sem OK, não há merge.
-6. **`git merge --no-ff`** da branch na `develop`, envio da develop, e a branch é apagada.
+6. **`git merge --no-ff -m "[merge](<escopo>): <o que passou a existir>"`** da branch na
+   `develop`, envio da develop, e a branch é apagada.
 
 O `--no-ff` é obrigatório: o histórico precisa mostrar que existiu uma feature, e é assim que
 dá para desfazer uma funcionalidade inteira de uma vez.
