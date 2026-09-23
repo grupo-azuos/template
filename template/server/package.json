@@ -35,7 +35,7 @@
     "@nestjs/serve-static": "^5.0.5",
     "@nestjs/swagger": "^11.4.7",
     "@template/shared": "*",
-    "better-sqlite3": "^13.0.3",
+    "better-sqlite3": "^12.11.1",
     "drizzle-orm": "^0.45.2",
     "nestjs-zod": "^5.5.0",
     "reflect-metadata": "^0.2.2",
