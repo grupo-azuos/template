@@ -7,8 +7,8 @@ describe('parseEnv', () => {
   it('starts with no variable at all, using the defaults', () => {
     expect(parseEnv({})).toEqual({
       NODE_ENV: 'development',
-      API_PORT: 3333,
-      API_CORS_ORIGIN: 'http://localhost:5173',
+      API_PORT: 3009,
+      API_CORS_ORIGIN: 'http://localhost:5009',
       API_LOG_LEVEL: 'log',
       DATABASE_FILE: './data/app.db',
     });

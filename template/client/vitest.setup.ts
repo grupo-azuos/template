@@ -13,7 +13,7 @@ afterEach(() => {
 
 /**
  * O jsdom não implementa Pointer Events nem `scrollIntoView`. Componentes do Radix (o Select
- * baixado em `lib/vendor/ui`, por exemplo) chamam os três ao abrir — sem o stub, o teste
+ * baixado em `lib/components/ui`, por exemplo) chamam os três ao abrir — sem o stub, o teste
  * quebra com "is not a function" antes de testar o que importa.
  */
 if (!Element.prototype.hasPointerCapture) {
