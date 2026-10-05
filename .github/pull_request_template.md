@@ -10,14 +10,14 @@
 
 - [ ] Commits no formato `[tipo](local): Mensagem`
 - [ ] Branch saiu de `develop` (ou de `main`, se for `hotfix/`)
-- [ ] `npm run lint`, `npm run typecheck` e `npm test` verdes
+- [ ] `npm run lint`, `npm run typecheck`, `npm run check:design` e `npm test` verdes
 - [ ] Caminho feliz **e** caminho triste testados
-- [ ] Story para todo primitivo/compositor novo ou alterado
+- [ ] Story e teste ao lado de todo `azuos-*` novo ou alterado
 - [ ] Endpoint novo documentado no Swagger
 - [ ] Mudança de banco com migration gerada (`npm run db:generate`) e seed atualizado
 - [ ] Nenhum hook de dado dentro de componente de UI
 - [ ] Props agrupadas em `data` / `ui` / `state` / `actions`
-- [ ] Nada editado dentro de `lib/vendor/`
+- [ ] Nada editado dentro de `lib/components/ui/`
 - [ ] `.env.example` atualizado se entrou variável nova
 - [ ] Nenhuma chave, senha ou dado real de cliente no diff — inclusive em seed, story e teste
 - [ ] Idioma conferido: nada em inglês na tela, nada em português em log/erro interno/teste

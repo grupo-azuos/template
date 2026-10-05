@@ -44,7 +44,7 @@ git --version
 3. Clone o repositório novo e abra a pasta no VS Code.
 4. Abra o Claude Code e digite: **`/comecar`**
 
-A skill `comecar` instala tudo, sobe o sistema, grava os dados de teste e abre no navegador.
+A skill `getting-started` instala tudo, sobe o sistema, grava os dados de teste e abre no navegador.
 Em seguida, peça **`/renomear-projeto`** para o nome do seu MVP aparecer nas telas.
 
 <details>
@@ -57,7 +57,7 @@ npm run seed:all       # cria o banco e grava os dados de teste
 npm run dev            # sobe o sistema
 ```
 
-Abra **http://localhost:5173**. A documentação da API fica em **http://localhost:3333/docs**.
+Abra **http://localhost:5009**. A documentação da API fica em **http://localhost:3009/docs**.
 
 </details>
 
@@ -186,7 +186,7 @@ Todos rodam dentro de `template/`:
 
 | Comando | O que faz |
 |---|---|
-| `npm run dev` | Sobe API (:3333) e tela (:5173), recarregando a cada mudança |
+| `npm run dev` | Sobe API (:3009) e tela (:5009), recarregando a cada mudança |
 | `npm run seed:all` | Grava os dados de teste (pode rodar quantas vezes quiser) |
 | `npm run db:reset` | **Apaga** o banco e recria com os dados de teste |
 | `npm run db:generate` | Gera a migration depois de mudar uma tabela |
@@ -206,7 +206,7 @@ cd template
 docker compose -f docker/compose.yml up --build
 ```
 
-Uma imagem só: o Nest serve `/api` **e** a tela na porta 3333. O arquivo do SQLite fica num
+Uma imagem só: o Nest serve `/api` **e** a tela na porta 3009. O arquivo do SQLite fica num
 volume — sem ele, cada `up --build` apagaria os dados.
 
 ---

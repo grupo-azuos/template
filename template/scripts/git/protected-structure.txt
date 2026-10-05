@@ -11,6 +11,7 @@
 ^template/scripts/tsconfig\.json$
 ^template/commitlint\.config\.js$
 ^template/docker/
+^template/client/components\.json$
 ^template/(shared|server|client)/eslint\.config\.ts$
 ^template/(shared|server|client)/tsconfig[^/]*\.json$
 ^template/(shared|server|client)/vitest[^/]*\.config\.ts$
