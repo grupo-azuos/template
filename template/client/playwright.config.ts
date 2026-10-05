@@ -16,7 +16,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5009',
     locale: 'pt-BR',
     trace: 'retain-on-failure',
   },
@@ -24,7 +24,19 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     cwd: '..',
-    url: 'http://localhost:5173',
+    /**
+     * A espera é por uma ROTA DA API, e não pela raiz da tela — e isso é correção de defeito.
+     *
+     * `npm run dev` sobe os dois juntos, mas o Vite responde em ~2s e o Nest leva ~15s para
+     * compilar. Esperando a raiz, o teste começava com a API ainda fora do ar: o proxy do Vite
+     * devolvia 502, o formulário mostrava "Não consegui falar com o servidor" e o diálogo não
+     * fechava. O sintoma aparecia como falha do componente, que estava correto — e só acontecia
+     * na primeira execução, porque na segunda o servidor já estava quente.
+     *
+     * `/api/tasks` passa PELO PROXY, então um 200 aqui prova as duas pontas de uma vez: o Vite
+     * está servindo e o Nest está respondendo.
+     */
+    url: 'http://localhost:5009/api/tasks',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: { DATABASE_FILE: './data/e2e.db' },
