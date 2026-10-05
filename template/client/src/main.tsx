@@ -3,7 +3,7 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { AppErrorBoundary } from './lib/ui/composers/app-error-boundary.component';
+import { AzuosAppErrorBoundary } from './lib/components/azuos-app-error-boundary/azuos-app-error-boundary.component';
 import { routeTree } from './routeTree.gen';
 import './lib/theme/tokens.css';
 
@@ -45,10 +45,10 @@ if (!container) throw new Error('Missing #root element to mount the application.
 
 createRoot(container).render(
   <StrictMode>
-    <AppErrorBoundary>
+    <AzuosAppErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </AppErrorBoundary>
+    </AzuosAppErrorBoundary>
   </StrictMode>,
 );

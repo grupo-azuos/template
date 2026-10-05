@@ -43,5 +43,5 @@ COPY --from=build /repo/server/dist server/dist
 COPY --from=build /repo/server/drizzle server/drizzle
 COPY --from=build /repo/client/dist client/dist
 RUN mkdir -p server/data
-EXPOSE 3333
+EXPOSE 3009
 CMD ["node", "server/dist/main.js"]

@@ -25,6 +25,8 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run check:design:test
+      - run: npm run check:design
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:e2e -w server

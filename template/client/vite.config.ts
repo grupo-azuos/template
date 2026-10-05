@@ -21,8 +21,8 @@ const CLIENT_DIR = fileURLToPath(new URL('.', import.meta.url));
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, CLIENT_DIR, '');
   /* A porta do Nest não é segredo e não é `VITE_`: ela serve só para montar o alvo do
-     proxy. Deixá-la configurável evita editar este arquivo quando a 3333 está ocupada. */
-  const apiPort = env.VITE_API_PORT || '3333';
+     proxy. Deixá-la configurável evita editar este arquivo quando a 3009 está ocupada. */
+  const apiPort = env.VITE_API_PORT || '3009';
 
   return {
     plugins: [
@@ -52,11 +52,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      /* Configurável pelo mesmo motivo da porta da API: com vários projetos abertos, a 5173
+      /* Configurável pelo mesmo motivo da porta da API: com vários projetos abertos, a 5009
          vive ocupada. O `strictPort` fica ligado de propósito — porta que muda sozinha
          quebraria o proxy e o CORS em silêncio, e o sintoma seria "erro de rede" numa tela
          que aparenta estar no ar. */
-      port: Number(env.VITE_DEV_PORT || '5173'),
+      port: Number(env.VITE_DEV_PORT || '5009'),
       strictPort: true,
       proxy: {
         '/api': {
@@ -65,7 +65,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    preview: { port: Number(env.VITE_PREVIEW_PORT || '5174'), strictPort: true },
+    preview: { port: Number(env.VITE_PREVIEW_PORT || '5109'), strictPort: true },
     build: { outDir: 'dist', sourcemap: true },
   };
 });

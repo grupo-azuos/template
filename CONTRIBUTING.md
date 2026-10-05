@@ -118,7 +118,7 @@ desenhado. Os dois se encontram na rota.
 ```
 routes/tasks/index.tsx        →  compõe: chama o model, passa para a view
 lib/view-models/…model.ts     →  estado, efeitos, queries, mutations, handlers. ZERO JSX.
-lib/ui/composers/…view.tsx    →  função pura de props → JSX. ZERO hook de dado.
+lib/components/azuos-…/…      →  função pura de props → JSX. ZERO hook de dado.
 ```
 
 ```ts
@@ -142,7 +142,7 @@ function TaskListRoute() {
 ```
 
 ```tsx
-// ✅ lib/ui/composers/task-list-view.component.tsx — sem nenhum hook de dado
+// ✅ lib/components/azuos-task-list-view/azuos-task-list-view.component.tsx — sem hook de dado
 function TaskListBody({ data, state, actions }: TaskListViewProps) {
   if (state.isLoading) return <TaskListSkeleton />;
   if (state.error) return <ErrorState data={{ message: state.error }} />;
@@ -199,26 +199,35 @@ view-model expõe usa o mesmo nome do callback que consome.
 ## 5. Componente baixado nunca mora com componente próprio
 
 ```
-lib/vendor/ui/        ⛔ território do CLI do shadcn. NÃO EDITE.
-lib/ui/primitives/    ✅ nosso. Indivisível: ActionButton, TextField, StatusBadge, EmptyState.
-lib/ui/composers/     ✅ nosso. Compõe primitivos: AppShell, TaskListView, ConfirmDialog.
+lib/components/ui/              ⛔ território do CLI do shadcn. NÃO EDITE.
+lib/components/azuos-<nome>/    ✅ nosso, GENÉRICO: AzuosActionButton, AzuosTextField, AzuosTable…
+routes/<feature>/components/azuos-<nome>/   ✅ nosso, DA FEATURE: conhece a entidade.
 ```
 
-O `components.json` aponta a saída para `lib/vendor/ui`. Rodar `npx shadcn@latest add <nome>`
+O `components.json` aponta a saída para `lib/components/ui`. Rodar `npx shadcn@latest add <nome>`
 sobrescreve aquela pasta — e é para sobrescrever mesmo.
 
-**Precisa mudar um componente baixado?** Não edite. Crie um primitivo nosso em
-`lib/ui/primitives/` que envolve o vendor e aplica nossas variantes com `tv()` —
+**Precisa mudar um componente baixado?** Não edite. Crie um componente nosso em
+`lib/components/azuos-<nome>/` que o envolve e aplica nossas variantes com `tv()` —
 `action-button.component.tsx` é o exemplo. O app importa o nosso; ninguém importa `vendor/`
 direto fora de `lib/ui/`.
 
-**Lint:** `no-restricted-imports` bloqueia `lib/vendor/**` fora de `lib/ui/**`.
+**Lint:** `no-restricted-imports` bloqueia `lib/components/ui/**` fora de `lib/components/**`.
+**Prefixo:** todo componente próprio é `azuos-<nome>/azuos-<nome>.component.tsx`, e a função
+exportada é `Azuos<Nome>`. **Altura e raio** vêm da régua de `lib/theme/tokens.css`
+(`control-sm|md|lg`, `rounded-surface|control|box|chip`). O `npm run check:design` reprova o que
+escapar — a regra inteira está na skill `design-system`.
 
 ---
 
-## 6. Storybook para 100% dos primitivos e compositores
+## 6. Storybook para 100% dos componentes
 
-Componente em `lib/ui/primitives/` ou `lib/ui/composers/` **sem** `.stories.tsx` não entra.
+Componente `azuos-*` **sem** `.component.stories.tsx` e `.component.test.tsx` ao lado não entra. A
+única exceção é a porta de entrada do `ui/` (um `.ts` que só reexporta): ela não decide nada.
+
+**O nome do teste é o arquivo + `.test`**, com o sufixo de papel: `format-date.util.test.ts`,
+`use-task-list.model.test.tsx`, `azuos-text-field.component.test.tsx`. Uma regra só, sem exceção por
+tipo de arquivo.
 
 Cada story cobre, no mínimo:
 
@@ -499,9 +508,9 @@ estar protegida (ver README, "Para quem administra"): o hook local não pega mer
 Conflito é normal quando várias pessoas mexem no mesmo sistema. Ele é explicado **pela tela
 afetada**, com **quem** mudou e **quando** — lido do `git log` —, e as duas mudanças são
 mantidas sempre que cabem juntas. Quando não cabem, quem decide é a pessoa, com as opções na
-frente dela. A skill `resolver-conflito` faz isso.
+frente dela. A skill `resolve-conflict` faz isso.
 
-A skill `git-fluxo` conduz o ciclo inteiro a partir de um pedido em português.
+A skill `git-flow` conduz o ciclo inteiro a partir de um pedido em português.
 
 ---
 
@@ -549,7 +558,7 @@ desligam a verificação do projeto inteiro e escondem o próximo conflito.
 
 ## 14. Definition of Done
 
-O PR só entra com tudo marcado (a skill `verificar` roda as partes automáticas):
+O PR só entra com tudo marcado (a skill `verify` roda as partes automáticas):
 
 - [ ] Commits no formato `[tipo](local): Mensagem`
 - [ ] Branch `feature/` ou `bugfix/` saiu de `develop`, e a `develop` foi trazida para ela no fim
@@ -558,13 +567,14 @@ O PR só entra com tudo marcado (a skill `verificar` roda as partes automáticas
 - [ ] `npm run lint`, `npm run typecheck` e `npm test` verdes
 - [ ] `npm audit` sem nada alto ou crítico que não esteja na tabela de exceções (§13)
 - [ ] Caminho feliz **e** caminho triste testados
-- [ ] Story para todo primitivo/compositor novo ou alterado
+- [ ] Story e teste para todo `azuos-*` novo ou alterado
+- [ ] `npm run check:design` sem violação nova
 - [ ] Endpoint novo documentado no Swagger
 - [ ] Mudança de banco com migration gerada e seed atualizado
 - [ ] Nenhum hook de dado dentro de componente de UI
 - [ ] Props agrupadas em `data` / `ui` / `state` / `actions`
 - [ ] Nenhum `else` alinhado
-- [ ] Nada editado dentro de `lib/vendor/`
+- [ ] Nada editado dentro de `lib/components/ui/`
 - [ ] `.env.example` atualizado se entrou variável nova
 - [ ] Nenhuma chave ou dado real de cliente no diff — inclusive em seed, story e teste
 - [ ] Idioma conferido (§1): nada em inglês na tela, nada em português em log/erro interno/teste
@@ -613,7 +623,7 @@ Cada uma custou um incidente real num sistema da casa. Estão aqui para não ser
   junta na `develop`. Se não estiver bom, é só dizer o que ajustar.
 - **Peça para ver funcionando.** "Roda e me mostra" é um pedido válido — o Claude sobe o
   sistema e confere no navegador.
-- **Erro na tela ou no terminal?** Copie e cole a mensagem inteira. A skill `socorro` cobre os
+- **Erro na tela ou no terminal?** Copie e cole a mensagem inteira. A skill `troubleshoot` cobre os
   problemas mais comuns de ambiente.
 - **O Claude não publica nada sozinho.** Push, PR, deploy e apagar o banco sempre passam por
   uma pergunta antes.
@@ -656,4 +666,4 @@ Quem administra libera a própria máquina com `git config azuos.admin true`.
 
 Não instala, não sobe, banco corrompido, migration quebrada, git em estado confuso, erro que só
 some mexendo em arquivo protegido, ou o mesmo erro depois de duas tentativas: **parar, guardar o
-trabalho e mandar o relatório ao suporte** (skill `suporte`). O contato está em `SUPORTE.md`.
+trabalho e mandar o relatório ao suporte** (skill `support`). O contato está em `SUPORTE.md`.

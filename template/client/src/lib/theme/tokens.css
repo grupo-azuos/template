@@ -58,6 +58,27 @@
   --ink-300: #d1d5db;
   --ink-100: #f3f4f6;
 
+  /**
+   * ---- Os TONS DE FUNDO, do mais fundo ao mais alto ----
+   *
+   * `base` é o fundo da página, `mantle` e `crust` são os degraus ABAIXO dele (o trilho de uma
+   * aba, o fundo de um campo embutido) e `surface` é o que SOBE acima dele — um bloco dentro
+   * de um cartão, que já está sobre o branco do cartão e precisa se separar dele.
+   *
+   * Existem como degraus nomeados, e não como `bg-gray-200` escolhido no olho, porque é a
+   * mesma pergunta que aparece em toda tela ("este bloco está acima ou abaixo do fundo?") e
+   * sem nome cada tela responde com um cinza diferente.
+   */
+  --crust: #e5e7eb;
+  --mantle: var(--ink-100);
+  --base: #f9fafb;
+  --surface: #e5e7eb;
+
+  /* O terceiro degrau de texto. Aponta para o mesmo valor de `muted-foreground`: é um apelido
+     por PAPEL ("texto de apoio"), não um tom novo — inventar um degrau intermediário daria
+     três cinzas de texto quase iguais, e ninguém acertaria qual usar. */
+  --subtext: var(--ink-500);
+
   --radius: 0.625rem;
 
   /* ---- Semântica da PÁGINA ---- */
@@ -79,6 +100,51 @@
   --border: var(--ink-300);
   --input: var(--ink-300);
   --ring: var(--brand-blue-600);
+  --destructive-foreground: #ffffff;
+
+  /**
+   * ---- O ACENTO DE DESTAQUE ----
+   *
+   * O amarelo da marca (o ponto da logo), reservado para UMA coisa por tela: o número que a
+   * pessoa veio ver, a linha que acabou de mudar. Ele é forte, e usado em dois lugares na
+   * mesma tela deixa de destacar qualquer um dos dois.
+   *
+   * O par de texto é escuro, não branco: branco sobre amarelo não passa em contraste nenhum.
+   */
+  --accent-hero: var(--brand-yellow-500);
+  --accent-hero-foreground: var(--ink-900);
+
+  /**
+   * ---- Os tons de ESTADO ----
+   *
+   * `danger` é o `destructive` acima; estes três nascem aqui. No claro são os tons 700 — texto
+   * pequeno tem de ser legível sobre branco, e o 500 de cada cor não é.
+   *
+   * `-soft` é o fundo SÓLIDO do tom (selo, cartão de indicador, preenchimento no hover): os
+   * tons 100 no claro e os 950 no escuro. Sólido de propósito — com opacidade, o selo mudava
+   * de cor conforme o que estivesse atrás dele, e o mesmo "Concluída" ficava de dois tons na
+   * mesma lista (um sobre o branco do cartão, outro sobre a linha cinza da tabela).
+   */
+  --success: #047857;
+  --success-soft: #d1fae5;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --info: #1d4ed8;
+  --info-soft: #dbeafe;
+  --destructive-soft: #fee2e2;
+  --primary-soft: var(--brand-blue-100);
+
+  /**
+   * ---- As cores de CATEGORIA dos gráficos ----
+   *
+   * A ordem é fixa e percorrida, nunca sorteada: sorteio faria a mesma fatia mudar de cor a
+   * cada recarga. Quem resolve a cor de uma fatia é `lib/utils/chart-slice.util.ts`.
+   */
+  --chart-1: var(--brand-blue-600);
+  --chart-2: #10b981;
+  --chart-3: var(--brand-yellow-500);
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
 
   /**
    * ---- Semântica da BARRA LATERAL ----
@@ -121,6 +187,35 @@
   --border: rgb(255 255 255 / 0.12);
   --input: rgb(255 255 255 / 0.12);
 
+  --crust: #060b14;
+  --mantle: #0b1220;
+  --base: #111827;
+  --surface: #1f2937;
+  --subtext: #9ca3af;
+
+  /* O vermelho do claro (um tom 600) fica quase preto sobre o fundo escuro. Aqui ele sobe para
+     o 400, que é o degrau legível — a mesma troca que `success`, `warning` e `info` fazem. */
+  --destructive: #f87171;
+  --destructive-foreground: var(--ink-900);
+
+  --accent-hero: var(--brand-yellow-400);
+  --accent-hero-foreground: var(--ink-900);
+
+  --success: #34d399;
+  --success-soft: #022c22;
+  --warning: #fbbf24;
+  --warning-soft: #451a03;
+  --info: #60a5fa;
+  --info-soft: #172554;
+  --destructive-soft: #450a0a;
+  --primary-soft: #16265c;
+
+  --chart-1: var(--brand-blue-500);
+  --chart-2: #34d399;
+  --chart-3: var(--brand-yellow-400);
+  --chart-4: #f87171;
+  --chart-5: #a78bfa;
+
   /* A barra continua azul, um tom abaixo: encostar no tom do fundo da página apagaria a
      separação entre menu e conteúdo. */
   --sidebar: #16265c;
@@ -144,6 +239,12 @@
   --color-brand-yellow-400: var(--brand-yellow-400);
   --color-brand-yellow-300: var(--brand-yellow-300);
 
+  --color-crust: var(--crust);
+  --color-mantle: var(--mantle);
+  --color-base: var(--base);
+  --color-surface: var(--surface);
+  --color-subtext: var(--subtext);
+
   --color-ink-900: var(--ink-900);
   --color-ink-700: var(--ink-700);
   --color-ink-500: var(--ink-500);
@@ -164,10 +265,28 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hero: var(--accent-hero);
+  --color-accent-hero-foreground: var(--accent-hero-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-primary-soft: var(--primary-soft);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -183,7 +302,204 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
+  /* ---- O ARREDONDAMENTO POR PAPEL ----
+
+     Os quatro acima são a escala do Tailwind, por TAMANHO: quem escreve escolhe `lg` ou `xl`
+     no olho, e o mesmo papel acaba com raios diferentes em telas diferentes — o cartão de
+     indicador com raio de botão, o seletor com um raio só dele.
+
+     Estes quatro são a escala por PAPEL: `rounded-surface` num cartão, `rounded-control` num
+     campo. O valor de cada um é o que os componentes baixados já usavam (`ui/card`,
+     `ui/dialog` e `ui/table` no maior; `ui/popover` um degrau abaixo) — eles não se editam,
+     então a régua é a deles, e o que estava fora é que veio para cá. */
+
+  /** O que pousa sobre o fundo: cartão, diálogo, tabela. */
+  --radius-surface: calc(var(--radius) + 6px);
+  /** O que se clica ou se digita: campo, botão, pastilha, combobox. */
+  --radius-control: calc(var(--radius) + 4px);
+  /** Bloco dentro de um cartão, aviso, balão. */
+  --radius-box: var(--radius);
+  /** Miudeza dentro de um bloco: item de lista de balão, quadradinho de ícone. */
+  --radius-chip: calc(var(--radius) - 2px);
+
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ==========================================================================
+   A RÉGUA DE ALTURA DOS CONTROLES.
+
+   Três degraus, e cada um com um trabalho. Sem a régua são cinco alturas soltas — 28, 32, 36 e
+   40px, mais um campo que não tem altura nenhuma e cresce pelo padding —, e o efeito aparece no
+   rodapé de todo diálogo: o "Cancelar" 4px mais baixo que o "Salvar" ao lado.
+
+   | classe       | altura | onde                                                                |
+   |--------------|--------|---------------------------------------------------------------------|
+   | `control-sm` | 32px   | dentro de outra coisa: linha de tabela, rodapé de cartão, paginação  |
+   | `control-md` | 36px   | a ação da tela: cabeçalho e rodapé de diálogo, botão de enviar       |
+   | `control-lg` | 40px   | campo de formulário E de filtro: texto, data, seletor, combobox      |
+
+   A regra que decide: **o que divide fileira tem que ter a mesma altura**. Um botão ao lado de
+   um campo é `control-lg`; o mesmo botão sozinho num cabeçalho é `control-md`.
+
+   O `control-icon-*` é o irmão quadrado, para o botão que só tem ícone: a largura acompanha a
+   ALTURA, e não o ícone dentro — senão a lixeira fica mais estreita que o lápis ao lado, numa
+   fileira que deveria ser uma régua só.
+
+   O RAIO NÃO ENTRA aqui, de propósito: ele é `rounded-control`, uma classe à parte. Junto, um
+   controle que precisasse de outro raio (uma pastilha redonda) ficaria com dois arredondamentos
+   na marcação e quem venceria seria a ordem do CSS gerado — o mesmo problema que o `cn` existe
+   para resolver (ver `lib/utils/cn.util.ts`).
+
+   As três medidas ficam em `:root` para aparecerem UMA vez: mudar o degrau é mudar aqui, e não
+   caçar `h-9` por trinta arquivos.
+   ========================================================================== */
+:root {
+  --control-sm: 2rem;
+  --control-md: 2.25rem;
+  --control-lg: 2.5rem;
+}
+
+@utility control-sm {
+  height: var(--control-sm);
+  padding-inline: 0.625rem;
+}
+
+@utility control-md {
+  height: var(--control-md);
+  padding-inline: 0.75rem;
+}
+
+@utility control-lg {
+  height: var(--control-lg);
+  padding-inline: 0.75rem;
+}
+
+@utility control-icon-sm {
+  height: var(--control-sm);
+  width: var(--control-sm);
+  padding-inline: 0;
+}
+
+@utility control-icon-md {
+  height: var(--control-md);
+  width: var(--control-md);
+  padding-inline: 0;
+}
+
+@utility control-icon-lg {
+  height: var(--control-lg);
+  width: var(--control-lg);
+  padding-inline: 0;
+}
+
+/* ==========================================================================
+   A GRADE DE CARTÕES DAS LISTAS.
+
+   De 1 a 4 cartões por linha, e quem decide quantos é o ESPAÇO QUE A LISTA TEM, não a largura
+   da janela: a área de conteúdo é mais estreita que o monitor (o menu lateral ocupa 256px e a
+   página tem largura máxima), e uma lista dentro de um diálogo é mais estreita ainda. Contando
+   pela janela, o diálogo ganharia quatro colunas espremidas.
+
+   Na prática: celular 1, tablet 2 a 3, monitor 3 a 4.
+
+   A conta: cada cartão tem no mínimo 15rem (240px); cabem quantos couberem, e o `max(...)`
+   segura o teto em 4 — um quinto cartão só entraria com cada um mais estreito que um quarto da
+   linha, o que o mínimo não deixa. `min-width: 0` nos filhos é o que permite o texto comprido
+   quebrar DENTRO do cartão em vez de alargar a coluna.
+   ========================================================================== */
+@utility card-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(max(15rem, calc((100% - 3 * 0.75rem) / 4)), 1fr));
+
+  & > * {
+    min-width: 0;
+  }
+
+  /* O RODAPÉ DO CARTÃO FICA NO FUNDO. Os cartões de uma mesma fileira têm a altura do maior;
+     sem isto, o que tem menos texto termina antes e o rodapé dele sobe, desalinhado dos
+     vizinhos, com um vazio embaixo. O cartão vira uma coluna e o último bloco é empurrado para
+     o fim — a sobra de altura fica entre o conteúdo e o rodapé.
+
+     `.col-span-full` é a legenda da lista, que mora na grade mas não é cartão. */
+  & > :not(.col-span-full) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & > :not(.col-span-full) > :last-child {
+    margin-top: auto;
+  }
+
+  /* `margin-top: auto` toma o lugar do respiro que o rodapé tinha (`mt-3`). Nos cartões sem
+     `gap` próprio, quem devolve esse respiro mínimo é o bloco de cima. Os que já usam `gap`
+     (a classe do cartão tem `gap-`) não precisam: o `gap` continua valendo. */
+  & > :not(.col-span-full):not([class*='gap-']) > :nth-last-child(2) {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* ==========================================================================
+   O PREENCHIMENTO NO HOVER — a cor do status entra por onde o mouse entrou.
+
+   Um círculo da cor do tom nasce no ponto em que o cursor cruzou a borda e cresce até cobrir o
+   item; ao sair, encolhe em direção ao ponto de saída. Quem informa os dois pontos é o hook
+   `lib/motion/use-hover-fill.ts`, por `--fill-x`/`--fill-y`; a cor vem em `--fill-color`.
+
+   É LEVE DE PROPÓSITO: a única coisa animada é `transform: scale` de uma camada só, que o
+   navegador entrega à placa de vídeo sem redesenhar o conteúdo — nada de animar cor de fundo,
+   sombra ou tamanho. E só o item sob o mouse anima, então 50 itens custam o mesmo que 5.
+
+   O círculo tem o tamanho exato para alcançar o canto mais distante a partir do ponto de
+   entrada. `isolation` + `z-index: -1` o deixam ACIMA do fundo do item e ABAIXO do texto.
+   Quem pediu menos movimento ao sistema vê a cor aparecer e sumir, sem crescer.
+
+   SÓ PARA CARTÃO (e outros blocos que cortam o próprio conteúdo). Em LINHA DE TABELA não: uma
+   `<tr>` ignora `overflow: hidden`, então a camada circular conta como conteúdo da tabela,
+   estica a área de rolagem e a tabela ganha barra para os lados.
+   ========================================================================== */
+@utility hover-fill {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: var(--fill-y, 50%);
+    left: var(--fill-x, 50%);
+    /* O dobro da distância até o canto mais longe (o hook mede em `--fill-reach`); sem a
+       medida, 3x a largura do item cobre qualquer ponto de entrada. */
+    width: calc(var(--fill-reach, 150%) * 2);
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    background-color: var(--fill-color, var(--muted));
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  /* Só onde existe mouse de verdade: no toque não há hover, e o "hover preso" depois de um
+     toque deixaria o item pintado até o próximo toque em outro lugar. */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::before {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  /* Modo LEVE (`data-effects='lite'` no <html>, decidido por `lib/hooks/use-effects`): a cor
+     aparece e some de uma vez, sem crescer. O mesmo para quem pediu menos movimento ao sistema
+     operacional. O resultado é igual; só a animação sai. */
+  :root[data-effects='lite'] &::before {
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before {
+      transition: none;
+    }
+  }
 }
 
 @layer base {

@@ -63,7 +63,7 @@ function checkFile(filePath) {
   if (readPatterns('protected-auth.txt').some((pattern) => pattern.test(path))) {
     block(
       `BLOQUEADO: "${path}" é território do auth-forward (login e identidade), gerenciado pelo suporte. ` +
-        'Não altere nem contorne. Siga a skill `limites-do-mvp`: explique à pessoa que login e usuários ' +
+        'Não altere nem contorne. Siga a skill `mvp-limits`: explique à pessoa que login e usuários ' +
         'vêm do auth-forward e, se ela precisar disso, oriente a falar com o suporte (SUPORTE.md).',
     );
   }
@@ -72,7 +72,7 @@ function checkFile(filePath) {
     block(
       `BLOQUEADO: "${path}" é da base e das regras do projeto, e só o suporte altera. ` +
         'Não mude regra, configuração ou trava para fazer um erro sumir. Se o trabalho só avança mexendo ' +
-        'aqui, siga a skill `suporte`: pare, prepare o relatório e oriente a pessoa a falar com o suporte.',
+        'aqui, siga a skill `support`: pare, prepare o relatório e oriente a pessoa a falar com o suporte.',
     );
   }
 }
@@ -94,7 +94,7 @@ function checkCommand(command) {
 
   block(
     `BLOQUEADO: ${blocked.join(', ')} é biblioteca de login/autenticação, e não entra no projeto. ` +
-      'A identidade vem do auth-forward, gerenciado pelo suporte. Siga a skill `limites-do-mvp`.',
+      'A identidade vem do auth-forward, gerenciado pelo suporte. Siga a skill `mvp-limits`.',
   );
 }
 

@@ -1,1 +1,2 @@
 sh template/scripts/git/branch-guard.sh push
+cd template && npm run check:design

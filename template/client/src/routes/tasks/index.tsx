@@ -2,9 +2,9 @@ import { createFileRoute } from '@tanstack/react-router';
 import { type Task } from '@template/shared/schemas/task.schema';
 import { useState } from 'react';
 
-import { ConfirmDialog } from '../../lib/ui/composers/confirm-dialog.component';
-import { TaskFormDialog } from '../../lib/ui/composers/task-form-dialog.component';
-import { TaskListView } from '../../lib/ui/composers/task-list-view.component';
+import { AzuosConfirmDialog } from '../../lib/components/azuos-confirm-dialog/azuos-confirm-dialog.component';
+import { AzuosTaskFormDialog } from '../../lib/components/azuos-task-form-dialog/azuos-task-form-dialog.component';
+import { AzuosTaskListView } from '../../lib/components/azuos-task-list-view/azuos-task-list-view.component';
 import { useTaskFormModel } from '../../lib/view-models/use-task-form.model';
 import { useTaskListModel } from '../../lib/view-models/use-task-list.model';
 
@@ -26,7 +26,7 @@ function TaskListRoute() {
 
   return (
     <>
-      <TaskListView
+      <AzuosTaskListView
         data={list.data}
         state={list.state}
         actions={{
@@ -45,7 +45,7 @@ function TaskListRoute() {
         />
       ) : null}
 
-      <ConfirmDialog
+      <AzuosConfirmDialog
         data={{
           title: 'Excluir esta tarefa?',
           description: `"${list.data.pendingDelete?.title ?? ''}" será excluída. Não dá para desfazer.`,
@@ -67,7 +67,7 @@ function TaskFormSlot({ task, onClose }: { task: Task | null; onClose: () => voi
   const form = useTaskFormModel({ task, onSaved: onClose });
 
   return (
-    <TaskFormDialog
+    <AzuosTaskFormDialog
       data={form.data}
       state={{ ...form.state, isOpen: true }}
       actions={{
