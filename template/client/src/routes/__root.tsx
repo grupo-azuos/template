@@ -1,7 +1,7 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 
-import { AppShell } from '../lib/ui/composers/app-shell.component';
-import { EmptyState } from '../lib/ui/primitives/empty-state.component';
+import { AzuosAppShell } from '../lib/components/azuos-app-shell/azuos-app-shell.component';
+import { AzuosEmptyState } from '../lib/components/azuos-empty-state/azuos-empty-state.component';
 import { useAppShellModel } from '../lib/view-models/use-app-shell.model';
 
 /**
@@ -17,16 +17,16 @@ function RootRoute() {
   const { data, state } = useAppShellModel();
 
   return (
-    <AppShell data={data} state={state}>
+    <AzuosAppShell data={data} state={state}>
       <Outlet />
-    </AppShell>
+    </AzuosAppShell>
   );
 }
 
 function RouteNotFound() {
   return (
     <div className="mx-auto w-full max-w-lg px-6 py-16">
-      <EmptyState
+      <AzuosEmptyState
         data={{
           title: 'Esta tela não existe',
           description: 'O endereço pode estar errado, ou a tela ainda não foi construída.',

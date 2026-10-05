@@ -2,7 +2,7 @@ import { useLocation } from '@tanstack/react-router';
 import { USER_ROLE_LABELS } from '@template/shared/schemas/user.schema';
 
 import { mockAuth } from '../auth/mock-user';
-import { activeNavKeyOf } from '../ui/navigation';
+import { activeNavKeyOf } from '../navigation/navigation';
 
 export type AppShellModel = {
   data: {

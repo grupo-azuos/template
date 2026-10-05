@@ -8,20 +8,20 @@ import {
 
 import { readError } from '../api/http-client';
 import { tasksApi } from '../api/tasks.api';
-import { type TaskFormField } from '../ui/composers/task-form-dialog.component';
-import { type FormFieldState } from '../ui/form-field.type';
+import { type AzuosTaskFormField } from '../components/azuos-task-form-dialog/azuos-task-form-dialog.component';
+import { type FormFieldState } from '../types/form-field.type';
 import { toFieldState } from './form-projection.util';
 import { TASKS_QUERY_KEY } from './use-task-list.model';
 
 export type TaskFormModel = {
   data: {
     mode: 'create' | 'edit';
-    fields: Record<TaskFormField, FormFieldState>;
+    fields: Record<AzuosTaskFormField, FormFieldState>;
   };
   state: { isSubmitting: boolean; error: string | null };
   actions: {
-    onChange: (field: TaskFormField, value: string) => void;
-    onBlur: (field: TaskFormField) => void;
+    onChange: (field: AzuosTaskFormField, value: string) => void;
+    onBlur: (field: AzuosTaskFormField) => void;
     onSubmit: () => void;
   };
 };
