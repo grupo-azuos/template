@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosTableViewToggle } from './azuos-table-view-toggle.component';
 
 const meta = {
-  title: 'Primitives/AzuosTableViewToggle',
+  title: 'Listas e tabelas/AzuosTableViewToggle',
   component: AzuosTableViewToggle,
 } satisfies Meta<typeof AzuosTableViewToggle>;
 

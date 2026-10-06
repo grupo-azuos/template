@@ -5,7 +5,7 @@ import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.co
 import { AzuosPageHeader } from './azuos-page-header.component';
 
 const meta = {
-  title: 'Primitives/AzuosPageHeader',
+  title: 'Navegação e estrutura/AzuosPageHeader',
   component: AzuosPageHeader,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof AzuosPageHeader>;

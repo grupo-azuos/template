@@ -5,7 +5,7 @@ import { fn } from 'storybook/test';
 import { AzuosActionButton } from './azuos-action-button.component';
 
 const meta = {
-  title: 'Primitives/AzuosActionButton',
+  title: 'Ações/AzuosActionButton',
   component: AzuosActionButton,
   args: { actions: { onClick: fn() } },
 } satisfies Meta<typeof AzuosActionButton>;

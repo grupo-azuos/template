@@ -15,7 +15,7 @@ import {
 } from './azuos-table.component';
 
 const meta = {
-  title: 'Primitives/AzuosTable',
+  title: 'Listas e tabelas/AzuosTable',
   component: AzuosTable,
 } satisfies Meta<typeof AzuosTable>;
 

@@ -4,7 +4,7 @@ import { Bar, BarChart, XAxis } from 'recharts';
 import { AzuosChartFrame } from './azuos-chart-frame.component';
 
 const meta = {
-  title: 'Primitives/AzuosChartFrame',
+  title: 'Gráficos e números/AzuosChartFrame',
   component: AzuosChartFrame,
 } satisfies Meta<typeof AzuosChartFrame>;
 

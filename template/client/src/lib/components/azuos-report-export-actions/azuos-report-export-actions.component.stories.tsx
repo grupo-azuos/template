@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosReportExportActions } from './azuos-report-export-actions.component';
 
 const meta = {
-  title: 'Primitives/AzuosReportExportActions',
+  title: 'Ações/AzuosReportExportActions',
   component: AzuosReportExportActions,
   args: { actions: { onExport: fn() } },
 } satisfies Meta<typeof AzuosReportExportActions>;

@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosDatePicker } from './azuos-date-picker.component';
 
 const meta = {
-  title: 'Primitives/AzuosDatePicker',
+  title: 'Formulários/AzuosDatePicker',
   component: AzuosDatePicker,
   args: { actions: { onChange: fn() } },
 } satisfies Meta<typeof AzuosDatePicker>;

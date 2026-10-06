@@ -10,7 +10,7 @@ const emptyFields = {
 };
 
 const meta = {
-  title: 'Composers/AzuosTaskFormDialog',
+  title: 'Diálogos/AzuosTaskFormDialog',
   component: AzuosTaskFormDialog,
   args: {
     data: { mode: 'create', fields: emptyFields },

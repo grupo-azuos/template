@@ -5,7 +5,7 @@ import { fn } from 'storybook/test';
 import { AzuosSelectField } from './azuos-select-field.component';
 
 const meta = {
-  title: 'Primitives/AzuosSelectField',
+  title: 'Formulários/AzuosSelectField',
   component: AzuosSelectField,
   decorators: [
     (Story) => (

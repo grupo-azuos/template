@@ -4,7 +4,7 @@ import { BarChart3 } from 'lucide-react';
 import { AzuosPendingArea } from './azuos-pending-area.component';
 
 const meta = {
-  title: 'Composers/AzuosPendingArea',
+  title: 'Estados da tela/AzuosPendingArea',
   component: AzuosPendingArea,
 } satisfies Meta<typeof AzuosPendingArea>;
 

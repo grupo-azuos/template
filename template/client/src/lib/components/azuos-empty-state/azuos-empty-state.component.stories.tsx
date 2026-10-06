@@ -5,7 +5,7 @@ import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.co
 import { AzuosEmptyState } from './azuos-empty-state.component';
 
 const meta = {
-  title: 'Primitives/AzuosEmptyState',
+  title: 'Estados da tela/AzuosEmptyState',
   component: AzuosEmptyState,
 } satisfies Meta<typeof AzuosEmptyState>;
 

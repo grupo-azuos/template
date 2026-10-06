@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosButtonGroup } from './azuos-button-group.component';
 
 const meta = {
-  title: 'Primitives/AzuosButtonGroup',
+  title: 'Ações/AzuosButtonGroup',
   component: AzuosButtonGroup,
   args: { actions: { onChange: fn() } },
 } satisfies Meta<typeof AzuosButtonGroup>;

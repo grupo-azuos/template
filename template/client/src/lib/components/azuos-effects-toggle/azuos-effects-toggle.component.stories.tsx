@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosEffectsToggle } from './azuos-effects-toggle.component';
 
 const meta = {
-  title: 'Primitives/AzuosEffectsToggle',
+  title: 'Preferências/AzuosEffectsToggle',
   component: AzuosEffectsToggle,
 } satisfies Meta<typeof AzuosEffectsToggle>;
 

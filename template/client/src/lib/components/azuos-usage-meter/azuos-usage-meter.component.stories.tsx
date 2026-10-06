@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosUsageMeter } from './azuos-usage-meter.component';
 
 const meta = {
-  title: 'Primitives/AzuosUsageMeter',
+  title: 'Gráficos e números/AzuosUsageMeter',
   component: AzuosUsageMeter,
 } satisfies Meta<typeof AzuosUsageMeter>;
 

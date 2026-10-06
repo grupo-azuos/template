@@ -5,7 +5,7 @@ import { AzuosSelectField } from '../azuos-select-field/azuos-select-field.compo
 import { AzuosFilterField } from './azuos-filter-field.component';
 
 const meta = {
-  title: 'Primitives/AzuosFilterField',
+  title: 'Formulários/AzuosFilterField',
   component: AzuosFilterField,
 } satisfies Meta<typeof AzuosFilterField>;
 

@@ -5,7 +5,7 @@ import { fn } from 'storybook/test';
 import { AzuosOptionPicker } from './azuos-option-picker.component';
 
 const meta = {
-  title: 'Primitives/AzuosOptionPicker',
+  title: 'Formulários/AzuosOptionPicker',
   component: AzuosOptionPicker,
   args: { actions: { onChange: fn() } },
 } satisfies Meta<typeof AzuosOptionPicker>;

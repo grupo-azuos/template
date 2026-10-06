@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosTextField } from './azuos-text-field.component';
 
 const meta = {
-  title: 'Primitives/AzuosTextField',
+  title: 'Formulários/AzuosTextField',
   component: AzuosTextField,
 } satisfies Meta<typeof AzuosTextField>;
 
