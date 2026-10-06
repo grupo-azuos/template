@@ -11,7 +11,7 @@ const slices = [
 ];
 
 const meta = {
-  title: 'Primitives/AzuosColumnChart',
+  title: 'Gráficos e números/AzuosColumnChart',
   component: AzuosColumnChart,
   parameters: { layout: 'padded' },
   decorators: [

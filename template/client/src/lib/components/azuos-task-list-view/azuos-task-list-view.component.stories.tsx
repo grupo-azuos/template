@@ -37,7 +37,7 @@ const idleState = {
 };
 
 const meta = {
-  title: 'Composers/AzuosTaskListView',
+  title: 'Listas e tabelas/AzuosTaskListView',
   component: AzuosTaskListView,
   parameters: { layout: 'fullscreen' },
   args: {

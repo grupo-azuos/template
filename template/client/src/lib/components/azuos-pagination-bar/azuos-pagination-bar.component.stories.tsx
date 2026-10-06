@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosPaginationBar } from './azuos-pagination-bar.component';
 
 const meta = {
-  title: 'Primitives/AzuosPaginationBar',
+  title: 'Listas e tabelas/AzuosPaginationBar',
   component: AzuosPaginationBar,
   args: { actions: { onPageChange: fn() } },
 } satisfies Meta<typeof AzuosPaginationBar>;

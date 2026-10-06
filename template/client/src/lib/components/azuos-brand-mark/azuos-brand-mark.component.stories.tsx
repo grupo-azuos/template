@@ -7,7 +7,7 @@ import { AzuosBrandMark } from './azuos-brand-mark.component';
  * sobre o azul da marca, que é o único lugar onde ela aparece no sistema. Sobre branco ela some.
  */
 const meta = {
-  title: 'Primitives/AzuosBrandMark',
+  title: 'Navegação e estrutura/AzuosBrandMark',
   component: AzuosBrandMark,
   decorators: [
     (Story) => (

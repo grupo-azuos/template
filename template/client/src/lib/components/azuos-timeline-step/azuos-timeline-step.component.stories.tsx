@@ -4,7 +4,7 @@ import { CheckCircle2, FileText } from 'lucide-react';
 import { AzuosTimelineStep } from './azuos-timeline-step.component';
 
 const meta = {
-  title: 'Primitives/AzuosTimelineStep',
+  title: 'Conteúdo e marcadores/AzuosTimelineStep',
   component: AzuosTimelineStep,
 } satisfies Meta<typeof AzuosTimelineStep>;
 

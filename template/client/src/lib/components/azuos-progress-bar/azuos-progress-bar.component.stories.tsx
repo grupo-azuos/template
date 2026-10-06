@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosProgressBar } from './azuos-progress-bar.component';
 
 const meta = {
-  title: 'Primitives/AzuosProgressBar',
+  title: 'Gráficos e números/AzuosProgressBar',
   component: AzuosProgressBar,
   decorators: [
     (Story) => (

@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosSubmitButton } from './azuos-submit-button.component';
 
 const meta = {
-  title: 'Primitives/AzuosSubmitButton',
+  title: 'Formulários/AzuosSubmitButton',
   component: AzuosSubmitButton,
 } satisfies Meta<typeof AzuosSubmitButton>;
 

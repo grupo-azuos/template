@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosBreadcrumb } from './azuos-breadcrumb.component';
 
 const meta = {
-  title: 'Primitives/AzuosBreadcrumb',
+  title: 'Navegação e estrutura/AzuosBreadcrumb',
   component: AzuosBreadcrumb,
 } satisfies Meta<typeof AzuosBreadcrumb>;
 

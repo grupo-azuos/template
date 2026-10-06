@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosCollapsible } from './azuos-collapsible.component';
 
 const meta = {
-  title: 'Primitives/AzuosCollapsible',
+  title: 'Conteúdo e marcadores/AzuosCollapsible',
   component: AzuosCollapsible,
   args: { actions: { onOpenChange: fn() } },
 } satisfies Meta<typeof AzuosCollapsible>;

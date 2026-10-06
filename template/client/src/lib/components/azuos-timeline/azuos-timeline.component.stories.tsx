@@ -5,7 +5,7 @@ import { AzuosTimelineStep } from '../azuos-timeline-step/azuos-timeline-step.co
 import { AzuosTimeline } from './azuos-timeline.component';
 
 const meta = {
-  title: 'Primitives/AzuosTimeline',
+  title: 'Conteúdo e marcadores/AzuosTimeline',
   component: AzuosTimeline,
 } satisfies Meta<typeof AzuosTimeline>;
 

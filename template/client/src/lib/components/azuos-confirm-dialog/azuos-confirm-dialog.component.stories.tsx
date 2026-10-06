@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosConfirmDialog } from './azuos-confirm-dialog.component';
 
 const meta = {
-  title: 'Composers/AzuosConfirmDialog',
+  title: 'Diálogos/AzuosConfirmDialog',
   component: AzuosConfirmDialog,
   args: {
     data: {

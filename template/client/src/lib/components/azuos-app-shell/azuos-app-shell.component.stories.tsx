@@ -31,7 +31,7 @@ const manyItems = [
 ];
 
 const meta = {
-  title: 'Composers/AzuosAppShell',
+  title: 'Navegação e estrutura/AzuosAppShell',
   component: AzuosAppShell,
   decorators: [withRouter],
   parameters: { layout: 'fullscreen' },

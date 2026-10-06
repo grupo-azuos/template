@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosTextAreaField } from './azuos-text-area-field.component';
 
 const meta = {
-  title: 'Primitives/AzuosTextAreaField',
+  title: 'Formulários/AzuosTextAreaField',
   component: AzuosTextAreaField,
   args: { actions: { onChange: fn(), onBlur: fn() } },
   decorators: [

@@ -5,7 +5,7 @@ import { fn } from 'storybook/test';
 import { AzuosInputGroup } from './azuos-input-group.component';
 
 const meta = {
-  title: 'Primitives/AzuosInputGroup',
+  title: 'Formulários/AzuosInputGroup',
   component: AzuosInputGroup,
   args: { actions: { onChange: fn(), onBlur: fn() } },
 } satisfies Meta<typeof AzuosInputGroup>;

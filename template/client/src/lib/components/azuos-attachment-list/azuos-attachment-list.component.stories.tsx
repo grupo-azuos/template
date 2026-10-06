@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosAttachmentList, type AzuosAttachment } from './azuos-attachment-list.component';
 
 const meta = {
-  title: 'Primitives/AzuosAttachmentList',
+  title: 'Listas e tabelas/AzuosAttachmentList',
   component: AzuosAttachmentList,
   args: { actions: { onRemove: fn() } },
 } satisfies Meta<typeof AzuosAttachmentList>;

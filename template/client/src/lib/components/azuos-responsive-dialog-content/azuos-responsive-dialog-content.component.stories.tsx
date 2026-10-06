@@ -5,7 +5,7 @@ import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } f
 import { AzuosResponsiveDialogContent } from './azuos-responsive-dialog-content.component';
 
 const meta = {
-  title: 'Primitives/AzuosResponsiveDialogContent',
+  title: 'Diálogos/AzuosResponsiveDialogContent',
   component: AzuosResponsiveDialogContent,
 } satisfies Meta<typeof AzuosResponsiveDialogContent>;
 
