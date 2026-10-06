@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosAttachmentPicker } from './azuos-attachment-picker.component';
 
 const meta = {
-  title: 'Primitives/AzuosAttachmentPicker',
+  title: 'Formulários/AzuosAttachmentPicker',
   component: AzuosAttachmentPicker,
   args: { actions: { onChange: fn(), onError: fn() } },
 } satisfies Meta<typeof AzuosAttachmentPicker>;

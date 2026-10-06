@@ -8,7 +8,7 @@ import {
 } from './azuos-history-timeline.component';
 
 const meta = {
-  title: 'Composers/AzuosHistoryTimeline',
+  title: 'Conteúdo e marcadores/AzuosHistoryTimeline',
   component: AzuosHistoryTimeline,
 } satisfies Meta<typeof AzuosHistoryTimeline>;
 

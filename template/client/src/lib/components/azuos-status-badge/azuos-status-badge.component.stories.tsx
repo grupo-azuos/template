@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosStatusBadge, type AzuosStatusBadgeTone } from './azuos-status-badge.component';
 
 const meta = {
-  title: 'Primitives/AzuosStatusBadge',
+  title: 'Conteúdo e marcadores/AzuosStatusBadge',
   component: AzuosStatusBadge,
 } satisfies Meta<typeof AzuosStatusBadge>;
 

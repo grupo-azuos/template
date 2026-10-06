@@ -30,6 +30,44 @@ if (!Element.prototype.scrollIntoView) {
 }
 
 /**
+ * Nem `ResizeObserver`. O `cmdk` (a lista com busca por trás do `AzuosComboboxField`) o usa para
+ * acompanhar a altura da lista enquanto o filtro muda — sem o stub, abrir o campo estoura com
+ * "ResizeObserver is not defined" antes de qualquer item aparecer.
+ *
+ * O STUB PRECISA RESPONDER UM TAMANHO, e não só existir calado. O `ResponsiveContainer` do
+ * Recharts (dentro do `AzuosChartFrame`) desenha o gráfico com a medida que o observador
+ * devolve: com zero, ele conclui que não cabe nada e não pinta eixo, barra nem rótulo — e os
+ * testes dos gráficos param de achar os nomes das categorias.
+ *
+ * A medida abaixo é fixa de propósito. No jsdom não existe layout de verdade para medir, e
+ * nenhum teste depende do tamanho em si; o que eles precisam é de uma área grande o bastante
+ * para o gráfico se considerar desenhável.
+ */
+const OBSERVED_SIZE = { width: 800, height: 400 };
+
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class {
+    private readonly callback: ResizeObserverCallback;
+
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback;
+    }
+
+    observe(target: Element) {
+      const contentRect = { ...OBSERVED_SIZE, top: 0, left: 0, x: 0, y: 0, right: 800, bottom: 400 };
+
+      this.callback(
+        [{ target, contentRect } as unknown as ResizeObserverEntry],
+        this as unknown as ResizeObserver,
+      );
+    }
+
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
+/**
  * O jsdom também não implementa `matchMedia`. O `Sidebar` do shadcn o consulta na montagem,
  * por `useIsMobile`, para decidir entre a barra e a gaveta — sem o stub toda tela que tem
  * menu quebra antes de renderizar qualquer coisa.

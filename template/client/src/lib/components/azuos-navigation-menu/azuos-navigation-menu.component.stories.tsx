@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosNavigationMenu } from './azuos-navigation-menu.component';
 
 const meta = {
-  title: 'Primitives/AzuosNavigationMenu',
+  title: 'Navegação e estrutura/AzuosNavigationMenu',
   component: AzuosNavigationMenu,
 } satisfies Meta<typeof AzuosNavigationMenu>;
 

@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosErrorState } from './azuos-error-state.component';
 
 const meta = {
-  title: 'Primitives/AzuosErrorState',
+  title: 'Estados da tela/AzuosErrorState',
   component: AzuosErrorState,
 } satisfies Meta<typeof AzuosErrorState>;
 

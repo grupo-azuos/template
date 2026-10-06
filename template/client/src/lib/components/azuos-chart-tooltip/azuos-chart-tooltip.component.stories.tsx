@@ -6,7 +6,7 @@ import { ChartTooltip } from '../ui/chart';
 import { AzuosChartTooltip } from './azuos-chart-tooltip.component';
 
 const meta = {
-  title: 'Primitives/AzuosChartTooltip',
+  title: 'Gráficos e números/AzuosChartTooltip',
   component: AzuosChartTooltip,
 } satisfies Meta<typeof AzuosChartTooltip>;
 

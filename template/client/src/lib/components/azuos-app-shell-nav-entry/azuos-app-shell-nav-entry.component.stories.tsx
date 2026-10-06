@@ -1,3 +1,10 @@
+import type React from 'react';
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+  RouterProvider,
+} from '@tanstack/react-router';
 import { type Meta, type StoryObj } from '@storybook/react';
 import { ListChecks } from 'lucide-react';
 
@@ -5,24 +12,35 @@ import { SidebarMenu, SidebarProvider } from '../ui/sidebar';
 import { AzuosAppShellNavEntry } from './azuos-app-shell-nav-entry.component';
 
 /**
- * O item precisa do contexto da barra lateral e do roteador para desenhar — o `Link` do TanStack
- * resolve o endereço contra a árvore de rotas. No Storybook ele vive dentro do `SidebarProvider`; a
- * navegação de verdade só acontece na aplicação.
+ * O item precisa de DUAS coisas para desenhar: o contexto da barra lateral e um roteador. O `Link`
+ * do TanStack resolve o endereço contra a árvore de rotas e, sem roteador por perto, a story morre
+ * antes de pintar. Aqui a rota raiz É a própria story — igual ao `AzuosAppShell`, que tem o mesmo
+ * problema. Não há navegação real; só o contexto que o `Link` precisa para não estourar fora do
+ * app.
  */
+function withShell(Story: () => React.JSX.Element) {
+  const router = createRouter({
+    routeTree: createRootRoute({
+      component: () => (
+        <SidebarProvider>
+          <div className="bg-sidebar w-64 p-2">
+            <SidebarMenu>
+              <Story />
+            </SidebarMenu>
+          </div>
+        </SidebarProvider>
+      ),
+    }),
+    history: createMemoryHistory({ initialEntries: ['/'] }),
+  });
+
+  return <RouterProvider router={router} />;
+}
+
 const meta = {
-  title: 'Primitives/AzuosAppShellNavEntry',
+  title: 'Navegação e estrutura/AzuosAppShellNavEntry',
   component: AzuosAppShellNavEntry,
-  decorators: [
-    (Story) => (
-      <SidebarProvider>
-        <div className="bg-sidebar w-64 p-2">
-          <SidebarMenu>
-            <Story />
-          </SidebarMenu>
-        </div>
-      </SidebarProvider>
-    ),
-  ],
+  decorators: [withShell],
 } satisfies Meta<typeof AzuosAppShellNavEntry>;
 
 export default meta;

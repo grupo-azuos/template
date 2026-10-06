@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosPersonAvatar } from './azuos-person-avatar.component';
 
 const meta = {
-  title: 'Primitives/AzuosPersonAvatar',
+  title: 'Conteúdo e marcadores/AzuosPersonAvatar',
   component: AzuosPersonAvatar,
 } satisfies Meta<typeof AzuosPersonAvatar>;
 

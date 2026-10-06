@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosRadialChart } from './azuos-radial-chart.component';
 
 const meta = {
-  title: 'Primitives/AzuosRadialChart',
+  title: 'Gráficos e números/AzuosRadialChart',
   component: AzuosRadialChart,
 } satisfies Meta<typeof AzuosRadialChart>;
 

@@ -12,7 +12,7 @@ const slices = [
 ];
 
 const meta = {
-  title: 'Primitives/AzuosDonutChart',
+  title: 'Gráficos e números/AzuosDonutChart',
   component: AzuosDonutChart,
   parameters: { layout: 'padded' },
   decorators: [
