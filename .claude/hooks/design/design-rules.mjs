@@ -334,7 +334,10 @@ export const RULES = [
         .flatMap((file) => {
           const name = file.path.replace(/\.component\.tsx$/, '').split('/').at(-1) ?? '';
           const expected = expectedExportName(name);
-          if (file.content.includes(`export function ${expected}(`)) return [];
+          /* O `<` entra junto com o `(`: componente GENÉRICO é declarado
+             `export function AzuosDataTable<TRow>(`, e exigir parêntese colado no nome
+             reprovava justamente quem estava certo. */
+          if (new RegExp(`export function ${expected}\\s*[(<]`).test(file.content)) return [];
           if (file.content.includes(`export class ${expected} `)) return [];
 
           return [

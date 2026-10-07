@@ -88,7 +88,10 @@ export function AzuosAppShell({ children, data, ui, state }: AzuosAppShellProps)
         <SidebarRail />
       </Sidebar>
 
-      <SidebarInset className="border-sidebar-border bg-background border">
+      {/* `min-w-0`: a área de conteúdo é item de uma fileira flex, e sem isto ela não encolhe
+          abaixo da largura do que tem dentro. Uma tabela larga empurrava a TELA INTEIRA para o
+          lado (cortando o botão do cabeçalho) em vez de rolar só dentro da própria caixa. */}
+      <SidebarInset className="border-sidebar-border bg-background min-w-0 border">
         <header className="flex h-12 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger />
         </header>
