@@ -67,8 +67,18 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
 
       {/* A LARGURA DA LISTA É AMARRADA À DO GATILHO, entre um piso e um teto. Sem isso ela se
           estica até o nome mais comprido da lista, e nasce mais larga que o diálogo inteiro,
-          vazando pelos dois lados. */}
-      <SelectContent className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-select-trigger-width)">
+          vazando pelos dois lados.
+
+          `position="popper"`: a lista abre logo ABAIXO do gatilho. O modo padrão do Radix
+          ("item-aligned") só calcula onde desenhar a lista quando encontra o `SelectValue` dele
+          dentro do gatilho — e aqui o rótulo é nosso (ver acima). Sem ele, a lista nascia sem
+          posição, no canto de baixo da janela, FORA da tela: o seletor abria e ninguém via as
+          opções. O teste em jsdom não pega isso, porque lá nada tem posição. */}
+      <SelectContent
+        position="popper"
+        sideOffset={4}
+        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-select-trigger-width)"
+      >
         {data.options.map((option) => (
           <OptionRow key={option.value || EMPTY_VALUE} data={{ option }} />
         ))}

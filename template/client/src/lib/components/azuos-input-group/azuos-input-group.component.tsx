@@ -55,8 +55,11 @@ export function AzuosInputGroup({
       >
         {prefix ? <InputGroupAddon>{prefix}</InputGroupAddon> : null}
 
+        {/* `text-foreground`: o `Input` do vendor herdava uma cor quase branca dentro do grupo, e o
+            valor digitado sumia no fundo do cartão. */}
         <InputGroupInput
           id={inputId}
+          className="text-foreground"
           name={data.name}
           value={data.value}
           placeholder={data.placeholder}
