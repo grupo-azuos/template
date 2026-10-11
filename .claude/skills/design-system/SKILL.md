@@ -228,6 +228,26 @@ O RAIO é uma escala à parte, por PAPEL: `rounded-surface` (cartão, diálogo, 
 `rounded-control` (campo, botão, pastilha), `rounded-box` (bloco dentro de cartão, aviso, balão),
 `rounded-chip` (miudeza dentro de um bloco). Nunca `rounded-lg`/`xl` escolhido no olho.
 
+**O canto e a altura do componente baixado precisam ser VENCIDOS, não só acompanhados.** Todo
+`ui/*` traz os seus de fábrica (`rounded-md`, `h-9`). Escrever `control-lg rounded-control` no
+`azuos-*` só resolve se as classes do baixado saírem do elemento — com as duas no elemento, vence a
+do baixado, e o campo sai com 8px de canto e 36px de altura sem nada acusar. Como se vence:
+
+1. **Sempre pelo `cn()`** (`lib/utils/cn.util.ts`). Ele conhece a régua da casa: `rounded-control`
+   derruba `rounded-md`, `control-lg` derruba `h-9` e `px-*`. Classe concatenada à mão não derruba
+   nada.
+2. **Altura imposta por variante se vence na mesma variante.** O `SelectTrigger` traz
+   `data-[size=default]:h-9`, e variante ganha de classe solta: além do `control-lg`, o
+   `azuos-select-field` escreve `data-[size=default]:h-(--control-lg)`. Ao envolver um `ui/*` novo,
+   abra o arquivo dele e procure `rounded-` e `h-` com prefixo de variante.
+3. **Todo campo novo entra na lista `FIELDS` de `lib/theme/control-ruler.test.tsx`**, que monta o
+   campo e reprova qualquer canto ou altura concorrente que tenha sobrado no elemento. É a única
+   checagem que pega a classe certa que perdeu o conflito.
+
+A regra `field-ruler` do `check:design` cobra a outra metade: todo `azuos-*-field`,
+`azuos-*-picker` e o `azuos-input-group` precisa ESCREVER `rounded-control` e `control-lg` (a área
+de texto, só o canto).
+
 Verificação:
 
 ```bash

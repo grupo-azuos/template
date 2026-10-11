@@ -89,6 +89,20 @@ const OFF_SCALE_SHADOW = /\bshadow(?:-(?:sm|md|lg|2xl|inner|\[[^\]]+\]))?(?=[\s"
 const OFF_SCALE_HEIGHT = /\bh-(?:7|8|9|11|12)\b/g;
 const RAW_INTERACTIVE = /<(button|input|select|textarea|table)\b/g;
 
+/**
+ * QUEM É CAMPO, pelo nome da pasta: `azuos-*-field`, `azuos-*-picker` e o `azuos-input-group`.
+ *
+ * É pelo nome porque é o nome que a casa já usa para campo de formulário e de filtro (skill
+ * `design-system` §5) — e uma regra que dependesse de ler o JSX erraria a cada forma nova de montar.
+ */
+const FIELD_NAME = /(?:-field|-picker|^input-group)$/;
+/** Moldura de rótulo em volta de um campo que vem pronto por `children`: não desenha controle. */
+const FIELD_WRAPPERS = ['filter-field'];
+const FIELD_RADIUS = /\brounded-control\b/;
+const FIELD_HEIGHT = /\bcontrol-lg\b/;
+/** Área de texto: a altura é o número de linhas, então a régua de altura não entra. */
+const MULTILINE = /<(?:textarea|Textarea)\b/;
+
 /** @param {string} path */
 function segments(path) {
   return path.split('/');
@@ -527,6 +541,29 @@ export const RULES = [
            do bottom sheet, não um raio escolhido no olho. */
         (match, file) => file.path.includes(`/${PREFIX}responsive-dialog-content/`),
       ),
+  },
+  {
+    id: 'field-ruler',
+    description:
+      'Todo campo (`azuos-*-field`, `azuos-*-picker`, `azuos-input-group`) tem `rounded-control` e `control-lg`.',
+    /* As regras acima PROÍBEM o valor errado; esta EXIGE o certo. Sem ela, um campo novo que
+       simplesmente não escreve canto nem altura passa limpo e herda os do componente baixado
+       (`rounded-md`, `h-9`) — fica 6px menos arredondado e 4px mais baixo que os vizinhos. */
+    check: (files) =>
+      files
+        .filter((file) => isOwnComponentSource(file.path))
+        .flatMap((file) => {
+          const name = (segments(file.path).at(-2) ?? '').replace(new RegExp(`^${PREFIX}`), '');
+          if (!FIELD_NAME.test(name) || FIELD_WRAPPERS.includes(name)) return [];
+
+          const out = [];
+          if (!FIELD_RADIUS.test(file.content))
+            out.push({ rule: 'field-ruler', file: file.path, detail: 'campo sem rounded-control' });
+          if (!MULTILINE.test(file.content) && !FIELD_HEIGHT.test(file.content))
+            out.push({ rule: 'field-ruler', file: file.path, detail: 'campo sem control-lg' });
+
+          return out;
+        }),
   },
   {
     id: 'raw-palette',
