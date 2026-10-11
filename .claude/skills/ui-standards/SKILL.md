@@ -50,6 +50,11 @@ num cabeçalho é `control-md`. A altura mora no `azuos-*`, nunca na tela.
 | `rounded-chip` | miudeza dentro de um bloco: item de lista de balão, quadradinho de ícone |
 | `rounded-full` | selo e bolinha |
 
+**Todo campo tem o mesmo canto (`rounded-control`) e a mesma altura (`control-lg`), medido na
+tela.** Componente baixado traz canto e altura próprios, e a classe certa escrita no código pode
+perder para a dele em silêncio. Ao revisar uma tela, compare os campos da mesma fileira; a forma de
+garantir está na skill `design-system` §6 e no teste `lib/theme/control-ruler.test.tsx`.
+
 Sombra: `shadow-xs` em repouso, `shadow-xl` no que flutua. Nada de `rounded-lg`, `shadow-md` ou
 `text-[11px]` escolhidos no olho — o `npm run check:design` reprova.
 

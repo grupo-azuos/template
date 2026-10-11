@@ -74,6 +74,10 @@ Depois crie o `azuos-*` que o envolve, aplicando as variantes com `tv()` (modelo
   papel** (`rounded-surface` cartão · `rounded-control` campo e botão · `rounded-box` bloco ·
   `rounded-chip` miudeza). Sombra: `shadow-xs` em repouso, `shadow-xl` no que flutua. Detalhes na
   skill `design-system` §6.
+- **Envolveu um `ui/*`? O canto e a altura dele têm de SAIR do elemento**, não conviver com os
+  nossos: passe as classes pelo `cn()`, vença na mesma variante a altura que ele impõe por variante
+  (`data-[size=default]:h-(--control-lg)` no seletor) e, se for campo, acrescente-o à lista
+  `FIELDS` de `lib/theme/control-ruler.test.tsx`. O porquê e o passo a passo: `design-system` §6.
 - Acessibilidade: rótulo ligado ao campo (`htmlFor`/`useId`), `aria-invalid` + `aria-describedby`
   no erro, `role="alert"` em falha, `aria-label` em botão só de ícone, `aria-pressed` no que liga e
   desliga, `aria-hidden` em ícone decorativo, `type="button"` em botão que não envia.
