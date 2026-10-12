@@ -96,12 +96,34 @@ const RAW_INTERACTIVE = /<(button|input|select|textarea|table)\b/g;
  * `design-system` §5) — e uma regra que dependesse de ler o JSX erraria a cada forma nova de montar.
  */
 const FIELD_NAME = /(?:-field|-picker|^input-group)$/;
-/** Moldura de rótulo em volta de um campo que vem pronto por `children`: não desenha controle. */
-const FIELD_WRAPPERS = ['filter-field'];
+/**
+ * Leva nome de campo, mas NÃO É um controle de uma linha — a régua de 40px e o canto de controle
+ * não descrevem a forma dele:
+ * - `filter-field`: moldura de rótulo em volta de um campo que vem pronto por `children`;
+ * - `checkbox-field`: um quadradinho de marcar com o rótulo ao lado;
+ * - `slider-field`: um trilho com uma bolinha;
+ * - `otp-field`: uma fileira de casas quadradas, uma por dígito;
+ * - `color-swatch-field`: uma fileira de quadradinhos de cor.
+ */
+const FIELD_WRAPPERS = [
+  'filter-field',
+  'checkbox-field',
+  'slider-field',
+  'otp-field',
+  'color-swatch-field',
+];
 const FIELD_RADIUS = /\brounded-control\b/;
 const FIELD_HEIGHT = /\bcontrol-lg\b/;
 /** Área de texto: a altura é o número de linhas, então a régua de altura não entra. */
 const MULTILINE = /<(?:textarea|Textarea)\b/;
+/**
+ * Campo que COMPÕE outro campo: importa um `azuos-*-field`, `azuos-*-picker` ou o
+ * `azuos-input-group`. O canto e a altura vêm do campo de dentro (ou da constante de classes que
+ * ele exporta), que já deve a régua por esta mesma regra — cobrar de novo de quem só põe rótulo e
+ * mensagem de erro em volta obrigaria a repetir as classes num elemento que não é o controle.
+ */
+const COMPOSES_FIELD =
+  /from\s+['"][^'"]*\/azuos-(?:[a-z0-9-]+-field|[a-z0-9-]+-picker|input-group)\/[^'"]+['"]/;
 
 /** @param {string} path */
 function segments(path) {
@@ -555,6 +577,7 @@ export const RULES = [
         .flatMap((file) => {
           const name = (segments(file.path).at(-2) ?? '').replace(new RegExp(`^${PREFIX}`), '');
           if (!FIELD_NAME.test(name) || FIELD_WRAPPERS.includes(name)) return [];
+          if (COMPOSES_FIELD.test(file.content)) return [];
 
           const out = [];
           if (!FIELD_RADIUS.test(file.content))

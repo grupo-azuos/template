@@ -168,7 +168,9 @@ const FIELDS: Field[] = [
     element: <AzuosInputGroup data={{ label: 'Valor', name: 'amount', value: '' }} prefix="R$" />,
     /* O canto e a altura ficam na moldura em volta do texto, não no `<input>` de dentro. */
     find: () => {
-      const frame = screen.getByRole('textbox', { name: 'Valor' }).closest('[data-slot="input-group"]');
+      const frame = screen
+        .getByRole('textbox', { name: 'Valor' })
+        .closest('[data-slot="input-group"]');
       if (!(frame instanceof HTMLElement)) throw new Error('input group frame not found');
 
       return frame;

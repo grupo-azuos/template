@@ -247,6 +247,9 @@ do baixado, e o campo sai com 8px de canto e 36px de altura sem nada acusar. Com
 A regra `field-ruler` do `check:design` cobra a outra metade: todo `azuos-*-field`,
 `azuos-*-picker` e o `azuos-input-group` precisa ESCREVER `rounded-control` e `control-lg` (a área
 de texto, só o canto).
+Ela não cobra de quem COMPÕE outro campo (importa um `azuos-*-field`/`-picker` e só põe rótulo e
+erro em volta), nem do que leva nome de campo mas não é controle de uma linha: caixa de marcar,
+controle deslizante, casas de código e quadradinhos de cor.
 
 Verificação:
 
