@@ -431,12 +431,39 @@ test('field-ruler: não cobra de quem não é campo, da moldura de rótulo, nem 
     [`${SRC}/lib/components/${PREFIX}stat-card/${PREFIX}stat-card.component.tsx`]: 'const c = "p-4";',
     [`${SRC}/lib/components/${PREFIX}filter-field/${PREFIX}filter-field.component.tsx`]:
       'const c = "flex flex-col";',
+    [`${SRC}/lib/components/${PREFIX}checkbox-field/${PREFIX}checkbox-field.component.tsx`]:
+      'const c = "size-4";',
     [`${SRC}/lib/components/ui/select.tsx`]: 'const c = "rounded-md h-9";',
     [`${SRC}/lib/components/${PREFIX}select-field/${PREFIX}select-field.component.test.tsx`]:
       'it("x", () => {});',
   });
 
   assert.deepEqual(run('field-ruler', files), []);
+});
+
+test('field-ruler: não cobra do campo que compõe outro campo', () => {
+  const path = `${SRC}/lib/components/${PREFIX}form-select-field/${PREFIX}form-select-field.component.tsx`;
+
+  // feliz
+  assert.deepEqual(
+    run(
+      'field-ruler',
+      project({
+        [path]: `import { AzuosSelectField } from '../${PREFIX}select-field/${PREFIX}select-field.component';`,
+      }),
+    ),
+    [],
+  );
+  // triste: importar componente que não é campo não isenta
+  assert.equal(
+    run(
+      'field-ruler',
+      project({
+        [path]: `import { AzuosPersonAvatar } from '../${PREFIX}person-avatar/${PREFIX}person-avatar.component';`,
+      }),
+    ).length,
+    2,
+  );
 });
 
 test('raw-palette: reprova a cor crua e aceita o token', () => {
