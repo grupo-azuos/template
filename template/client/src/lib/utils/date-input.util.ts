@@ -46,7 +46,17 @@ export function displayFromIso(iso: string | null | undefined): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? '');
   if (!match) return '';
 
-  return `${match[3]}/${match[2]}/${match[1]}`;
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+
+  const date = new Date(year, month - 1, day, 12);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return '';
+  }
+
+  return `${dayText}/${monthText}/${yearText}`;
 }
 
 /**

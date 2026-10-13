@@ -48,6 +48,9 @@ export type AzuosDateFieldProps = {
     /** O ano em que o calendário abre quando o campo está vazio. Ver `AzuosDateStepper`. */
     startYear?: number;
     className?: string;
+    /** Esconde o rótulo da vista, mas não do leitor de tela — para campo que já tem o rótulo ao
+        lado, como o "desde" de uma lista. */
+    isLabelHidden?: boolean;
   };
   state?: { error?: string | null; isDisabled?: boolean };
   actions: { onChange: (value: string | null) => void; onBlur?: () => void };
@@ -68,6 +71,13 @@ function typedProblem(text: string | null, min?: string, max?: string): string |
 
 function resolveState(state: AzuosDateFieldProps['state']) {
   return { externalError: state?.error ?? null, isDisabled: state?.isDisabled ?? false };
+}
+
+function resolveCompletedIso(text: string, min?: string, max?: string): string | null {
+  const iso = isoFromDisplay(text);
+  if (iso && isIsoWithin(iso, min, max)) return iso;
+
+  return null;
 }
 
 export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps) {
@@ -95,8 +105,8 @@ export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps
       return;
     }
 
-    const iso = isoFromDisplay(text);
-    if (iso && isIsoWithin(iso, data.min, data.max)) actions.onChange(iso);
+    const iso = resolveCompletedIso(text, data.min, data.max);
+    if (iso) actions.onChange(iso);
   };
 
   const leave = () => {
@@ -117,7 +127,10 @@ export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps
 
   return (
     <div className={cn('flex flex-col gap-1.5', ui?.className)}>
-      <FieldLabel data={{ inputId, label: data.label, isRequired: data.isRequired }} />
+      <FieldLabel
+        data={{ inputId, label: data.label, isRequired: data.isRequired }}
+        ui={{ isHidden: ui?.isLabelHidden }}
+      />
 
       <input type="hidden" name={data.name} value={data.value ?? ''} readOnly />
 
@@ -155,9 +168,18 @@ export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps
   );
 }
 
-function FieldLabel({ data }: { data: { inputId: string; label: string; isRequired?: boolean } }) {
+function FieldLabel({
+  data,
+  ui,
+}: {
+  data: { inputId: string; label: string; isRequired?: boolean };
+  ui: { isHidden?: boolean };
+}) {
   return (
-    <label htmlFor={data.inputId} className="text-ink-700 text-sm font-medium">
+    <label
+      htmlFor={data.inputId}
+      className={cn('text-ink-700 text-sm font-medium', ui.isHidden && 'sr-only')}
+    >
       {data.label}
       {data.isRequired ? (
         <span className="text-destructive" aria-hidden="true">

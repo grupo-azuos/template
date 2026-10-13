@@ -127,8 +127,8 @@ export function AzuosDateStepper({ data, ui, actions }: AzuosDateStepperProps) {
   /* Com data já escolhida, abre direto no dia: quem volta para corrigir quase sempre errou o dia,
      e o ano e o mês ficam no topo para trocar. Vazio, começa pela primeira pergunta. */
   const [step, setStep] = useState<Step>(selected ? 'day' : 'year');
-  const [year, setYear] = useState<number | null>(selected?.year ?? null);
-  const [month, setMonth] = useState<number | null>(selected?.month ?? null);
+  const [year, setYear] = useState<number | null>(selected ? selected.year : null);
+  const [month, setMonth] = useState<number | null>(selected ? selected.month : null);
 
   const today = todayParts();
 
@@ -142,40 +142,90 @@ export function AzuosDateStepper({ data, ui, actions }: AzuosDateStepperProps) {
     setStep('day');
   };
 
+  const chooseDay = (day: number) => {
+    if (year !== null && month !== null) {
+      actions.onChange(isoOf(year, month, day));
+    }
+  };
+
   return (
     <div className={cn('flex w-72 flex-col gap-3 p-3', ui?.className)}>
       <StepHeader
         data={{ step, year, month }}
         actions={{ onBackToYear: () => setStep('year'), onBackToMonth: () => setStep('month') }}
       />
-
-      {step === 'year' ? (
-        <YearStep
-          data={{
-            years: yearsBetween(data.min, data.max, today),
-            selectedYear: year,
-            focusYear: year ?? ui?.startYear ?? today.year,
-            currentYear: today.year,
-          }}
-          actions={{ onChoose: chooseYear }}
-        />
-      ) : null}
-
-      {step === 'month' && year !== null ? (
-        <MonthStep
-          data={{ year, selectedMonth: month, today, min: data.min, max: data.max }}
-          actions={{ onChoose: chooseMonth }}
-        />
-      ) : null}
-
-      {step === 'day' && year !== null && month !== null ? (
-        <DayStep
-          data={{ year, month, selected, today, min: data.min, max: data.max }}
-          actions={{ onChoose: (day) => actions.onChange(isoOf(year, month, day)) }}
-        />
-      ) : null}
+      <StepperBody
+        step={step}
+        year={year}
+        month={month}
+        data={data}
+        ui={ui}
+        today={today}
+        selected={selected}
+        actions={{ chooseYear, chooseMonth, chooseDay }}
+      />
     </div>
   );
+}
+
+function StepperBody({
+  step,
+  year,
+  month,
+  data,
+  ui,
+  today,
+  selected,
+  actions,
+}: {
+  step: Step;
+  year: number | null;
+  month: number | null;
+  data: AzuosDateStepperProps['data'];
+  ui: AzuosDateStepperProps['ui'];
+  today: { year: number; month: number; day: number };
+  selected: { year: number; month: number; day: number } | null;
+  actions: {
+    chooseYear: (value: number) => void;
+    chooseMonth: (value: number) => void;
+    chooseDay: (value: number) => void;
+  };
+}) {
+  if (step === 'year') {
+    const focusYear = year ?? ui?.startYear ?? today.year;
+
+    return (
+      <YearStep
+        data={{
+          years: yearsBetween(data.min, data.max, today),
+          selectedYear: year,
+          focusYear,
+          currentYear: today.year,
+        }}
+        actions={{ onChoose: actions.chooseYear }}
+      />
+    );
+  }
+
+  if (step === 'month' && year !== null) {
+    return (
+      <MonthStep
+        data={{ year, selectedMonth: month, today, min: data.min, max: data.max }}
+        actions={{ onChoose: actions.chooseMonth }}
+      />
+    );
+  }
+
+  if (step === 'day' && year !== null && month !== null) {
+    return (
+      <DayStep
+        data={{ year, month, selected, today, min: data.min, max: data.max }}
+        actions={{ onChoose: actions.chooseDay }}
+      />
+    );
+  }
+
+  return null;
 }
 
 /**

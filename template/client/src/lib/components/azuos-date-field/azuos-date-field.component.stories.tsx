@@ -98,3 +98,12 @@ export const NarrowField: Story = {
     ui: { className: 'w-36' },
   },
 };
+
+/** Rótulo escondido: o campo fica ao lado de um texto que já diz o que é ("desde"). O leitor de
+    tela continua lendo o rótulo. */
+export const HiddenLabel: Story = {
+  args: {
+    data: { label: 'Entrega por e-mail desde', name: 'emailSince', value: '2024-01-15' },
+    ui: { isLabelHidden: true, className: 'w-40' },
+  },
+};

@@ -92,6 +92,14 @@ describe('AzuosDateField', () => {
     expect(container.querySelector('input[name="birthDate"]')).toHaveValue('1990-03-25');
   });
 
+  // feliz
+  it('hides the label from view but keeps it for the screen reader', () => {
+    renderField({ ui: { isLabelHidden: true } });
+
+    expect(field()).toBeInTheDocument();
+    expect(screen.getByText('Data de nascimento')).toHaveClass('sr-only');
+  });
+
   // triste
   /* O aviso só vem ao sair do campo: avisar a cada tecla acusaria quem ainda está digitando. */
   it('warns about an incomplete date only when the person leaves the field', () => {

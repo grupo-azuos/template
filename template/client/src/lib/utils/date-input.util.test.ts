@@ -72,6 +72,7 @@ describe('displayFromIso', () => {
     expect(displayFromIso(null)).toBe('');
     expect(displayFromIso(undefined)).toBe('');
     expect(displayFromIso('a definir')).toBe('');
+    expect(displayFromIso('2002-02-31')).toBe('');
   });
 });
 
