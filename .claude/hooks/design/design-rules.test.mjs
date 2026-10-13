@@ -368,6 +368,104 @@ test('radius-by-role: reprova o raio por tamanho', () => {
   assert.equal(run('radius-by-role', files).length, 1);
 });
 
+test('field-ruler: aceita o campo com o canto e a altura da régua', () => {
+  // feliz
+  const files = project({
+    [`${SRC}/lib/components/${PREFIX}select-field/${PREFIX}select-field.component.tsx`]:
+      'const c = "control-lg rounded-control";',
+    [`${SRC}/routes/orders/components/${PREFIX}order-picker/${PREFIX}order-picker.component.tsx`]:
+      'const c = "control-lg rounded-control";',
+    [`${SRC}/lib/components/${PREFIX}input-group/${PREFIX}input-group.component.tsx`]:
+      'const c = "control-lg rounded-control";',
+  });
+
+  assert.deepEqual(run('field-ruler', files), []);
+});
+
+test('field-ruler: reprova o campo que não escreve o canto nem a altura', () => {
+  // triste
+  const files = project({
+    [`${SRC}/lib/components/${PREFIX}money-field/${PREFIX}money-field.component.tsx`]:
+      'const c = "border px-3";',
+  });
+
+  assert.deepEqual(
+    run('field-ruler', files).map((violation) => violation.detail),
+    ['campo sem rounded-control', 'campo sem control-lg'],
+  );
+});
+
+test('field-ruler: reprova o campo com a altura de outro degrau da régua', () => {
+  // triste
+  const files = project({
+    [`${SRC}/lib/components/${PREFIX}date-picker/${PREFIX}date-picker.component.tsx`]:
+      'const c = "control-md rounded-control";',
+  });
+
+  assert.deepEqual(
+    run('field-ruler', files).map((violation) => violation.detail),
+    ['campo sem control-lg'],
+  );
+});
+
+test('field-ruler: a área de texto só deve o canto', () => {
+  const path = `${SRC}/lib/components/${PREFIX}text-area-field/${PREFIX}text-area-field.component.tsx`;
+
+  // feliz
+  assert.deepEqual(
+    run('field-ruler', project({ [path]: '<textarea className="rounded-control" />' })),
+    [],
+  );
+  // triste
+  assert.deepEqual(
+    run('field-ruler', project({ [path]: '<textarea className="border" />' })).map(
+      (violation) => violation.detail,
+    ),
+    ['campo sem rounded-control'],
+  );
+});
+
+test('field-ruler: não cobra de quem não é campo, da moldura de rótulo, nem do componente baixado', () => {
+  // feliz
+  const files = project({
+    [`${SRC}/lib/components/${PREFIX}stat-card/${PREFIX}stat-card.component.tsx`]: 'const c = "p-4";',
+    [`${SRC}/lib/components/${PREFIX}filter-field/${PREFIX}filter-field.component.tsx`]:
+      'const c = "flex flex-col";',
+    [`${SRC}/lib/components/${PREFIX}checkbox-field/${PREFIX}checkbox-field.component.tsx`]:
+      'const c = "size-4";',
+    [`${SRC}/lib/components/ui/select.tsx`]: 'const c = "rounded-md h-9";',
+    [`${SRC}/lib/components/${PREFIX}select-field/${PREFIX}select-field.component.test.tsx`]:
+      'it("x", () => {});',
+  });
+
+  assert.deepEqual(run('field-ruler', files), []);
+});
+
+test('field-ruler: não cobra do campo que compõe outro campo', () => {
+  const path = `${SRC}/lib/components/${PREFIX}form-select-field/${PREFIX}form-select-field.component.tsx`;
+
+  // feliz
+  assert.deepEqual(
+    run(
+      'field-ruler',
+      project({
+        [path]: `import { AzuosSelectField } from '../${PREFIX}select-field/${PREFIX}select-field.component';`,
+      }),
+    ),
+    [],
+  );
+  // triste: importar componente que não é campo não isenta
+  assert.equal(
+    run(
+      'field-ruler',
+      project({
+        [path]: `import { AzuosPersonAvatar } from '../${PREFIX}person-avatar/${PREFIX}person-avatar.component';`,
+      }),
+    ).length,
+    2,
+  );
+});
+
 test('raw-palette: reprova a cor crua e aceita o token', () => {
   const folder = `${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`;
 

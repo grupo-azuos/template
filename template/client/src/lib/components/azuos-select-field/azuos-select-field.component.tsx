@@ -56,11 +56,19 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
           `min-w-0` + `max-w-full`: sem os dois, uma opção de nome longo faz o gatilho crescer além
           do espaço que ele tem e empurra a largura de quem está em volta — dentro de um diálogo,
           isso vira barra de rolagem horizontal na tela inteira. O nome completo continua acessível
-          pelo `title` e pela lista aberta. */}
+          pelo `title` e pela lista aberta.
+
+          `data-[size=default]:h-(--control-lg)`: o gatilho baixado impõe a altura dele DENTRO de
+          uma variante (`data-[size=default]:h-9`), e uma variante ganha de classe solta — o
+          `control-lg` sozinho ficava no elemento e perdia, com o campo saindo 36px ao lado de
+          campos de 40px. Só a mesma variante derruba a dele. */}
       <SelectTrigger
         aria-label={ui?.ariaLabel}
         title={selectedLabel || undefined}
-        className={cn('control-lg rounded-control max-w-full min-w-0 text-sm', ui?.className)}
+        className={cn(
+          'control-lg rounded-control max-w-full min-w-0 text-sm data-[size=default]:h-(--control-lg)',
+          ui?.className,
+        )}
       >
         <SelectedValue data={{ option: selectedOption }} ui={{ placeholder: ui?.placeholder }} />
       </SelectTrigger>
