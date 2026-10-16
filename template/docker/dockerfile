@@ -23,7 +23,7 @@ COPY client/package.json client/package.json
 # sentido) dentro da imagem — e roda antes de os scripts serem copiados. Nenhuma dependência
 # de runtime precisa de script de instalação: o `better-sqlite3` já traz o binário pronto, e
 # um `npm rebuild` aqui o faria tentar COMPILAR, exigindo python e g++ na imagem.
-RUN npm ci --ignore-scripts
+RUN --mount=type=cache,id=template-npm,target=/root/.npm,sharing=locked npm ci --prefer-offline --ignore-scripts
 
 FROM deps AS build
 COPY . .
@@ -44,4 +44,8 @@ COPY --from=build /repo/server/drizzle server/drizzle
 COPY --from=build /repo/client/dist client/dist
 RUN mkdir -p server/data
 EXPOSE 3009
+# Consulta HTTP interna; falhas e timeouts ficam no histórico de saúde do Docker.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD node -e "Promise.all(['http://127.0.0.1:' + (process.env.API_PORT || 3009) + '/'].map(async (url) => { const response = await fetch(url, { signal: AbortSignal.timeout(3000), redirect: 'error' }); if (!response.ok) throw new Error(url + ': HTTP ' + response.status); })).then(() => process.exit(0)).catch((error) => { console.error(error.message); process.exit(1); })"
+
 CMD ["node", "server/dist/main.js"]
