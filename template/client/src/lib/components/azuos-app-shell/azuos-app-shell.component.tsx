@@ -59,6 +59,9 @@ export function AzuosAppShell({ children, data, ui, state }: AzuosAppShellProps)
           <div className="flex items-center px-2 py-1.5 group-data-[collapsible=icon]:hidden">
             <AzuosBrandMark ui={{ size: 'sm' }} />
           </div>
+          <div className="hidden items-center justify-center py-1.5 group-data-[collapsible=icon]:flex">
+            <AzuosBrandMark ui={{ size: 'sm', variant: 'icon' }} />
+          </div>
         </SidebarHeader>
 
         <SidebarContent>

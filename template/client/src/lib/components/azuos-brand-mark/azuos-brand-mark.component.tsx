@@ -1,32 +1,35 @@
+import azuosIcon from './assets/azuos-icon.svg';
 import azuosLogoWhite from './assets/azuos-logo-oficial-white.png';
 import { cn } from '../../utils/cn.util';
 
 /**
  * A marca, a partir dos ARQUIVOS OFICIAIS da marca.
  *
- * `azuos-logo-oficial-white.png` é o mesmo arquivo dos outros sistemas do Grupo Azuos. Ele é
- * BRANCO com o ponto amarelo, feito para fundo escuro — é por isso que só aparece sobre o
- * azul da marca, e nunca sobre o branco do conteúdo.
- *
- * Não há versão em SVG, de propósito: uma marca redesenhada à mão é pior que nenhuma — ela
- * passa por certa e vira a identidade por omissão.
+ * O PNG branco mantém o contraste sobre a barra azul. O ícone SVG oficial identifica a
+ * marca quando a barra está recolhida, sem comprimir o nome inteiro em poucos pixels.
+ * Os dois arquivos vêm do pacote azuos-brand.
  */
 export type AzuosBrandMarkProps = {
   ui?: {
     size?: 'sm' | 'md' | 'lg';
+    variant?: 'full' | 'icon';
     className?: string;
   };
 };
 
 /** Larguras em px. A altura é proporcional: a logo é uma imagem, não um ícone quadrado. */
 const WIDTHS = { sm: 84, md: 110, lg: 180 } as const;
+const ICON_WIDTHS = { sm: 28, md: 36, lg: 48 } as const;
 
 export function AzuosBrandMark({ ui }: AzuosBrandMarkProps) {
-  const width = WIDTHS[ui?.size ?? 'md'];
+  const variant = ui?.variant ?? 'full';
+  const size = ui?.size ?? 'md';
+  const width = variant === 'icon' ? ICON_WIDTHS[size] : WIDTHS[size];
+  const src = variant === 'icon' ? azuosIcon : azuosLogoWhite;
 
   return (
     <img
-      src={azuosLogoWhite}
+      src={src}
       width={width}
       alt="Grupo Azuos"
       className={cn('h-auto shrink-0', ui?.className)}
