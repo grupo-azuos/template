@@ -11,6 +11,11 @@ defaults:
   run:
     working-directory: template
 
+# Uma atualização do mesmo PR substitui a verificação anterior.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -23,7 +28,7 @@ jobs:
           cache: npm
           cache-dependency-path: template/package-lock.json
 
-      - run: npm ci
+      - run: npm ci --prefer-offline
       - run: npm run lint
       - run: npm run check:design:test
       - run: npm run check:design
