@@ -419,7 +419,7 @@ Formato obrigatório, sem variação:
 | `contracts` | `template/shared/` (pacote `@template/shared`) |
 | `docker` | `template/docker/` |
 | `ci` | `.github/` |
-| `docs` | `.md` na raiz |
+| `docs` | `docs/` e documentação `.md` na raiz |
 | `deps` | Atualização de dependência |
 | `claude` | `.claude/` e `CLAUDE.md` |
 
@@ -671,7 +671,7 @@ trabalho e mandar o relatório ao suporte** (skill `support`). O contato está e
 ## Identificação e métricas
 
 Antes de mudanças, commits e merges, siga `.claude/skills/participant-identity/SKILL.md`.
-Complete apenas os dados ausentes em `docs/project.json`; em conta compartilhada, confirme a
-pessoa da sessão. Commits atômicos mantêm o formato do projeto e levam os trailers de
+Use ID opaco por padrão em `docs/project.json`; nome e e-mail são opcionais. Em conta
+compartilhada, confirme a pessoa/código da sessão. Leia `docs/metrics-privacy.md` antes de salvar perfis. Commits atômicos mantêm o formato do projeto e levam os trailers de
 identificação descritos em `docs/project-metrics.md`. Essa validação vale também em modo admin.
 Dados históricos desconhecidos ficam pendentes, sem inventar autoria, datas ou departamentos.
