@@ -667,3 +667,11 @@ Quem administra libera a própria máquina com `git config azuos.admin true`.
 Não instala, não sobe, banco corrompido, migration quebrada, git em estado confuso, erro que só
 some mexendo em arquivo protegido, ou o mesmo erro depois de duas tentativas: **parar, guardar o
 trabalho e mandar o relatório ao suporte** (skill `support`). O contato está em `SUPORTE.md`.
+
+## Identificação e métricas
+
+Antes de mudanças, commits e merges, siga `.claude/skills/participant-identity/SKILL.md`.
+Complete apenas os dados ausentes em `docs/project.json`; em conta compartilhada, confirme a
+pessoa da sessão. Commits atômicos mantêm o formato do projeto e levam os trailers de
+identificação descritos em `docs/project-metrics.md`. Essa validação vale também em modo admin.
+Dados históricos desconhecidos ficam pendentes, sem inventar autoria, datas ou departamentos.
