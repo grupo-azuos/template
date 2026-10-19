@@ -233,12 +233,22 @@ function featureOf(path) {
   return parts[0].startsWith('__') ? '*' : parts[0];
 }
 
+function importerOwners(importer, folders, app, ownersOf) {
+  if (isStoryOrTest(importer.path)) return [];
+  const owner = folders.find((folder) => importer.path.startsWith(`${folder}/`));
+  if (owner) return [...ownersOf(owner)];
+  if (!importer.path.startsWith(`${routesDir(app)}/`)) return ['*'];
+
+  return [featureOf(importer.path)];
+}
+
 /**
  * Para cada componente de `lib/components`, as features que o usam — seguindo a cadeia: se
  * `azuos-task-row` só é importado por `azuos-task-list-view`, e esse só pela rota `tasks`, os dois
  * são da feature `tasks`. O `__root.tsx` conta como "app inteiro" (`*`).
  * @param {ProjectFile[]} files @returns {Map<string, Set<string>>}
  */
+
 export function featureOwners(files) {
   const libFolders = componentFolders(files).filter((folder) => {
     const app = appOf(folder);
@@ -278,19 +288,9 @@ export function featureOwners(files) {
 
     const owners = new Set();
     const app = appOf(folder);
-    for (const importer of importersOf.get(folder) ?? []) {
-      if (isStoryOrTest(importer.path)) continue;
-      const libOwner = libFolders.find((other) => importer.path.startsWith(`${other}/`));
-      if (libOwner) {
-        for (const owner of ownersOf(libOwner)) owners.add(owner);
-        continue;
-      }
-      if (!importer.path.startsWith(`${routesDir(app)}/`)) {
-        owners.add('*');
-        continue;
-      }
-      owners.add(featureOf(importer.path));
-    }
+    (importersOf.get(folder) ?? [])
+      .flatMap((importer) => importerOwners(importer, libFolders, app, ownersOf))
+      .forEach((owner) => owners.add(owner));
 
     resolving.delete(folder);
     memo.set(folder, owners);
@@ -312,30 +312,27 @@ function lineOf(content, index) {
 }
 
 /**
- * @param {ProjectFile[]} files
+ * @param {ProjectFile} file
  * @param {string} rule
  * @param {RegExp} pattern
- * @param {(match: string, file: ProjectFile) => boolean} [allowed]
+ * @param {(match: string, file: ProjectFile) => boolean} allowed
  * @returns {Violation[]}
  */
+function fileClassViolations(file, rule, pattern, allowed) {
+  if (!isStyledSource(file.path)) return [];
+
+  return [...file.content.matchAll(pattern)]
+    .filter((match) => !allowed(match[0], file))
+    .map((match) => ({
+      rule,
+      file: file.path,
+      detail: match[0],
+      line: lineOf(file.content, match.index),
+    }));
+}
+
 function classViolations(files, rule, pattern, allowed = () => false) {
-  const out = [];
-
-  for (const file of files) {
-    if (!isStyledSource(file.path)) continue;
-
-    for (const match of file.content.matchAll(pattern)) {
-      if (allowed(match[0], file)) continue;
-      out.push({
-        rule,
-        file: file.path,
-        detail: match[0],
-        line: lineOf(file.content, match.index),
-      });
-    }
-  }
-
-  return out;
+  return files.flatMap((file) => fileClassViolations(file, rule, pattern, allowed));
 }
 
 /** `azuos-text-field` → `AzuosTextField`: o nome que a função exportada tem de ter. */
@@ -368,7 +365,11 @@ export const RULES = [
       files
         .filter((file) => isOwnComponentSource(file.path))
         .flatMap((file) => {
-          const name = file.path.replace(/\.component\.tsx$/, '').split('/').at(-1) ?? '';
+          const name =
+            file.path
+              .replace(/\.component\.tsx$/, '')
+              .split('/')
+              .at(-1) ?? '';
           const expected = expectedExportName(name);
           /* O `<` entra junto com o `(`: componente GENÉRICO é declarado
              `export function AzuosDataTable<TRow>(`, e exigir parêntese colado no nome
@@ -401,7 +402,11 @@ export const RULES = [
         /* O teste e a story espelham o nome INTEIRO do arquivo, sufixo de papel incluso: a regra é
            "arquivo + `.test`", a mesma de `format-date.util.test.ts` e de `use-task-list.model.test.tsx`. */
         if (!paths.has(`${folder}/${name}.component.stories.tsx`))
-          out.push({ rule: 'component-siblings', file: folder, detail: 'sem .component.stories.tsx' });
+          out.push({
+            rule: 'component-siblings',
+            file: folder,
+            detail: 'sem .component.stories.tsx',
+          });
         if (!paths.has(`${folder}/${name}.component.test.tsx`))
           out.push({ rule: 'component-siblings', file: folder, detail: 'sem .component.test.tsx' });
       }
