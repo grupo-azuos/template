@@ -94,3 +94,10 @@ lint falha num arquivo que você não mexeu, conserte ou avise a pessoa — não
 
 Mostre em uma linha o que foi salvo (`git log --oneline -3`). **Não faça `git push`** sem a
 pessoa pedir — push publica. Terminar e juntar na develop é o `git-flow`, Fase 3.
+
+## Identificação obrigatória
+
+Antes de executar este fluxo, siga `../participant-identity/SKILL.md`. Pergunte só o que
+falta no cadastro; em conta compartilhada, confirme a pessoa desta sessão. Cada commit e merge
+leva os trailers conferidos contra `docs/project.json` do índice. Preserve commits atômicos e
+nunca use `--no-verify` para pular a identificação, inclusive em modo administrador.

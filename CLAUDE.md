@@ -40,7 +40,7 @@ Este repositório tem dois modos de operação para o git e para o Claude:
      - Pode commitar direto na `develop` ou criar releases/hotfixes conforme o Git-Flow.
      - Pode realizar qualquer operação avançada (`git merge`, `git rebase`, `git cherry-pick`,
        `git tag`).
-     - Pode usar `--no-verify` se o admin optar por pular hooks ou verificações automáticas.
+     - A validação de identidade e métricas não pode ser desativada, inclusive em modo admin.
      - Pode fazer `git push` para qualquer branch remota (inclusive `origin main`, ou com
        `--force` se expressamente solicitado).
   2. **Arquivos de estrutura liberados**:
@@ -228,3 +228,11 @@ use o navegador em http://localhost:5009.
 - Colocar dado real de pessoa ou cliente em seed, story ou teste.
 - Dizer que terminou sem ter rodado `lint`, `typecheck`, `check:design` e os testes do que
   mudou (a menos que o admin tenha pedido especificamente para ignorar).
+
+## Identificação e métricas
+
+Antes de mudanças, commits e merges, siga `.claude/skills/participant-identity/SKILL.md`.
+Complete apenas os dados ausentes em `docs/project.json`; em conta compartilhada, confirme a
+pessoa da sessão. Commits atômicos mantêm o formato do projeto e levam os trailers de
+identificação descritos em `docs/project-metrics.md`. Essa validação vale também em modo admin.
+Dados históricos desconhecidos ficam pendentes, sem inventar autoria, datas ou departamentos.

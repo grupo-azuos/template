@@ -189,3 +189,10 @@ feature/<nome>` (pede confirmação). Isso **não** junta nada na develop.
 - Merge na develop sem o OK da Fase 3.4, ou sem `--no-ff`.
 - Resolver conflito na develop.
 - `git config azuos.admin` — essa chave é de quem administra, na máquina dela.
+
+## Identificação obrigatória
+
+Antes de executar este fluxo, siga `../participant-identity/SKILL.md`. Pergunte só o que
+falta no cadastro; em conta compartilhada, confirme a pessoa desta sessão. Cada commit e merge
+leva os trailers conferidos contra `docs/project.json` do índice. Preserve commits atômicos e
+nunca use `--no-verify` para pular a identificação, inclusive em modo administrador.
