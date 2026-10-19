@@ -5,7 +5,7 @@
   "status": null,
   "participants": [
     {
-      "id": "vinicius-gabriel",
+      "id": "p-3f660a9404234e1eac85599e0099dc30",
       "name": "Vinicius Gabriel",
       "email": "github@vinicius-gpl.com",
       "department": "TI",
@@ -20,7 +20,10 @@
         "vinicius.gabriel.p.leitao+github@gmail.com"
       ],
       "prior_it_experience": null,
-      "position": "junior"
+      "position": "junior",
+      "legacy_ids": [
+        "vinicius-gabriel"
+      ]
     }
   ],
   "shared_accounts": [],
@@ -44,7 +47,11 @@
     "milestones.mvp_at",
     "milestones.production_at",
     "requirements_meetings",
-    "traditional_estimate_days"
+    "traditional_estimate_days",
+    "privacy.controller",
+    "privacy.contact",
+    "privacy.lawful_basis",
+    "privacy.retention_policy"
   ],
   "evidence": [
     {
@@ -68,5 +75,18 @@
       "tool": "Codex",
       "note": "Ferramenta usada para instrumentar este repositório."
     }
-  ]
+  ],
+  "privacy": {
+    "commit_identity": "pseudonymous",
+    "governance_status": "pending_review",
+    "purpose": "internal_delivery_metrics",
+    "controller": null,
+    "contact": null,
+    "lawful_basis": null,
+    "retention_policy": null,
+    "repository_visibility": "private",
+    "visibility_checked_at": "2026-10-19",
+    "publication_status": "not_authorized"
+  },
+  "technical_interventions": []
 }

@@ -1,2 +1,2 @@
-python3 .github/scripts/project-metrics/validate-metrics.py --message "$1" || exit $?
+node .github/scripts/project-metrics/validate-metrics.mjs --message "$1" || exit $?
 cd template && npx --no -- commitlint --edit "$1"

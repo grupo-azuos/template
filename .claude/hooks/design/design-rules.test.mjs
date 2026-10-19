@@ -33,7 +33,7 @@ function project(tree) {
 /** @param {string} id @param {ReturnType<typeof project>} files */
 function run(id, files) {
   const rule = RULES.find((entry) => entry.id === id);
-  assert.ok(rule, `regra inexistente: ${id}`);
+  assert.ok(rule, `Unknown rule: ${id}`);
 
   return rule.check(files);
 }
@@ -43,8 +43,7 @@ function component(folder, name, extra = {}) {
   const base = `${folder}/${PREFIX}${name}`;
 
   return {
-    [`${base}/${PREFIX}${name}.component.tsx`]:
-      `export function ${expectedExportName(PREFIX + name)}() { return null; }`,
+    [`${base}/${PREFIX}${name}.component.tsx`]: `export function ${expectedExportName(PREFIX + name)}() { return null; }`,
     [`${base}/${PREFIX}${name}.component.stories.tsx`]: 'export default {};',
     [`${base}/${PREFIX}${name}.component.test.tsx`]: 'it("x", () => {});',
     ...extra,
@@ -53,14 +52,14 @@ function component(folder, name, extra = {}) {
 
 // ---------------------------------------------------------------- component-prefix
 
-test('component-prefix: aceita a pasta com prefixo', () => {
+test('component-prefix: accepts prefixed folders', () => {
   // feliz
   const files = project(component(`${SRC}/lib/components`, 'text-field'));
 
   assert.deepEqual(run('component-prefix', files), []);
 });
 
-test('component-prefix: reprova a pasta sem prefixo', () => {
+test('component-prefix: rejects folders without a prefix', () => {
   // triste
   const files = project({
     [`${SRC}/lib/components/text-field/text-field.component.tsx`]: 'export function TextField() {}',
@@ -72,7 +71,7 @@ test('component-prefix: reprova a pasta sem prefixo', () => {
   assert.equal(found[0].file, `${SRC}/lib/components/text-field`);
 });
 
-test('component-prefix: não olha a pasta do CLI', () => {
+test('component-prefix: ignores CLI-managed folders', () => {
   // triste (o `ui/` é do shadcn e não se renomeia)
   const files = project({ [`${SRC}/lib/components/ui/button.tsx`]: 'export function Button() {}' });
 
@@ -81,14 +80,14 @@ test('component-prefix: não olha a pasta do CLI', () => {
 
 // ---------------------------------------------------------- component-export-prefix
 
-test('component-export-prefix: aceita a função com o prefixo no nome', () => {
+test('component-export-prefix: accepts a prefixed function name', () => {
   // feliz
   const files = project(component(`${SRC}/lib/components`, 'stat-card'));
 
   assert.deepEqual(run('component-export-prefix', files), []);
 });
 
-test('component-export-prefix: reprova a função sem o prefixo', () => {
+test('component-export-prefix: rejects functions without the prefix', () => {
   // triste
   const files = project({
     [`${SRC}/lib/components/${PREFIX}stat-card/${PREFIX}stat-card.component.tsx`]:
@@ -101,7 +100,7 @@ test('component-export-prefix: reprova a função sem o prefixo', () => {
   assert.match(found[0].detail, /AzuosStatCard/);
 });
 
-test('expectedExportName: converte o nome da pasta no nome da função', () => {
+test('expectedExportName: converts a folder name into a function name', () => {
   // feliz
   assert.equal(expectedExportName('azuos-text-field'), 'AzuosTextField');
   assert.equal(expectedExportName('azuos-app-shell-nav-entry'), 'AzuosAppShellNavEntry');
@@ -109,14 +108,14 @@ test('expectedExportName: converte o nome da pasta no nome da função', () => {
 
 // ---------------------------------------------------------------- component-siblings
 
-test('component-siblings: aceita o componente com story e teste', () => {
+test('component-siblings: accepts components with a story and a test', () => {
   // feliz
   const files = project(component(`${SRC}/lib/components`, 'empty-state'));
 
   assert.deepEqual(run('component-siblings', files), []);
 });
 
-test('component-siblings: reprova o componente sem story e sem teste', () => {
+test('component-siblings: rejects components missing a story and a test', () => {
   // triste
   const files = project({
     [`${SRC}/lib/components/${PREFIX}empty-state/${PREFIX}empty-state.component.tsx`]: 'x',
@@ -127,10 +126,11 @@ test('component-siblings: reprova o componente sem story e sem teste', () => {
   assert.deepEqual(details.sort(), ['sem .component.stories.tsx', 'sem .component.test.tsx']);
 });
 
-test('component-siblings: a porta de entrada do ui/ não precisa de story nem teste', () => {
+test('component-siblings: exempts UI re-export entrypoints', () => {
   // feliz — um `.ts` que só reexporta não decide nada
   const files = project({
-    [`${SRC}/lib/components/${PREFIX}dialog/${PREFIX}dialog.ts`]: "export { Dialog } from '../ui/dialog';",
+    [`${SRC}/lib/components/${PREFIX}dialog/${PREFIX}dialog.ts`]:
+      "export { Dialog } from '../ui/dialog';",
   });
 
   assert.deepEqual(run('component-siblings', files), []);
@@ -138,12 +138,11 @@ test('component-siblings: a porta de entrada do ui/ não precisa de story nem te
 
 // -------------------------------------------------------- feature-component-in-lib
 
-test('feature-component-in-lib: reprova o componente que leva o nome da feature', () => {
+test('feature-component-in-lib: rejects domain components in the library', () => {
   // triste — `task-row` carrega `task` no nome E só é usado por `routes/tasks`
   const files = project({
     ...component(`${SRC}/lib/components`, 'task-row'),
-    [`${SRC}/routes/tasks/index.tsx`]:
-      `import { AzuosTaskRow } from '../../lib/components/${PREFIX}task-row/${PREFIX}task-row.component';`,
+    [`${SRC}/routes/tasks/index.tsx`]: `import { AzuosTaskRow } from '../../lib/components/${PREFIX}task-row/${PREFIX}task-row.component';`,
   });
 
   const found = run('feature-component-in-lib', files);
@@ -152,7 +151,7 @@ test('feature-component-in-lib: reprova o componente que leva o nome da feature'
   assert.equal(found[0].detail, 'só usado por routes/tasks');
 });
 
-test('feature-component-in-lib: aceita o componente usado por duas features', () => {
+test('feature-component-in-lib: accepts components shared by two features', () => {
   // feliz
   const importLine = `import x from '../../lib/components/${PREFIX}task-row/${PREFIX}task-row.component';`;
   const files = project({
@@ -164,27 +163,24 @@ test('feature-component-in-lib: aceita o componente usado por duas features', ()
   assert.deepEqual(run('feature-component-in-lib', files), []);
 });
 
-test('feature-component-in-lib: o primitivo sem nome de feature fica em lib, mesmo com um consumidor só', () => {
+test('feature-component-in-lib: keeps generic primitives in the library with one consumer', () => {
   /* feliz — pela CONTAGEM ele seria empurrado para dentro de `tasks`, e a segunda tela que precisasse
      de um gráfico o traria de volta. Quem decide é o NOME: `donut-chart` não fala de tarefa nenhuma. */
   const files = project({
     ...component(`${SRC}/lib/components`, 'donut-chart'),
-    [`${SRC}/routes/tasks/index.tsx`]:
-      `import x from '../../lib/components/${PREFIX}donut-chart/${PREFIX}donut-chart.component';`,
+    [`${SRC}/routes/tasks/index.tsx`]: `import x from '../../lib/components/${PREFIX}donut-chart/${PREFIX}donut-chart.component';`,
   });
 
   assert.deepEqual(run('feature-component-in-lib', files), []);
 });
 
-test('featureOwners: segue a cadeia de imports até a rota', () => {
+test('featureOwners: follows import chains to the owning route', () => {
   // feliz
   const files = project({
     ...component(`${SRC}/lib/components`, 'task-row'),
     ...component(`${SRC}/lib/components`, 'task-list'),
-    [`${SRC}/lib/components/${PREFIX}task-list/${PREFIX}task-list.component.tsx`]:
-      `import x from '../${PREFIX}task-row/${PREFIX}task-row.component'; export function AzuosTaskList() { return null; }`,
-    [`${SRC}/routes/tasks/index.tsx`]:
-      `import x from '../../lib/components/${PREFIX}task-list/${PREFIX}task-list.component';`,
+    [`${SRC}/lib/components/${PREFIX}task-list/${PREFIX}task-list.component.tsx`]: `import x from '../${PREFIX}task-row/${PREFIX}task-row.component'; export function AzuosTaskList() { return null; }`,
+    [`${SRC}/routes/tasks/index.tsx`]: `import x from '../../lib/components/${PREFIX}task-list/${PREFIX}task-list.component';`,
   });
 
   const owners = featureOwners(files);
@@ -194,7 +190,7 @@ test('featureOwners: segue a cadeia de imports até a rota', () => {
 
 // ---------------------------------------------------------------- hook-location
 
-test('hook-location: aceita a pasta use-<nome>', () => {
+test('hook-location: accepts use-prefixed hook folders', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/hooks/use-media-query/use-media-query.ts`]: 'export function useMediaQuery() {}',
@@ -203,7 +199,7 @@ test('hook-location: aceita a pasta use-<nome>', () => {
   assert.deepEqual(run('hook-location', files), []);
 });
 
-test('hook-location: reprova o arquivo solto e a pasta sem use-', () => {
+test('hook-location: rejects loose files and unprefixed hook folders', () => {
   // triste
   const files = project({
     [`${SRC}/lib/hooks/media-query.ts`]: 'x',
@@ -215,7 +211,7 @@ test('hook-location: reprova o arquivo solto e a pasta sem use-', () => {
   assert.deepEqual(details.sort(), ['arquivo solto em lib/hooks', 'pasta sem prefixo use-']);
 });
 
-test('hook-location: a pasta do CLI é exceção', () => {
+test('hook-location: exempts CLI-managed folders', () => {
   // feliz — `hooks/ui` é escrito pelo `shadcn add` e não se renomeia
   const files = project({ [`${SRC}/lib/hooks/ui/use-mobile.ts`]: 'x' });
 
@@ -224,7 +220,7 @@ test('hook-location: a pasta do CLI é exceção', () => {
 
 // ---------------------------------------------------------------- view-model-name
 
-test('view-model-name: aceita use-<nome>.model.ts e um util ao lado', () => {
+test('view-model-name: accepts model filenames and adjacent utilities', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/view-models/use-task-list.model.ts`]: 'x',
@@ -234,7 +230,7 @@ test('view-model-name: aceita use-<nome>.model.ts e um util ao lado', () => {
   assert.deepEqual(run('view-model-name', files), []);
 });
 
-test('view-model-name: reprova o arquivo fora do padrão', () => {
+test('view-model-name: rejects non-standard filenames', () => {
   // triste
   const files = project({ [`${SRC}/lib/view-models/taskList.ts`]: 'x' });
 
@@ -243,7 +239,7 @@ test('view-model-name: reprova o arquivo fora do padrão', () => {
 
 // ---------------------------------------------------------------- lib-folder
 
-test('lib-folder: aceita as pastas do mapa', () => {
+test('lib-folder: accepts documented library folders', () => {
   // feliz
   const files = project(
     Object.fromEntries(LIB_FOLDERS.map((folder) => [`${SRC}/lib/${folder}/x.ts`, 'x'])),
@@ -252,7 +248,7 @@ test('lib-folder: aceita as pastas do mapa', () => {
   assert.deepEqual(run('lib-folder', files), []);
 });
 
-test('lib-folder: reprova a pasta fora do mapa', () => {
+test('lib-folder: rejects undocumented library folders', () => {
   // triste
   const files = project({ [`${SRC}/lib/context/thing.ts`]: 'x' });
 
@@ -264,7 +260,7 @@ test('lib-folder: reprova a pasta fora do mapa', () => {
 
 // ---------------------------------------------------------------- ui-import-boundary
 
-test('ui-import-boundary: o componente de lib pode importar o ui', () => {
+test('ui-import-boundary: allows library components to wrap CLI UI', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/components/${PREFIX}action-button/${PREFIX}action-button.component.tsx`]:
@@ -274,7 +270,7 @@ test('ui-import-boundary: o componente de lib pode importar o ui', () => {
   assert.deepEqual(run('ui-import-boundary', files), []);
 });
 
-test('ui-import-boundary: a rota não importa o ui', () => {
+test('ui-import-boundary: rejects direct UI imports in routes', () => {
   // triste
   const files = project({
     [`${SRC}/routes/tasks/index.tsx`]: "import { Button } from '../../lib/components/ui/button';",
@@ -285,21 +281,19 @@ test('ui-import-boundary: a rota não importa o ui', () => {
 
 // ---------------------------------------------------------------- cross-feature-import
 
-test('cross-feature-import: a rota pode importar componente genérico de lib', () => {
+test('cross-feature-import: allows routes to import generic library components', () => {
   // feliz — o caminho para `lib/components` sobe o mesmo número de pastas, e casaria sem a guarda
   const files = project({
-    [`${SRC}/routes/tasks/index.tsx`]:
-      `import x from '../../lib/components/${PREFIX}page-header/${PREFIX}page-header.component';`,
+    [`${SRC}/routes/tasks/index.tsx`]: `import x from '../../lib/components/${PREFIX}page-header/${PREFIX}page-header.component';`,
   });
 
   assert.deepEqual(run('cross-feature-import', files), []);
 });
 
-test('cross-feature-import: reprova a feature que importa componente de outra', () => {
+test('cross-feature-import: rejects imports across feature boundaries', () => {
   // triste
   const files = project({
-    [`${SRC}/routes/tasks/index.tsx`]:
-      `import x from '../reports/components/${PREFIX}report-row/${PREFIX}report-row.component';`,
+    [`${SRC}/routes/tasks/index.tsx`]: `import x from '../reports/components/${PREFIX}report-row/${PREFIX}report-row.component';`,
   });
 
   const found = run('cross-feature-import', files);
@@ -310,16 +304,17 @@ test('cross-feature-import: reprova a feature que importa componente de outra', 
 
 // ---------------------------------------------------------------- route-markup / height
 
-test('route-markup: a rota só compõe', () => {
+test('route-markup: accepts routes composing components', () => {
   // feliz
   const files = project({
-    [`${SRC}/routes/tasks/index.tsx`]: 'export default function Page() { return <AzuosTaskList />; }',
+    [`${SRC}/routes/tasks/index.tsx`]:
+      'export default function Page() { return <AzuosTaskList />; }',
   });
 
   assert.deepEqual(run('route-markup', files), []);
 });
 
-test('route-markup: reprova o controle cru na rota', () => {
+test('route-markup: rejects raw interactive controls inside routes', () => {
   // triste
   const files = project({
     [`${SRC}/routes/tasks/index.tsx`]: 'const x = <button type="button">Salvar</button>;',
@@ -331,14 +326,14 @@ test('route-markup: reprova o controle cru na rota', () => {
   assert.equal(found[0].detail, '<button> na rota');
 });
 
-test('route-height: reprova a altura de controle escrita na rota', () => {
+test('route-height: rejects control heights defined in routes', () => {
   // triste — quem define altura de campo é o componente, pela régua
   const files = project({ [`${SRC}/routes/tasks/index.tsx`]: 'const x = "h-9 w-full";' });
 
   assert.equal(run('route-height', files).length, 1);
 });
 
-test('route-height: a altura no componente não é problema da rota', () => {
+test('route-height: allows heights inside components', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`]: 'const c = "h-9";',
@@ -349,7 +344,7 @@ test('route-height: a altura no componente não é problema da rota', () => {
 
 // ---------------------------------------------------------------- classes
 
-test('radius-by-role: aceita o raio por papel', () => {
+test('radius-by-role: accepts semantic radius tokens', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`]:
@@ -359,7 +354,7 @@ test('radius-by-role: aceita o raio por papel', () => {
   assert.deepEqual(run('radius-by-role', files), []);
 });
 
-test('radius-by-role: reprova o raio por tamanho', () => {
+test('radius-by-role: rejects arbitrary radius sizes', () => {
   // triste
   const files = project({
     [`${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`]: 'const c = "rounded-lg";',
@@ -368,7 +363,7 @@ test('radius-by-role: reprova o raio por tamanho', () => {
   assert.equal(run('radius-by-role', files).length, 1);
 });
 
-test('field-ruler: aceita o campo com o canto e a altura da régua', () => {
+test('field-ruler: accepts fields using the standard radius and height', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/components/${PREFIX}select-field/${PREFIX}select-field.component.tsx`]:
@@ -382,7 +377,7 @@ test('field-ruler: aceita o campo com o canto e a altura da régua', () => {
   assert.deepEqual(run('field-ruler', files), []);
 });
 
-test('field-ruler: reprova o campo que não escreve o canto nem a altura', () => {
+test('field-ruler: rejects fields missing the radius and height', () => {
   // triste
   const files = project({
     [`${SRC}/lib/components/${PREFIX}money-field/${PREFIX}money-field.component.tsx`]:
@@ -395,7 +390,7 @@ test('field-ruler: reprova o campo que não escreve o canto nem a altura', () =>
   );
 });
 
-test('field-ruler: reprova o campo com a altura de outro degrau da régua', () => {
+test('field-ruler: rejects a field using the wrong height tier', () => {
   // triste
   const files = project({
     [`${SRC}/lib/components/${PREFIX}date-picker/${PREFIX}date-picker.component.tsx`]:
@@ -408,7 +403,7 @@ test('field-ruler: reprova o campo com a altura de outro degrau da régua', () =
   );
 });
 
-test('field-ruler: a área de texto só deve o canto', () => {
+test('field-ruler: requires only the radius for multiline fields', () => {
   const path = `${SRC}/lib/components/${PREFIX}text-area-field/${PREFIX}text-area-field.component.tsx`;
 
   // feliz
@@ -425,10 +420,11 @@ test('field-ruler: a área de texto só deve o canto', () => {
   );
 });
 
-test('field-ruler: não cobra de quem não é campo, da moldura de rótulo, nem do componente baixado', () => {
+test('field-ruler: ignores non-fields, label wrappers and CLI components', () => {
   // feliz
   const files = project({
-    [`${SRC}/lib/components/${PREFIX}stat-card/${PREFIX}stat-card.component.tsx`]: 'const c = "p-4";',
+    [`${SRC}/lib/components/${PREFIX}stat-card/${PREFIX}stat-card.component.tsx`]:
+      'const c = "p-4";',
     [`${SRC}/lib/components/${PREFIX}filter-field/${PREFIX}filter-field.component.tsx`]:
       'const c = "flex flex-col";',
     [`${SRC}/lib/components/${PREFIX}checkbox-field/${PREFIX}checkbox-field.component.tsx`]:
@@ -441,7 +437,7 @@ test('field-ruler: não cobra de quem não é campo, da moldura de rótulo, nem 
   assert.deepEqual(run('field-ruler', files), []);
 });
 
-test('field-ruler: não cobra do campo que compõe outro campo', () => {
+test('field-ruler: exempts wrappers composing another field', () => {
   const path = `${SRC}/lib/components/${PREFIX}form-select-field/${PREFIX}form-select-field.component.tsx`;
 
   // feliz
@@ -466,7 +462,7 @@ test('field-ruler: não cobra do campo que compõe outro campo', () => {
   );
 });
 
-test('raw-palette: reprova a cor crua e aceita o token', () => {
+test('raw-palette: rejects raw colors and accepts semantic tokens', () => {
   const folder = `${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`;
 
   // triste
@@ -475,25 +471,31 @@ test('raw-palette: reprova a cor crua e aceita o token', () => {
   assert.deepEqual(run('raw-palette', project({ [folder]: 'const c = "bg-success-soft";' })), []);
 });
 
-test('arbitrary-font-size: reprova o tamanho arbitrário', () => {
+test('arbitrary-font-size: rejects arbitrary text sizes', () => {
   const folder = `${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`;
 
   // triste
-  assert.equal(run('arbitrary-font-size', project({ [folder]: 'const c = "text-[11px]";' })).length, 1);
+  assert.equal(
+    run('arbitrary-font-size', project({ [folder]: 'const c = "text-[11px]";' })).length,
+    1,
+  );
   // feliz
   assert.deepEqual(run('arbitrary-font-size', project({ [folder]: 'const c = "text-xs";' })), []);
 });
 
-test('shadow-scale: aceita xs e xl, reprova o resto', () => {
+test('shadow-scale: accepts xs and xl while rejecting other shadows', () => {
   const folder = `${SRC}/lib/components/${PREFIX}x/${PREFIX}x.component.tsx`;
 
   // feliz
-  assert.deepEqual(run('shadow-scale', project({ [folder]: 'const c = "shadow-xs shadow-xl";' })), []);
+  assert.deepEqual(
+    run('shadow-scale', project({ [folder]: 'const c = "shadow-xs shadow-xl";' })),
+    [],
+  );
   // triste
   assert.equal(run('shadow-scale', project({ [folder]: 'const c = "shadow-lg";' })).length, 1);
 });
 
-test('shadow-scale: a gaveta de baixo do celular é a exceção', () => {
+test('shadow-scale: exempts the mobile bottom sheet', () => {
   // feliz — ela flutua sobre a tela inteira
   const path = `${SRC}/lib/components/${PREFIX}responsive-dialog-content/${PREFIX}responsive-dialog-content.component.tsx`;
 
@@ -502,7 +504,7 @@ test('shadow-scale: a gaveta de baixo do celular é a exceção', () => {
 
 // ---------------------------------------------------------------- doc-file-name
 
-test('doc-file-name: aceita kebab-case e reprova MAIÚSCULO', () => {
+test('doc-file-name: accepts kebab-case and rejects uppercase names', () => {
   // feliz
   assert.deepEqual(run('doc-file-name', project({ 'template/docs/architecture.md': 'x' })), []);
   // triste
@@ -511,7 +513,7 @@ test('doc-file-name: aceita kebab-case e reprova MAIÚSCULO', () => {
 
 // ---------------------------------------------------------------- baseline
 
-test('compareWithBaseline: o que está na baseline passa; o que é novo reprova', () => {
+test('compareWithBaseline: accepts known violations and rejects new ones', () => {
   const known = { rule: 'raw-palette', file: 'a.tsx', detail: 'bg-red-500' };
   const fresh = { rule: 'raw-palette', file: 'b.tsx', detail: 'bg-blue-500' };
 
@@ -521,7 +523,7 @@ test('compareWithBaseline: o que está na baseline passa; o que é novo reprova'
   assert.deepEqual(added, [fresh]);
 });
 
-test('compareWithBaseline: dívida paga aparece como corrigida', () => {
+test('compareWithBaseline: reports resolved debt', () => {
   // feliz — é o que manda a pessoa regravar a baseline menor
   const known = { rule: 'raw-palette', file: 'a.tsx', detail: 'bg-red-500' };
 
@@ -531,7 +533,7 @@ test('compareWithBaseline: dívida paga aparece como corrigida', () => {
   assert.deepEqual(fixed, [violationKey(known)]);
 });
 
-test('compareWithBaseline: duas violações iguais contam duas vezes', () => {
+test('compareWithBaseline: counts duplicate violations separately', () => {
   // triste — sem a contagem, a segunda cor crua no mesmo arquivo entraria de graça
   const one = { rule: 'raw-palette', file: 'a.tsx', detail: 'bg-red-500' };
 
@@ -540,7 +542,7 @@ test('compareWithBaseline: duas violações iguais contam duas vezes', () => {
   assert.equal(added.length, 1);
 });
 
-test('violationKey: não muda quando a linha anda', () => {
+test('violationKey: stays stable when source line numbers change', () => {
   // feliz — a chave da baseline não pode depender da linha, ou toda edição a invalidaria
   const key = violationKey({ rule: 'r', file: 'a.tsx', detail: 'd', line: 10 });
 
@@ -549,7 +551,7 @@ test('violationKey: não muda quando a linha anda', () => {
 
 // ---------------------------------------------------------------- violationsTouching
 
-test('violationsTouching: pega a violação do próprio arquivo', () => {
+test('violationsTouching: includes the edited file violations', () => {
   // feliz
   const mine = { rule: 'r', file: 'a/b.tsx', detail: 'd' };
   const other = { rule: 'r', file: 'c/d.tsx', detail: 'd' };
@@ -557,7 +559,7 @@ test('violationsTouching: pega a violação do próprio arquivo', () => {
   assert.deepEqual(violationsTouching([mine, other], 'a/b.tsx'), [mine]);
 });
 
-test('violationsTouching: pega também a violação registrada na PASTA do componente', () => {
+test('violationsTouching: includes component folder violations', () => {
   /* `component-prefix` e `component-siblings` são registradas na pasta: editar o componente tem de
      acusar a violação da pasta, ou o hook ficaria calado justamente no arquivo em que a pessoa está. */
   const folder = {
@@ -566,15 +568,12 @@ test('violationsTouching: pega também a violação registrada na PASTA do compo
     detail: 'sem .component.test.tsx',
   };
 
-  assert.deepEqual(
-    violationsTouching([folder], 'a/azuos-x/azuos-x.component.tsx'),
-    [folder],
-  );
+  assert.deepEqual(violationsTouching([folder], 'a/azuos-x/azuos-x.component.tsx'), [folder]);
 });
 
 // ---------------------------------------------------------------- componentFolders
 
-test('componentFolders: acha a pasta em lib e a de feature, e ignora o ui', () => {
+test('componentFolders: finds library and feature folders while ignoring CLI UI', () => {
   // feliz
   const files = project({
     [`${SRC}/lib/components/${PREFIX}a/${PREFIX}a.component.tsx`]: 'x',
