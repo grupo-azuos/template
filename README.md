@@ -310,3 +310,5 @@ o repositório como **Template repository** (Settings → General).
 
 Versões: a partir da `develop`, pelo Git-Flow do Tower (*Start Release* / *Finish Release*),
 com tag `v<versão>`.
+
+Consulte o [índice da documentação](docs/index.md) para os guias do projeto, métricas e privacidade.
