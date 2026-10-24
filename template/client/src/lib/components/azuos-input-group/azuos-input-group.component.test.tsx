@@ -80,4 +80,18 @@ describe('AzuosInputGroup', () => {
 
     expect(onChange).not.toHaveBeenCalled();
   });
+  it('paints the field red only when there is an error', () => {
+    const { container, rerender } = render(
+      <AzuosInputGroup data={{ label: 'Meta', name: 'goal', value: '' }} />,
+    );
+    const group = () => container.querySelector('[data-slot="input-group"]');
+
+    expect(group()).toHaveClass('bg-card');
+    expect(group()).not.toHaveClass('bg-destructive-soft');
+
+    rerender(
+      <AzuosInputGroup data={{ label: 'Meta', name: 'goal', value: '' }} state={{ error: 'Obrigatório' }} />,
+    );
+    expect(group()).toHaveClass('bg-destructive-soft');
+  });
 });

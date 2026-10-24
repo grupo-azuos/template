@@ -82,16 +82,6 @@ const DOT_TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
   brand: 'bg-primary',
 };
 
-/** O halo em volta do marco: a mesma cor, quase transparente — destaca sem pesar. */
-const HALO_TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
-  neutral: 'ring-muted-foreground/15',
-  info: 'ring-info/20',
-  success: 'ring-success/20',
-  warning: 'ring-warning/20',
-  danger: 'ring-destructive/20',
-  brand: 'ring-primary/20',
-};
-
 export function AzuosHistoryTimeline({ data, ui, state }: AzuosHistoryTimelineProps) {
   /* Estados na frente, conteúdo por último e sem aninhamento. */
   if (state?.error) {
@@ -141,9 +131,8 @@ function HistoryRow({
         <span className={cn('h-0.5 w-px', ui.isFirst ? 'bg-transparent' : 'bg-border')} />
         <span
           className={cn(
-            'my-1 size-3 shrink-0 rounded-full ring-4',
+            'my-1 size-3 shrink-0 rounded-full',
             DOT_TONE_CLASSES[entry.tone],
-            HALO_TONE_CLASSES[entry.tone],
           )}
         />
         {ui.isLast ? null : <span className="bg-border w-px flex-1" />}

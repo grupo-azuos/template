@@ -3,6 +3,10 @@ import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { cn } from '../../utils/cn.util';
+import {
+  AzuosCalendarDropdown,
+  calendarMonthName,
+} from '../azuos-calendar-dropdown/azuos-calendar-dropdown.component';
 import { Button } from '../ui/button';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -122,6 +126,10 @@ export function AzuosDatePicker({ data, ui, state, actions }: AzuosDatePickerPro
             defaultMonth={selected}
             locale={ptBR}
             captionLayout="dropdown"
+            /* A lista de mês e de ano é a nossa, não o `<select>` nativo — ver
+               `AzuosCalendarDropdown`. */
+            formatters={{ formatMonthDropdown: calendarMonthName }}
+            components={{ Dropdown: AzuosCalendarDropdown }}
             labels={NAV_LABELS}
             className="rounded-control border-0 p-3"
           />

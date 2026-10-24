@@ -108,4 +108,48 @@ describe('AzuosStatCard', () => {
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('marks the selected card with the full tone color, never a ring', () => {
+    const { container } = render(
+      <AzuosStatCard
+        data={{ label: 'Vencidos', value: 3 }}
+        ui={{ tone: 'danger' }}
+        state={{ isSelected: true }}
+        actions={{ onClick: () => {} }}
+      />,
+    );
+    const card = container.firstElementChild as HTMLElement;
+
+    expect(card).toHaveClass('bg-destructive');
+    expect(card).not.toHaveClass('bg-destructive-soft');
+    expect(card.className).not.toMatch(/\bring-/);
+  });
+
+  it('never paints a colored border or a side stripe', () => {
+    const { container } = render(<AzuosStatCard data={{ label: 'Em dia', value: 8 }} ui={{ tone: 'success' }} />);
+    const card = container.firstElementChild as HTMLElement;
+
+    expect(card.className).not.toMatch(/border-(success|primary|destructive|warning|info)/);
+    expect(container.querySelector('.inset-y-0')).toBeNull();
+  });
+  it('uses the color the person picked as the card background, soft at rest and full when selected', () => {
+    const { container, rerender } = render(
+      <AzuosStatCard data={{ label: 'Depositada', value: 4 }} ui={{ color: '#0ea5e9' }} actions={{ onClick: () => {} }} />,
+    );
+    const card = () => container.firstElementChild as HTMLElement;
+
+    expect(card().getAttribute('style')).toContain('color-mix');
+    expect(card().className).not.toMatch(/border-(primary|destructive|success|warning|info)/);
+
+    rerender(
+      <AzuosStatCard
+        data={{ label: 'Depositada', value: 4 }}
+        ui={{ color: '#0ea5e9' }}
+        state={{ isSelected: true }}
+        actions={{ onClick: () => {} }}
+      />,
+    );
+    expect(card().getAttribute('style')).not.toContain('color-mix');
+    expect(screen.getByText('Depositada').style.color).toBe('');
+  });
 });
