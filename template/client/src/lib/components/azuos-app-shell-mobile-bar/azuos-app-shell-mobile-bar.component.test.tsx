@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BarChart3, CalendarRange, ListChecks, Settings, Users, Wrench } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
@@ -112,5 +112,39 @@ describe('AzuosAppShellMobileBar', () => {
 
     const sheet = await screen.findByRole('dialog');
     expect(within(sheet).queryByRole('group', { name: 'Partes do sistema' })).not.toBeInTheDocument();
+  });
+
+  // feliz
+  /* Padrão do Android (Compose): a gaveta tem a "linguinha" e não tem o X de fechar. */
+  it('draws the sheet with the drag handle and without a close button', async () => {
+    renderBar({ state: { isMenuOpen: true } });
+
+    const sheet = await screen.findByRole('dialog');
+    expect(sheet.querySelector('[data-slot="sheet-drag-handle"]')).toBeInTheDocument();
+    expect(within(sheet).queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+  });
+
+  it('closes the sheet when the handle is dragged down', async () => {
+    renderBar({ state: { isMenuOpen: true } });
+
+    const sheet = await screen.findByRole('dialog');
+    const handle = sheet.querySelector('[data-slot="sheet-drag-handle"]')!;
+    fireEvent.pointerDown(handle, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientY: 260, pointerId: 1 });
+    fireEvent.pointerUp(handle, { clientY: 260, pointerId: 1 });
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  // triste
+  it('keeps the sheet open after a short drag', async () => {
+    renderBar({ state: { isMenuOpen: true } });
+
+    const sheet = await screen.findByRole('dialog');
+    const handle = sheet.querySelector('[data-slot="sheet-drag-handle"]')!;
+    fireEvent.pointerDown(handle, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerUp(handle, { clientY: 116, pointerId: 1 });
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

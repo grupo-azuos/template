@@ -487,10 +487,11 @@ function PageTransition({ pageKey, children }: { pageKey?: string; children: Rea
     { dependencies: [pageKey] },
   );
 
+  /* No celular não há a barra de cima do desktop: sem o `pt-1.5` a tela colava no topo. */
   return (
     <div
       ref={pageRef}
-      className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0"
+      className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pt-1.5 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0"
     >
       {children}
     </div>
