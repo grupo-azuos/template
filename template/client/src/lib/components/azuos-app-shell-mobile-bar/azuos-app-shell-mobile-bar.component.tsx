@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { LogOut, Menu } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
+import { type PointerEvent, type ReactNode, useRef, useState } from 'react';
 
 import { AzuosAppShellAvatar } from '../azuos-app-shell-avatar/azuos-app-shell-avatar.component';
 import { AzuosAppShellTargetLink } from '../azuos-app-shell-target-link/azuos-app-shell-target-link.component';
@@ -25,6 +25,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
  * no quarto lugar, o ☰. O ☰ abre o menu INTEIRO numa gaveta de baixo — as partes, todas as
  * telas, os atalhos, o AzuosZuzu, o perfil e o Sair. O ☰ fica aceso quando a tela aberta não
  * está entre os 3 da barra: a pessoa nunca perde a pista de onde está.
+ *
+ * A gaveta segue o bottom sheet do Android (Material 3 / Compose): cantos de 28px em cima, a
+ * "linguinha" de 32×4 no topo e arrastar para baixo fecha — sem o X, que o Android não tem.
  */
 export type AzuosAppShellMobileBarProps = {
   data: {
@@ -51,6 +54,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
   const barItems = data.items.slice(0, MOBILE_BAR_ITEMS);
   const isMenuActive = !barItems.some((item) => item.key === state?.activeKey);
   const close = () => setIsOpen(false);
+  const drag = useSheetDrag(close);
 
   return (
     <>
@@ -99,9 +103,12 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
           side="bottom"
-          className="bg-sidebar text-sidebar-foreground border-sidebar-border rounded-t-surface max-h-[85svh] gap-0 overflow-y-auto p-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
+          showCloseButton={false}
+          style={drag.style}
+          className="bg-sidebar text-sidebar-foreground max-h-[85svh] gap-0 overflow-y-auto rounded-t-[28px] border-0 p-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
         >
-          <SheetHeader className="flex-row items-center px-4 pt-4 pb-2">
+          <SheetDragHandle handlers={drag.handlers} />
+          <SheetHeader className="flex-row items-center px-4 pt-0 pb-2">
             <AzuosBrandMark ui={{ size: 'sm' }} />
             <SheetTitle className="sr-only">Menu</SheetTitle>
             <SheetDescription className="sr-only">
@@ -229,5 +236,65 @@ function BarIcon({ badge, children }: { badge?: number; children: ReactNode }) {
         </span>
       ) : null}
     </span>
+  );
+}
+
+/**
+ * Quanto arrastar (px) ou com que rapidez (px/ms) para baixo fecha a gaveta, como no Android. O
+ * puxão rápido só vale depois de um mínimo: um toque que treme não fecha nada.
+ */
+const DRAG_CLOSE_DISTANCE = 96;
+const DRAG_CLOSE_SPEED = 0.6;
+const DRAG_FLICK_MIN = 24;
+
+/**
+ * Arrastar a gaveta para baixo pela "linguinha": ela acompanha o dedo e, ao soltar, fecha se
+ * desceu o bastante (ou foi um puxão rápido); senão volta ao lugar. Sem biblioteca: só eventos
+ * de ponteiro, que valem para toque e mouse.
+ */
+function useSheetDrag(onClose: () => void) {
+  const [offset, setOffset] = useState(0);
+  const start = useRef<{ y: number; time: number } | null>(null);
+
+  const end = (event: PointerEvent<HTMLDivElement>) => {
+    if (!start.current) return;
+    const distance = event.clientY - start.current.y;
+    const speed = distance / Math.max(1, event.timeStamp - start.current.time);
+    start.current = null;
+    setOffset(0);
+    const isFlick = distance > DRAG_FLICK_MIN && speed > DRAG_CLOSE_SPEED;
+    if (distance > DRAG_CLOSE_DISTANCE || isFlick) onClose();
+  };
+
+  return {
+    style: offset > 0 ? { transform: `translateY(${offset}px)`, transition: 'none' } : undefined,
+    handlers: {
+      onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
+        start.current = { y: event.clientY, time: event.timeStamp };
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+      },
+      onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
+        if (start.current) setOffset(Math.max(0, event.clientY - start.current.y));
+      },
+      onPointerUp: end,
+      onPointerCancel: () => {
+        start.current = null;
+        setOffset(0);
+      },
+    },
+  };
+}
+
+/** A "linguinha" do bottom sheet do Android: a área de 36px é o alvo do dedo, a barra é 32×4. */
+function SheetDragHandle({ handlers }: { handlers: ReturnType<typeof useSheetDrag>['handlers'] }) {
+  return (
+    <div
+      data-slot="sheet-drag-handle"
+      aria-hidden="true"
+      className="flex h-9 shrink-0 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
+      {...handlers}
+    >
+      <span className="bg-sidebar-foreground/40 h-1 w-8 rounded-full" />
+    </div>
   );
 }
