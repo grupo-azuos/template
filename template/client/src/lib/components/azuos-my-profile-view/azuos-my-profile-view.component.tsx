@@ -95,7 +95,7 @@ export function AzuosMyProfileView({ data, state, actions, slots }: AzuosMyProfi
   }
 
   return (
-    <section aria-label="Meu perfil" className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-10">
+    <section aria-label="Meu perfil" className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-10 sm:px-6">
       <Banner data={{ person: data.person, accountUrl: data.accountUrl }} aside={slots?.bannerAside} />
       {state?.error ? (
         <ErrorNotice data={{ message: state.error }} actions={{ onRetry: actions.onRetry }} />
@@ -455,7 +455,7 @@ function ErrorNotice({
 /** O esqueleto com a forma da página: um "carregando…" solto fazia a tela pular. */
 function ProfileSkeleton() {
   return (
-    <div role="status" aria-busy="true" className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-10">
+    <div role="status" aria-busy="true" className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-10 sm:px-6">
       <span className="sr-only">Carregando seu perfil…</span>
       <div className="bg-card border-border rounded-surface overflow-hidden border shadow-xs">
         <div className="bg-muted h-20 animate-pulse" />
