@@ -43,6 +43,14 @@ describe('AzuosTextField', () => {
     expect(input).toHaveAttribute('aria-describedby', screen.getByRole('alert').id);
   });
 
+  it('marks the error with the light red background, never a red border', () => {
+    render(<AzuosTextField data={data} state={{ error: 'Campo obrigatório' }} />);
+
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveClass('bg-destructive-soft');
+    expect(input.className).not.toMatch(/border-destructive/);
+  });
+
   it('does not describe the input by an error that is not there', () => {
     render(<AzuosTextField data={data} />);
 

@@ -73,7 +73,7 @@ export function AzuosCalendarDropdown({
         aria-controls={listId}
         aria-label={`${name}: ${selected?.label ?? ''}`}
         onClick={() => setIsOpen((current) => !current)}
-        className="control-sm rounded-control border-input bg-card text-foreground hover:bg-accent/60 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60"
+        className="control-sm rounded-control border-input bg-card text-foreground hover:bg-accent/60 focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {selected?.label}
         <ChevronDown className="text-muted-foreground size-3.5" aria-hidden="true" />

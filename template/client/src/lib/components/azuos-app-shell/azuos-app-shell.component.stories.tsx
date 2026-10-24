@@ -6,28 +6,35 @@ import {
   RouterProvider,
 } from '@tanstack/react-router';
 import { type Meta, type StoryObj } from '@storybook/react';
-import { BarChart3, ListChecks, Settings } from 'lucide-react';
+import {
+  BarChart3,
+  CalendarRange,
+  FileCheck,
+  LayoutGrid,
+  LifeBuoy,
+  ListChecks,
+  SlidersHorizontal,
+  Users,
+} from 'lucide-react';
+import { fn } from 'storybook/test';
 
 import { AzuosAppShell } from './azuos-app-shell.component';
 
-/**
- * `AzuosAppShell` desenha `<Link>` do TanStack Router, que exige um `RouterProvider` por perto.
- * Aqui a rota raiz É a própria story: não há navegação real, só o contexto que o `Link`
- * precisa para não estourar fora do app.
- */
+/** `Link` exige um `RouterProvider` por perto: a rota raiz É a própria story. */
 function withRouter(Story: () => React.JSX.Element) {
   const router = createRouter({
     routeTree: createRootRoute({ component: Story }),
-    history: createMemoryHistory({ initialEntries: ['/'] }),
+    history: createMemoryHistory({ initialEntries: ['/tasks'] }),
   });
 
   return <RouterProvider router={router} />;
 }
 
-const manyItems = [
-  { key: 'tasks', label: 'Tarefas', to: '/tasks', icon: ListChecks },
-  { key: 'reports', label: 'Relatórios', to: '/reports', icon: BarChart3 },
-  { key: 'settings', label: 'Configurações', to: '/settings', icon: Settings },
+const items = [
+  { key: 'tasks', label: 'Tarefas', to: '/tasks', icon: ListChecks, area: 'operation' },
+  { key: 'schedule', label: 'Cronograma', to: '/schedule', icon: CalendarRange, area: 'operation' },
+  { key: 'reports', label: 'Relatórios', to: '/reports', icon: BarChart3, area: 'operation' },
+  { key: 'team', label: 'Equipe', to: '/team', icon: Users, area: 'operation' },
 ];
 
 const meta = {
@@ -35,49 +42,61 @@ const meta = {
   component: AzuosAppShell,
   decorators: [withRouter],
   parameters: { layout: 'fullscreen' },
+  args: {
+    children: <div className="text-ink-700 p-8 text-sm">Conteúdo da rota entra aqui.</div>,
+    data: {
+      user: { name: 'Ana Souza', role: 'Administradora' },
+      areas: [],
+      items,
+      actions: [
+        { key: 'support', label: 'Abrir chamado', icon: LifeBuoy, href: '/support', opensInNewTab: true },
+        { key: 'verify', label: 'Validar documento', icon: FileCheck, href: '/verify', opensInNewTab: true },
+      ],
+      profile: { to: '/profile' },
+      badges: { schedule: 3 },
+    },
+    state: { activeKey: 'tasks' },
+    actions: { onSelectArea: fn(), onSignOut: fn() },
+  },
 } satisfies Meta<typeof AzuosAppShell>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+/** Sem partes: uma coluna, ícone + rótulo. */
+export const OneColumn: Story = {};
+
+/** Recolhida: só ícones, com o nome na dica. */
+export const OneColumnCollapsed: Story = {
+  args: { state: { activeKey: 'tasks', isCollapsed: true } },
+};
+
+/** Com partes: o trilho de ícones com as partes e o painel com os itens rotulados. */
+export const TwoColumns: Story = {
   args: {
-    children: <div className="text-ink-700 p-8 text-sm">Conteúdo da rota entra aqui.</div>,
-    data: { user: { name: 'Ana Souza', email: 'ana@empresa.com.br', role: 'Administrador' } },
-    state: { activeKey: 'tasks' },
+    data: {
+      ...meta.args.data,
+      areas: [
+        { key: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
+        { key: 'operation', label: 'Operação', icon: ListChecks },
+        { key: 'management', label: 'Gestão', icon: SlidersHorizontal },
+      ],
+    },
+    state: { activeKey: 'tasks', activeArea: 'operation' },
   },
 };
 
-/** Vários itens, com contador. Os contadores vêm prontos por `data` — a casca não busca nada. */
-export const WithBadges: Story = {
-  args: {
-    ...Default.args,
-    ui: { items: manyItems },
-    data: { ...Default.args?.data, badges: { tasks: 3, reports: 12 } },
-  },
+/** Duas colunas recolhida: sobra o trilho, com os itens da parte em ícone. */
+export const TwoColumnsCollapsed: Story = {
+  args: { ...TwoColumns.args, state: { ...TwoColumns.args?.state, isCollapsed: true } },
 };
 
-/** Recolhida: os rótulos saem e sobra tela para o conteúdo. */
-export const Collapsed: Story = {
-  args: { ...WithBadges.args, state: { isCollapsed: true, activeKey: 'tasks' } },
+/** Celular: barra de baixo com 3 itens + ☰. */
+export const Mobile: Story = {
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
 };
 
-/** Sem identidade: o rodapé não quebra. */
-export const WithoutUser: Story = {
-  args: { children: Default.args?.children },
-};
-
-/** Caso limite: conteúdo mais alto que a tela não deve empurrar o menu para fora. */
-export const TallContent: Story = {
-  args: {
-    ...Default.args,
-    children: (
-      <div className="text-ink-700 space-y-4 p-8 text-sm">
-        {Array.from({ length: 30 }, (_, index) => (
-          <p key={index}>Linha de conteúdo {index + 1}, só para esticar a tela.</p>
-        ))}
-      </div>
-    ),
-  },
+export const SigningOut: Story = {
+  args: { state: { activeKey: 'tasks', isSigningOut: true } },
 };

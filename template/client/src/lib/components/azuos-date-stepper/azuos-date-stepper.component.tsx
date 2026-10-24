@@ -113,9 +113,9 @@ function yearsBetween(min: string | undefined, max: string | undefined, today: D
 function cellClassName(state: { isSelected: boolean; isToday?: boolean }, className: string) {
   return cn(
     'rounded-control text-foreground hover:bg-accent cursor-pointer border border-transparent text-sm transition-colors outline-none',
-    'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+    'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
     'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent',
-    state.isToday && 'border-primary/50 font-semibold',
+    state.isToday && 'bg-primary-soft text-primary font-semibold',
     state.isSelected && 'bg-primary text-primary-foreground hover:bg-primary font-semibold',
     className,
   );
@@ -278,7 +278,7 @@ function AnswerChip({
       type="button"
       onClick={actions.onClick}
       aria-label={`${data.label}: ${data.value}. Trocar`}
-      className="control-sm rounded-control border-border bg-muted/50 text-ink-700 hover:bg-accent focus-visible:border-ring focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-xs transition-colors outline-none focus-visible:ring-[3px]"
+      className="control-sm rounded-control border-border bg-muted/50 text-ink-700 hover:bg-accent focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-xs transition-colors outline-none focus-visible:ring-[3px]"
     >
       <span className="text-ink-500">{data.label}:</span>
       <span className="text-ink-900 font-semibold">{data.value}</span>

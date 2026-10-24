@@ -586,3 +586,55 @@ test('componentFolders: finds library and feature folders while ignoring CLI UI'
     `${SRC}/routes/tasks/components/${PREFIX}b`,
   ]);
 });
+
+// ---------------------------------------------------------------- regras do grupo (13 sistemas)
+
+test('colored-border: refuses a colored border, a side stripe and a selection ring', () => {
+  const files = project({
+    [`${SRC}/lib/components/azuos-x/azuos-x.component.tsx`]: [
+      "<div className='rounded-surface border border-destructive/40 bg-card' />",
+      "<div className='border-l-4 border-l-warning' />",
+      "<div className='ring-2 ring-primary' />",
+      "<input className='aria-invalid:border-destructive' />",
+    ].join('\n'),
+  });
+
+  const details = run('colored-border', files).map((violation) => violation.detail);
+  assert.ok(details.includes('border-destructive/40'));
+  assert.ok(details.includes('border-l-warning'));
+  assert.ok(details.includes('ring-primary'));
+  assert.ok(details.includes('aria-invalid:border-destructive'));
+});
+
+test('colored-border: lets the focus ring, neutral borders, spinners and comments through', () => {
+  const files = project({
+    [`${SRC}/lib/components/azuos-x/azuos-x.component.tsx`]: [
+      "<button className='border border-border focus-visible:ring-2 focus-visible:ring-ring/50' />",
+      "<div className='bg-destructive-soft text-ink-900' />",
+      "<span className='size-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />",
+      ' * antes era `border-l-4 border-l-warning`, agora não é mais',
+    ].join('\n'),
+  });
+
+  assert.deepEqual(run('colored-border', files), []);
+});
+
+test('native-select: refuses the HTML select and a calendar dropdown without our list', () => {
+  const files = project({
+    [`${SRC}/lib/components/azuos-x/azuos-x.component.tsx`]: '<select value={v}><option /></select>',
+    [`${SRC}/lib/components/azuos-y/azuos-y.component.tsx`]: '<Calendar captionLayout="dropdown" />',
+  });
+
+  assert.equal(run('native-select', files).length, 2);
+});
+
+test('native-select: lets the calendar with its own list and a comment about select through', () => {
+  const files = project({
+    [`${SRC}/lib/components/azuos-x/azuos-x.component.tsx`]: [
+      ' * A lista é a nossa, não o `<select>` nativo.',
+      '<Calendar captionLayout="dropdown" components={{ Dropdown: AzuosCalendarDropdown }} />',
+    ].join('\n'),
+  });
+
+  assert.deepEqual(run('native-select', files), []);
+});

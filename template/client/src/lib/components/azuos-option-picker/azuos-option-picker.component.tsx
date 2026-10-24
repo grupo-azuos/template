@@ -102,23 +102,23 @@ const optionPill = tv({
   },
   compoundVariants: [
     { isSelected: true, tone: 'neutral', class: 'border-foreground bg-foreground text-background' },
-    { isSelected: true, tone: 'info', class: 'border-info bg-info text-primary-foreground' },
+    { isSelected: true, tone: 'info', class: 'bg-info text-primary-foreground' },
     {
       isSelected: true,
       tone: 'success',
-      class: 'border-success bg-success text-primary-foreground',
+      class: 'bg-success text-primary-foreground',
     },
     {
       isSelected: true,
       tone: 'warning',
-      class: 'border-warning bg-warning text-primary-foreground',
+      class: 'bg-warning text-primary-foreground',
     },
     {
       isSelected: true,
       tone: 'danger',
-      class: 'border-destructive bg-destructive text-destructive-foreground',
+      class: 'bg-destructive text-destructive-foreground',
     },
-    { isSelected: true, tone: 'brand', class: 'border-primary bg-primary text-primary-foreground' },
+    { isSelected: true, tone: 'brand', class: 'bg-primary text-primary-foreground' },
   ],
   defaultVariants: { layout: 'filter', isSelected: false, tone: 'neutral' },
 });
@@ -357,7 +357,7 @@ function OptionSearch({
         className={cn(
           /* A busca do balão é um controle como os outros: degrau `sm` da régua. */
           'control-sm rounded-control',
-          'border-border/60 bg-muted/30 text-foreground focus:border-primary w-full border pr-2 pl-7 text-xs outline-none',
+          'border-border/60 bg-muted/30 text-foreground w-full border pr-2 pl-7 text-xs outline-none',
         )}
       />
     </div>

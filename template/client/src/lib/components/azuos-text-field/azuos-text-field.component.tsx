@@ -154,7 +154,7 @@ function inputClassName({
     'bg-card text-foreground w-full border text-sm transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
-    hasError ? 'border-destructive' : 'border-input',
+    hasError ? 'border-border bg-destructive-soft' : 'border-input',
   );
 }
 

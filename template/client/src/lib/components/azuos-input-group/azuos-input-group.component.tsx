@@ -51,7 +51,7 @@ export function AzuosInputGroup({
       {/* `px-0!`: o `control-lg` traz o respiro lateral de um campo sozinho; aqui quem dá o respiro
           é o prefixo, o sufixo e o próprio input de dentro. */}
       <InputGroup
-        className={cn('control-lg rounded-control bg-card px-0!', hasError && 'border-destructive')}
+        className={cn('control-lg rounded-control px-0!', hasError ? 'bg-destructive-soft' : 'bg-card')}
       >
         {prefix ? <InputGroupAddon>{prefix}</InputGroupAddon> : null}
 

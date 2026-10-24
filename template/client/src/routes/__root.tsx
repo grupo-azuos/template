@@ -14,10 +14,10 @@ export const Route = createRootRoute({
 });
 
 function RootRoute() {
-  const { data, state } = useAppShellModel();
+  const { data, state, actions } = useAppShellModel();
 
   return (
-    <AzuosAppShell data={data} state={state}>
+    <AzuosAppShell data={data} state={state} actions={actions}>
       <Outlet />
     </AzuosAppShell>
   );
