@@ -9,23 +9,16 @@ import { createPreferenceStore } from '../utils/preference-store.util';
  * Mora aqui e não em `lib/hooks/` de propósito: não é o estado de UMA tela, é uma preferência do
  * sistema inteiro — e é a mesma identidade visual que `lib/theme/tokens.css` descreve.
  *
- * Nada salvo ainda? Segue a preferência do SISTEMA OPERACIONAL, não um padrão fixo. Quem já
- * deixou o computador no escuro não quer abrir uma tela branca de manhã.
+ * Nada salvo ainda? Abre no tema CLARO, o padrão do grupo; o escuro é escolha de quem usa.
  */
 
 export type Theme = 'light' | 'dark';
 
 const STORAGE_KEY = 'azuos-theme';
 
-function systemPrefersDark(): boolean {
-  if (typeof window === 'undefined' || !window.matchMedia) return false;
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
 const store = createPreferenceStore<Theme>({
   key: STORAGE_KEY,
-  fallback: () => (systemPrefersDark() ? 'dark' : 'light'),
+  fallback: () => 'light',
   parse: (raw) => (raw === 'light' || raw === 'dark' ? raw : null),
   apply: (theme) => {
     if (typeof document === 'undefined') return;

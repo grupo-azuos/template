@@ -137,7 +137,7 @@ export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps
       {/* A régua de medidas (`lib/theme/tokens.css`), como no `AzuosInputGroup`: `px-0!` porque
           quem dá o respiro lateral aqui é o input de dentro e o botão do calendário. */}
       <InputGroup
-        className={cn('control-lg rounded-control bg-card px-0!', hasError && 'border-destructive')}
+        className={cn('control-lg rounded-control px-0!', hasError ? 'bg-destructive-soft' : 'bg-card')}
       >
         <InputGroupInput
           id={inputId}

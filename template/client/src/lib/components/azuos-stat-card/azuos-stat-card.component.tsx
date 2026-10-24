@@ -9,7 +9,7 @@ import { Skeleton } from '../ui/skeleton';
  *
  * Quando o cartão tem um tom (danger, info, success, brand, warning), ele ganha o fundo SÓLIDO da
  * cor correspondente, sem borda (o token `-soft` do tom). Sem tom escolhido (neutral), fica neutro
- * com a borda padrão.
+ * com a borda padrão. Borda ou faixa colorida, nunca: é regra do grupo, igual nos 13 sistemas.
  *
  * O `-soft` é sólido de propósito: com opacidade, o cartão mudava de cor conforme o que estivesse
  * atrás dele, e o mesmo indicador ficava de dois tons em duas telas.
@@ -31,6 +31,8 @@ export type AzuosStatCardProps = {
     size?: 'md' | 'lg';
     className?: string;
     icon?: LucideIcon;
+    /** Uma cor que a PESSOA escolheu (`#rrggbb`) para o rótulo e o quadrado do ícone — vence o tom. */
+    color?: string | null;
   };
   state?: {
     isLoading?: boolean;
@@ -51,6 +53,26 @@ const TONE_CARD: Record<AzuosStatCardTone, string> = {
   info: 'bg-info-soft text-foreground',
 };
 
+/** Selecionado: o fundo na cor CHEIA do tom, e todo o texto claro por cima — nunca um contorno. */
+const TONE_SELECTED: Record<AzuosStatCardTone, string> = {
+  brand: 'bg-primary',
+  neutral: 'bg-ink-700',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-destructive',
+  info: 'bg-info',
+};
+
+/** A pastilha no tom (prazo, situação): fundo suave e texto na cor do tom. */
+export const STAT_TONE_BADGE: Record<AzuosStatCardTone, string> = {
+  brand: 'bg-primary-soft text-primary',
+  neutral: 'bg-muted text-ink-700',
+  success: 'bg-success-soft text-success',
+  warning: 'bg-warning-soft text-warning',
+  danger: 'bg-destructive-soft text-destructive',
+  info: 'bg-info-soft text-info',
+};
+
 const TONE_LABEL: Record<AzuosStatCardTone, string> = {
   brand: 'text-primary',
   neutral: 'text-ink-500',
@@ -63,7 +85,7 @@ const TONE_LABEL: Record<AzuosStatCardTone, string> = {
 /** Cor SÓLIDA do quadrado do ícone — nunca o mesmo `-soft` do fundo, senão o ícone some nele. */
 const TONE_ICON: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-ink-700 text-primary-foreground',
+  neutral: 'bg-foreground text-background',
   success: 'bg-success text-primary-foreground',
   warning: 'bg-warning text-primary-foreground',
   danger: 'bg-destructive text-destructive-foreground',
@@ -75,36 +97,64 @@ const TONE_ICON: Record<AzuosStatCardTone, string> = {
  * (`lib/theme/tokens.css`) — com raio de controle ele encostava visualmente nos botões em volta e
  * parecia um botão grande.
  *
- * Clicável: sobe um pouco no hover, para avisar que responde ao clique. Selecionado: um anel em
- * volta — o fundo já é a cor do tom, então quem marca o estado é o contorno.
+ * Clicável: sobe um pouco no hover, para avisar que responde ao clique. Selecionado: o fundo na
+ * cor cheia do tom (o tom é escolhido aqui, um OU outro, para nunca haver dois fundos brigando).
  */
 const statCard = tv({
   base: 'rounded-surface py-4 pr-4 pl-5 shadow-xs transition-all',
   variants: {
-    tone: TONE_CARD,
     isClickable: {
       true: 'relative cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
       false: '',
     },
-    isSelected: { true: 'ring-ring ring-offset-background ring-2 ring-offset-2', false: '' },
+    isSelected: { true: 'text-primary-foreground **:text-primary-foreground', false: '' },
   },
-  defaultVariants: { tone: 'neutral', isClickable: false, isSelected: false },
+  defaultVariants: { isClickable: false, isSelected: false },
 });
+
+/** O fundo: o suave do tom, ou a cor cheia quando selecionado — um OU outro, nunca os dois. */
+function surfaceOf(tone: AzuosStatCardTone, isSelected: boolean | undefined): string {
+  return isSelected ? TONE_SELECTED[tone] : TONE_CARD[tone];
+}
+
+/** A casca do cartão: a régua comum, o fundo (tom ou cor escolhida) e o que a tela acrescenta. */
+function rootPropsOf(input: {
+  tone: AzuosStatCardTone;
+  isClickable: boolean;
+  isSelected: boolean;
+  ui: AzuosStatCardProps['ui'];
+}) {
+  const color = input.ui?.color;
+
+  return {
+    className: cn(
+      statCard({ isClickable: input.isClickable, isSelected: input.isSelected }),
+      color ? '' : surfaceOf(input.tone, input.isSelected),
+      input.ui?.className,
+    ),
+    style: customSurfaceOf(color, input.isSelected),
+  };
+}
+
+/**
+ * Com uma cor que a PESSOA escolheu, o fundo é ela — a mesma regra dos tons: suave parado (misturada
+ * com o fundo do card, legível nos dois temas), cheia quando selecionado. Nunca borda.
+ */
+function customSurfaceOf(color: string | null | undefined, isSelected: boolean | undefined) {
+  if (!color) return undefined;
+
+  return { backgroundColor: isSelected ? color : `color-mix(in srgb, ${color} 18%, var(--card))` };
+}
 
 export function AzuosStatCard({ data, ui, state, actions }: AzuosStatCardProps) {
   const tone = ui?.tone ?? 'neutral';
   const isClickable = Boolean(actions?.onClick);
 
   return (
-    <div
-      className={cn(
-        statCard({ tone, isClickable, isSelected: Boolean(state?.isSelected) }),
-        ui?.className,
-      )}
-    >
+    <div {...rootPropsOf({ tone, isClickable, ui, isSelected: Boolean(state?.isSelected) })}>
       {isClickable ? <StatCardClickTarget data={data} state={state} actions={actions} /> : null}
 
-      <StatCardLabel data={data} tone={tone} icon={ui?.icon} />
+      <StatCardLabel data={data} tone={tone} ui={ui} isSelected={Boolean(state?.isSelected)} />
 
       {state?.isLoading ? (
         <Skeleton className="mt-1 h-8 w-20" />
@@ -168,14 +218,25 @@ function StatCardClickTarget({
 function StatCardLabel({
   data,
   tone,
-  icon: Icon,
+  ui,
+  isSelected,
 }: {
   data: AzuosStatCardProps['data'];
   tone: AzuosStatCardTone;
-  icon?: LucideIcon;
+  ui: AzuosStatCardProps['ui'];
+  isSelected: boolean;
 }) {
+  const Icon = ui?.icon;
+  /* Selecionado, o fundo JÁ é a cor: o rótulo fica claro, como o resto do texto do card. */
+  const color = isSelected ? null : ui?.color;
   const label = (
-    <p className={cn('text-xs font-semibold tracking-wider uppercase', TONE_LABEL[tone])}>
+    <p
+      className={cn(
+        'text-xs font-semibold tracking-wider uppercase',
+        color ? '' : TONE_LABEL[tone],
+      )}
+      style={color ? { color } : undefined}
+    >
       {data.label}
     </p>
   );
@@ -187,8 +248,9 @@ function StatCardLabel({
       <span
         className={cn(
           'rounded-chip flex size-8 shrink-0 items-center justify-center',
-          TONE_ICON[tone],
+          color ? 'text-white' : TONE_ICON[tone],
         )}
+        style={color ? { backgroundColor: color } : undefined}
       >
         <Icon size={15} aria-hidden="true" />
       </span>

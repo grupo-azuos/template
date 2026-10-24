@@ -94,9 +94,9 @@ function triggerClassName(state: { hasError: boolean; hasValue: boolean }): stri
        outros filtros e tem de ter a altura e o canto deles. */
     'control-lg rounded-control',
     'bg-card hover:bg-accent/40 flex w-full cursor-pointer items-center gap-2.5 border text-left text-sm transition-colors outline-none',
-    'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+    'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
     'disabled:cursor-not-allowed disabled:opacity-60',
-    state.hasError ? 'border-destructive' : 'border-input',
+    state.hasError ? 'border-border bg-destructive-soft' : 'border-input',
     state.hasValue ? 'text-foreground' : 'text-muted-foreground',
   );
 }
@@ -312,7 +312,7 @@ function EdgeInput({
         /* Ao sair, o campo volta a mostrar a data que está valendo: texto pela metade some, em
            vez de ficar parecendo uma data aceita. */
         onBlur={() => setDraft(null)}
-        className="control-lg rounded-control bg-card text-foreground border-input placeholder:text-ink-500 focus-visible:border-ring focus-visible:ring-ring/50 w-full min-w-0 border text-sm outline-none focus-visible:ring-[3px]"
+        className="control-lg rounded-control bg-card text-foreground border-input placeholder:text-ink-500 focus-visible:ring-ring/50 w-full min-w-0 border text-sm outline-none focus-visible:ring-[3px]"
       />
     </div>
   );

@@ -40,7 +40,7 @@ export class AzuosAppErrorBoundary extends Component<
       <div className="bg-ink-100 flex min-h-screen items-center justify-center p-6">
         <div
           role="alert"
-          className="border-destructive/40 bg-card rounded-surface w-full max-w-lg border p-6 shadow-xl"
+          className="bg-destructive-soft rounded-surface w-full max-w-lg p-6 shadow-xl"
         >
           <h1 className="text-destructive text-lg font-bold">A tela não carregou</h1>
           <p className="text-ink-700 mt-2 text-sm">
