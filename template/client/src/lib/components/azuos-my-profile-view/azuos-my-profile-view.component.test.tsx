@@ -127,4 +127,12 @@ describe('AzuosMyProfileView', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
     expect(props.actions.onRetry).toHaveBeenCalledOnce();
   });
+
+  // triste
+  /* No celular a ficha colava nas bordas da tela: a margem lateral é do próprio componente. */
+  it('keeps a side margin so the card does not touch the screen edges on mobile', () => {
+    renderView();
+
+    expect(screen.getByRole('region', { name: 'Meu perfil' })).toHaveClass('px-4', 'sm:px-6');
+  });
 });
