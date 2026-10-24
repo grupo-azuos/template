@@ -23,8 +23,8 @@ export type AzuosTimelineStepProps = {
 
 const ICON_TONE_CLASSES = {
   neutral: 'border-border bg-card text-foreground',
-  brand: 'border-primary/30 bg-primary/10 text-primary',
-  success: 'border-success/30 bg-success/10 text-success',
+  brand: 'bg-primary/10 text-primary',
+  success: 'bg-success/10 text-success',
 } as const;
 
 export function AzuosTimelineStep({ data, ui, children }: AzuosTimelineStepProps) {

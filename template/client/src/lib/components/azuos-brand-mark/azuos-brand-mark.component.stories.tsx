@@ -24,6 +24,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
+export const Compact: Story = {
+  args: { ui: { size: 'sm', variant: 'icon' } },
+};
+
 export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-4">

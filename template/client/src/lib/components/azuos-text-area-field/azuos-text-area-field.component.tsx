@@ -98,7 +98,7 @@ function textAreaClassName(hasError: boolean): string {
     'rounded-control',
     'bg-card text-foreground w-full resize-y border px-3 py-2.5 text-sm transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
-    hasError ? 'border-destructive' : 'border-input',
+    hasError ? 'border-border bg-destructive-soft' : 'border-input',
   );
 }
 

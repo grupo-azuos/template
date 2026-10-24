@@ -13,6 +13,14 @@ describe('AzuosBrandMark', () => {
     expect(screen.getByRole('img', { name: 'Grupo Azuos' })).toBeInTheDocument();
   });
 
+  it('uses the official symbol when the sidebar is collapsed', () => {
+    render(<AzuosBrandMark ui={{ variant: 'icon', size: 'sm' }} />);
+
+    const brand = screen.getByRole('img', { name: 'Grupo Azuos' });
+    expect(brand.getAttribute('src')).toMatch(/azuos-icon|^data:image\/svg/);
+    expect(brand).toHaveAttribute('width', '28');
+  });
+
   it('uses the official file, not a hand-drawn copy', () => {
     render(<AzuosBrandMark />);
 
