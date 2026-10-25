@@ -1,17 +1,15 @@
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
-
 import { cn } from '../../utils/cn.util';
+import { type ChartOption, type ChartTheme, resolveColor } from '../../utils/echarts.util';
 import {
   dayLabel,
   hourLabel,
   toTimeRows,
   type TimePoint,
+  type TimeRow,
   type TimeSeriesDef,
 } from '../../utils/time-series.util';
-import { AzuosChartFrame, configOfSeries } from '../azuos-chart-frame/azuos-chart-frame.component';
 import { AzuosChartLegend } from '../azuos-chart-legend/azuos-chart-legend.component';
-import { AzuosChartTooltip } from '../azuos-chart-tooltip/azuos-chart-tooltip.component';
-import { ChartTooltip } from '../ui/chart';
+import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
  * ÁREA — o volume de alguma coisa ao longo do tempo.
@@ -52,64 +50,72 @@ export type AzuosAreaChartProps = {
 function percentScale(isPercent: boolean | undefined) {
   if (!isPercent) return {};
 
-  return { domain: [0, 105], ticks: [0, 25, 50, 75, 100] };
+  return { min: 0, max: 105, interval: 25 };
 }
 
 export function AzuosAreaChart({ data, state, ui }: AzuosAreaChartProps) {
   const rows = toTimeRows(data.points, data.series);
-  const config = configOfSeries(data.series);
-  const formatTick = ui?.tick === 'hour' ? hourLabel : dayLabel;
-  const isStacked = ui?.layout === 'stack';
 
   return (
     <div className={cn('flex flex-col gap-2', ui?.className)}>
       <AzuosChartLegend data={{ series: data.series }} />
 
-      <AzuosChartFrame
-        data={{ config }}
+      <AzuosEchart
+        data={{
+          option: (theme) => areaOption(rows, data.series, ui, theme),
+          description: data.series.map((series) => series.label).join(', '),
+        }}
         ui={{ heightClass: ui?.heightClass, emptyLabel: ui?.emptyLabel }}
         state={{ isLoading: state?.isLoading, isEmpty: rows.length === 0 }}
-      >
-        <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="at"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            minTickGap={24}
-            tickFormatter={(value: Date | string) => formatTick(value)}
-          />
-          <YAxis width={34} tickLine={false} axisLine={false} {...percentScale(ui?.isPercent)} />
-          <ChartTooltip
-            content={
-              <AzuosChartTooltip
-                labelFormatter={(_, payload) => {
-                  const at = (payload?.[0]?.payload as { at?: Date } | undefined)?.at;
-
-                  return at ? formatTick(at) : '';
-                }}
-              />
-            }
-          />
-
-          {data.series.map((series) => (
-            <Area
-              key={series.key}
-              dataKey={series.key}
-              type="monotone"
-              stackId={isStacked ? 'total' : undefined}
-              stroke={'var(--color-' + series.key + ')'}
-              fill={'var(--color-' + series.key + ')'}
-              /* Sobrepostas, as áreas têm de deixar ver a de baixo; empilhadas, não há o que ver
-                 atrás e a cor cheia lê melhor. */
-              fillOpacity={isStacked ? 0.85 : 0.2}
-              strokeWidth={2}
-              dot={false}
-            />
-          ))}
-        </AreaChart>
-      </AzuosChartFrame>
+      />
     </div>
   );
+}
+
+/**
+ * As áreas: grade só na horizontal, eixo do tempo com a régua curta (hora ou dia) e cada série na
+ * sua cor. Sobrepostas, as áreas deixam ver a de baixo; empilhadas, a cor cheia lê melhor.
+ */
+export function areaOption(
+  rows: readonly TimeRow[],
+  series: readonly TimeSeriesDef[],
+  ui: AzuosAreaChartProps['ui'],
+  theme: Pick<ChartTheme, 'border' | 'muted'>,
+): ChartOption {
+  const formatTick = ui?.tick === 'hour' ? hourLabel : dayLabel;
+  const isStacked = ui?.layout === 'stack';
+
+  return {
+    grid: { top: 8, right: 8, bottom: 0, left: 0, containLabel: true },
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: rows.map((row) => formatTick(row.at)),
+      axisTick: { show: false },
+      axisLine: { show: false },
+      axisLabel: { color: theme.muted, hideOverlap: true },
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: theme.muted },
+      splitLine: { lineStyle: { color: theme.border, opacity: 0.5 } },
+      ...percentScale(ui?.isPercent),
+    },
+    series: series.map((item) => {
+      const color = resolveColor(item.color);
+
+      return {
+        type: 'line' as const,
+        name: item.label,
+        smooth: true,
+        symbol: 'none',
+        stack: isStacked ? 'total' : undefined,
+        lineStyle: { color, width: 2 },
+        itemStyle: { color },
+        areaStyle: { color, opacity: isStacked ? 0.85 : 0.2 },
+        data: rows.map((row) => Number(row[item.key] ?? 0)),
+      };
+    }),
+  };
 }

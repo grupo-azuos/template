@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AzuosColumnChart } from './azuos-column-chart.component';
+import { AzuosColumnChart, barOption, columnOption } from './azuos-column-chart.component';
 
 const SLICES = [
   { label: 'Mariana Ribeiro', value: 8 },
@@ -19,28 +19,37 @@ describe('AzuosColumnChart', () => {
     expect(container.querySelector('[data-slot="chart"]')).toBeInTheDocument();
   });
 
-  /* O eixo escreve o nome de cada categoria: num gráfico de uma série só, a cor não identifica nada
-     — quem identifica é o rótulo embaixo da coluna. */
-  it('writes the category names on the axis', () => {
+  /* Cada categoria com o valor ESCRITO, para o leitor de tela: num gráfico de uma série só, a cor não
+     identifica nada — e um desenho não se lê em voz alta. */
+  it('gives every category and value to a screen reader', () => {
     render(<AzuosColumnChart data={{ slices: SLICES, seriesLabel: 'Tarefas' }} />);
 
-    expect(screen.getByText('Caio Prado')).toBeInTheDocument();
+    expect(screen.getByText('Caio Prado: 5')).toBeInTheDocument();
   });
 
-  /* Nome longo é CORTADO no eixo (o nome inteiro continua no balão): sem o corte, três nomes
-     compridos girados se encavalam e nenhum fica legível. */
+  /* Nome longo é CORTADO no eixo (o nome inteiro continua no balão): sem o corte, nomes compridos
+     girados se encavalam e nenhum fica legível. */
   it('shortens a long name on the axis', () => {
-    render(
-      <AzuosColumnChart
-        data={{
-          slices: [{ label: 'Departamento Jurídico e Contratos', value: 4 }],
-          seriesLabel: 'Tarefas',
-        }}
-      />,
-    );
+    const option = columnOption([{ label: 'Departamento Jurídico e Contratos', value: 4 }], 'Tarefas');
+    const axis = option.xAxis as { axisLabel: { formatter: (label: string) => string } };
 
-    expect(screen.queryByText('Departamento Jurídico e Contratos')).not.toBeInTheDocument();
-    expect(screen.getByText(/Departamento/)).toBeInTheDocument();
+    expect(axis.axisLabel.formatter('Departamento Jurídico e Contratos')).toBe('Departamento Jurídi…');
+  });
+
+  /* Série no tempo: uma cor só, porque cada coluna é a mesma medida. */
+  it('paints every column with one colour when asked', () => {
+    const option = columnOption(SLICES, 'Tarefas', '#123456');
+    const series = (option.series as { data: { itemStyle: { color: string } }[] }[])[0]!;
+
+    expect(new Set(series.data.map((item) => item.itemStyle.color))).toEqual(new Set(['#123456']));
+  });
+
+  /* Deitada, o maior fica EM CIMA: é a ordem em que se lê um ranking. */
+  it('puts the biggest bar on top when lying down', () => {
+    const option = barOption(SLICES, 'Tarefas');
+
+    expect((option.yAxis as { inverse: boolean }).inverse).toBe(true);
+    expect((option.yAxis as { data: string[] }).data[0]).toBe('Mariana Ribeiro');
   });
 
   // triste

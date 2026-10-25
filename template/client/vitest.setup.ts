@@ -34,10 +34,10 @@ if (!Element.prototype.scrollIntoView) {
  * acompanhar a altura da lista enquanto o filtro muda — sem o stub, abrir o campo estoura com
  * "ResizeObserver is not defined" antes de qualquer item aparecer.
  *
- * O STUB PRECISA RESPONDER UM TAMANHO, e não só existir calado. O `ResponsiveContainer` do
- * Recharts (dentro do `AzuosChartFrame`) desenha o gráfico com a medida que o observador
- * devolve: com zero, ele conclui que não cabe nada e não pinta eixo, barra nem rótulo — e os
- * testes dos gráficos param de achar os nomes das categorias.
+ * O STUB PRECISA RESPONDER UM TAMANHO, e não só existir calado. A moldura dos gráficos
+ * (`AzuosEchart`) redesenha o ECharts com a medida que o observador
+ * devolve, e medida zero é ignorada (é o quadro escondido) — sem um tamanho de verdade, o
+ * caminho do redimensionamento nunca roda nos testes.
  *
  * A medida abaixo é fixa de propósito. No jsdom não existe layout de verdade para medir, e
  * nenhum teste depende do tamanho em si; o que eles precisam é de uma área grande o bastante

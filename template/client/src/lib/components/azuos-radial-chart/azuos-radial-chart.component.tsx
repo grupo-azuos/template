@@ -1,7 +1,6 @@
-import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts';
-
 import { cn } from '../../utils/cn.util';
-import { AzuosChartFrame } from '../azuos-chart-frame/azuos-chart-frame.component';
+import { type ChartOption, type ChartTheme, resolveColor } from '../../utils/echarts.util';
+import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
  * MEDIDOR RADIAL — um número só, contra o quanto ele poderia ser.
@@ -37,8 +36,6 @@ export type AzuosRadialChartProps = {
   };
 };
 
-const VALUE_KEY = 'value';
-
 /**
  * A fração preenchida, entre 0 e 1.
  *
@@ -52,37 +49,19 @@ export function fractionOf(value: number, max: number): number {
 }
 
 export function AzuosRadialChart({ data, state, ui }: AzuosRadialChartProps) {
-  const max = data.max ?? 100;
-  const color = ui?.color ?? 'var(--chart-1)';
-  const percent = fractionOf(data.value, max) * 100;
-  const heightClass = ui?.heightClass ?? 'h-40';
+  const { color, heightClass } = radialLookOf(ui);
+  const percent = fractionOf(data.value, data.max ?? 100) * 100;
 
   return (
     <div className={cn('relative', heightClass, ui?.className)}>
-      <AzuosChartFrame
-        data={{ config: { [VALUE_KEY]: { label: data.label, color } } }}
+      <AzuosEchart
+        data={{
+          option: (theme) => radialOption(percent, color, theme),
+          description: `${data.label}: ${data.display ?? data.value}`,
+        }}
         ui={{ heightClass }}
         state={{ isLoading: state?.isLoading }}
-      >
-        <RadialBarChart
-          data={[{ [VALUE_KEY]: percent }]}
-          startAngle={90}
-          endAngle={-270}
-          innerRadius="72%"
-          outerRadius="100%"
-        >
-          {/* `PolarAngleAxis` com domínio fixo é o que dá ESCALA ao arco: sem ele o Recharts estica a
-              única barra até a volta completa, e 20% desenha igual a 80%. */}
-          <PolarAngleAxis type="number" domain={[0, 100]} tick={false} axisLine={false} />
-          <RadialBar
-            dataKey={VALUE_KEY}
-            cornerRadius={999}
-            fill={color}
-            /* A trilha de trás: é ela que faz o arco ser lido como "quanto de quanto". */
-            background
-          />
-        </RadialBarChart>
-      </AzuosChartFrame>
+      />
 
       {state?.isLoading ? null : <RadialCenter data={data} />}
     </div>
@@ -96,11 +75,50 @@ export function AzuosRadialChart({ data, state, ui }: AzuosRadialChartProps) {
 function RadialCenter({ data }: { data: AzuosRadialChartProps['data'] }) {
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-      <span className="text-foreground text-2xl leading-tight font-bold tabular-nums">
+      {/* Menor no celular: três medidores lado a lado numa tela de 360px não comportam o número
+          grande sem ele encostar no arco. */}
+      <span className="text-foreground text-lg leading-tight font-bold tabular-nums sm:text-2xl">
         {data.display ?? data.value.toLocaleString('pt-BR')}
       </span>
-      <span className="text-muted-foreground text-xs tracking-wide uppercase">{data.label}</span>
-      {data.hint ? <span className="text-muted-foreground mt-0.5 text-xs">{data.hint}</span> : null}
+      <span className="text-muted-foreground max-w-[70%] truncate text-xs tracking-wide uppercase">
+        {data.label}
+      </span>
+      {data.hint ? (
+        <span className="text-muted-foreground mt-0.5 max-w-[70%] truncate text-xs">{data.hint}</span>
+      ) : null}
     </div>
   );
+}
+
+function radialLookOf(ui: AzuosRadialChartProps['ui']) {
+  return { color: ui?.color ?? 'var(--chart-1)', heightClass: ui?.heightClass ?? 'h-40' };
+}
+
+/**
+ * O arco: começa no topo e anda no sentido do relógio, com a TRILHA de trás na cor apagada do tema —
+ * é ela que faz o arco ser lido como "quanto de quanto". A escala é fixa em 0–100: sem isso, 20%
+ * desenharia igual a 80%.
+ */
+export function radialOption(percent: number, color: string, theme: Pick<ChartTheme, 'track'>): ChartOption {
+  return {
+    series: [
+      {
+        type: 'gauge',
+        startAngle: 90,
+        endAngle: -270,
+        min: 0,
+        max: 100,
+        radius: '100%',
+        pointer: { show: false },
+        progress: { show: true, roundCap: true, width: 12, itemStyle: { color: resolveColor(color) } },
+        axisLine: { roundCap: true, lineStyle: { width: 12, color: [[1, theme.track]] } },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        axisLabel: { show: false },
+        detail: { show: false },
+        title: { show: false },
+        data: [{ value: percent }],
+      },
+    ],
+  };
 }
