@@ -75,49 +75,76 @@ export function AzuosDonutChart({ data, state, ui, actions }: AzuosDonutChartPro
           própria altura de conteúdo — e com 13 status o `overflow-y-auto` nunca entra em
           ação, e a lista extravasa o cartão por baixo. */}
       <ul className="min-h-0 min-w-0 flex-1 space-y-2.5 self-stretch overflow-y-auto pr-1">
-        {data.slices.map((slice, index) => {
-          const color = colorOfSlice(slice.label, index);
-          const percent = shareOf(slice.value, total);
-
-          return (
-            <li key={slice.label}>
-              <button
-                type="button"
-                onClick={() => actions?.onSelect?.(slice.label)}
-                className={cn(
-                  'rounded-chip flex w-full items-center gap-2 px-1 py-0.5 text-left text-xs',
-                  actions?.onSelect ? 'hover:bg-muted' : undefined,
-                )}
-              >
-                <span
-                  className="size-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: color }}
-                  aria-hidden="true"
-                />
-                <span className="text-muted-foreground w-20 shrink-0 truncate" title={slice.label}>
-                  {slice.label}
-                </span>
-                {/* Barrinha de progresso — não é `AzuosProgressBar` (esse componente é pra "quanto
-                    já foi cumprido de uma obrigação", com tom por faixa de conclusão:
-                    vermelho/amarelo/verde, independente de QUEM é o status). Aqui a cor tem
-                    que ser a mesma do ponto e da fatia — a identidade da categoria, não uma
-                    leitura de "isso está bom ou ruim". */}
-                <span className="bg-muted h-1.5 min-w-8 flex-1 overflow-hidden rounded-full">
-                  <span
-                    className="block h-full rounded-full"
-                    style={{ width: `${percent}%`, backgroundColor: color }}
-                  />
-                </span>
-                <span className="text-foreground shrink-0 font-semibold">
-                  {formatCount(slice.value)}
-                </span>
-                <span className="text-muted-foreground w-9 shrink-0 text-right">{percent}%</span>
-              </button>
-            </li>
-          );
-        })}
+        {data.slices.map((slice, index) => (
+          <li key={slice.label}>
+            <LegendItem
+              data={{
+                slice,
+                color: colorOfSlice(slice.label, index),
+                percent: shareOf(slice.value, total),
+              }}
+              actions={{ onSelect: actions?.onSelect }}
+            />
+          </li>
+        ))}
       </ul>
     </div>
+  );
+}
+
+/**
+ * Uma linha da legenda. Botão só quando o clique abre alguma coisa: sem `onSelect` ela é texto — um
+ * botão que não faz nada atrapalha quem navega por teclado e confunde o leitor de tela.
+ */
+function LegendItem({
+  data,
+  actions,
+}: {
+  data: { slice: ChartSlice; color: string; percent: number };
+  actions: { onSelect?: (label: string) => void };
+}) {
+  const row = <LegendRow data={data} />;
+  const className = 'rounded-chip flex w-full items-center gap-2 px-1 py-0.5 text-left text-xs';
+  const onSelect = actions.onSelect;
+
+  if (!onSelect) return <div className={className}>{row}</div>;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(data.slice.label)}
+      className={cn(className, 'hover:bg-muted')}
+    >
+      {row}
+    </button>
+  );
+}
+
+function LegendRow({ data }: { data: { slice: ChartSlice; color: string; percent: number } }) {
+  return (
+    <>
+      <span
+        className="size-2 shrink-0 rounded-full"
+        style={{ backgroundColor: data.color }}
+        aria-hidden="true"
+      />
+      <span className="text-muted-foreground w-20 shrink-0 truncate" title={data.slice.label}>
+        {data.slice.label}
+      </span>
+      {/* Barrinha de progresso — não é `AzuosProgressBar` (esse componente é pra "quanto já foi
+          cumprido de uma obrigação", com tom por faixa de conclusão). Aqui a cor tem que ser a
+          mesma do ponto e da fatia — a identidade da categoria, não "isso está bom ou ruim". */}
+      <span className="bg-muted h-1.5 min-w-8 flex-1 overflow-hidden rounded-full">
+        <span
+          className="block h-full rounded-full"
+          style={{ width: `${data.percent}%`, backgroundColor: data.color }}
+        />
+      </span>
+      <span className="text-foreground shrink-0 font-semibold">
+        {formatCount(data.slice.value)}
+      </span>
+      <span className="text-muted-foreground w-9 shrink-0 text-right">{data.percent}%</span>
+    </>
   );
 }
 
