@@ -19,7 +19,7 @@ Antes de criar, procure em `client/src/lib/components/`. O sistema de design já
 | Número | `AzuosStatCard` + `AzuosStatCardGrid` · `AzuosProgressBar` · `AzuosUsageMeter` |
 | Selo e pessoa | `AzuosStatusBadge` · `AzuosPersonAvatar` · `AzuosBrandMark` |
 | Superfície | `AzuosPanelCard` · `AzuosTable` (+ `Header`/`Head`/`Row`/`Cell`/`Footer`/`Actions`) · `AzuosCollapsible` |
-| Gráfico | `AzuosChartFrame` (a moldura de todos) · `AzuosChartTooltip` · `AzuosChartLegend` · `AzuosColumnChart` · `AzuosDonutChart` · `AzuosAreaChart` · `AzuosRadarChart` · `AzuosRadialChart` |
+| Gráfico (ECharts) | `AzuosEchart` (a moldura de todos: carregando, vazio, tema, tamanho, rolagem) · `AzuosChartLegend` · `AzuosChartValueList` (valores para leitor de tela) · `AzuosColumnChart` (em pé ou deitada) · `AzuosStackedBarChart` · `AzuosDonutChart` · `AzuosAreaChart` · `AzuosRadarChart` · `AzuosRadialChart` · `AzuosTreemapChart` · `AzuosHeatmapChart` · `AzuosCalendarChart` · `AzuosSankeyChart` |
 | Navegação | `AzuosAppShell` (+ `NavEntry`) · `AzuosNavigationMenu` · `AzuosBreadcrumb` · `AzuosPaginationBar` · `AzuosTableViewToggle` |
 | Diálogo | `AzuosResponsiveDialogContent` (troque o `DialogContent` por ele) · `AzuosConfirmDialog` |
 | Estado | `AzuosEmptyState` · `AzuosErrorState` · `AzuosPendingArea` · `AzuosAppErrorBoundary` |

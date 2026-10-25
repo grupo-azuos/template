@@ -1,9 +1,7 @@
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
-
 import { type ChartSlice } from '../../utils/chart-slice.util';
-import { AzuosChartFrame } from '../azuos-chart-frame/azuos-chart-frame.component';
-import { AzuosChartTooltip } from '../azuos-chart-tooltip/azuos-chart-tooltip.component';
-import { ChartTooltip } from '../ui/chart';
+import { type ChartOption, type ChartTheme, formatCount, resolveColor } from '../../utils/echarts.util';
+import { AzuosChartValueList } from '../azuos-chart-value-list/azuos-chart-value-list.component';
+import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
  * RADAR — o PERFIL de um conjunto de categorias, de uma vez só.
@@ -41,8 +39,6 @@ export type AzuosRadarChartProps = {
   };
 };
 
-const VALUE_KEY = 'value';
-
 /**
  * Quantas categorias o radar comporta antes de os nomes se encavalarem em volta.
  *
@@ -63,43 +59,55 @@ export function AzuosRadarChart({ data, state, ui }: AzuosRadarChartProps) {
 
   return (
     <div className={ui?.className}>
-      <AzuosChartFrame
-        data={{ config: { [VALUE_KEY]: { label: data.seriesLabel, color } } }}
+      <AzuosEchart
+        data={{
+          option: (theme) => radarOption(data.slices, data.seriesLabel, color, theme),
+          description: `${data.seriesLabel}: ${data.slices.length} categorias`,
+        }}
         ui={{ heightClass: ui?.heightClass ?? 'h-72', emptyLabel: ui?.emptyLabel }}
         state={{ isLoading: state?.isLoading, isEmpty: data.slices.length === 0 }}
-      >
-        <RadarChart data={data.slices} outerRadius="72%">
-          <PolarGrid />
-          <PolarAngleAxis dataKey="label" tickFormatter={(label: string) => shortenAxis(label)} />
-          <ChartTooltip
-            content={
-              <AzuosChartTooltip
-                nameKey={VALUE_KEY}
-                labelFormatter={(_, payload) =>
-                  (payload?.[0]?.payload as ChartSlice | undefined)?.label ?? ''
-                }
-              />
-            }
-          />
-          <Radar
-            dataKey={VALUE_KEY}
-            stroke={color}
-            fill={color}
-            fillOpacity={0.25}
-            strokeWidth={2}
-          />
-        </RadarChart>
-      </AzuosChartFrame>
+      />
 
       {/* A LISTA PARA LEITOR DE TELA. A teia é uma forma, e forma não se lê em voz alta: sem esta
           lista, quem usa leitor de tela não recebe nenhum dos números do gráfico. */}
-      <ul className="sr-only">
-        {data.slices.map((slice) => (
-          <li key={slice.label}>
-            {slice.label}: {slice.value}
-          </li>
-        ))}
-      </ul>
+      <AzuosChartValueList data={{ slices: data.slices }} />
     </div>
   );
+}
+
+/** A teia: grade nos tons do tema, nome de cada categoria no próprio eixo e a forma preenchida. */
+export function radarOption(
+  slices: readonly ChartSlice[],
+  seriesLabel: string,
+  color: string,
+  theme: Pick<ChartTheme, 'border' | 'muted'>,
+): ChartOption {
+  const top = Math.max(...slices.map((slice) => slice.value), 1);
+  const stroke = resolveColor(color);
+
+  return {
+    tooltip: { trigger: 'item' },
+    radar: {
+      radius: '68%',
+      indicator: slices.map((slice) => ({ name: shortenAxis(slice.label), max: top })),
+      axisName: { color: theme.muted, fontSize: 11 },
+      splitLine: { lineStyle: { color: theme.border } },
+      splitArea: { show: false },
+      axisLine: { lineStyle: { color: theme.border } },
+    },
+    series: [
+      {
+        type: 'radar',
+        name: seriesLabel,
+        symbol: 'none',
+        lineStyle: { color: stroke, width: 2 },
+        areaStyle: { color: stroke, opacity: 0.25 },
+        data: [{ name: seriesLabel, value: slices.map((slice) => slice.value) }],
+        tooltip: {
+          formatter: () =>
+            slices.map((slice) => `${slice.label}: ${formatCount(slice.value)}`).join('<br/>'),
+        },
+      },
+    ],
+  };
 }

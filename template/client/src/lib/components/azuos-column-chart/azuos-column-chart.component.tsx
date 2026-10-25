@@ -1,145 +1,181 @@
-import { Bar, BarChart, Cell, LabelList, XAxis } from 'recharts';
-
 import { type ChartSlice, colorOfSlice } from '../../utils/chart-slice.util';
-import { AzuosChartFrame } from '../azuos-chart-frame/azuos-chart-frame.component';
-import { AzuosChartTooltip } from '../azuos-chart-tooltip/azuos-chart-tooltip.component';
-import { ChartTooltip } from '../ui/chart';
+import {
+  type ChartOption,
+  formatCount,
+  resolveColor,
+  shortenLabel,
+} from '../../utils/echarts.util';
+import { AzuosChartValueList } from '../azuos-chart-value-list/azuos-chart-value-list.component';
+import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
- * Coluna — para comparar quantidades entre categorias (por responsável, por tipo).
+ * Coluna — para comparar quantidades entre categorias (por responsável, por status).
  *
- * **Sem legenda** (uma série só; legenda de uma série é ruído), **o valor escrito acima de
- * cada coluna** (no lugar de obrigar a estimar pela altura) e **clique na coluna abrindo o
- * detalhamento**. Sem eixo Y: com o número em cima de cada coluna, a escala à esquerda não
- * acrescenta nada e come largura.
+ * **Sem legenda** (uma série só; legenda de uma série é ruído), **o valor escrito em cada coluna**
+ * (no lugar de obrigar a estimar pela altura) e **clique na coluna abrindo o detalhamento**. Sem
+ * eixo de valores: com o número em cada coluna, a escala não acrescenta nada e come largura.
+ *
+ * **Deitada** (`orientation: 'horizontal'`) quando há muitas categorias ou nomes compridos: o nome
+ * fica inteiro, na horizontal, à esquerda da barra — em vez de vinte rótulos girados a -30° que
+ * ninguém lê. Passou da altura do quadro, a lista ROLA dentro dele, uma barra por linha.
  */
 export type AzuosColumnChartProps = {
   data: {
     slices: ChartSlice[];
-    /** O nome da série no popover — "Tarefas: 8". Mesmo motivo da rosca. */
+    /** O nome da série no balão — "Status: 8". */
     seriesLabel: string;
   };
   state?: { isLoading?: boolean };
-  ui?: { emptyLabel?: string; heightClass?: string };
+  ui?: {
+    emptyLabel?: string;
+    heightClass?: string;
+    /** @default 'vertical' */
+    orientation?: 'vertical' | 'horizontal';
+    /**
+     * UMA cor para todas as colunas — para a série no tempo (dias de um mês), em que cada coluna
+     * é a mesma medida e cor por coluna inventaria categorias que não existem.
+     */
+    color?: string;
+  };
   actions?: { onSelect?: (label: string) => void };
 };
 
+/** A altura de cada linha da barra deitada — o bastante para o nome caber sem encostar no vizinho. */
+const ROW_HEIGHT = 28;
+
 export function AzuosColumnChart({ data, state, ui, actions }: AzuosColumnChartProps) {
-  /* Carregando e vazio moram na moldura (`AzuosChartFrame`), e não aqui: escritos em cada gráfico,
-     o mesmo painel tinha dois cinzas diferentes piscando e duas frases diferentes para o vazio. */
+  const isHorizontal = ui?.orientation === 'horizontal';
+  const onSelect = actions?.onSelect;
+
   return (
-    <AzuosChartFrame
-      data={{ config: { value: { label: data.seriesLabel } } }}
-      ui={{ heightClass: ui?.heightClass ?? 'h-full', emptyLabel: ui?.emptyLabel }}
-      state={{ isLoading: state?.isLoading, isEmpty: data.slices.length === 0 }}
-    >
-      {/* Margem lateral maior que o normal: o selo do valor é mais largo que o número
-          sozinho, e nas colunas da ponta ele passava da borda do gráfico sem essa folga.
-          Margem de baixo também maior: some com a folga que faltava pro rótulo comprido do
-          eixo (girado -30°) não vazar por baixo da área do SVG — o `height` do `XAxis` reserva
-          espaço para o texto girado, mas sem margem nenhuma o pé do texto encostava na borda
-          de baixo e cortava. */}
-      <BarChart data={data.slices} margin={{ top: 24, right: 14, left: 14, bottom: 12 }}>
-        {/* Mesmo contêiner arredondado e com sombra macia que a rosca usa — os dois
-            popovers do dashboard têm que parecer a mesma peça. `labelFormatter` troca o
-            título pelo NOME da fatia em vez do rótulo genérico da série: sem ele, o topo do
-            popover ficava em branco (o cruzamento de `labelKey`/`config` não resolvia
-            sozinho) e só a linha "Tarefas: 6" aparecia — sem dizer de QUAL categoria. */}
-        <ChartTooltip
-          cursor={{ fill: 'var(--color-muted)' }}
-          content={
-            <AzuosChartTooltip
-              nameKey="value"
-              labelFormatter={(_, tooltipPayload) =>
-                (tooltipPayload?.[0]?.payload as ChartSlice | undefined)?.label ?? ''
-              }
-            />
-          }
-        />
-        <XAxis
-          dataKey="label"
-          tickLine={false}
-          axisLine={false}
-          interval={0}
-          height={64}
-          angle={-30}
-          textAnchor="end"
-          tickFormatter={(label: string) => shorten(label)}
-        />
-        <Bar
-          dataKey="value"
-          radius={[4, 4, 0, 0]}
-          onClick={(bar: unknown) => actions?.onSelect?.(readLabel(bar))}
-          className={actions?.onSelect ? 'cursor-pointer' : undefined}
-        >
-          {data.slices.map((slice, index) => (
-            <Cell key={slice.label} fill={colorOfSlice(slice.label, index)} />
-          ))}
-          {/* Selo na MESMA cor da coluna — não uma cor genérica só pra ele — pra ler como
-              parte da própria coluna, não como uma etiqueta colada em cima. */}
-          <LabelList
-            dataKey="value"
-            position="top"
-            offset={12}
-            content={(props: unknown) => (
-              <ColumnValueBadge {...(props as ColumnValueBadgeProps)} slices={data.slices} />
-            )}
-          />
-        </Bar>
-      </BarChart>
-    </AzuosChartFrame>
+    <>
+      <AzuosEchart
+        data={{
+          option: (isHorizontal ? barOption : columnOption)(
+            data.slices,
+            data.seriesLabel,
+            ui?.color,
+          ),
+          description: `${data.seriesLabel}: ${data.slices.length} categorias`,
+        }}
+        ui={boxOf(ui, isHorizontal ? data.slices.length : 0)}
+        state={{ isLoading: state?.isLoading, isEmpty: data.slices.length === 0 }}
+        actions={{ onSelect: onSelect ? (selection) => onSelect(selection.name) : undefined }}
+      />
+      <AzuosChartValueList data={{ slices: data.slices }} />
+    </>
   );
 }
 
-/** Rótulo longo cortado no eixo; o nome inteiro continua no tooltip. */
-function shorten(label: string): string {
-  return label.length > 14 ? `${label.slice(0, 13)}…` : label;
+/** A caixa: deitada, o desenho cresce uma linha por categoria e rola dentro dela. */
+function boxOf(ui: AzuosColumnChartProps['ui'], rows: number) {
+  return {
+    heightClass: ui?.heightClass ?? 'h-full',
+    emptyLabel: ui?.emptyLabel,
+    scrollHeight: rows > 0 ? rows * ROW_HEIGHT + 8 : undefined,
+  };
 }
 
-function readLabel(bar: unknown): string {
-  const payload = bar as { label?: string; payload?: { label?: string } };
-
-  return payload.label ?? payload.payload?.label ?? '';
+/** As colunas em pé: nome girado embaixo, valor num selo da cor da coluna em cima. */
+export function columnOption(
+  slices: readonly ChartSlice[],
+  seriesLabel: string,
+  color?: string,
+): ChartOption {
+  return {
+    grid: { top: 28, right: 12, bottom: 4, left: 12, containLabel: true },
+    tooltip: { trigger: 'item', formatter: tooltipOf(seriesLabel) },
+    xAxis: {
+      type: 'category',
+      data: slices.map((slice) => slice.label),
+      axisTick: { show: false },
+      axisLine: { show: false },
+      axisLabel: {
+        interval: 0,
+        rotate: 30,
+        fontSize: 11,
+        formatter: (label: string) => shortenLabel(label, AXIS_LABEL_MAX),
+      },
+    },
+    yAxis: { type: 'value', show: false },
+    series: [
+      {
+        type: 'bar',
+        name: seriesLabel,
+        barMaxWidth: 36,
+        itemStyle: { borderRadius: [4, 4, 0, 0] },
+        data: slices.map((slice, index) => ({
+          value: slice.value,
+          itemStyle: { color: colorOf(slice, index, color) },
+          label: { backgroundColor: colorOf(slice, index, color) },
+        })),
+        label: {
+          show: true,
+          position: 'top',
+          color: '#ffffff',
+          fontSize: 11,
+          fontWeight: 600,
+          padding: [2, 6],
+          borderRadius: 8,
+          formatter: ({ value }) => formatCount(Number(value)),
+        },
+      },
+    ],
+  };
 }
 
-type ColumnValueBadgeProps = { x: number; y: number; width: number; value: number; index: number };
+/** As barras deitadas: o maior em cima, o nome à esquerda, o valor no fim da barra. */
+export function barOption(
+  slices: readonly ChartSlice[],
+  seriesLabel: string,
+  color?: string,
+): ChartOption {
+  return {
+    grid: { top: 4, right: 48, bottom: 4, left: 8, containLabel: true },
+    tooltip: { trigger: 'item', formatter: tooltipOf(seriesLabel) },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category',
+      inverse: true,
+      data: slices.map((slice) => slice.label),
+      axisTick: { show: false },
+      axisLine: { show: false },
+      axisLabel: { fontSize: 11, formatter: (label: string) => shortenLabel(label, 22) },
+    },
+    series: [
+      {
+        type: 'bar',
+        name: seriesLabel,
+        barMaxWidth: 16,
+        itemStyle: { borderRadius: [0, 6, 6, 0] },
+        data: slices.map((slice, index) => ({
+          value: slice.value,
+          itemStyle: { color: colorOf(slice, index, color) },
+        })),
+        label: {
+          show: true,
+          position: 'right',
+          fontSize: 11,
+          fontWeight: 600,
+          formatter: ({ value }) => formatCount(Number(value)),
+        },
+      },
+    ],
+  };
+}
 
-/**
- * O selo do valor, desenhado à mão — SVG puro, porque `LabelList` só aceita marcação SVG
- * (`<g>`, `<rect>`, `<text>`), não um componente HTML qualquer por cima do gráfico.
- *
- * Largura calculada pelo tamanho do texto: um selo de largura fixa ou sobra vazio atrás de
- * "1" ou corta o "6" de duas colunas de dois dígitos — nenhuma das opções serve pras duas
- * pontas que a mesma coluna precisa cobrir.
- *
- * A cor vem de `colorOfSlice(slices[index].label, index)` — a MESMA conta que colore a
- * `<Cell>` da coluna logo abaixo — para o selo nunca destoar da coluna que ele rotula.
- */
-function ColumnValueBadge({
-  x,
-  y,
-  width,
-  value,
-  index,
-  slices,
-}: ColumnValueBadgeProps & { slices: ChartSlice[] }) {
-  const text = String(value);
-  const pillWidth = Math.max(20, text.length * 6.5 + 12);
-  const cx = x + width / 2;
-  const fill = colorOfSlice(slices[index]?.label ?? '', index);
+/** Quantas letras do nome cabem no eixo, inclinadas; o nome inteiro continua no balão. */
+const AXIS_LABEL_MAX = 20;
 
-  return (
-    <g className="pointer-events-none">
-      <rect x={cx - pillWidth / 2} y={y - 16} width={pillWidth} height={16} rx={8} fill={fill} />
-      <text
-        x={cx}
-        y={y - 8}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        className="fill-white text-xs font-semibold"
-      >
-        {text}
-      </text>
-    </g>
-  );
+/** A cor única, quando quem chama pediu uma; senão a cor da categoria. */
+function colorOf(slice: ChartSlice, index: number, color: string | undefined): string {
+  return color ? resolveColor(color) : colorOfSlice(slice.label, index);
+}
+
+function tooltipOf(seriesLabel: string) {
+  return (params: unknown) => {
+    const { name, value } = params as { name: string; value: number };
+
+    return `<b>${name}</b><br/>${seriesLabel}: ${formatCount(value)}`;
+  };
 }
