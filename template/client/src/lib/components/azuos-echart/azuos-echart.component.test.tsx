@@ -1,9 +1,29 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AzuosEchart } from './azuos-echart.component';
+import type * as EchartsUtil from '../../utils/echarts.util';
+import { AzuosEchart, RESIZE_SETTLE_MS } from './azuos-echart.component';
+
+/* Um ECharts de mentira: o teste do redimensionamento só quer contar quantas vezes ele redesenha. */
+const fakeChart = vi.hoisted(() => ({
+  on: vi.fn(),
+  setOption: vi.fn(),
+  resize: vi.fn(),
+  dispose: vi.fn(),
+}));
+
+vi.mock('../../utils/echarts.util', async (importOriginal) => ({
+  ...(await importOriginal<typeof EchartsUtil>()),
+  loadECharts: () => Promise.resolve({ init: () => fakeChart }),
+}));
 
 const OPTION = { series: [{ type: 'bar' as const, data: [1, 2, 3] }] };
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+  fakeChart.resize.mockClear();
+});
 
 describe('AzuosEchart', () => {
   // feliz
@@ -15,25 +35,72 @@ describe('AzuosEchart', () => {
   });
 
   it('looks clickable only when a click opens something', () => {
-    const { container, rerender } = render(<AzuosEchart data={{ option: OPTION, description: 'x' }} />);
+    const { container, rerender } = render(
+      <AzuosEchart data={{ option: OPTION, description: 'x' }} />,
+    );
     expect(container.querySelector('.cursor-pointer')).not.toBeInTheDocument();
 
-    rerender(<AzuosEchart data={{ option: OPTION, description: 'x' }} actions={{ onSelect: () => undefined }} />);
+    rerender(
+      <AzuosEchart
+        data={{ option: OPTION, description: 'x' }}
+        actions={{ onSelect: () => undefined }}
+      />,
+    );
     expect(container.querySelector('.cursor-pointer')).toBeInTheDocument();
   });
 
   /* Desenho maior que a caixa: a caixa vira janela e o desenho rola dentro dela. */
   it('scrolls a drawing taller than its box', () => {
-    render(<AzuosEchart data={{ option: OPTION, description: 'x' }} ui={{ heightClass: 'h-40', scrollHeight: 900 }} />);
+    render(
+      <AzuosEchart
+        data={{ option: OPTION, description: 'x' }}
+        ui={{ heightClass: 'h-40', scrollHeight: 900 }}
+      />,
+    );
 
     expect(screen.getByRole('img')).toHaveStyle({ height: '900px' });
     expect(screen.getByRole('img').parentElement).toHaveClass('overflow-y-auto', 'h-40');
   });
 
+  /* Abrir o menu anima a largura e o observador dispara a cada quadro: o gráfico só pode se
+     redesenhar UMA vez, quando o tamanho para de mudar — senão o FPS da tela toda despenca. */
+  it('redraws once, after the size stops changing', async () => {
+    const callbacks: ResizeObserverCallback[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: ResizeObserverCallback) {
+          callbacks.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    render(<AzuosEchart data={{ option: OPTION, description: 'x' }} />);
+    await waitFor(() => expect(callbacks).toHaveLength(1));
+
+    for (const width of [500, 520, 540, 560]) {
+      callbacks[0]!(
+        [{ contentRect: { width, height: 300 } } as ResizeObserverEntry],
+        {} as ResizeObserver,
+      );
+    }
+    expect(fakeChart.resize).not.toHaveBeenCalled();
+
+    act(() => vi.advanceTimersByTime(RESIZE_SETTLE_MS));
+    expect(fakeChart.resize).toHaveBeenCalledOnce();
+    expect(fakeChart.resize).toHaveBeenCalledWith(expect.objectContaining({ width: 560 }));
+  });
+
   // triste
   it('says there is no data instead of drawing an empty box', () => {
     render(
-      <AzuosEchart data={{ option: OPTION, description: 'x' }} state={{ isEmpty: true }} ui={{ emptyLabel: 'Nada aqui' }} />,
+      <AzuosEchart
+        data={{ option: OPTION, description: 'x' }}
+        state={{ isEmpty: true }}
+        ui={{ emptyLabel: 'Nada aqui' }}
+      />,
     );
 
     expect(screen.getByText('Nada aqui')).toBeInTheDocument();
@@ -42,7 +109,11 @@ describe('AzuosEchart', () => {
 
   it('keeps the box while loading, so the panel does not reflow', () => {
     const { container } = render(
-      <AzuosEchart data={{ option: OPTION, description: 'x' }} state={{ isLoading: true }} ui={{ heightClass: 'h-40' }} />,
+      <AzuosEchart
+        data={{ option: OPTION, description: 'x' }}
+        state={{ isLoading: true }}
+        ui={{ heightClass: 'h-40' }}
+      />,
     );
 
     expect(container.querySelector('[aria-busy="true"]')).toHaveClass('h-40');
