@@ -43,6 +43,13 @@ describe('AzuosDonutChart', () => {
   });
 
   // triste
+  /* Sem clique, a legenda é texto: um botão que não faz nada atrapalha o teclado e o leitor de tela. */
+  it('draws no button in the legend when it opens nothing', () => {
+    render(<AzuosDonutChart data={{ slices: SLICES, seriesLabel: 'Tarefas' }} />);
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
   it('says there is no data instead of drawing an empty ring', () => {
     render(
       <AzuosDonutChart
