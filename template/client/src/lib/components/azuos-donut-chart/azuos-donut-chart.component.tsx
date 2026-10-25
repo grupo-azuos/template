@@ -1,10 +1,7 @@
-import { Cell, Pie, PieChart } from 'recharts';
-
-import { cn } from '../../utils/cn.util';
 import { type ChartSlice, colorOfSlice } from '../../utils/chart-slice.util';
-import { AzuosChartFrame } from '../azuos-chart-frame/azuos-chart-frame.component';
-import { AzuosChartTooltip } from '../azuos-chart-tooltip/azuos-chart-tooltip.component';
-import { ChartTooltip } from '../ui/chart';
+import { cn } from '../../utils/cn.util';
+import { type ChartOption, type ChartTheme, formatCount, shareOf } from '../../utils/echarts.util';
+import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
  * Rosca — para mostrar como um todo se divide (situação, categoria, cidade).
@@ -12,8 +9,9 @@ import { ChartTooltip } from '../ui/chart';
  * Três coisas fazem o gráfico ser USADO e não só olhado:
  *
  *  1. **Legenda ao lado, com o nome escrito** — com o valor e a porcentagem junto.
- *  2. **O valor desenhado dentro da fatia**, com a porcentagem, e só quando a fatia passa de
- *     5% — abaixo disso o número não caberia e viraria borrão sobre a borda.
+ *  2. **Anel limpo**: a fatia não leva número escrito em cima. Valor e porcentagem aparecem na
+ *     legenda e, ao passar o mouse, no balão — número dentro da fatia poluía o desenho e virava
+ *     borrão nas fatias pequenas.
  *  3. **Clique na fatia abre o detalhamento** (`actions.onSelect`). O gráfico é o caminho para
  *     a lista, não um enfeite: é assim que alguém sai de "42 em andamento" para "quais 42".
  *
@@ -33,78 +31,39 @@ export type AzuosDonutChartProps = {
   actions?: { onSelect?: (label: string) => void };
 };
 
-/** Abaixo disso o rótulo não cabe na fatia. */
-const MIN_LABEL_PERCENT = 0.05;
-
 export function AzuosDonutChart({ data, state, ui, actions }: AzuosDonutChartProps) {
-  /* Carregando e vazio moram na moldura (`AzuosChartFrame`): um lugar só para os dois estados, em
-     todos os gráficos. */
   if (state?.isLoading || data.slices.length === 0) {
     return (
-      <AzuosChartFrame
-        data={{ config: { value: { label: data.seriesLabel } } }}
+      <AzuosEchart
+        data={{ option: {}, description: data.seriesLabel }}
         ui={{ heightClass: 'h-full', emptyLabel: ui?.emptyLabel }}
         state={{ isLoading: state?.isLoading, isEmpty: data.slices.length === 0 }}
-      >
-        <PieChart />
-      </AzuosChartFrame>
+      />
     );
   }
 
   const total = data.slices.reduce((sum, slice) => sum + slice.value, 0);
+  const onSelect = actions?.onSelect;
 
   return (
-    <div className="flex h-full items-center gap-4">
+    /* No celular o anel vai EM CIMA e a legenda embaixo: lado a lado, numa tela de 360px, sobrava
+       um anel do tamanho de uma moeda e uma legenda com os nomes cortados. */
+    <div className="flex h-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
       {/* Quadrado próprio para a rosca: sem ele, a legenda ao lado empurra o centro do
           anel para fora do meio visual do cartão, e o total sobreposto fica desalinhado. */}
-      <div className="relative aspect-square h-full shrink-0">
-        <AzuosChartFrame
-          data={{ config: { value: { label: data.seriesLabel } } }}
+      <div className="relative mx-auto aspect-square h-40 shrink-0 sm:h-full">
+        <AzuosEchart
+          data={{
+            option: (theme) => donutOption(data.slices, data.seriesLabel, theme),
+            description: `${data.seriesLabel}: ${formatCount(total)} no total`,
+          }}
           ui={{ heightClass: 'h-full' }}
-        >
-          <PieChart>
-            {/* Título = a fatia, corpo = "Série: valor". `labelFormatter` pega o nome direto
-                do payload (`slice.label`, ex.: "Em andamento") — o cruzamento automático de
-                `labelKey`/`config` do componente não resolve sozinho quando o nome da fatia
-                não está cadastrado no `config`, e o título saía em branco. A casca do balão
-                (raio, sombra, sem a borda fina que brigava com o fundo) mora no
-                `AzuosChartTooltip`, num lugar só. */}
-            <ChartTooltip
-              content={
-                <AzuosChartTooltip
-                  nameKey="value"
-                  labelFormatter={(_, tooltipPayload) =>
-                    (tooltipPayload?.[0]?.payload as ChartSlice | undefined)?.label ?? ''
-                  }
-                />
-              }
-            />
-            <Pie
-              data={data.slices}
-              dataKey="value"
-              nameKey="label"
-              innerRadius="62%"
-              outerRadius="100%"
-              paddingAngle={1}
-              /* Anel de 2px na cor da superfície: sem ele, duas fatias de tom próximo
-                 encostam e viram uma só. */
-              stroke="var(--color-card)"
-              strokeWidth={2}
-              labelLine={false}
-              label={renderSliceLabel}
-              onClick={(slice: unknown) => actions?.onSelect?.(readLabel(slice))}
-              className={actions?.onSelect ? 'cursor-pointer' : undefined}
-            >
-              {data.slices.map((slice, index) => (
-                <Cell key={slice.label} fill={colorOfSlice(slice.label, index)} />
-              ))}
-            </Pie>
-          </PieChart>
-        </AzuosChartFrame>
+          actions={{ onSelect: onSelect ? (selection) => onSelect(selection.name) : undefined }}
+        />
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-foreground text-xl leading-tight font-bold">
-            {total.toLocaleString('pt-BR')}
+            {formatCount(total)}
           </span>
           <span className="text-muted-foreground text-xs tracking-wide uppercase">
             {data.seriesLabel}
@@ -115,10 +74,10 @@ export function AzuosDonutChart({ data, state, ui, actions }: AzuosDonutChartPro
       {/* `self-stretch`: sem isso a lista fica `items-center` do pai, que dá a ela só a
           própria altura de conteúdo — e com 13 status o `overflow-y-auto` nunca entra em
           ação, e a lista extravasa o cartão por baixo. */}
-      <ul className="min-w-0 flex-1 space-y-2.5 self-stretch overflow-y-auto pr-1">
+      <ul className="min-h-0 min-w-0 flex-1 space-y-2.5 self-stretch overflow-y-auto pr-1">
         {data.slices.map((slice, index) => {
           const color = colorOfSlice(slice.label, index);
-          const percent = total > 0 ? Math.round((slice.value / total) * 100) : 0;
+          const percent = shareOf(slice.value, total);
 
           return (
             <li key={slice.label}>
@@ -149,7 +108,9 @@ export function AzuosDonutChart({ data, state, ui, actions }: AzuosDonutChartPro
                     style={{ width: `${percent}%`, backgroundColor: color }}
                   />
                 </span>
-                <span className="text-foreground shrink-0 font-semibold">{slice.value}</span>
+                <span className="text-foreground shrink-0 font-semibold">
+                  {formatCount(slice.value)}
+                </span>
                 <span className="text-muted-foreground w-9 shrink-0 text-right">{percent}%</span>
               </button>
             </li>
@@ -160,41 +121,41 @@ export function AzuosDonutChart({ data, state, ui, actions }: AzuosDonutChartPro
   );
 }
 
-type SliceLabelProps = {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-  value: number;
-};
+/**
+ * O anel: fatias separadas por um fio da cor do cartão (sem ele, dois tons próximos encostam e viram
+ * uma fatia só), sem número escrito em cima — o valor e a porcentagem estão na legenda e no balão.
+ */
+export function donutOption(
+  slices: readonly ChartSlice[],
+  seriesLabel: string,
+  theme: Pick<ChartTheme, 'surface'>,
+): ChartOption {
+  const total = slices.reduce((sum, slice) => sum + slice.value, 0);
 
-/** O valor e a porcentagem no meio da fatia, em branco com sombra. */
-function renderSliceLabel(props: unknown) {
-  const { cx, cy, midAngle, innerRadius, outerRadius, percent, value } = props as SliceLabelProps;
-  if (percent < MIN_LABEL_PERCENT) return null;
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: (params: unknown) => {
+        const { name, value } = params as { name: string; value: number };
 
-  const radius = innerRadius + (outerRadius - innerRadius) / 2;
-  const radians = (-midAngle * Math.PI) / 180;
-
-  return (
-    <text
-      x={cx + radius * Math.cos(radians)}
-      y={cy + radius * Math.sin(radians)}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      className="pointer-events-none fill-white text-xs font-semibold [paint-order:stroke]"
-      stroke="rgba(0,0,0,.25)"
-      strokeWidth={2}
-    >
-      {`${value} (${Math.round(percent * 100)}%)`}
-    </text>
-  );
-}
-
-function readLabel(slice: unknown): string {
-  const payload = slice as { label?: string; payload?: { label?: string } };
-
-  return payload.label ?? payload.payload?.label ?? '';
+        return `<b>${name}</b><br/>${seriesLabel}: ${formatCount(value)} (${shareOf(value, total)}%)`;
+      },
+    },
+    series: [
+      {
+        type: 'pie',
+        name: seriesLabel,
+        radius: ['62%', '100%'],
+        padAngle: 1,
+        itemStyle: { borderColor: theme.surface, borderWidth: 2 },
+        label: { show: false },
+        emphasis: { scaleSize: 4 },
+        data: slices.map((slice, index) => ({
+          name: slice.label,
+          value: slice.value,
+          itemStyle: { color: colorOfSlice(slice.label, index) },
+        })),
+      },
+    ],
+  };
 }
