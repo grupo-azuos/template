@@ -18,7 +18,10 @@ const OPTION = {
 };
 
 export const Default: Story = {
-  args: { data: { option: OPTION, description: 'Tarefas por mês' }, ui: { heightClass: 'h-64', className: 'w-96' } },
+  args: {
+    data: { option: OPTION, description: 'Tarefas por mês' },
+    ui: { heightClass: 'h-64', className: 'w-96' },
+  },
 };
 
 export const Scrolling: Story = {
@@ -29,7 +32,11 @@ export const Scrolling: Story = {
 };
 
 export const Loading: Story = {
-  args: { data: { option: OPTION, description: 'x' }, state: { isLoading: true }, ui: { heightClass: 'h-64' } },
+  args: {
+    data: { option: OPTION, description: 'x' },
+    state: { isLoading: true },
+    ui: { heightClass: 'h-64' },
+  },
 };
 
 export const Empty: Story = {
