@@ -54,7 +54,12 @@ export type AzuosEchartProps = {
   actions?: { onSelect?: (selection: ChartSelection) => void };
 };
 
-type ChartBox = { heightClass: string; className?: string; emptyLabel: string; scrollHeight?: number };
+type ChartBox = {
+  heightClass: string;
+  className?: string;
+  emptyLabel: string;
+  scrollHeight?: number;
+};
 
 export function AzuosEchart({ data, ui, state, actions }: AzuosEchartProps) {
   const box = resolveBox(ui);
@@ -78,7 +83,10 @@ function resolveBox(ui: AzuosEchartProps['ui']): ChartBox {
 
 function ChartLoading({ box }: { box: ChartBox }) {
   return (
-    <div className={cn('bg-muted rounded-box w-full animate-pulse', box.heightClass, box.className)} aria-busy="true" />
+    <div
+      className={cn('bg-muted rounded-box w-full animate-pulse', box.heightClass, box.className)}
+      aria-busy="true"
+    />
   );
 }
 
@@ -129,6 +137,9 @@ function ChartBody({
   );
 }
 
+/** Quanto o tamanho precisa ficar parado para o gráfico se redesenhar — um pouco mais que a animação do menu. */
+export const RESIZE_SETTLE_MS = 250;
+
 function ChartSurface({
   option,
   description,
@@ -155,6 +166,7 @@ function ChartSurface({
   useEffect(() => {
     let isDisposed = false;
     let observer: ResizeObserver | null = null;
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
 
     void loadECharts().then((echarts) => {
       const box = boxRef.current;
@@ -170,9 +182,18 @@ function ChartSurface({
       chart.on('click', (params) => selectRef.current?.(selectionOf(params)));
       chartRef.current = chart;
 
+      /* Redesenha UMA vez, quando o tamanho PARA de mudar, e sem animação. Abrir ou fechar o menu
+         anima a largura por uns 200ms, e o observador dispara a cada quadro: redesenhar o SVG
+         inteiro 60 vezes por segundo (o fluxo e o calendário têm centenas de peças) derrubava o
+         FPS da tela toda. Durante a animação o desenho fica como estava; no fim, assume a medida. */
       observer = new ResizeObserver(([entry]) => {
         if (!entry || entry.contentRect.width === 0) return;
-        chart.resize({ width: entry.contentRect.width, height: entry.contentRect.height });
+        const { width, height } = entry.contentRect;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(
+          () => chart.resize({ width, height, animation: { duration: 0 } }),
+          RESIZE_SETTLE_MS,
+        );
       });
       observer.observe(box);
       setIsReady(true);
@@ -180,6 +201,7 @@ function ChartSurface({
 
     return () => {
       isDisposed = true;
+      clearTimeout(resizeTimer);
       observer?.disconnect();
       chartRef.current?.dispose();
       chartRef.current = null;
@@ -217,7 +239,10 @@ function useChartTheme(): ChartTheme {
 
   useEffect(() => {
     const observer = new MutationObserver(() => setTheme(readChartTheme()));
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
 
     return () => observer.disconnect();
   }, []);
