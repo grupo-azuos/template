@@ -1,760 +1,701 @@
 /**
- * As regras das skills `design-system` e `ui-standards`, em código.
+ * Regras de design verificáveis no código: as da marca (só tokens, sem preto/branco puro) e
+ * as das leis de UX (Hick, Fitts, Jakob, Miller, Von Restorff, Conectividade Uniforme,
+ * Tesler).
  *
- * Regra que só existe em markdown é sugestão: o agente lê, entende, e na terceira tela esquece.
- * Aqui cada regra vira uma função pura sobre a lista de arquivos do projeto — sem disco, sem rede —,
- * para o teste poder montar um projeto de mentira e provar que a regra pega o que deve.
+ * Sem dependência. No brand maker é TypeScript; no kit vai como JavaScript (.mjs), com os
+ * tipos tirados no build. Por isso só sintaxe "apagável" (tipos, nada de enum, namespace ou
+ * parameter property), que vira JavaScript sem mudar o comportamento.
  *
- * É o mesmo módulo que roda no `check:design` (CI, pre-push) e no hook `PostToolUse` do Claude Code —
- * por isso é `.mjs` puro, sem `tsx` e sem dependência: o hook precisa ser rápido em toda edição.
+ * As checagens são estáticas, por expressão regular, sobre .svelte/.tsx/.jsx/.vue/.html/.css.
+ * Elas pegam o erro comum, não provam que a tela está certa: a skill `ux-laws` diz o que
+ * ainda precisa de olho humano.
  *
- * Quem lê o disco e decide se o CI (ou o hook) reprova é o `check-design.mjs`.
- *
- * @typedef {Object} ProjectFile
- * @property {string} path - Caminho relativo à raiz do repositório, com `/`.
- * @property {string} content - Conteúdo; só é lido para arquivo de texto que alguma regra inspeciona.
- *
- * @typedef {Object} Violation
- * @property {string} rule
- * @property {string} file
- * @property {string} detail - O que está errado, sem número de linha: a chave da baseline não pode mudar a cada edição.
- * @property {number} [line]
- *
- * @typedef {Object} Rule
- * @property {string} id
- * @property {string} description - Uma linha, em pt-BR: aparece no relatório para quem vai corrigir.
- * @property {(files: ProjectFile[]) => Violation[]} check
- *
- * @typedef {Object.<string, number>} Baseline
- *
- * @typedef {Object} Comparison
- * @property {Violation[]} added - Violações a mais do que a baseline permite: é isso que reprova.
- * @property {string[]} fixed - Chaves que a baseline tinha e sumiram (ou diminuíram): dívida paga, falta atualizar.
+ * Para silenciar um caso justificado, comente na linha de cima:
+ *   <!-- design-ignore-next-line fitts/target-size: ícone dentro de um alvo de 40px -->
+ *   // design-ignore-next-line
+ * Ou `design-ignore-file` em qualquer lugar do arquivo.
  */
+/* ------------------------------------------------------------------ utilitários */
+/** Apaga comentários HTML e de bloco, mantendo as quebras de linha (os números de linha batem). */
+function stripComments(content) {
+	const blank = (match) => match.replace(/[^\n]/g, " ");
+	return content.replace(/<!--[\s\S]*?-->/g, blank).replace(/\/\*[\s\S]*?\*\//g, blank);
+}
+function lineOf(code, index) {
+	let line = 1;
+	for (let i = 0; i < index && i < code.length; i++) if (code[i] === "\n") line++;
+	return line;
+}
+/** Todas as ocorrências de `pattern` (precisa da flag g). */
+function* matches(code, pattern) {
+	const re = new RegExp(pattern.source, pattern.flags.includes("g") ? pattern.flags : pattern.flags + "g");
+	let m;
+	while ((m = re.exec(code)) !== null) {
+		yield m;
+		if (m[0].length === 0) re.lastIndex++;
+	}
+}
+/**
+* Tags de abertura pelo nome. Tolera um nível de `{...}` nos atributos (Svelte/JSX), onde um
+* `>` de comparação não fecha a tag.
+*/
+function tags(code, names) {
+	const pattern = new RegExp(`<(${names})\\b(?:[^>{}]|\\{[^{}]*\\})*>`, "g");
+	return [...matches(code, pattern)].map((m) => ({
+		name: m[1],
+		text: m[0],
+		index: m.index
+	}));
+}
+/** Blocos `<tag ...>...</tag>` (sem aninhamento do mesmo nome). */
+function blocks(code, name) {
+	const pattern = new RegExp(`<${name}\\b[\\s\\S]*?<\\/${name}>`, "g");
+	return [...matches(code, pattern)].map((m) => ({
+		text: m[0],
+		index: m.index
+	}));
+}
+function attr(tag, name) {
+	const m = tag.match(new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|\\{([^}]*)\\})`));
+	if (m) return m[1] ?? m[2] ?? m[3] ?? "";
+	// Atalho do Svelte: {href} equivale a href={href}.
+	if (new RegExp(`\\{\\s*${name}\\s*\\}`).test(tag)) return "";
+	return null;
+}
+const hasAttr = (tag, name) => attr(tag, name) !== null || /\{\s*\.\.\./.test(tag);
+/** Classes de utilitário de cor do Tailwind (prefixos que recebem cor). */
+const COLOR_UTILITY = "(?:bg|text|border(?:-[trblxy])?|ring|ring-offset|fill|stroke|from|via|to|outline|divide|shadow|decoration|caret|accent|placeholder)";
+const TAILWIND_PALETTE = "(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)";
+const INTERACTIVE_TAGS = "button|a|input|select|textarea|summary";
+const SMALL_INPUT_TYPES = /\btype\s*=\s*["'](?:checkbox|radio|hidden|range|color|file)["']/;
+/* ------------------------------------------------------------------ regras da marca */
+const noPureBlackWhite = {
+	id: "brand/no-pure-black-white",
+	law: "Marca",
+	severity: "error",
+	description: "Preto puro e branco puro são proibidos pela marca.",
+	hint: "Use os tokens: `foreground`/`background` (ou `primary-foreground`) já são os tons quase-preto e quase-branco da marca.",
+	enabled: (c) => c.brandRules.noPureBlackWhite,
+	check: (file) => {
+		const patterns = [
+			/#(?:000|fff|000000|ffffff)(?:f|ff)?\b/gi,
+			/\brgba?\(\s*(?:0\s*,\s*0\s*,\s*0|255\s*,\s*255\s*,\s*255)\b/gi,
+			/(?:^|[\s;{])(?:color|background(?:-color)?|border(?:-[a-z]+)?-?color|fill|stroke|outline-color)\s*:\s*(?:black|white)\b/gim,
+			new RegExp(`\\b${COLOR_UTILITY}-(?:black|white)\\b`, "g")
+		];
+		return patterns.flatMap((p) => [...matches(file.code, p)].map((m) => ({
+			index: m.index,
+			message: `Cor proibida: \`${m[0].trim()}\`.`
+		})));
+	}
+};
+function isColorHex(code, index, hex) {
+	if (![
+		3,
+		4,
+		6,
+		8
+	].includes(hex.length)) return false;
+	const before = code.slice(Math.max(0, index - 6), index);
+	if (/[\w&]$/.test(before)) return false;
+	return !/(?:href=["']?|url\(\s*["']?|id=["']?)$/.test(before);
+}
+const tokensOnly = {
+	id: "brand/tokens-only",
+	law: "Marca",
+	severity: "error",
+	description: "Cor só por token. Cor crua (hex, rgb, hsl, oklch) ou paleta padrão do Tailwind fica fora da marca.",
+	hint: "Troque por uma classe de token (`bg-primary`, `text-muted-foreground`, `border-border`) ou `var(--token)`. Cor nova entra primeiro no tokens.css.",
+	enabled: (c) => c.brandRules.tokensOnly,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		const found = [];
+		for (const m of matches(file.code, /#([0-9a-fA-F]{3,8})\b/g)) {
+			if (isColorHex(file.code, m.index, m[1])) found.push({
+				index: m.index,
+				message: `Cor crua \`${m[0]}\`.`
+			});
+		}
+		for (const m of matches(file.code, /\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(\s*[\d.]/g)) {
+			found.push({
+				index: m.index,
+				message: `Cor crua \`${m[0]}…)\`.`
+			});
+		}
+		const palette = new RegExp(`\\b${COLOR_UTILITY}-${TAILWIND_PALETTE}-(?:50|[1-9]00|950)\\b`, "g");
+		for (const m of matches(file.code, palette)) {
+			found.push({
+				index: m.index,
+				message: `Paleta padrão do Tailwind \`${m[0]}\`.`
+			});
+		}
+		return found;
+	}
+};
+const noArbitraryValues = {
+	id: "brand/no-arbitrary-values",
+	law: "Marca",
+	severity: "warning",
+	description: "Valor arbitrário de cor, raio, sombra ou fonte foge da escala do design.",
+	hint: "Use a escala: `rounded-lg`/`rounded-[var(--radius)]` via token, `text-sm`, `shadow-sm`. Se falta um degrau, crie o token.",
+	enabled: (c) => c.brandRules.noArbitraryValues,
+	check: (file) => [...matches(file.code, /\b(?:rounded(?:-[a-z]{1,2})?|shadow|text|bg|border|ring|font|leading|tracking)-\[(?!var\()[^\]\s]+\]/g)].map((m) => ({
+		index: m.index,
+		message: `Valor arbitrário \`${m[0]}\`.`
+	}))
+};
+const noGradientsOrGlass = {
+	id: "brand/no-gradients-or-glass",
+	law: "Marca",
+	severity: "error",
+	description: "Gradientes, glassmorphism e efeitos de blur/transparência arbitrária são proibidos na identidade Azuos.",
+	hint: "Cards e superfícies devem ser 100% sólidos (`bg-card`, `bg-muted`). Remova gradientes e `backdrop-blur`.",
+	enabled: (c) => c.brandRules?.noGradientsOrGlass ?? true,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		const patterns = [
+			/\bbg-gradient-[a-z0-9-]+/g,
+			/\bbackdrop-blur(?:-[a-z0-9]+)?\b/g,
+			/\bbackdrop-filter\b/g
+		];
+		return patterns.flatMap((p) => [...matches(file.code, p)].map((m) => ({
+			index: m.index,
+			message: `Efeito proibido pela marca: \`${m[0]}\`. Superfícies devem ser 100% sólidas.`
+		})));
+	}
+};
+function isWatermarkLine(code, index) {
+	const start = Math.max(0, index - 250);
+	const end = Math.min(code.length, index + 250);
+	const snippet = code.slice(start, end);
+	return /hero-card-icon|hero-watermark|data-slot="hero-card-icon"/i.test(snippet);
+}
 
-/** O prefixo de todo componente próprio (skill `design-system` I4). */
-export const PREFIX = 'azuos-';
+function findCardOpacityViolations(code, pattern) {
+	const found = [];
+	for (const m of matches(code, pattern)) {
+		if (isWatermarkLine(code, m.index)) continue;
+		found.push({
+			index: m.index,
+			message: `Opacidade proibida em card: \`${m[0]}\`. Cards devem ter cor 100% sólida.`
+		});
+	}
+	return found;
+}
 
-/** A raiz do client. O projeto tem um app só; a lista existe para o dia em que tiver dois. */
-export const APPS = [{ name: 'client', src: 'template/client/src' }];
+const noCardOpacity = {
+	id: "brand/no-card-opacity",
+	law: "Marca",
+	severity: "error",
+	description: "Cards e superfícies devem ser 100% sólidos. Opacidades e transparências em cards são estritamente proibidas.",
+	hint: "Use cores 100% sólidas da paleta. Remova classes com barra de opacidade (`bg-*/...`, `opacity-*`) em cards.",
+	enabled: (c) => c.brandRules?.noCardOpacity ?? true,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		const isCardFile = /card|surface/i.test(file.path);
+		if (!isCardFile && !/data-slot="[^"]*card[^"]*"|role="article"/i.test(file.code)) return [];
+		const patterns = [
+			/\bbg-[a-z0-9-]+(?:\/[0-9]{1,2})\b/g,
+			/\bopacity-[0-9]{1,2}\b/g
+		];
+		return patterns.flatMap((pattern) => findCardOpacityViolations(file.code, pattern));
+	}
+};
+const staticZuzu = {
+	id: "brand/static-zuzu",
+	law: "Marca",
+	severity: "error",
+	description: "O mascote Zuzu deve permanecer estático. Animações, rotações e oscilações são proibidas.",
+	hint: "Remova classes de animação (`animate-*`, rotação/escala) do mascote Zuzu.",
+	enabled: (c) => c.brandRules?.staticZuzu ?? true,
+	check: (file) => {
+		const found = [];
+		const zuzuTags = [...matches(file.code, /<[^>]*(?:zuzu|mascot)[^>]*>/gi)];
+		for (const tag of zuzuTags) {
+			if (/\banimate-|\bhover:rotate|\bhover:scale/i.test(tag[0])) {
+				found.push({
+					index: tag.index,
+					message: `Animação proibida no Zuzu: mascote deve ser sempre estático.`
+				});
+			}
+		}
+		return found;
+	}
+};
+const canonicalBackButton = {
+	id: "brand/canonical-back-button",
+	law: "Marca",
+	severity: "error",
+	description: "O botão de voltar canônico AzuosBackButton é obrigatório. Variações manuais de botão de voltar são proibidas.",
+	hint: "Use `<AzuosBackButton data={{ destination: '...' }} />` com formato `← Voltar para [destino]`.",
+	enabled: (c) => c.brandRules?.canonicalBackButton ?? true,
+	check: (file) => {
+		if (file.path.includes("azuos-back-button") || file.path.includes("/ui/")) return [];
+		const found = [];
+		for (const m of matches(file.code, /<(?:button|a)\b[^>]*>(?:(?!<\/(?:button|a)>)[\s\S])*?(?:Voltar\s+para|Retornar)[\s\S]*?<\/(?:button|a)>/gi)) {
+			if (!m[0].includes('data-slot="azuos-back-button"') && !m[0].includes("AzuosBackButton")) {
+				found.push({
+					index: m.index,
+					message: "Botão de voltar fora do padrão AzuosBackButton."
+				});
+			}
+		}
+		return found;
+	}
+};
+const solidInputs = {
+	id: "brand/solid-inputs",
+	law: "Marca",
+	severity: "error",
+	description: "Campos de entrada de formulário devem ter fundo sólido bg-muted, nunca bg-transparent.",
+	hint: "Use `bg-muted` sólido para manter contraste consistente entre claro e escuro.",
+	enabled: (c) => c.brandRules?.solidInputs ?? true,
+	check: (file) => {
+		if (file.path.includes("/ui/") || file.isTokenFile) return [];
+		const found = [];
+		for (const tag of tags(file.code, "input|textarea")) {
+			if (tag.text.includes("bg-transparent") && !SMALL_INPUT_TYPES.test(tag.text)) {
+				found.push({
+					index: tag.index,
+					message: "Campo de entrada com `bg-transparent`. Todos os campos devem ter fundo sólido `bg-muted`."
+				});
+			}
+		}
+		return found;
+	}
+};
+const dualFileActions = {
+	id: "brand/dual-file-actions",
+	law: "Marca",
+	severity: "warning",
+	description: "Funções de arquivo devem sempre disponibilizar download e visualização via hyperlink.",
+	hint: "Use o componente canônico `<AzuosFileLinks />` ou disponibilize links com download e target=\"_blank\".",
+	enabled: (c) => c.brandRules?.dualFileActions ?? true,
+	check: (file) => {
+		if (file.path.includes("/ui/") || file.isTokenFile) return [];
+		const isFileFeature = /file.*link|attachment.*list/i.test(file.path);
+		if (!isFileFeature) return [];
+		const hasDownload = /\bdownload\b/i.test(file.code);
+		const hasHyperlink = /target=["']_blank["']/i.test(file.code) || /\bviewUrl\b/i.test(file.code);
+		if ((hasDownload && !hasHyperlink) || (!hasDownload && hasHyperlink)) {
+			return [{
+				index: 0,
+				message: "Componente de arquivo incompleto: deve fornecer ambas as funções de download e abrir via hyperlink."
+			}];
+		}
+		return [];
+	}
+};
+const pasteFileAttachment = {
+	id: "brand/paste-file-attachment",
+	law: "Marca",
+	severity: "warning",
+	description: "Locais de anexar arquivos devem suportar colagem de arquivos/imagens via Ctrl+V.",
+	hint: "Adicione handler `onPaste` para capturar arquivos da área de transferência (clipboardData).",
+	enabled: (c) => c.brandRules?.pasteFileAttachment ?? true,
+	check: (file) => {
+		if (file.path.includes("/ui/") || file.isTokenFile) return [];
+		const isUploadFile = /(?:attachment|file).*picker|upload|dropzone/i.test(file.path);
+		if (!isUploadFile) return [];
+		if (/type=["']file["']/i.test(file.code) && !/\bonPaste\b/i.test(file.code)) {
+			return [{
+				index: 0,
+				message: "Componente de anexo de arquivo sem suporte a Ctrl+V (área de transferência)."
+			}];
+		}
+		return [];
+	}
+};
+/* ------------------------------------------------------------------ Lei de Hick */
+const hickNavItems = {
+	id: "hick/nav-items",
+	law: "Lei de Hick",
+	severity: "warning",
+	description: "Menu com opções demais aumenta o tempo de decisão.",
+	hint: "Agrupe itens raros num \"Mais\" ou mova-os para a página onde fazem sentido.",
+	enabled: (c) => c.laws.hick.enabled,
+	check: (file, c) => blocks(file.code, "nav").flatMap((nav) => {
+		const count = tags(nav.text, "a|button").length;
+		const max = c.laws.hick.maxNavItems;
+		return count > max ? [{
+			index: nav.index,
+			message: `Menu com ${count} itens (máximo ${max}).`
+		}] : [];
+	})
+};
+const hickSelectOptions = {
+	id: "hick/select-options",
+	law: "Lei de Hick",
+	severity: "warning",
+	description: "Select com opções demais obriga a ler a lista inteira.",
+	hint: "Troque por um campo com busca (combobox) ou agrupe com <optgroup>.",
+	enabled: (c) => c.laws.hick.enabled,
+	check: (file, c) => blocks(file.code, "select").flatMap((select) => {
+		const count = tags(select.text, "option").length;
+		const max = c.laws.hick.maxSelectOptions;
+		const grouped = /<optgroup\b/.test(select.text);
+		return count > max && !grouped ? [{
+			index: select.index,
+			message: `Select com ${count} opções (máximo ${max}).`
+		}] : [];
+	})
+};
+/* ------------------------------------------------------------------ Lei de Fitts */
+const TAILWIND_SPACING_PX = 4;
+/** Altura declarada num tag (Tailwind `h-*`/`size-*`/`min-h-*`, `h-[Npx]` ou style inline), em px. */
+function declaredHeights(tag) {
+	const fixed = [];
+	let min = null;
+	for (const m of matches(tag, /(?<![\w-])(min-h|h|size)-(\d+(?:\.\d+)?|\[(\d+)px\])(?![\w.-])/g)) {
+		const px = m[3] ? Number(m[3]) : Number(m[2]) * TAILWIND_SPACING_PX;
+		if (m[1] === "min-h") {
+			min = Math.max(min ?? 0, px);
+			continue;
+		}
+		fixed.push(px);
+	}
+	for (const m of matches(tag, /(min-)?height\s*:\s*(\d+)px/g)) {
+		if (m[1]) {
+			min = Math.max(min ?? 0, Number(m[2]));
+			continue;
+		}
+		fixed.push(Number(m[2]));
+	}
+	return {
+		min,
+		fixed
+	};
+}
 
-/** Pastas permitidas em `lib` (skill `design-system` §2). */
-export const LIB_FOLDERS = [
-  'api',
-  'auth',
-  'components',
-  'hooks',
-  'motion',
-  'navigation',
-  'theme',
-  'types',
-  'utils',
-  'view-models',
+function checkFittsTags(code, minPx) {
+	const found = [];
+	const candidates = [
+		...tags(code, INTERACTIVE_TAGS),
+		...tags(code, "[a-z][\\w-]*").filter((t) => /\brole\s*=\s*["']button["']/.test(t.text))
+	];
+	for (const tag of candidates) {
+		if (tag.name === "input" && SMALL_INPUT_TYPES.test(tag.text)) continue;
+		const { min, fixed } = declaredHeights(tag.text);
+		if (min !== null && min >= minPx) continue;
+		const tooSmall = fixed.filter((px) => px < minPx);
+		if (tooSmall.length && tooSmall.length === fixed.length) {
+			found.push({
+				index: tag.index,
+				message: `<${tag.name}> com ${Math.max(...tooSmall)}px de altura (mínimo ${minPx}px).`
+			});
+		}
+	}
+	return found;
+}
+
+function checkFittsCss(code, minPx) {
+	const found = [];
+	for (const m of matches(code, /([^{}]+)\{([^{}]*)\}/g)) {
+		const selector = m[1];
+		if (!/\b(?:button|btn|input|select|textarea)\b|\[role=["']?button/.test(selector)) continue;
+		const height = m[2].match(/(?:^|[;\s])height\s*:\s*(\d+)px/);
+		if (height && Number(height[1]) < minPx) {
+			found.push({
+				index: m.index + m[0].indexOf(height[0]),
+				message: `\`${selector.trim()}\` com ${height[1]}px de altura (mínimo ${minPx}px).`
+			});
+		}
+	}
+	return found;
+}
+
+const fittsTargetSize = {
+	id: "fitts/target-size",
+	law: "Lei de Fitts",
+	severity: "error",
+	description: "Alvo de clique ou toque pequeno demais.",
+	hint: "Dê ao controle a altura mínima da marca (ex.: `h-10`). Ícone pequeno vai dentro de um botão do tamanho mínimo.",
+	enabled: (c) => c.laws.fitts.enabled,
+	check: (file, c) => [
+		...checkFittsTags(file.code, c.laws.fitts.minTargetPx),
+		...checkFittsCss(file.code, c.laws.fitts.minTargetPx)
+	]
+};
+/* ------------------------------------------------------------------ Lei de Jakob */
+const jakobClickable = {
+	id: "jakob/clickable-non-interactive",
+	law: "Lei de Jakob",
+	severity: "error",
+	description: "Elemento não interativo com clique: não recebe foco, não responde a teclado e não parece clicável.",
+	hint: "Use <button type=\"button\"> para ação e <a href> para navegação.",
+	enabled: (c) => c.laws.jakob.enabled,
+	check: (file) => tags(file.code, "div|span|li|p|img|section|article|td|tr|label|header|footer").filter((t) => /\b(?:onclick|on:click|onClick)\s*=/.test(t.text)).map((t) => ({
+		index: t.index,
+		message: `<${t.name}> com clique.`
+	}))
+};
+const jakobAnchorHref = {
+	id: "jakob/anchor-without-href",
+	law: "Lei de Jakob",
+	severity: "error",
+	description: "Link sem destino: não abre em nova aba, não aparece para leitor de tela como link.",
+	hint: "Se navega, dê um `href`. Se executa uma ação, é um <button>.",
+	enabled: (c) => c.laws.jakob.enabled,
+	check: (file) => tags(file.code, "a").filter((t) => !hasAttr(t.text, "href")).map((t) => ({
+		index: t.index,
+		message: "<a> sem href."
+	}))
+};
+function insideLabel(code, index) {
+	const before = code.slice(0, index);
+	return before.lastIndexOf("<label") > before.lastIndexOf("</label>");
+}
+function hasLabelFor(code, id) {
+	return new RegExp(`\\b(?:for|htmlFor)\\s*=\\s*["'{]${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'}]`).test(code);
+}
+const jakobPlaceholderLabel = {
+	id: "jakob/placeholder-as-label",
+	law: "Lei de Jakob",
+	severity: "warning",
+	description: "Campo só com placeholder: o rótulo some ao digitar.",
+	hint: "Use <label for> visível (ou aria-label quando o contexto já diz o que é). O placeholder fica como exemplo.",
+	enabled: (c) => c.laws.jakob.enabled,
+	check: (file) => tags(file.code, "input|textarea").filter((t) => hasAttr(t.text, "placeholder")).filter((t) => !/\btype\s*=\s*["'](?:hidden|submit|button|checkbox|radio|reset|image)["']/.test(t.text)).filter((t) => !hasAttr(t.text, "aria-label") && !hasAttr(t.text, "aria-labelledby") && !hasAttr(t.text, "title")).filter((t) => !insideLabel(file.code, t.index)).filter((t) => {
+		const id = attr(t.text, "id");
+		return id === null || id === "" || !hasLabelFor(file.code, id);
+	}).map((t) => ({
+		index: t.index,
+		message: `<${t.name}> sem rótulo (só placeholder).`
+	}))
+};
+/* ------------------------------------------------------------------ Lei de Miller */
+function countFields(code) {
+	const native = tags(code, "input|select|textarea").filter((t) => !/\btype\s*=\s*["'](?:hidden|submit|button|reset|image)["']/.test(t.text)).length;
+	const components = [...matches(code, /<[A-Z]\w*(?:Field|Input|Select|Textarea|Picker)\b/g)].length;
+	return native + components;
+}
+const millerUngrouped = {
+	id: "miller/ungrouped-fields",
+	law: "Lei de Miller",
+	severity: "warning",
+	description: "Formulário longo sem grupos sobrecarrega a memória de trabalho.",
+	hint: "Divida em <fieldset> com <legend> (dados pessoais, endereço, pagamento) ou em etapas.",
+	enabled: (c) => c.laws.miller.enabled,
+	check: (file, c) => blocks(file.code, "form").flatMap((form) => {
+		const count = countFields(form.text);
+		const max = c.laws.miller.maxUngroupedFields;
+		const grouped = /<fieldset\b|role\s*=\s*["']group["']/.test(form.text);
+		return count > max && !grouped ? [{
+			index: form.index,
+			message: `Formulário com ${count} campos sem agrupar (máximo ${max}).`
+		}] : [];
+	})
+};
+/* ------------------------------------------------------------------ Efeito Von Restorff */
+function isPrimaryAction(tag) {
+	return /\bbg-primary(?![\w-])/.test(tag) || /\bvariant\s*=\s*["']primary["']/.test(tag) || /\b(?:btn|button)(?:--|-)primary\b/.test(tag);
+}
+const vonRestorffPrimary = {
+	id: "von-restorff/single-primary",
+	law: "Efeito Von Restorff",
+	severity: "warning",
+	description: "Ação primária demais na mesma tela: quando tudo se destaca, nada se destaca.",
+	hint: "Mantenha uma ação primária por tela; as outras viram secundárias (contorno ou fantasma).",
+	enabled: (c) => c.laws.vonRestorff.enabled,
+	check: (file, c) => {
+		const max = c.laws.vonRestorff.maxPrimaryActions;
+		const primaries = tags(file.code, `${INTERACTIVE_TAGS}|[A-Z]\\w*Button`).filter((t) => isPrimaryAction(t.text));
+		if (primaries.length <= max) return [];
+		return primaries.slice(max).map((t) => ({
+			index: t.index,
+			message: `${primaries.length} ações primárias no arquivo (máximo ${max}).`
+		}));
+	}
+};
+/* ------------------------------------------------------------------ Conectividade Uniforme */
+const uniformChoiceGroup = {
+	id: "uniform-connectedness/choice-group",
+	law: "Conectividade Uniforme",
+	severity: "warning",
+	description: "Opções do mesmo grupo soltas, sem contorno comum.",
+	hint: "Envolva as opções em <fieldset> com <legend>, ou num container com role=\"radiogroup\"/\"group\" e aria-label.",
+	enabled: (c) => c.laws.uniformConnectedness.enabled,
+	check: (file) => {
+		const groups = new Map();
+		for (const tag of tags(file.code, "input")) {
+			if (!/\btype\s*=\s*["'](?:radio|checkbox)["']/.test(tag.text)) continue;
+			const name = attr(tag.text, "name");
+			if (!name) continue;
+			groups.set(name, [...groups.get(name) ?? [], tag.index]);
+		}
+		const grouped = /<fieldset\b|role\s*=\s*["'](?:radiogroup|group)["']/.test(file.code);
+		if (grouped) return [];
+		return [...groups.entries()].filter(([, indexes]) => indexes.length >= 2).map(([name, indexes]) => ({
+			index: indexes[0],
+			message: `Grupo "${name}" com ${indexes.length} opções sem <fieldset>.`
+		}));
+	}
+};
+/* ------------------------------------------------------------------ Lei de Tesler */
+const FIELD_KINDS = [
+	{
+		pattern: /e-?mail/i,
+		autocomplete: "email",
+		type: "email"
+	},
+	{
+		pattern: /\b(?:tel|phone|fone|telefone|celular|whats(?:app)?)\b/i,
+		autocomplete: "tel",
+		type: "tel"
+	},
+	{
+		pattern: /\b(?:cep|zip|postal(?:-?code)?)\b/i,
+		autocomplete: "postal-code",
+		inputmode: "numeric"
+	},
+	{
+		pattern: /\b(?:nome|name|full-?name)\b/i,
+		autocomplete: "name"
+	},
+	{
+		pattern: /\b(?:endereco|address|street|logradouro)\b/i,
+		autocomplete: "street-address"
+	},
+	{
+		pattern: /\b(?:cpf|cnpj)\b/i,
+		autocomplete: "off",
+		inputmode: "numeric"
+	}
 ];
-
-/**
- * O NOME DENUNCIA O COMPONENTE DE FEATURE — e é por ele que a regra decide, não pela contagem de
- * consumidores.
- *
- * "Usado por uma feature só" não serve de sinal AQUI: este repositório é um template, e nasce com UMA
- * feature de exemplo. Pela contagem, `azuos-page-header` e `azuos-status-badge` — que são o coração do
- * sistema de design — seriam empurrados para dentro de `routes/tasks/`, e a segunda tela teria de
- * trazê-los de volta. Uma regra que acusa o certo é uma regra que alguém desliga.
- *
- * O sinal que não erra é o primeiro da skill `design-system` §3.1: **nome da feature dentro de
- * `lib/components/`**. `azuos-task-list-view` só é usado por `routes/tasks` E carrega `task` no nome —
- * esse é de feature. `azuos-page-header` também só é usado por `routes/tasks`, mas não fala de tarefa
- * nenhuma — esse é genérico.
- *
- * O preço: um componente de domínio batizado sem o nome da entidade (`azuos-invoice-row` dentro da
- * feature `billing`) escapa. É um preço menor que o de uma regra que grita no lugar errado.
- *
- * @param {string} folder @param {string} feature
- */
-function nameMentionsFeature(folder, feature) {
-  if (feature === '*' || feature === '') return false;
-
-  const name = (segments(folder).at(-1) ?? '').replace(new RegExp(`^${PREFIX}`), '');
-  /* `tasks` casa com `task-list-view`: a pasta da rota é plural, o nome do componente é singular. */
-  const singular = feature.replace(/s$/, '');
-
-  return name.split('-').includes(singular) || name.split('-').includes(feature);
+function fieldKind(tag) {
+	const key = [attr(tag, "name"), attr(tag, "id")].filter(Boolean).join(" ");
+	return key ? FIELD_KINDS.find((k) => k.pattern.test(key)) : undefined;
 }
-
-const RAW_PALETTE =
-  /\b(?:text|bg|border|ring|fill|stroke|from|to|via)-(?:neutral|gray|slate|zinc|stone|red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d{2,3}\b/g;
-const ARBITRARY_FONT = /\btext-\[\d+(?:\.\d+)?px\]/g;
-const SIZE_RADIUS = /\brounded(?:-(?:xs|sm|md|lg|xl|2xl|3xl|\[[^\]]+\]))?(?=[\s"'`}]|$)/g;
-const OFF_SCALE_SHADOW = /\bshadow(?:-(?:sm|md|lg|2xl|inner|\[[^\]]+\]))?(?=[\s"'`}]|$)/g;
-const OFF_SCALE_HEIGHT = /\bh-(?:7|8|9|11|12)\b/g;
-const RAW_INTERACTIVE = /<(button|input|select|textarea|table)\b/g;
-
-/**
- * QUEM É CAMPO, pelo nome da pasta: `azuos-*-field`, `azuos-*-picker` e o `azuos-input-group`.
- *
- * É pelo nome porque é o nome que a casa já usa para campo de formulário e de filtro (skill
- * `design-system` §5) — e uma regra que dependesse de ler o JSX erraria a cada forma nova de montar.
- */
-const FIELD_NAME = /(?:-field|-picker|^input-group)$/;
-/**
- * Leva nome de campo, mas NÃO É um controle de uma linha — a régua de 40px e o canto de controle
- * não descrevem a forma dele:
- * - `filter-field`: moldura de rótulo em volta de um campo que vem pronto por `children`;
- * - `checkbox-field`: um quadradinho de marcar com o rótulo ao lado;
- * - `slider-field`: um trilho com uma bolinha;
- * - `otp-field`: uma fileira de casas quadradas, uma por dígito;
- * - `color-swatch-field`: uma fileira de quadradinhos de cor.
- */
-const FIELD_WRAPPERS = [
-  'filter-field',
-  'checkbox-field',
-  'slider-field',
-  'otp-field',
-  'color-swatch-field',
-];
-const FIELD_RADIUS = /\brounded-control\b/;
-const FIELD_HEIGHT = /\bcontrol-lg\b/;
-/** Área de texto: a altura é o número de linhas, então a régua de altura não entra. */
-const MULTILINE = /<(?:textarea|Textarea)\b/;
-/**
- * Campo que COMPÕE outro campo: importa um `azuos-*-field`, `azuos-*-picker` ou o
- * `azuos-input-group`. O canto e a altura vêm do campo de dentro (ou da constante de classes que
- * ele exporta), que já deve a régua por esta mesma regra — cobrar de novo de quem só põe rótulo e
- * mensagem de erro em volta obrigaria a repetir as classes num elemento que não é o controle.
- */
-const COMPOSES_FIELD =
-  /from\s+['"][^'"]*\/azuos-(?:[a-z0-9-]+-field|[a-z0-9-]+-picker|input-group)\/[^'"]+['"]/;
-
-/** @param {string} path */
-function segments(path) {
-  return path.split('/');
-}
-
-/** O app que contém o caminho, ou `undefined` se ele não mora em nenhum (ex.: `server/`). */
-/** @param {string} path @returns {{name: string, src: string} | undefined} */
-function appOf(path) {
-  return APPS.find((app) => path === app.src || path.startsWith(`${app.src}/`));
-}
-
-/** @param {{src: string}} app */
-function libComponents(app) {
-  return `${app.src}/lib/components`;
-}
-
-/** @param {{src: string}} app */
-function libHooks(app) {
-  return `${app.src}/lib/hooks`;
-}
-
-/** @param {{src: string}} app */
-function viewModels(app) {
-  return `${app.src}/lib/view-models`;
-}
-
-/** @param {{src: string}} app */
-function routesDir(app) {
-  return `${app.src}/routes`;
-}
-
-/** @param {string} path */
-function isUi(path) {
-  return path.includes('/components/ui/') || path.includes('/hooks/ui/');
-}
-
-/** @param {string} path */
-function isStoryOrTest(path) {
-  return /\.(stories|test)\.(ts|tsx)$/.test(path);
-}
-
-/**
- * Arquivo de rota: qualquer `.tsx` dentro de `routes`, fora de `/components/`. O `routeTree.gen.ts`
- * é gerado e fica de fora.
- * @param {string} path
- */
-function isRouteFile(path) {
-  const app = appOf(path);
-  if (!app) return false;
-  if (!path.startsWith(`${routesDir(app)}/`) || !path.endsWith('.tsx')) return false;
-
-  return !path.includes('/components/');
-}
-
-/** Arquivo de componente próprio (genérico ou de feature), fora do CLI e fora de story/teste. */
-/** @param {string} path */
-function isOwnComponentSource(path) {
-  if (!path.endsWith('.component.tsx') || isUi(path) || isStoryOrTest(path)) return false;
-  const app = appOf(path);
-  if (!app) return false;
-  if (path.startsWith(`${libComponents(app)}/`)) return true;
-
-  return new RegExp(`^${routesDir(app)}/.+/components/`).test(path);
-}
-
-/** Onde regra de classe Tailwind vale: componente próprio e arquivo de rota. */
-/** @param {string} path */
-function isStyledSource(path) {
-  if (isOwnComponentSource(path)) return true;
-
-  return isRouteFile(path) && !isStoryOrTest(path);
-}
-
-/** As pastas imediatas de componente: `lib/components/<x>` e `routes/**\/components/<x>`. */
-/** @param {ProjectFile[]} files @returns {string[]} */
-export function componentFolders(files) {
-  const folders = new Set();
-
-  for (const { path } of files) {
-    if (isUi(path)) continue;
-    const app = appOf(path);
-    if (!app) continue;
-
-    const lib = path.match(new RegExp(`^(${libComponents(app)}/[^/]+)/`));
-    if (lib?.[1]) folders.add(lib[1]);
-
-    const feature = path.match(new RegExp(`^(${routesDir(app)}/.+?/components/[^/]+)/`));
-    if (feature?.[1]) folders.add(feature[1]);
-  }
-
-  return [...folders].sort();
-}
-
-/**
- * A feature de um arquivo de rota: `routes/tasks/index.tsx` → `tasks`. Um `.tsx` direto na raiz de
- * `routes` (o `__root.tsx`, o `index.tsx`) conta como "app inteiro" (`*`).
- * @param {string} path
- */
-function featureOf(path) {
-  const app = appOf(path);
-  if (!app) return '';
-
-  const parts = path.slice(routesDir(app).length + 1).split('/');
-  if (parts.length <= 1) return '*';
-
-  return parts[0].startsWith('__') ? '*' : parts[0];
-}
-
-/**
- * Para cada componente de `lib/components`, as features que o usam — seguindo a cadeia: se
- * `azuos-task-row` só é importado por `azuos-task-list-view`, e esse só pela rota `tasks`, os dois
- * são da feature `tasks`. O `__root.tsx` conta como "app inteiro" (`*`).
- * @param {ProjectFile[]} files @returns {Map<string, Set<string>>}
- */
-export function featureOwners(files) {
-  const libFolders = componentFolders(files).filter((folder) => {
-    const app = appOf(folder);
-
-    return app && folder.startsWith(`${libComponents(app)}/`);
-  });
-  const importersOf = new Map();
-
-  for (const folder of libFolders) {
-    const app = appOf(folder);
-    const name = segments(folder).at(-1) ?? '';
-    /* `<nome>/<nome>` e não `components/<nome>/<nome>`: aqui os imports são RELATIVOS, e um
-       componente importando o irmão escreve `../azuos-x/azuos-x.component` — sem `components/` no
-       caminho. Exigindo o prefixo, a cadeia lib -> lib ficava invisível e um componente de feature
-       passava por genérico. O par repetido já é específico o bastante para não casar por acidente. */
-    const importPath = `${name}/${name}`;
-    importersOf.set(
-      folder,
-      files.filter(
-        (file) =>
-          appOf(file.path) === app &&
-          !file.path.startsWith(`${folder}/`) &&
-          file.content.includes(importPath),
-      ),
-    );
-  }
-
-  const memo = new Map();
-  const resolving = new Set();
-
-  const ownersOf = (folder) => {
-    const cached = memo.get(folder);
-    if (cached) return cached;
-    /* Ciclo de import: trata como genérico para não reprovar por engano. */
-    if (resolving.has(folder)) return new Set(['*']);
-    resolving.add(folder);
-
-    const owners = new Set();
-    const app = appOf(folder);
-    for (const importer of importersOf.get(folder) ?? []) {
-      if (isStoryOrTest(importer.path)) continue;
-      const libOwner = libFolders.find((other) => importer.path.startsWith(`${other}/`));
-      if (libOwner) {
-        for (const owner of ownersOf(libOwner)) owners.add(owner);
-        continue;
-      }
-      if (!importer.path.startsWith(`${routesDir(app)}/`)) {
-        owners.add('*');
-        continue;
-      }
-      owners.add(featureOf(importer.path));
-    }
-
-    resolving.delete(folder);
-    memo.set(folder, owners);
-
-    return owners;
-  };
-
-  for (const folder of libFolders) ownersOf(folder);
-  /* Sem dono nenhum (componente que ninguém importa) não é "de feature": fica de fora. */
-  for (const [folder, owners] of memo)
-    if (owners.size === 0 || owners.has('*')) memo.delete(folder);
-
-  return memo;
-}
-
-/** @param {string} content @param {number} index */
-function lineOf(content, index) {
-  return content.slice(0, index).split('\n').length;
-}
-
-/**
- * @param {ProjectFile[]} files
- * @param {string} rule
- * @param {RegExp} pattern
- * @param {(match: string, file: ProjectFile) => boolean} [allowed]
- * @returns {Violation[]}
- */
-function classViolations(files, rule, pattern, allowed = () => false) {
-  const out = [];
-
-  for (const file of files) {
-    if (!isStyledSource(file.path)) continue;
-
-    for (const match of file.content.matchAll(pattern)) {
-      if (allowed(match[0], file)) continue;
-      out.push({
-        rule,
-        file: file.path,
-        detail: match[0],
-        line: lineOf(file.content, match.index),
-      });
-    }
-  }
-
-  return out;
-}
-
-/** `azuos-text-field` → `AzuosTextField`: o nome que a função exportada tem de ter. */
-/** @param {string} folderName */
-export function expectedExportName(folderName) {
-  return folderName
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
-}
-
-/** @type {Rule[]} */
-/* ---------------------------------------------------------------- regras do grupo (13 sistemas) */
-
-const GROUP_TONE =
-  '(?:primary|destructive|success|warning|info|accent|brand-[a-z]+-\\d{2,3}|azuos-(?!border\\b)[a-z-]+|tone-[a-z]+-border|(?:red|rose|green|emerald|blue|sky|amber|yellow|orange|lime|teal|cyan|indigo|violet|purple|fuchsia|pink)-\\d{2,3})';
-const COLORED_BORDER = new RegExp(
-  `(?<![\\w-])((?:[\\w\\-\\[\\]=&*>~./]+:)*)!?(border(?:-[xytrblse])?|ring)-(${GROUP_TONE}|ring)(?:\\/\\d+)?(?![\\w-])`,
-  'g',
-);
-const FOCUS_VARIANT = /focus|has-focus|has-\[/;
-const GROUP_SOURCE = /\/client\/src\/.*\.(?:tsx|svelte)$/;
-const GROUP_SKIP = /\.(?:test|stories|spec)\.|\.test\.svelte$|\.stories\.svelte$/;
-const COMMENT_LINE = /^\s*(?:\*|\/\/|\/\*|<!--)/;
-
-/** As linhas de código de um arquivo de tela, sem os comentários de linha inteira. */
-function codeLines(file) {
-  return file.content.split('\n').map((text, index) => ({ text, line: index + 1 }));
-}
-
-
-/** O anel de FOCO fica (acessibilidade); borda de foco, não. */
-function isColoredBorder([, variants, kind, color]) {
-  const isFocus = FOCUS_VARIANT.test(variants);
-  if (kind === 'ring') return !isFocus;
-
-  return color !== 'ring' || isFocus;
-}
-
-/** Só as telas do sistema; teste e story ficam de fora. */
-function isGroupSource(file) {
-  return GROUP_SOURCE.test(`/${file.path}`) && !GROUP_SKIP.test(file.path);
-}
-
-function borderLineViolations(file, { text, line }) {
-  if (COMMENT_LINE.test(text) || text.includes('animate-spin')) return [];
-
-  return [...text.matchAll(COLORED_BORDER)]
-    .filter(isColoredBorder)
-    .map(([whole]) => ({ rule: 'colored-border', file: file.path, detail: whole, line }));
-}
-
-/** @param {ProjectFile[]} files */
-function coloredBorderViolations(files) {
-  return files
-    .filter(isGroupSource)
-    .flatMap((file) => codeLines(file).flatMap((entry) => borderLineViolations(file, entry)));
-}
-
-function selectLineViolations(file, ownDropdown, { text, line }) {
-  if (COMMENT_LINE.test(text)) return [];
-
-  const out = [];
-  if (/<select[\s>]/.test(text)) out.push({ rule: 'native-select', file: file.path, detail: '<select>', line });
-  if (/captionLayout=\{?["'`]dropdown/.test(text) && !ownDropdown)
-    out.push({ rule: 'native-select', file: file.path, detail: 'captionLayout="dropdown" sem lista própria', line });
-
-  return out;
-}
-
-/** @param {ProjectFile[]} files */
-function nativeSelectViolations(files) {
-  return files.filter(isGroupSource).flatMap((file) => {
-    const ownDropdown = /Dropdown\s*:/.test(file.content);
-
-    return codeLines(file).flatMap((entry) => selectLineViolations(file, ownDropdown, entry));
-  });
-}
-
+const teslerAutocomplete = {
+	id: "tesler/autocomplete",
+	law: "Lei de Tesler",
+	severity: "warning",
+	description: "Campo comum sem autocomplete: a pessoa digita o que o navegador já sabe.",
+	hint: "Adicione `autocomplete` com o valor padrão do HTML para o campo.",
+	enabled: (c) => c.laws.tesler.enabled,
+	check: (file) => tags(file.code, "input").flatMap((t) => {
+		const kind = fieldKind(t.text);
+		if (!kind || hasAttr(t.text, "autocomplete")) return [];
+		return [{
+			index: t.index,
+			message: "Campo sem autocomplete.",
+			hint: `Use autocomplete="${kind.autocomplete}".`
+		}];
+	})
+};
+const teslerInputType = {
+	id: "tesler/input-type",
+	law: "Lei de Tesler",
+	severity: "warning",
+	description: "Tipo de campo genérico: no celular abre o teclado errado e não valida.",
+	hint: "Use o `type`/`inputmode` do conteúdo: email, tel, numeric.",
+	enabled: (c) => c.laws.tesler.enabled,
+	check: (file) => tags(file.code, "input").flatMap((t) => {
+		const kind = fieldKind(t.text);
+		if (!kind) return [];
+		const type = attr(t.text, "type");
+		if (kind.type && type !== kind.type) {
+			return [{
+				index: t.index,
+				message: `Campo de ${kind.autocomplete} com type="${type ?? "text"}".`,
+				hint: `Use type="${kind.type}".`
+			}];
+		}
+		if (kind.inputmode && attr(t.text, "inputmode") === null) {
+			return [{
+				index: t.index,
+				message: "Campo numérico sem inputmode.",
+				hint: `Use inputmode="${kind.inputmode}".`
+			}];
+		}
+		return [];
+	})
+};
+/* ------------------------------------------------------------------ motor */
 export const RULES = [
-  {
-    id: 'component-prefix',
-    description: `Todo componente próprio mora em pasta \`${PREFIX}<nome>/\`.`,
-    check: (files) =>
-      componentFolders(files)
-        .filter((folder) => !segments(folder).at(-1)?.startsWith(PREFIX))
-        .map((folder) => ({
-          rule: 'component-prefix',
-          file: folder,
-          detail: `pasta sem prefixo ${PREFIX}`,
-        })),
-  },
-  {
-    id: 'component-export-prefix',
-    description: `A função exportada leva o prefixo no nome (\`${PREFIX}text-field\` → \`AzuosTextField\`).`,
-    check: (files) =>
-      files
-        .filter((file) => isOwnComponentSource(file.path))
-        .flatMap((file) => {
-          const name = file.path.replace(/\.component\.tsx$/, '').split('/').at(-1) ?? '';
-          const expected = expectedExportName(name);
-          /* O `<` entra junto com o `(`: componente GENÉRICO é declarado
-             `export function AzuosDataTable<TRow>(`, e exigir parêntese colado no nome
-             reprovava justamente quem estava certo. */
-          if (new RegExp(`export function ${expected}\\s*[(<]`).test(file.content)) return [];
-          if (file.content.includes(`export class ${expected} `)) return [];
-
-          return [
-            {
-              rule: 'component-export-prefix',
-              file: file.path,
-              detail: `sem export function ${expected}`,
-            },
-          ];
-        }),
-  },
-  {
-    id: 'component-siblings',
-    description:
-      'Todo componente próprio tem `.component.stories.tsx` e `.component.test.tsx` ao lado.',
-    check: (files) => {
-      const paths = new Set(files.map((file) => file.path));
-      const out = [];
-
-      for (const folder of componentFolders(files)) {
-        const name = segments(folder).at(-1) ?? '';
-        /* A porta de entrada do `ui/` é um `.ts` que só reexporta: não decide nada, não tem story
-           nem teste. Quem ganha variante própria vira `.component.tsx` e passa a ter os dois. */
-        if (!paths.has(`${folder}/${name}.component.tsx`)) continue;
-        /* O teste e a story espelham o nome INTEIRO do arquivo, sufixo de papel incluso: a regra é
-           "arquivo + `.test`", a mesma de `format-date.util.test.ts` e de `use-task-list.model.test.tsx`. */
-        if (!paths.has(`${folder}/${name}.component.stories.tsx`))
-          out.push({ rule: 'component-siblings', file: folder, detail: 'sem .component.stories.tsx' });
-        if (!paths.has(`${folder}/${name}.component.test.tsx`))
-          out.push({ rule: 'component-siblings', file: folder, detail: 'sem .component.test.tsx' });
-      }
-
-      return out;
-    },
-  },
-  {
-    id: 'feature-component-in-lib',
-    description:
-      'Componente de `lib/components` que leva o nome de uma feature e só é usado por ela é de feature: mora em `routes/<feature>/components/`.',
-    check: (files) =>
-      [...featureOwners(files)]
-        .filter(
-          ([folder, owners]) =>
-            owners.size === 1 && nameMentionsFeature(folder, [...owners][0] ?? ''),
-        )
-        .map(([folder, owners]) => ({
-          rule: 'feature-component-in-lib',
-          file: folder,
-          detail: `só usado por routes/${[...owners][0]}`,
-        })),
-  },
-  {
-    id: 'hook-location',
-    description: 'Hook próprio mora em `lib/hooks/use-<nome>/`; nada solto, nada sem `use-`.',
-    check: (files) =>
-      APPS.flatMap((app) => {
-        const entries = new Set();
-        for (const { path } of files) {
-          const match = path.match(new RegExp(`^${libHooks(app)}/([^/]+)(/)?`));
-          if (match?.[1]) entries.add(match[2] ? `${match[1]}/` : match[1]);
-        }
-
-        return [...entries]
-          .filter((entry) => entry !== 'ui/' && !(entry.startsWith('use-') && entry.endsWith('/')))
-          .map((entry) => ({
-            rule: 'hook-location',
-            file: `${libHooks(app)}/${entry.replace(/\/$/, '')}`,
-            detail: entry.endsWith('/') ? 'pasta sem prefixo use-' : 'arquivo solto em lib/hooks',
-          }));
-      }),
-  },
-  {
-    id: 'view-model-name',
-    description: 'View-model é `lib/view-models/use-<nome>.model.ts`; util ao lado é `.util.ts`.',
-    check: (files) =>
-      APPS.flatMap((app) =>
-        files
-          .filter((file) => file.path.startsWith(`${viewModels(app)}/`))
-          .filter((file) => !isStoryOrTest(file.path))
-          .filter((file) => {
-            const name = segments(file.path).at(-1) ?? '';
-
-            return !/^use-[a-z0-9-]+\.model\.ts$/.test(name) && !/\.util\.ts$/.test(name);
-          })
-          .map((file) => ({
-            rule: 'view-model-name',
-            file: file.path,
-            detail: 'fora de use-<nome>.model.ts',
-          })),
-      ),
-  },
-  {
-    id: 'lib-folder',
-    description: `Em \`lib\` só existem: ${LIB_FOLDERS.join(', ')}.`,
-    check: (files) =>
-      APPS.flatMap((app) => {
-        const folders = new Set();
-        for (const { path } of files) {
-          const match = path.match(new RegExp(`^${app.src}/lib/([^/]+)/`));
-          if (match?.[1]) folders.add(match[1]);
-        }
-
-        return [...folders]
-          .filter((folder) => !LIB_FOLDERS.includes(folder))
-          .map((folder) => ({
-            rule: 'lib-folder',
-            file: `${app.src}/lib/${folder}`,
-            detail: 'pasta fora do mapa',
-          }));
-      }),
-  },
-  {
-    id: 'ui-import-boundary',
-    description: '`lib/components/ui` só é importado por componente de `lib/components`.',
-    check: (files) =>
-      files
-        .filter((file) => {
-          const app = appOf(file.path);
-
-          return app && !file.path.startsWith(`${libComponents(app)}/`);
-        })
-        .filter((file) => /(?:lib\/)?components\/ui\//.test(file.content))
-        .map((file) => ({
-          rule: 'ui-import-boundary',
-          file: file.path,
-          detail: 'importa components/ui',
-        })),
-  },
-  {
-    id: 'cross-feature-import',
-    description: 'Feature não importa componente de outra feature.',
-    check: (files) =>
-      files
-        .filter((file) => {
-          const app = appOf(file.path);
-
-          return app && file.path.startsWith(`${routesDir(app)}/`);
-        })
-        .flatMap((file) =>
-          /* `(?!lib\/)` é o que separa "componente de outra feature" de "componente genérico": o
-             caminho para `lib/components` sobe o mesmo número de pastas e casaria igual. */
-          [...file.content.matchAll(/from\s+['"](?:\.\.\/)+(?!lib\/)([a-z-]+)\/components\//g)].map(
-            (match) => ({
-              rule: 'cross-feature-import',
-              file: file.path,
-              detail: `importa componente de ${match[1]}`,
-            }),
-          ),
-        ),
-  },
-  {
-    id: 'route-markup',
-    description:
-      'Rota só compõe: nada de `<button>`, `<input>`, `<select>`, `<textarea>`, `<table>` cru.',
-    check: (files) =>
-      files
-        .filter((file) => isRouteFile(file.path))
-        .flatMap((file) =>
-          [...file.content.matchAll(RAW_INTERACTIVE)].map((match) => ({
-            rule: 'route-markup',
-            file: file.path,
-            detail: `<${match[1]}> na rota`,
-            line: lineOf(file.content, match.index),
-          })),
-        ),
-  },
-  {
-    id: 'route-height',
-    description: 'A rota não define altura de controle; campo é `control-lg` no componente.',
-    check: (files) =>
-      classViolations(
-        files.filter((file) => isRouteFile(file.path)),
-        'route-height',
-        OFF_SCALE_HEIGHT,
-      ),
-  },
-  {
-    id: 'radius-by-role',
-    description:
-      'Raio por papel: `rounded-surface|control|box|chip|full`, nunca `rounded-lg/xl/…`.',
-    check: (files) =>
-      classViolations(
-        files,
-        'radius-by-role',
-        SIZE_RADIUS,
-        /* A gaveta de baixo do celular tem o canto de cima arredondado por fora da escala: é a forma
-           do bottom sheet, não um raio escolhido no olho. */
-        (match, file) => file.path.includes(`/${PREFIX}responsive-dialog-content/`),
-      ),
-  },
-  {
-    id: 'field-ruler',
-    description:
-      'Todo campo (`azuos-*-field`, `azuos-*-picker`, `azuos-input-group`) tem `rounded-control` e `control-lg`.',
-    /* As regras acima PROÍBEM o valor errado; esta EXIGE o certo. Sem ela, um campo novo que
-       simplesmente não escreve canto nem altura passa limpo e herda os do componente baixado
-       (`rounded-md`, `h-9`) — fica 6px menos arredondado e 4px mais baixo que os vizinhos. */
-    check: (files) =>
-      files
-        .filter((file) => isOwnComponentSource(file.path))
-        .flatMap((file) => {
-          const name = (segments(file.path).at(-2) ?? '').replace(new RegExp(`^${PREFIX}`), '');
-          if (!FIELD_NAME.test(name) || FIELD_WRAPPERS.includes(name)) return [];
-          if (COMPOSES_FIELD.test(file.content)) return [];
-
-          const out = [];
-          if (!FIELD_RADIUS.test(file.content))
-            out.push({ rule: 'field-ruler', file: file.path, detail: 'campo sem rounded-control' });
-          if (!MULTILINE.test(file.content) && !FIELD_HEIGHT.test(file.content))
-            out.push({ rule: 'field-ruler', file: file.path, detail: 'campo sem control-lg' });
-
-          return out;
-        }),
-  },
-  {
-    id: 'raw-palette',
-    description:
-      'Cor só por token (`text-ink-*`, `bg-card`, `text-destructive`…), nunca paleta crua.',
-    check: (files) => classViolations(files, 'raw-palette', RAW_PALETTE),
-  },
-  {
-    id: 'arbitrary-font-size',
-    description: 'Menor texto é `text-xs`; nada de `text-[11px]`.',
-    check: (files) => classViolations(files, 'arbitrary-font-size', ARBITRARY_FONT),
-  },
-  {
-    id: 'shadow-scale',
-    description: 'Sombra só `shadow-xs` (repouso) e `shadow-xl` (flutuante).',
-    check: (files) =>
-      classViolations(
-        files,
-        'shadow-scale',
-        OFF_SCALE_SHADOW,
-        /* A única exceção: a gaveta de baixo do celular (`responsive-dialog-content`) usa
-           `shadow-2xl`, porque ela flutua sobre a tela inteira. */
-        (match, file) =>
-          match === 'shadow-2xl' && file.path.includes(`/${PREFIX}responsive-dialog-content/`),
-      ),
-  },
-  /* REGRA DO GRUPO (13 sistemas): cor de card vem do FUNDO, nunca da borda. Faixa lateral/topo
-     colorida, contorno no tom e anel colorido de seleção são proibidos em QUALQUER componente.
-     Fica só o anel de FOCO (acessibilidade). Card colorido: `AzuosToneCard`. */
-  {
-    id: 'colored-border',
-    description:
-      'Borda colorida é proibida em qualquer componente: a cor vem do fundo (`AzuosToneCard`). Só o anel de foco fica.',
-    check: (files) => coloredBorderViolations(files),
-  },
-  /* REGRA DO GRUPO (13 sistemas): nunca `<select>` nativo — sempre o combobox do projeto. O
-     calendário com `captionLayout="dropdown"` sem a lista própria (`components.Dropdown`) cai no
-     `<select>` do navegador e conta também. */
-  {
-    id: 'native-select',
-    description: 'Nunca `<select>` nativo: sempre o combobox/seletor personalizado do projeto.',
-    check: (files) => nativeSelectViolations(files),
-  },
-  {
-    id: 'doc-file-name',
-    description: 'Arquivo em `docs/` tem nome kebab-case minúsculo (conteúdo segue pt-BR).',
-    check: (files) =>
-      files
-        .filter((file) => /(^|\/)docs\/[^/]+\.md$/.test(file.path))
-        .filter((file) => !/\/docs\/[a-z0-9]+(-[a-z0-9]+)*\.md$/.test(`/${file.path}`))
-        .map((file) => ({
-          rule: 'doc-file-name',
-          file: file.path,
-          detail: 'nome fora de kebab-case',
-        })),
-  },
+	noPureBlackWhite,
+	tokensOnly,
+	noArbitraryValues,
+	noGradientsOrGlass,
+	noCardOpacity,
+	staticZuzu,
+	canonicalBackButton,
+	solidInputs,
+	dualFileActions,
+	pasteFileAttachment,
+	hickNavItems,
+	hickSelectOptions,
+	fittsTargetSize,
+	jakobClickable,
+	jakobAnchorHref,
+	jakobPlaceholderLabel,
+	millerUngrouped,
+	vonRestorffPrimary,
+	uniformChoiceGroup,
+	teslerAutocomplete,
+	teslerInputType
 ];
-
-/** A chave que a baseline conta: muda quando o problema muda, não quando a linha anda. */
-/** @param {Violation} violation */
-export function violationKey(violation) {
-  return `${violation.rule}|${violation.file}|${violation.detail}`;
+/** Caminho com `/`, para casar com a config em qualquer sistema. */
+const normalize = (path) => path.replace(/\\/g, "/");
+export function isTokenFile(path, config) {
+	const p = normalize(path);
+	return config.scan.tokenFiles.some((name) => p === name || p.endsWith(`/${name}`));
 }
-
-/** @param {Violation[]} violations @returns {Baseline} */
-export function countByKey(violations) {
-  const counts = {};
-  for (const violation of violations) {
-    const key = violationKey(violation);
-    counts[key] = (counts[key] ?? 0) + 1;
-  }
-
-  return counts;
+export function isInScope(path, config) {
+	const p = normalize(path);
+	if (config.scan.ignore.some((part) => p.includes(part))) return false;
+	if (!config.scan.extensions.some((ext) => p.endsWith(ext))) return false;
+	return config.scan.dirs.some((dir) => dir === "." || p === dir || p.startsWith(`${normalize(dir).replace(/\/$/, "")}/`));
 }
-
-/** @param {Violation[]} violations @param {Baseline} baseline @returns {Comparison} */
-export function compareWithBaseline(violations, baseline) {
-  const seen = {};
-  const added = [];
-
-  for (const violation of violations) {
-    const key = violationKey(violation);
-    seen[key] = (seen[key] ?? 0) + 1;
-    if (seen[key] > (baseline[key] ?? 0)) added.push(violation);
-  }
-
-  const fixed = Object.entries(baseline)
-    .filter(([key, count]) => (seen[key] ?? 0) < count)
-    .map(([key]) => key);
-
-  return { added, fixed };
+/** Linhas com `design-ignore-next-line [regra…]` silenciam a linha de baixo. */
+function ignoredLines(content) {
+	const ignored = new Map();
+	content.split("\n").forEach((text, i) => {
+		const m = text.match(/design-ignore-next-line(?:\s+([\w/,\s-]+?))?(?::|-->|\*\/|$)/);
+		if (!m) return;
+		const rules = m[1]?.split(/[\s,]+/).filter((r) => r.includes("/"));
+		ignored.set(i + 2, rules?.length ? rules : "all");
+	});
+	return ignored;
 }
-
-/**
- * As violações que tocam um arquivo editado: as dele mesmo, e as da pasta de componente onde ele mora
- * (a violação de `component-prefix`/`component-siblings` é registrada na PASTA, não no arquivo —
- * editar `azuos-x.component.tsx` precisa acusar a violação de `azuos-x/`).
- * @param {Violation[]} violations @param {string} path @returns {Violation[]}
- */
-export function violationsTouching(violations, path) {
-  return violations.filter(
-    (violation) => path === violation.file || path.startsWith(`${violation.file}/`),
-  );
+export function checkSource(path, content, config) {
+	if (content.includes("design-ignore-file")) return [];
+	const file = {
+		path: normalize(path),
+		code: stripComments(content),
+		isTokenFile: isTokenFile(path, config)
+	};
+	const ignored = ignoredLines(content);
+	return RULES.filter((rule) => rule.enabled(config)).flatMap((rule) => rule.check(file, config).map((f) => ({
+		rule: rule.id,
+		law: rule.law,
+		severity: rule.severity,
+		line: lineOf(file.code, f.index),
+		message: f.message,
+		hint: f.hint ?? rule.hint
+	}))).filter((v) => {
+		const skip = ignored.get(v.line);
+		return !skip || skip !== "all" && !skip.includes(v.rule);
+	}).sort((a, b) => a.line - b.line);
+}
+export function formatViolations(path, violations) {
+	return violations.map((v) => `${v.severity === "error" ? "✕" : "!"} ${path}:${v.line}  [${v.rule}] ${v.message}\n    ${v.law}: ${v.hint}`).join("\n");
+}
+/** Resumo curto das regras para o contexto do agente (hook SessionStart). */
+export function summarize(config) {
+	const { laws } = config;
+	const lines = [
+		`Design de "${config.brand}": siga as skills ${config.skill} e ux-laws.`,
+		"- Cor só por token (bg-primary, text-foreground…); nunca hex cru, paleta padrão do Tailwind, preto ou branco puro.",
+		laws.fitts.enabled && `- Fitts: alvo de clique/toque com no mínimo ${laws.fitts.minTargetPx}px de altura.`,
+		laws.hick.enabled && `- Hick: menu com até ${laws.hick.maxNavItems} itens; select com mais de ${laws.hick.maxSelectOptions} opções vira busca.`,
+		laws.jakob.enabled && "- Jakob: link é <a href>, ação é <button>; todo campo tem rótulo.",
+		laws.miller.enabled && `- Miller: formulário com mais de ${laws.miller.maxUngroupedFields} campos é agrupado em <fieldset>.`,
+		laws.vonRestorff.enabled && `- Von Restorff: até ${laws.vonRestorff.maxPrimaryActions} ação primária por tela.`,
+		laws.uniformConnectedness.enabled && "- Conectividade uniforme: opções do mesmo grupo dentro de <fieldset>/role=\"group\".",
+		laws.tesler.enabled && "- Tesler: type e autocomplete certos em e-mail, telefone, nome, endereço, CEP.",
+		"Um hook confere cada arquivo editado e devolve as violações; corrija antes de seguir."
+	];
+	return lines.filter(Boolean).join("\n");
 }

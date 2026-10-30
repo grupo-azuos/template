@@ -3,7 +3,9 @@ import { type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AzuosComboboxField } from '../components/azuos-combobox-field/azuos-combobox-field.component';
+import { AzuosDateField } from '../components/azuos-date-field/azuos-date-field.component';
 import { AzuosDatePicker } from '../components/azuos-date-picker/azuos-date-picker.component';
+import { AzuosDateRangeField } from '../components/azuos-date-range-field/azuos-date-range-field.component';
 import { AzuosInputGroup } from '../components/azuos-input-group/azuos-input-group.component';
 import { AzuosSelectField } from '../components/azuos-select-field/azuos-select-field.component';
 import { AzuosTextAreaField } from '../components/azuos-text-area-field/azuos-text-area-field.component';
@@ -175,6 +177,34 @@ const FIELDS: Field[] = [
 
       return frame;
     },
+  },
+  {
+    name: 'AzuosDateField',
+    element: (
+      <AzuosDateField
+        data={{ label: 'Nascimento', name: 'birthDate', value: null }}
+        actions={{ onChange: vi.fn() }}
+      />
+    ),
+    /* Como no `AzuosInputGroup`: o canto e a altura ficam na moldura em volta do texto. */
+    find: () => {
+      const frame = screen
+        .getByRole('textbox', { name: 'Nascimento' })
+        .closest('[data-slot="input-group"]');
+      if (!(frame instanceof HTMLElement)) throw new Error('date field frame not found');
+
+      return frame;
+    },
+  },
+  {
+    name: 'AzuosDateRangeField',
+    element: (
+      <AzuosDateRangeField
+        data={{ label: 'Período', name: 'period', value: { from: null, to: null } }}
+        actions={{ onChange: vi.fn() }}
+      />
+    ),
+    find: () => screen.getByRole('button', { name: /Período/ }),
   },
   {
     name: 'AzuosTextAreaField',

@@ -130,7 +130,7 @@ export function heatmapOption(
           column: cell.column,
           value: [data.columns.indexOf(cell.column), data.rows.indexOf(cell.row), cell.value],
           /* Texto claro na célula escura e escuro na clara: com uma cor só, metade dos números some. */
-          label: { color: cell.value > top * 0.55 ? '#ffffff' : theme.foreground },
+          label: { color: cell.value > top * 0.55 ? 'var(--primary-foreground)' : theme.foreground },
         })),
       },
     ],

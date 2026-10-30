@@ -108,7 +108,7 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           disabled={state?.isDisabled}
           title={selectedOption?.label}
           className={cn(
-            'control-lg rounded-control border-input flex w-full max-w-full min-w-0 items-center justify-between gap-2 border bg-transparent px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
+            'control-lg rounded-control border-input flex w-full max-w-full min-w-0 items-center justify-between gap-2 border bg-muted text-foreground px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
             'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-50',
             texts.className,

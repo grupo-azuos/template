@@ -1,1 +1,2 @@
+node .github/scripts/project-metrics/validate-metrics.mjs --message "$1" || exit $?
 cd template && npx --no -- commitlint --edit "$1"

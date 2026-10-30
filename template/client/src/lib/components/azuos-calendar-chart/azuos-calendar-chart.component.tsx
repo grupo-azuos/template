@@ -32,6 +32,7 @@ const DESKTOP_MONTHS = 12;
 const MOBILE_MONTHS = 4;
 
 /** Do mais claro ao mais forte: vencimento é atenção, então a escala vai do amarelo ao vermelho. */
+// design-ignore-next-line brand/tokens-only: gradiente de calor contínuo do calendário
 const HEAT_COLORS = ['#fde68a', '#fbbf24', '#f97316', '#dc2626'];
 
 export function AzuosCalendarChart({ data, state, ui }: AzuosCalendarChartProps) {

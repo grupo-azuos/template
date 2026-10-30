@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -159,5 +159,94 @@ describe('AzuosAttachmentPicker', () => {
     );
 
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
+  });
+
+  // Ctrl+V (clipboard paste) e Drag & Drop
+  it('captura arquivos colados via Ctrl+V da área de transferência', () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const { container } = render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange, onError }}
+      />,
+    );
+
+    const pastedFile = fileOf('print-tela.png', 500);
+    fireEvent.paste(container.firstChild as HTMLElement, {
+      clipboardData: {
+        files: [pastedFile],
+        items: [{ kind: 'file', getAsFile: () => pastedFile }],
+      },
+    });
+
+    expect(onError).toHaveBeenCalledWith(null);
+    expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ name: 'print-tela.png' })]);
+  });
+
+  it('recusa arquivo colado quando passa do limite de tamanho', () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const { container } = render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange, onError }}
+      />,
+    );
+
+    const bigFile = fileOf('grande.pdf', 5 * 1024 * 1024);
+    fireEvent.paste(container.firstChild as HTMLElement, {
+      clipboardData: {
+        files: [bigFile],
+        items: [{ kind: 'file', getAsFile: () => bigFile }],
+      },
+    });
+
+    expect(onError).toHaveBeenCalledWith(expect.stringContaining('passa de 1 MB'));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('suporta arrastar e soltar arquivos (drag and drop)', () => {
+    const onChange = vi.fn();
+    render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange, onError: vi.fn() }}
+      />,
+    );
+
+    const droppedFile = fileOf('documento.pdf', 300);
+    const dropzone = screen.getByText('Escolher arquivos').closest('label');
+    expect(dropzone).toBeInTheDocument();
+
+    fireEvent.drop(dropzone!, {
+      dataTransfer: {
+        files: [droppedFile],
+      },
+    });
+
+    expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ name: 'documento.pdf' })]);
+  });
+
+  it('não processa colagem via Ctrl+V quando o campo está desabilitado', () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const { container } = render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        state={{ isDisabled: true }}
+        actions={{ onChange, onError }}
+      />,
+    );
+
+    const file = fileOf('anexo.pdf', 100);
+    fireEvent.paste(container.firstChild as HTMLElement, {
+      clipboardData: {
+        files: [file],
+      },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
   });
 });

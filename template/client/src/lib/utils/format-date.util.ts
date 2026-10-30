@@ -8,6 +8,21 @@
  */
 const DATE_TIME = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 const DATE_ONLY = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' });
+const MONTH_YEAR = new Intl.DateTimeFormat('pt-BR', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+export function formatCalendarMonth(value: string | null | undefined): string {
+  const match = /^(\d{4})-(\d{2})$/.exec(value ?? '');
+  if (!match) return '—';
+
+  const month = Number(match[2]);
+  if (month < 1 || month > 12) return '—';
+
+  return MONTH_YEAR.format(new Date(Date.UTC(Number(match[1]), month - 1, 1)));
+}
 
 export function formatDateTime(iso: string | null | undefined): string {
   const date = parse(iso);

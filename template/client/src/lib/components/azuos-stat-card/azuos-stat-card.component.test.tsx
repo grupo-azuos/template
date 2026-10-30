@@ -30,13 +30,13 @@ describe('AzuosStatCard', () => {
     expect(screen.getByText('13/13')).toBeInTheDocument();
   });
 
-  /* O token do tom, e não a paleta crua: `bg-emerald-100` não acompanharia a troca de tema. */
-  it('paints the whole card with the tone token', () => {
+  /* O token do tom, e não a paleta crua: cor sólida cheia da marca. */
+  it('paints the whole card with the solid tone token', () => {
     const { container } = render(
       <AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-success-soft');
+    expect(container.firstElementChild?.className).toContain('bg-success');
   });
 
   it('keeps the neutral card with a border, since it has no tone to separate it from the page', () => {
@@ -45,13 +45,17 @@ describe('AzuosStatCard', () => {
     expect(container.firstElementChild?.className).toContain('border');
   });
 
-  /* O quadrado do ícone é a identidade da categoria: cor sólida, não o `-soft` do fundo. */
-  it('draws the icon square when it was given an icon', () => {
+  /* O quadrado do ícone é a identidade da categoria: cor sólida, perfeitamente centralizado. */
+  it('draws the icon square when it was given an icon with perfect centering', () => {
     const { container } = render(
       <AzuosStatCard data={{ label: 'Clientes', value: 7 }} ui={{ icon: Building2 }} />,
     );
 
-    expect(container.querySelector('svg')).toBeInTheDocument();
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveClass('size-4', 'block');
+    const badge = svg?.parentElement;
+    expect(badge).toHaveClass('size-8', 'inline-flex', 'items-center', 'justify-center');
   });
 
   it('becomes a real button when it filters the list, so the keyboard reaches it', async () => {

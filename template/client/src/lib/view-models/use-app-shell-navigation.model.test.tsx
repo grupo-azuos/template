@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { type AppShellNavigation } from '../navigation/app-shell-navigation';
+import { accountProfileUrl } from '../api/account-session.api';
 import { useAppShellNavigationModel } from './use-app-shell-navigation.model';
 
 const config: AppShellNavigation = {
@@ -100,6 +101,6 @@ describe('useAppShellNavigationModel', () => {
     const withoutProfile = { areas: config.areas, items: config.items, actions: config.actions };
     await renderAt('/tasks', false, withoutProfile);
 
-    expect(seen.model?.data.profile).toEqual({ href: 'http://localhost:5000/profile' });
+    expect(seen.model?.data.profile).toEqual({ href: accountProfileUrl() });
   });
 });

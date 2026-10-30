@@ -31,25 +31,16 @@ export type AzuosToneCardProps = {
   children: ReactNode;
 };
 
-const SOFT: Record<AzuosToneCardTone, string> = {
-  brand: 'bg-primary-soft text-ink-900',
-  neutral: 'bg-card text-card-foreground border border-border',
-  success: 'bg-success-soft text-ink-900',
-  warning: 'bg-warning-soft text-ink-900',
-  danger: 'bg-destructive-soft text-ink-900',
-  info: 'bg-info-soft text-ink-900',
-};
-
 const SOLID: Record<AzuosToneCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-ink-700 text-primary-foreground',
+  neutral: 'bg-card text-card-foreground border border-border',
   success: 'bg-success text-primary-foreground',
   warning: 'bg-warning text-primary-foreground',
-  danger: 'bg-destructive text-primary-foreground',
+  danger: 'bg-destructive text-destructive-foreground',
   info: 'bg-info text-primary-foreground',
 };
 
-const BASE = 'rounded-surface relative p-4 shadow-xs';
+const BASE = 'rounded-surface relative p-4 shadow-card';
 
 export function AzuosToneCard({ data, ui, state, actions, children }: AzuosToneCardProps) {
   const tone = ui?.tone ?? 'neutral';
@@ -70,7 +61,7 @@ export function AzuosToneCard({ data, ui, state, actions, children }: AzuosToneC
   }
 
   return (
-    <Surface data={data} actions={actions} className={cn(BASE, SOFT[tone], ui?.className)}>
+    <Surface data={data} actions={actions} className={cn(BASE, SOLID[tone], ui?.className)}>
       {children}
     </Surface>
   );

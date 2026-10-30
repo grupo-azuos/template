@@ -124,4 +124,20 @@ describe('AzuosTaskListView', () => {
 
     expect(screen.getByText(/Mostrando só as primeiras 1/)).toBeInTheDocument();
   });
+
+  it('contém títulos longos sem espaços sem estourar o card e preserva botões', () => {
+    const longTitle = 'Tarefa'.repeat(30);
+    renderView({
+      data: {
+        tasks: [{ ...task, id: 9, title: longTitle }],
+      },
+    });
+
+    const titleEl = screen.getByText(longTitle);
+    expect(titleEl).toHaveClass('break-words');
+    expect(titleEl).toHaveClass('[overflow-wrap:anywhere]');
+    expect(titleEl).toHaveClass('min-w-0');
+    expect(screen.getByRole('button', { name: 'Editar tarefa' })).toBeInTheDocument();
+    expect(screen.getByText('Em andamento')).toBeInTheDocument();
+  });
 });

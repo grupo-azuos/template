@@ -23,7 +23,7 @@
     "typecheck": "npm run typecheck -w @template/shared && npm run typecheck -w server && npm run typecheck -w client && tsc -p scripts",
     "storybook": "npm run storybook -w client",
     "check:design": "node ../.claude/hooks/design/check-design.mjs",
-    "check:design:test": "node --test ../.claude/hooks/design/design-rules.test.mjs",
+    "check:design:test": "node --test \"../.claude/hooks/design/*.test.mjs\"",
     "api:docs": "npm run docs -w server",
     "api:client": "npm run api:client -w client",
     "db:generate": "npm run db:generate -w server",

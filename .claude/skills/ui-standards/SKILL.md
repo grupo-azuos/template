@@ -61,6 +61,7 @@ Sombra: `shadow-xs` em repouso, `shadow-xl` no que flutua. Nada de `rounded-lg`,
 ## Estrutura de toda tela
 
 ```
+AzuosBackButton (quando em tela de detalhe/entidade: ← Voltar para [destino])
 AzuosPageHeader (título h1 + uma linha do que é a tela + ações à direita)
 Barra de filtros (AzuosFilterField + AzuosOptionPicker/AzuosSelectField), quando é lista
 Aviso de falha de ação (AzuosErrorState inline), quando houver
@@ -69,6 +70,21 @@ Corpo
 
 Largura: `mx-auto w-full max-w-5xl px-4 sm:px-6`. Espaço entre blocos: `gap-5`.
 Uma ação principal por tela (azul). As outras são `secondary` ou `ghost`.
+
+## As Leis Absolutas do Padrão Azuos 2.0 (Blindagem de Design)
+
+1. **Botão de Voltar Canônico (`AzuosBackButton`):** Todo retorno de página é exclusivamente um link limpo `← Voltar para [destino]` em `text-primary`. Proibido botão com moldura, circular com ícone ou texto fora desse padrão.
+2. **Inputs 100% com Fundo Sólido (`bg-muted`):** Todo input, textarea, select e combobox tem preenchimento sólido `bg-muted text-foreground`. Proibido `bg-transparent` ou misturar campos outline com campos cinzas.
+3. **Cards Sólidos Sem Vidro:** Cards são 100% opacos (`bg-card` ou cor sólida da paleta). Proibido `backdrop-blur`, gradientes (`bg-gradient-*`) e transparências translúcidas.
+4. **Cards de Dashboard com Ícone:** Cards de estatística (`AzuosStatCard`) e destaque (`AzuosHeroCard`) usam prioritariamente ícones Lucide padronizados.
+5. **Mascote Zuzu Estático:** O mascote Zuzu corporativo é 100% estático. Proibido `animate-*`, giros ou transforms.
+6. **Card Grid sempre Pagina vs Tabela sempre Scroll Contínuo:** Visualização em grade de cards SEMPRE usa paginação (`AzuosPaginationBar`); tabela/lista usa scroll contínuo sem campos em branco.
+7. **Proibição de Tabela de Botões:** Proibido enfileirar botões em cada linha da tabela. Usar menu discreto de 3 pontinhos (`DropdownMenu`).
+8. **Select com 15+ Itens Vira Combobox:** Mais de 15 itens exige Combobox com pesquisa. Se pesquisar e não encontrar, deve oferecer opção de cadastrar novo item.
+9. **Bloqueio de Cadastro de Empresa/Grupo:** Exceto CRM, Public-API e Paralegal, nenhum sistema pode criar tela ou modal de cadastrar empresa/grupo; devem usar os mocks unificados.
+10. **Exclusividade do Template:** Criação de novos componentes canônicos e instalação de bibliotecas visuais só é permitida no repositório `template`. Os demais 13 sistemas apenas consomem.
+11. **Ações Duplas em Arquivos (Download + Abrir via Hyperlink):** Toda exibição ou link de arquivo DEVE fornecer duas opções obrigatórias: baixar o arquivo (`download={fileName}`) e abrir diretamente via hyperlink em nova aba (`target="_blank" rel="noopener noreferrer"`). Componentes canônicos: `<AzuosFileLinks />` e `<AzuosAttachmentList />`.
+12. **Upload e Anexo com Suporte a Ctrl+V (Área de Transferência):** Todo local ou componente de anexar arquivo (`<AzuosAttachmentPicker>`, áreas de upload e dropzones) DEVE aceitar colar arquivos via `Ctrl+V` (captura direta de prints e arquivos do clipboard).
 
 ## O corpo, sempre nesta ordem (early return)
 

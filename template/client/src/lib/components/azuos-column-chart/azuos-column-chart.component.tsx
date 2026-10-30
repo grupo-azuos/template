@@ -112,7 +112,7 @@ export function columnOption(
         label: {
           show: true,
           position: 'top',
-          color: '#ffffff',
+          color: 'var(--primary-foreground)',
           fontSize: 11,
           fontWeight: 600,
           padding: [2, 6],

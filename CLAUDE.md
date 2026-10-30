@@ -40,7 +40,7 @@ Este repositório tem dois modos de operação para o git e para o Claude:
      - Pode commitar direto na `develop` ou criar releases/hotfixes conforme o Git-Flow.
      - Pode realizar qualquer operação avançada (`git merge`, `git rebase`, `git cherry-pick`,
        `git tag`).
-     - Pode usar `--no-verify` se o admin optar por pular hooks ou verificações automáticas.
+     - A validação de identidade e métricas não pode ser desativada, inclusive em modo admin.
      - Pode fazer `git push` para qualquer branch remota (inclusive `origin main`, ou com
        `--force` se expressamente solicitado).
   2. **Arquivos de estrutura liberados**:
@@ -229,6 +229,21 @@ use o navegador em http://localhost:5009.
 - Dizer que terminou sem ter rodado `lint`, `typecheck`, `check:design` e os testes do que
   mudou (a menos que o admin tenha pedido especificamente para ignorar).
 
+## Identificação e métricas
+
+Antes de mudanças, commits e merges, siga `.claude/skills/participant-identity/SKILL.md`.
+Use ID opaco por padrão em `docs/project.json`; nome e e-mail são opcionais. Em conta
+compartilhada, confirme a pessoa/código da sessão. Leia `docs/privacy/metrics-privacy.md` antes de salvar perfis. Commits atômicos mantêm o formato do projeto e levam os trailers de
+identificação descritos em `docs/metrics/project-metrics.md`. Essa validação vale também em modo admin.
+Dados históricos desconhecidos ficam pendentes, sem inventar autoria, datas ou departamentos.
+
+## Transparência das métricas
+
+Antes de solicitar dados de métricas, siga `participant-identity` e
+`docs/privacy/metrics-notice-flow.md`: apresente o aviso ao usuário na conversa. O contexto do hook
+não comprova apresentação. Não exigir aceite obrigatório, registrar consentimento presumido
+ou tratar ID como anonimização. Governança pendente também impede iniciar nova coleta por
+participante; continue ajudando com o código sem pedir novos dados para métricas.
 ## CASCA PADRÃO E "MEU PERFIL" — REGRA ABSOLUTA
 
 O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo Azuos** e
@@ -248,4 +263,11 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
   colorido; `interactive` com o hover-fill do Chamados); selecionado = fundo na cor cheia. Ficam
   só a borda neutra, o anel de foco e os spinners.
 - **Nunca `<select>` nativo**: sempre o combobox/seletor do projeto.
+- **Ações duplas em arquivos (Download + Abrir via hyperlink)**: sempre que houver função de
+  arquivo, o sistema deve fornecer duas ações: download (`download={fileName}`) e abrir via
+  hyperlink em nova aba (`target="_blank" rel="noopener noreferrer"`). Componentes canônicos:
+  `AzuosFileLinks` e `AzuosAttachmentList`.
+- **Anexo de arquivos com Ctrl+V**: qualquer campo ou local de anexar arquivos (como
+  `AzuosAttachmentPicker`) deve obrigatoriamente aceitar colar arquivos via `Ctrl+V` (captura
+  direta de imagens/prints e arquivos do clipboard).
 - Checado no hook e no CI (`check:design`). Exceção só pelo suporte (Central de Chamados).

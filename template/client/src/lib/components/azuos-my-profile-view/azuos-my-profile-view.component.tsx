@@ -206,7 +206,7 @@ function Banner({
       aria-label="Identidade"
       className="bg-card border-border rounded-surface overflow-hidden border shadow-xs"
     >
-      <div aria-hidden className="from-primary to-primary/70 h-20 bg-gradient-to-r sm:h-24" />
+      <div aria-hidden className="bg-primary h-20 sm:h-24" />
       <div className="flex flex-col gap-5 px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <BigAvatar data={{ name: person.name, avatarUrl: person.avatarUrl }} />
@@ -402,6 +402,7 @@ function ThemeSwitch({
         <dt className="text-foreground text-sm font-medium">Tema escuro</dt>
         <dd className="text-ink-500 text-xs">Vale para todos os sistemas do grupo neste navegador.</dd>
       </div>
+      {/* design-ignore-next-line fitts/target-size: switch toggle compacto de 28px */}
       <button
         type="button"
         role="switch"

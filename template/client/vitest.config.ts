@@ -22,6 +22,12 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.{ts,tsx}', 'src/**/*.stories.tsx', 'src/routeTree.gen.ts'],
       reporter: ['text', 'lcov'],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
+      },
     },
   },
 });
