@@ -81,26 +81,58 @@
 
   --radius: 0.625rem;
 
+  /* Arredondamento "gordinho" canônico Azuos: controles 14px, botões 14px, cartões 20px, diálogos 16px. */
+  --shape-control: 14px;
+  --shape-button: 14px;
+  --shape-card: 20px;
+  --shape-dialog: 16px;
+  --shape-chip: 9999px;
+  --shape-badge: 9999px;
+  --border-width: 1px;
+  --border-style: solid;
+  --card-border-color: var(--border);
+  --card-background: var(--card);
+  --elevation-card: none;
+  --elevation-button: none;
+  --control-height: 44px;
+  --heading-weight: 700;
+  --heading-tracking: -0.02em;
+  --heading-case: none;
+  --body-size: 1.0625rem;
+  --motion-duration: 350ms;
+  --motion-easing: cubic-bezier(0.32, 0.72, 0, 1);
+  --focus-width: 3px;
+  --focus-color: var(--color-ring);
+  --link-decoration: none;
+
+  --brand-font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --brand-font-heading: 'IBM Plex Sans', system-ui, sans-serif;
+
   /* ---- Semântica da PÁGINA ---- */
   --background: #f8fafc;
   --foreground: var(--ink-900);
-  --card: #ffffff;
+  --card: #fbfbfd;
   --card-foreground: var(--ink-900);
-  --popover: #ffffff;
+  --popover: #fbfbfd;
   --popover-foreground: var(--ink-900);
   --primary: var(--brand-blue-800);
-  --primary-foreground: #ffffff;
+  --primary-foreground: #f8fafc;
+  --primary-strong: var(--brand-blue-900);
+  --primary-soft: var(--brand-blue-100);
   --secondary: var(--ink-100);
   --secondary-foreground: var(--ink-900);
   --muted: var(--ink-100);
   --muted-foreground: var(--ink-500);
   --accent: var(--brand-blue-100);
   --accent-foreground: var(--brand-blue-900);
+  --accent-strong: #b45309;
+  --tertiary: #8b5cf6;
+  --tertiary-strong: #6d28d9;
   --destructive: #dc2626;
   --border: var(--ink-300);
   --input: var(--ink-300);
   --ring: var(--brand-blue-600);
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #f8fafc;
 
   /**
    * ---- O ACENTO DE DESTAQUE ----
@@ -156,10 +188,10 @@
   --sidebar: var(--brand-blue-800);
   --sidebar-foreground: #e2e8f0;
   --sidebar-primary: var(--brand-blue-600);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgb(255 255 255 / 0.08);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgb(255 255 255 / 0.1);
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: rgb(248 250 252 / 0.08);
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: rgb(248 250 252 / 0.1);
   --sidebar-ring: var(--brand-yellow-500);
 
   color-scheme: light;
@@ -177,15 +209,17 @@
   --popover: #111827;
   --popover-foreground: var(--ink-100);
   --primary: var(--brand-blue-500);
-  --primary-foreground: #ffffff;
+  --primary-foreground: #f8fafc;
+  --primary-strong: var(--brand-blue-500);
+  --primary-soft: #16265c;
   --secondary: #1f2937;
   --secondary-foreground: var(--ink-100);
   --muted: #1f2937;
   --muted-foreground: #9ca3af;
   --accent: #1e293b;
   --accent-foreground: var(--ink-100);
-  --border: rgb(255 255 255 / 0.12);
-  --input: rgb(255 255 255 / 0.12);
+  --border: rgb(248 250 252 / 0.12);
+  --input: rgb(248 250 252 / 0.12);
 
   --crust: #060b14;
   --mantle: #0b1220;
@@ -200,6 +234,9 @@
 
   --accent-hero: var(--brand-yellow-400);
   --accent-hero-foreground: var(--ink-900);
+  --accent-strong: var(--brand-yellow-400);
+  --tertiary: #a78bfa;
+  --tertiary-strong: #a78bfa;
 
   --success: #34d399;
   --success-soft: #022c22;
@@ -267,6 +304,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-hero: var(--accent-hero);
   --color-accent-hero-foreground: var(--accent-hero-foreground);
+  --color-accent-strong: var(--accent-strong);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-strong: var(--tertiary-strong);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -302,27 +342,32 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ---- O ARREDONDAMENTO POR PAPEL ----
+  /* ---- O ARREDONDAMENTO POR PAPEL (Padrão Cupertino) ---- */
+  --radius-control: var(--shape-control);
+  --radius-button: var(--shape-button);
+  --radius-card: var(--shape-card);
+  --radius-dialog: var(--shape-dialog);
+  --radius-chip: var(--shape-chip);
+  --radius-badge: var(--shape-badge);
+  --radius-surface: var(--shape-card);
+  --radius-box: var(--shape-control);
 
-     Os quatro acima são a escala do Tailwind, por TAMANHO: quem escreve escolhe `lg` ou `xl`
-     no olho, e o mesmo papel acaba com raios diferentes em telas diferentes — o cartão de
-     indicador com raio de botão, o seletor com um raio só dele.
+  --shadow-card: var(--elevation-card);
+  --shadow-button: var(--elevation-button);
+  --ease-brand: var(--motion-easing);
+  --spacing-control: var(--control-height);
 
-     Estes quatro são a escala por PAPEL: `rounded-surface` num cartão, `rounded-control` num
-     campo. O valor de cada um é o que os componentes baixados já usavam (`ui/card`,
-     `ui/dialog` e `ui/table` no maior; `ui/popover` um degrau abaixo) — eles não se editam,
-     então a régua é a deles, e o que estava fora é que veio para cá. */
+  --font-sans: var(--brand-font-sans);
+  --font-heading: var(--brand-font-heading);
 
-  /** O que pousa sobre o fundo: cartão, diálogo, tabela. */
-  --radius-surface: calc(var(--radius) + 6px);
-  /** O que se clica ou se digita: campo, botão, pastilha, combobox. */
-  --radius-control: calc(var(--radius) + 4px);
-  /** Bloco dentro de um cartão, aviso, balão. */
-  --radius-box: var(--radius);
-  /** Miudeza dentro de um bloco: item de lista de balão, quadradinho de ícone. */
-  --radius-chip: calc(var(--radius) - 2px);
+  /* Reflexo que corre no título (estilos Metálico e Holográfico). */
+  --animate-shimmer: shimmer 6s linear infinite;
 
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  @keyframes shimmer {
+    to {
+      background-position: 200% center;
+    }
+  }
 }
 
 /* ==========================================================================

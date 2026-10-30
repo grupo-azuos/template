@@ -101,7 +101,7 @@ const TONE_ICON: Record<AzuosStatCardTone, string> = {
  * cor cheia do tom (o tom é escolhido aqui, um OU outro, para nunca haver dois fundos brigando).
  */
 const statCard = tv({
-  base: 'rounded-surface py-4 pr-4 pl-5 shadow-xs transition-all',
+  base: 'rounded-surface py-4 pr-4 pl-5 shadow-card transition-all',
   variants: {
     isClickable: {
       true: 'relative cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
@@ -248,7 +248,7 @@ function StatCardLabel({
       <span
         className={cn(
           'rounded-chip flex size-8 shrink-0 items-center justify-center',
-          color ? 'text-white' : TONE_ICON[tone],
+          color ? 'text-primary-foreground' : TONE_ICON[tone],
         )}
         style={color ? { backgroundColor: color } : undefined}
       >

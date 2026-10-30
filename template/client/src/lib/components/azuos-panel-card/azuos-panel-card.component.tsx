@@ -26,7 +26,7 @@ export type AzuosPanelCardProps = {
 export function AzuosPanelCard({ data, ui, tools, children }: AzuosPanelCardProps) {
   return (
     <section
-      className={cn('bg-card border-border rounded-surface border p-5 shadow-xs', ui?.className)}
+      className={cn('bg-card border-border rounded-surface border p-5 shadow-card', ui?.className)}
     >
       {/* Empilhado no celular: título e controle lado a lado a 360px espremem os dois. */}
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

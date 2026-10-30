@@ -151,7 +151,7 @@ function inputClassName({
        formulário. Com a altura vindo só do padding, campo de texto, seletor, data e botão nunca
        alinhavam na mesma fileira nem pareciam a mesma família de controle. */
     'control-lg rounded-control',
-    'bg-card text-foreground w-full border text-sm transition-colors',
+    'bg-muted text-foreground w-full border text-sm transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
     hasError ? 'border-border bg-destructive-soft' : 'border-input',

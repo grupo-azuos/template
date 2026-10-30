@@ -97,7 +97,7 @@ export function treemapOption(
         label: {
           show: true,
           fontSize: 11,
-          color: '#ffffff',
+          color: 'var(--primary-foreground)',
           overflow: 'truncate',
           formatter: (params: unknown) => {
             const { name, value } = params as { name: string; value: number };

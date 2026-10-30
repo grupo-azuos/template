@@ -60,7 +60,7 @@ export function AzuosPersonAvatar({ name, avatarUrl, ui }: AzuosPersonAvatarProp
           que a lista passa de umas poucas linhas. */}
       <AvatarFallback
         className={cn(
-          'from-success to-info text-primary-foreground flex aspect-square size-full items-center justify-center rounded-full bg-gradient-to-br font-bold select-none',
+          'bg-primary text-primary-foreground flex aspect-square size-full items-center justify-center rounded-full font-bold select-none',
           SIZE_CLASS[size],
         )}
       >

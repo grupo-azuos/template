@@ -49,7 +49,7 @@ const SOLID: Record<AzuosToneCardTone, string> = {
   info: 'bg-info text-primary-foreground',
 };
 
-const BASE = 'rounded-surface relative p-4 shadow-xs';
+const BASE = 'rounded-surface relative p-4 shadow-card';
 
 export function AzuosToneCard({ data, ui, state, actions, children }: AzuosToneCardProps) {
   const tone = ui?.tone ?? 'neutral';
