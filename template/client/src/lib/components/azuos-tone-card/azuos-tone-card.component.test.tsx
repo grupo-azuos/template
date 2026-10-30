@@ -6,7 +6,7 @@ import { AzuosToneCard } from './azuos-tone-card.component';
 
 describe('AzuosToneCard', () => {
   // feliz
-  it('paints a static card with the soft tone background, never a colored border', () => {
+  it('paints a static card with the full solid tone background, never pastel or colored border', () => {
     render(
       <AzuosToneCard data={{ label: 'Vencidos' }} ui={{ tone: 'danger' }}>
         3
@@ -14,7 +14,7 @@ describe('AzuosToneCard', () => {
     );
 
     const card = screen.getByRole('group', { name: 'Vencidos' });
-    expect(card).toHaveClass('bg-destructive-soft');
+    expect(card).toHaveClass('bg-destructive', 'text-destructive-foreground');
     expect(card.className).not.toMatch(/border-(destructive|primary|success|warning|info)/);
     expect(card).not.toHaveClass('hover-fill');
   });

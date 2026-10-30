@@ -30,13 +30,13 @@ describe('AzuosStatCard', () => {
     expect(screen.getByText('13/13')).toBeInTheDocument();
   });
 
-  /* O token do tom, e não a paleta crua: `bg-emerald-100` não acompanharia a troca de tema. */
-  it('paints the whole card with the tone token', () => {
+  /* O token do tom, e não a paleta crua: cor sólida cheia da marca. */
+  it('paints the whole card with the solid tone token', () => {
     const { container } = render(
       <AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-success-soft');
+    expect(container.firstElementChild?.className).toContain('bg-success');
   });
 
   it('keeps the neutral card with a border, since it has no tone to separate it from the page', () => {

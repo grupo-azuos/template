@@ -43,53 +43,53 @@ export type AzuosStatCardProps = {
   actions?: { onClick?: () => void };
 };
 
-/** O fundo do cartão inteiro: colorido não tem borda; neutro usa `bg-card` com borda. */
+/** O fundo do cartão inteiro: colorido usa cor sólida cheia; neutro usa `bg-card` com borda. */
 const TONE_CARD: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary-soft text-foreground',
-  neutral: 'bg-card border-border border text-card-foreground',
-  success: 'bg-success-soft text-foreground',
-  warning: 'bg-warning-soft text-foreground',
-  danger: 'bg-destructive-soft text-foreground',
-  info: 'bg-info-soft text-foreground',
-};
-
-/** Selecionado: o fundo na cor CHEIA do tom, e todo o texto claro por cima — nunca um contorno. */
-const TONE_SELECTED: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary',
-  neutral: 'bg-ink-700',
-  success: 'bg-success',
-  warning: 'bg-warning',
-  danger: 'bg-destructive',
-  info: 'bg-info',
-};
-
-/** A pastilha no tom (prazo, situação): fundo suave e texto na cor do tom. */
-export const STAT_TONE_BADGE: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary-soft text-primary',
-  neutral: 'bg-muted text-ink-700',
-  success: 'bg-success-soft text-success',
-  warning: 'bg-warning-soft text-warning',
-  danger: 'bg-destructive-soft text-destructive',
-  info: 'bg-info-soft text-info',
-};
-
-const TONE_LABEL: Record<AzuosStatCardTone, string> = {
-  brand: 'text-primary',
-  neutral: 'text-ink-500',
-  success: 'text-success',
-  warning: 'text-warning',
-  danger: 'text-destructive',
-  info: 'text-info',
-};
-
-/** Cor SÓLIDA do quadrado do ícone — nunca o mesmo `-soft` do fundo, senão o ícone some nele. */
-const TONE_ICON: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-foreground text-background',
+  neutral: 'bg-card border-border border text-card-foreground',
   success: 'bg-success text-primary-foreground',
   warning: 'bg-warning text-primary-foreground',
   danger: 'bg-destructive text-destructive-foreground',
   info: 'bg-info text-primary-foreground',
+};
+
+/** Selecionado: o fundo na cor CHEIA do tom, e todo o texto claro por cima — nunca um contorno. */
+const TONE_SELECTED: Record<AzuosStatCardTone, string> = {
+  brand: 'bg-primary text-primary-foreground',
+  neutral: 'bg-ink-700 text-primary-foreground',
+  success: 'bg-success text-primary-foreground',
+  warning: 'bg-warning text-primary-foreground',
+  danger: 'bg-destructive text-destructive-foreground',
+  info: 'bg-info text-primary-foreground',
+};
+
+/** A pastilha no tom (prazo, situação): fundo sólido contrastante. */
+export const STAT_TONE_BADGE: Record<AzuosStatCardTone, string> = {
+  brand: 'bg-primary text-primary-foreground',
+  neutral: 'bg-muted text-ink-700',
+  success: 'bg-success text-primary-foreground',
+  warning: 'bg-warning text-primary-foreground',
+  danger: 'bg-destructive text-destructive-foreground',
+  info: 'bg-info text-primary-foreground',
+};
+
+const TONE_LABEL: Record<AzuosStatCardTone, string> = {
+  brand: 'text-primary-foreground/80',
+  neutral: 'text-ink-500',
+  success: 'text-primary-foreground/80',
+  warning: 'text-primary-foreground/80',
+  danger: 'text-destructive-foreground/80',
+  info: 'text-primary-foreground/80',
+};
+
+/** Cor SÓLIDA do quadrado do ícone — 100% sólida sem opacidade ou tons pastéis. */
+const TONE_ICON: Record<AzuosStatCardTone, string> = {
+  brand: 'bg-primary-foreground text-primary',
+  neutral: 'bg-foreground text-background',
+  success: 'bg-primary-foreground text-success',
+  warning: 'bg-primary-foreground text-warning',
+  danger: 'bg-destructive-foreground text-destructive',
+  info: 'bg-primary-foreground text-info',
 };
 
 /**
@@ -179,7 +179,8 @@ function StatCardValue({
     <div className="flex flex-wrap items-baseline gap-x-2">
       <p
         className={cn(
-          'text-foreground font-bold tabular-nums',
+          tone === 'neutral' ? 'text-foreground' : 'text-inherit',
+          'font-bold tabular-nums',
           ui?.size === 'lg' ? 'text-4xl' : 'text-3xl font-semibold tracking-tight',
         )}
       >
