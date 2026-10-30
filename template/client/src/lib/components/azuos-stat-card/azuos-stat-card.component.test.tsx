@@ -45,13 +45,17 @@ describe('AzuosStatCard', () => {
     expect(container.firstElementChild?.className).toContain('border');
   });
 
-  /* O quadrado do ícone é a identidade da categoria: cor sólida, não o `-soft` do fundo. */
-  it('draws the icon square when it was given an icon', () => {
+  /* O quadrado do ícone é a identidade da categoria: cor sólida, perfeitamente centralizado. */
+  it('draws the icon square when it was given an icon with perfect centering', () => {
     const { container } = render(
       <AzuosStatCard data={{ label: 'Clientes', value: 7 }} ui={{ icon: Building2 }} />,
     );
 
-    expect(container.querySelector('svg')).toBeInTheDocument();
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveClass('size-4', 'block');
+    const badge = svg?.parentElement;
+    expect(badge).toHaveClass('size-8', 'inline-flex', 'items-center', 'justify-center');
   });
 
   it('becomes a real button when it filters the list, so the keyboard reaches it', async () => {

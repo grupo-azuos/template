@@ -101,7 +101,7 @@ const TONE_ICON: Record<AzuosStatCardTone, string> = {
  * cor cheia do tom (o tom é escolhido aqui, um OU outro, para nunca haver dois fundos brigando).
  */
 const statCard = tv({
-  base: 'rounded-surface py-4 pr-4 pl-5 shadow-card transition-all',
+  base: 'rounded-surface p-5 shadow-card transition-all',
   variants: {
     isClickable: {
       true: 'relative cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
@@ -233,7 +233,7 @@ function StatCardLabel({
   const label = (
     <p
       className={cn(
-        'text-xs font-semibold tracking-wider uppercase',
+        'text-xs font-semibold tracking-wider uppercase leading-none',
         color ? '' : TONE_LABEL[tone],
       )}
       style={color ? { color } : undefined}
@@ -245,15 +245,15 @@ function StatCardLabel({
   if (!Icon) return <div className="mb-1">{label}</div>;
 
   return (
-    <div className="mb-2 flex items-center gap-2.5">
+    <div className="mb-2.5 flex items-center gap-2.5">
       <span
         className={cn(
-          'rounded-chip flex size-8 shrink-0 items-center justify-center',
+          'rounded-chip inline-flex size-8 shrink-0 items-center justify-center [&>svg]:block [&>svg]:shrink-0',
           color ? 'text-primary-foreground' : TONE_ICON[tone],
         )}
         style={color ? { backgroundColor: color } : undefined}
       >
-        <Icon size={15} aria-hidden="true" />
+        <Icon size={16} className="size-4 shrink-0 block stroke-[1.8]" aria-hidden="true" />
       </span>
       {label}
     </div>
