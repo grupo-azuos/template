@@ -115,7 +115,7 @@ function extractFilesFromClipboard(clipboardData: DataTransfer | null): File[] {
   const items = clipboardData.items ?? [];
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    if (item.kind !== 'file') continue;
+    if (!item || item.kind !== 'file') continue;
     const file = item.getAsFile();
     if (file) files.push(file);
   }
