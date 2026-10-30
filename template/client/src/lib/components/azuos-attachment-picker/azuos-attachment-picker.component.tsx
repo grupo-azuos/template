@@ -1,5 +1,5 @@
 import { Paperclip, X } from 'lucide-react';
-import { useRef } from 'react';
+import { type ClipboardEvent, type DragEvent, useRef, useState } from 'react';
 
 import { cn } from '../../utils/cn.util';
 import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
@@ -105,11 +105,29 @@ export function reviewChoice(
   return { accepted, error: null };
 }
 
+function extractFilesFromClipboard(clipboardData: DataTransfer | null): File[] {
+  if (!clipboardData) return [];
+  if (clipboardData.files && clipboardData.files.length > 0) {
+    return Array.from(clipboardData.files);
+  }
+
+  const files: File[] = [];
+  const items = clipboardData.items ?? [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item.kind !== 'file') continue;
+    const file = item.getAsFile();
+    if (file) files.push(file);
+  }
+  return files;
+}
+
 export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachmentPickerProps) {
   /* O `<input type="file">` não deixa tirar um arquivo da seleção por código sem limpar o campo
      inteiro, então ele é zerado a cada escolha e quem guarda a lista é o view-model. */
   const inputRef = useRef<HTMLInputElement>(null);
   const isDisabled = state?.isDisabled === true;
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const choose = (chosen: File[]) => {
     if (inputRef.current) inputRef.current.value = '';
@@ -126,17 +144,65 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
     actions.onChange(data.files.filter((chosen) => chosen !== file));
   };
 
+  /** Captura arquivos colados da área de transferência (Ctrl+V) ou itens de print/imagem. */
+  const handlePaste = (event: ClipboardEvent<HTMLElement>) => {
+    if (isDisabled) return;
+    const clipboardFiles = extractFilesFromClipboard(event.clipboardData);
+    if (clipboardFiles.length === 0) return;
+
+    event.preventDefault();
+    choose(clipboardFiles);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLElement>) => {
+    if (isDisabled) return;
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLElement>) => {
+    if (isDisabled) return;
+    event.preventDefault();
+    setIsDragOver(false);
+    const droppedFiles = Array.from(event.dataTransfer?.files ?? []);
+    if (droppedFiles.length > 0) {
+      choose(droppedFiles);
+    }
+  };
+
   return (
-    <div className={cn('relative flex flex-col gap-2', ui?.className)}>
+    <div
+      className={cn('relative flex flex-col gap-2', ui?.className)}
+      onPaste={handlePaste}
+    >
       <label
         htmlFor="azuos-attachments"
+        aria-label="Escolher arquivos"
+        tabIndex={isDisabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={cn(
-          'border-input hover:bg-muted/50 control-lg rounded-control flex cursor-pointer items-center gap-2 border border-dashed text-sm',
+          'border-input hover:bg-muted control-lg rounded-control flex cursor-pointer items-center justify-between border border-dashed px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          isDragOver && 'border-ring bg-muted',
           isDisabled && 'pointer-events-none opacity-60',
         )}
       >
-        <Paperclip className="text-ink-500 size-4 shrink-0" aria-hidden="true" />
-        <span className="text-ink-700">Escolher arquivos</span>
+        <div className="flex items-center gap-2">
+          <Paperclip className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+          <span className="text-foreground font-medium">Escolher arquivos</span>
+        </div>
+        <span className="text-muted-foreground text-xs">ou cole com Ctrl+V</span>
       </label>
 
       <input
@@ -150,7 +216,7 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
         onChange={(event) => choose(Array.from(event.target.files ?? []))}
       />
 
-      <p className="text-ink-500 text-xs">{limitsSummary(data.limits)}</p>
+      <p className="text-muted-foreground text-xs">{limitsSummary(data.limits)}</p>
 
       {state?.error ? (
         <p className="text-destructive text-xs" role="alert">
@@ -159,7 +225,7 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
       ) : null}
 
       {data.files.length > 0 ? (
-        <ul className="rounded-box divide-y border">
+        <ul className="rounded-box divide-border border-border divide-y border">
           {data.files.map((file, index) => (
             /* A chave leva a POSIÇÃO junto com a identidade. A recusa acima já barra o mesmo arquivo
                duas vezes, mas chave repetida derruba a tela inteira — e nenhuma lista de anexos vale
@@ -169,8 +235,8 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
               className="flex items-center justify-between gap-2 p-2"
             >
               <div className="min-w-0">
-                <p className="text-ink-900 truncate text-sm">{file.name}</p>
-                <p className="text-ink-500 text-xs">{fileSizeOf(file.size)}</p>
+                <p className="text-foreground truncate text-sm font-medium">{file.name}</p>
+                <p className="text-muted-foreground text-xs">{fileSizeOf(file.size)}</p>
               </div>
 
               <AzuosActionButton

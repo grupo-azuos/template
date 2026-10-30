@@ -265,6 +265,48 @@ const solidInputs = {
 		return found;
 	}
 };
+const dualFileActions = {
+	id: "brand/dual-file-actions",
+	law: "Marca",
+	severity: "warning",
+	description: "Funções de arquivo devem sempre disponibilizar download e visualização via hyperlink.",
+	hint: "Use o componente canônico `<AzuosFileLinks />` ou disponibilize links com download e target=\"_blank\".",
+	enabled: (c) => c.brandRules?.dualFileActions ?? true,
+	check: (file) => {
+		if (file.path.includes("/ui/") || file.isTokenFile) return [];
+		const isFileFeature = /file.*link|attachment.*list/i.test(file.path);
+		if (!isFileFeature) return [];
+		const hasDownload = /\bdownload\b/i.test(file.code);
+		const hasHyperlink = /target=["']_blank["']/i.test(file.code) || /\bviewUrl\b/i.test(file.code);
+		if ((hasDownload && !hasHyperlink) || (!hasDownload && hasHyperlink)) {
+			return [{
+				index: 0,
+				message: "Componente de arquivo incompleto: deve fornecer ambas as funções de download e abrir via hyperlink."
+			}];
+		}
+		return [];
+	}
+};
+const pasteFileAttachment = {
+	id: "brand/paste-file-attachment",
+	law: "Marca",
+	severity: "warning",
+	description: "Locais de anexar arquivos devem suportar colagem de arquivos/imagens via Ctrl+V.",
+	hint: "Adicione handler `onPaste` para capturar arquivos da área de transferência (clipboardData).",
+	enabled: (c) => c.brandRules?.pasteFileAttachment ?? true,
+	check: (file) => {
+		if (file.path.includes("/ui/") || file.isTokenFile) return [];
+		const isUploadFile = /(?:attachment|file).*picker|upload|dropzone/i.test(file.path);
+		if (!isUploadFile) return [];
+		if (/type=["']file["']/i.test(file.code) && !/\bonPaste\b/i.test(file.code)) {
+			return [{
+				index: 0,
+				message: "Componente de anexo de arquivo sem suporte a Ctrl+V (área de transferência)."
+			}];
+		}
+		return [];
+	}
+};
 /* ------------------------------------------------------------------ Lei de Hick */
 const hickNavItems = {
 	id: "hick/nav-items",
@@ -580,6 +622,8 @@ export const RULES = [
 	staticZuzu,
 	canonicalBackButton,
 	solidInputs,
+	dualFileActions,
+	pasteFileAttachment,
 	hickNavItems,
 	hickSelectOptions,
 	fittsTargetSize,

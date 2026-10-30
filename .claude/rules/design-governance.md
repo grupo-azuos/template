@@ -41,3 +41,13 @@ Todo código gerado ou modificado nos 14 sistemas do Grupo Azuos DEVE seguir est
 
 ## 10. Cobertura de Testes Obrigatória (Mínimo de 90%)
 - Todo novo componente ou modificação deve conter cobertura de testes com Vitest, cumprindo os thresholds estritos de 90% em linhas, funções, branches e statements.
+
+## 11. Ações Duplas em Arquivos (Download + Abrir via Hyperlink)
+- Sempre que houver função ou visualização de arquivo, o sistema DEVE obrigatoriamente fornecer DUAS funções:
+  1. **Download**: Baixar o arquivo com seu nome original (`download={fileName}`).
+  2. **Abrir via Hyperlink**: Abrir diretamente em nova aba do navegador (`target="_blank" rel="noopener noreferrer"`).
+- Componentes canônicos: `<AzuosFileLinks />` e `<AzuosAttachmentList />`.
+
+## 12. Upload e Anexo com Suporte Universal a Ctrl+V (Área de Transferência)
+- Todo local ou componente de anexar arquivo (`<AzuosAttachmentPicker>`, campos de upload e dropzones) DEVE obrigatoriamente aceitar colar arquivos via `Ctrl+V` (captura direta de imagens/prints e arquivos do clipboard).
+- Ao colar, os arquivos da área de transferência são adicionados à seleção, respeitando limites de quantidade e tamanho configurados.

@@ -254,4 +254,23 @@ describe("regras de marca estendidas (Azuos 2.0)", () => {
 		const heroWatermark = rulesFor('<div data-slot="hero-card-icon" className="opacity-15 text-primary-foreground" />', "src/components/azuos-hero-card.component.tsx");
 		assert.ok(!heroWatermark.includes("brand/no-card-opacity"));
 	});
+
+	it("dual-file-actions: exige download e hyperlink em componentes de arquivo", () => {
+		const onlyDownload = rulesFor('<a href="/file" download="doc.pdf">Baixar</a>', "src/lib/components/azuos-file-links.tsx");
+		assert.ok(onlyDownload.includes("brand/dual-file-actions"));
+
+		const complete = rulesFor(
+			'<a href="/file" target="_blank" rel="noopener noreferrer">Abrir</a><a href="/file" download="doc.pdf">Baixar</a>',
+			"src/lib/components/azuos-file-links.tsx"
+		);
+		assert.ok(!complete.includes("brand/dual-file-actions"));
+	});
+
+	it("paste-file-attachment: exige onPaste (Ctrl+V) em campos de upload/anexo", () => {
+		const noPaste = rulesFor('<div className="dropzone"><input type="file" /></div>', "src/lib/components/azuos-attachment-picker.tsx");
+		assert.ok(noPaste.includes("brand/paste-file-attachment"));
+
+		const withPaste = rulesFor('<div className="dropzone" onPaste={handlePaste}><input type="file" /></div>', "src/lib/components/azuos-attachment-picker.tsx");
+		assert.ok(!withPaste.includes("brand/paste-file-attachment"));
+	});
 });

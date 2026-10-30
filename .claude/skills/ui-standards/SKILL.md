@@ -83,6 +83,8 @@ Uma ação principal por tela (azul). As outras são `secondary` ou `ghost`.
 8. **Select com 15+ Itens Vira Combobox:** Mais de 15 itens exige Combobox com pesquisa. Se pesquisar e não encontrar, deve oferecer opção de cadastrar novo item.
 9. **Bloqueio de Cadastro de Empresa/Grupo:** Exceto CRM, Public-API e Paralegal, nenhum sistema pode criar tela ou modal de cadastrar empresa/grupo; devem usar os mocks unificados.
 10. **Exclusividade do Template:** Criação de novos componentes canônicos e instalação de bibliotecas visuais só é permitida no repositório `template`. Os demais 13 sistemas apenas consomem.
+11. **Ações Duplas em Arquivos (Download + Abrir via Hyperlink):** Toda exibição ou link de arquivo DEVE fornecer duas opções obrigatórias: baixar o arquivo (`download={fileName}`) e abrir diretamente via hyperlink em nova aba (`target="_blank" rel="noopener noreferrer"`). Componentes canônicos: `<AzuosFileLinks />` e `<AzuosAttachmentList />`.
+12. **Upload e Anexo com Suporte a Ctrl+V (Área de Transferência):** Todo local ou componente de anexar arquivo (`<AzuosAttachmentPicker>`, áreas de upload e dropzones) DEVE aceitar colar arquivos via `Ctrl+V` (captura direta de prints e arquivos do clipboard).
 
 ## O corpo, sempre nesta ordem (early return)
 

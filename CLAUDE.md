@@ -263,4 +263,11 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
   colorido; `interactive` com o hover-fill do Chamados); selecionado = fundo na cor cheia. Ficam
   só a borda neutra, o anel de foco e os spinners.
 - **Nunca `<select>` nativo**: sempre o combobox/seletor do projeto.
+- **Ações duplas em arquivos (Download + Abrir via hyperlink)**: sempre que houver função de
+  arquivo, o sistema deve fornecer duas ações: download (`download={fileName}`) e abrir via
+  hyperlink em nova aba (`target="_blank" rel="noopener noreferrer"`). Componentes canônicos:
+  `AzuosFileLinks` e `AzuosAttachmentList`.
+- **Anexo de arquivos com Ctrl+V**: qualquer campo ou local de anexar arquivos (como
+  `AzuosAttachmentPicker`) deve obrigatoriamente aceitar colar arquivos via `Ctrl+V` (captura
+  direta de imagens/prints e arquivos do clipboard).
 - Checado no hook e no CI (`check:design`). Exceção só pelo suporte (Central de Chamados).
