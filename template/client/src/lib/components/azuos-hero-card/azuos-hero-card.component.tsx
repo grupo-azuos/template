@@ -50,7 +50,7 @@ const TONE_STYLES: Record<
     description: 'text-primary-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-strong',
+    iconColor: 'text-primary-foreground',
   },
   accent: {
     container: 'bg-accent-hero text-accent-hero-foreground',
@@ -58,7 +58,7 @@ const TONE_STYLES: Record<
     description: 'text-ink-700',
     badgeBg: 'bg-ink-900',
     badgeText: 'text-primary-foreground',
-    iconColor: 'text-accent-strong',
+    iconColor: 'text-accent-hero-foreground',
   },
   success: {
     container: 'bg-success text-primary-foreground',
@@ -66,7 +66,7 @@ const TONE_STYLES: Record<
     description: 'text-success-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-strong',
+    iconColor: 'text-primary-foreground',
   },
   warning: {
     container: 'bg-warning text-primary-foreground',
@@ -74,7 +74,7 @@ const TONE_STYLES: Record<
     description: 'text-warning-soft',
     badgeBg: 'bg-ink-900',
     badgeText: 'text-primary-foreground',
-    iconColor: 'text-ink-900',
+    iconColor: 'text-primary-foreground',
   },
   danger: {
     container: 'bg-destructive text-destructive-foreground',
@@ -82,7 +82,7 @@ const TONE_STYLES: Record<
     description: 'text-destructive-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-ink-900',
+    iconColor: 'text-destructive-foreground',
   },
   info: {
     container: 'bg-info text-primary-foreground',
@@ -90,7 +90,7 @@ const TONE_STYLES: Record<
     description: 'text-info-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-strong',
+    iconColor: 'text-primary-foreground',
   },
   neutral: {
     container: 'bg-card text-card-foreground border border-border',
@@ -98,7 +98,7 @@ const TONE_STYLES: Record<
     description: 'text-muted-foreground',
     badgeBg: 'bg-muted',
     badgeText: 'text-foreground',
-    iconColor: 'text-muted',
+    iconColor: 'text-muted-foreground',
   },
 };
 
@@ -116,13 +116,14 @@ function HeroCardInner({
   return (
     <>
       <div
+        data-slot="hero-card-icon"
         className={cn(
-          'pointer-events-none absolute -bottom-4 -right-4 size-32 select-none overflow-hidden transition-transform duration-300 group-hover:scale-105',
+          'pointer-events-none absolute -bottom-5 -right-5 size-36 select-none overflow-hidden opacity-15 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-25',
           styles.iconColor,
         )}
         aria-hidden="true"
       >
-        <Icon className="size-full stroke-[1.4]" />
+        <Icon className="size-full stroke-[1.2]" />
       </div>
 
       <div className="relative z-10 flex flex-col gap-1.5 pr-14 text-left">

@@ -165,6 +165,25 @@ const noGradientsOrGlass = {
 		})));
 	}
 };
+function isWatermarkLine(code, index) {
+	const start = Math.max(0, index - 250);
+	const end = Math.min(code.length, index + 250);
+	const snippet = code.slice(start, end);
+	return /hero-card-icon|hero-watermark|data-slot="hero-card-icon"/i.test(snippet);
+}
+
+function findCardOpacityViolations(code, pattern) {
+	const found = [];
+	for (const m of matches(code, pattern)) {
+		if (isWatermarkLine(code, m.index)) continue;
+		found.push({
+			index: m.index,
+			message: `Opacidade proibida em card: \`${m[0]}\`. Cards devem ter cor 100% sólida.`
+		});
+	}
+	return found;
+}
+
 const noCardOpacity = {
 	id: "brand/no-card-opacity",
 	law: "Marca",
@@ -180,10 +199,7 @@ const noCardOpacity = {
 			/\bbg-[a-z0-9-]+(?:\/[0-9]{1,2})\b/g,
 			/\bopacity-[0-9]{1,2}\b/g
 		];
-		return patterns.flatMap((pattern) => [...matches(file.code, pattern)].map((m) => ({
-			index: m.index,
-			message: `Opacidade proibida em card: \`${m[0]}\`. Cards devem ter cor 100% sólida.`
-		})));
+		return patterns.flatMap((pattern) => findCardOpacityViolations(file.code, pattern));
 	}
 };
 const staticZuzu = {

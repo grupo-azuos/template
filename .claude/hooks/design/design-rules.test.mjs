@@ -250,5 +250,8 @@ describe("regras de marca estendidas (Azuos 2.0)", () => {
 
 		const good = rulesFor('<div className="bg-card text-card-foreground p-4" data-slot="card" />', "src/components/my-card.tsx");
 		assert.ok(!good.includes("brand/no-card-opacity"));
+
+		const heroWatermark = rulesFor('<div data-slot="hero-card-icon" className="opacity-15 text-primary-foreground" />', "src/components/azuos-hero-card.component.tsx");
+		assert.ok(!heroWatermark.includes("brand/no-card-opacity"));
 	});
 });

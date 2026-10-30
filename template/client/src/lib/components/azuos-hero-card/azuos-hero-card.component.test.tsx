@@ -95,4 +95,24 @@ describe('AzuosHeroCard', () => {
 
     expect(screen.getByTestId('custom-tag')).toBeInTheDocument();
   });
+
+  it('renderiza o ícone como marca d água integrada tom-sobre-tom sem branco seco', () => {
+    const { container } = render(
+      <AzuosHeroCard
+        data={{
+          title: 'Azuos Benefícios',
+          icon: Sparkles,
+        }}
+        ui={{ tone: 'brand' }}
+      />,
+    );
+
+    const iconSlot = container.querySelector('[data-slot="hero-card-icon"]');
+    expect(iconSlot).toBeInTheDocument();
+    expect(iconSlot).toHaveClass('opacity-15');
+    // Card container deve ser 100% sólido bg-primary
+    const card = container.querySelector('[data-slot="azuos-hero-card"]');
+    expect(card).toHaveClass('bg-primary');
+    expect(card?.className).not.toMatch(/bg-[a-z0-9-]+\/[0-9]/);
+  });
 });
