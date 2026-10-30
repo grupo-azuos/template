@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { AzuosBackButton } from './azuos-back-button.component';
 
 const meta = {
-  title: 'Components/AzuosBackButton',
+  title: 'Navegação e estrutura/AzuosBackButton',
   component: AzuosBackButton,
   parameters: {
     layout: 'padded',

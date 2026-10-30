@@ -50,7 +50,7 @@ const TONE_STYLES: Record<
     description: 'text-primary-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-strong/40',
+    iconColor: 'text-primary-strong',
   },
   accent: {
     container: 'bg-accent-hero text-accent-hero-foreground',
@@ -58,7 +58,7 @@ const TONE_STYLES: Record<
     description: 'text-ink-700',
     badgeBg: 'bg-ink-900',
     badgeText: 'text-primary-foreground',
-    iconColor: 'text-accent-strong/30',
+    iconColor: 'text-accent-strong',
   },
   success: {
     container: 'bg-success text-primary-foreground',
@@ -66,7 +66,7 @@ const TONE_STYLES: Record<
     description: 'text-success-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-ink-900/30',
+    iconColor: 'text-primary-strong',
   },
   warning: {
     container: 'bg-warning text-primary-foreground',
@@ -74,7 +74,7 @@ const TONE_STYLES: Record<
     description: 'text-warning-soft',
     badgeBg: 'bg-ink-900',
     badgeText: 'text-primary-foreground',
-    iconColor: 'text-ink-900/30',
+    iconColor: 'text-ink-900',
   },
   danger: {
     container: 'bg-destructive text-destructive-foreground',
@@ -82,7 +82,7 @@ const TONE_STYLES: Record<
     description: 'text-destructive-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-ink-900/30',
+    iconColor: 'text-ink-900',
   },
   info: {
     container: 'bg-info text-primary-foreground',
@@ -90,7 +90,7 @@ const TONE_STYLES: Record<
     description: 'text-info-soft',
     badgeBg: 'bg-accent-hero',
     badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-strong/40',
+    iconColor: 'text-primary-strong',
   },
   neutral: {
     container: 'bg-card text-card-foreground border border-border',
@@ -98,7 +98,7 @@ const TONE_STYLES: Record<
     description: 'text-muted-foreground',
     badgeBg: 'bg-muted',
     badgeText: 'text-foreground',
-    iconColor: 'text-muted/50',
+    iconColor: 'text-muted',
   },
 };
 

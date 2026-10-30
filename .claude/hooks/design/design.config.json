@@ -34,6 +34,7 @@
     "noPureBlackWhite": true,
     "noArbitraryValues": true,
     "noGradientsOrGlass": true,
+    "noCardOpacity": true,
     "staticZuzu": true,
     "canonicalBackButton": true,
     "solidInputs": true

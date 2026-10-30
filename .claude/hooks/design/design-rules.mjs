@@ -165,6 +165,27 @@ const noGradientsOrGlass = {
 		})));
 	}
 };
+const noCardOpacity = {
+	id: "brand/no-card-opacity",
+	law: "Marca",
+	severity: "error",
+	description: "Cards e superfícies devem ser 100% sólidos. Opacidades e transparências em cards são estritamente proibidas.",
+	hint: "Use cores 100% sólidas da paleta. Remova classes com barra de opacidade (`bg-*/...`, `opacity-*`) em cards.",
+	enabled: (c) => c.brandRules?.noCardOpacity ?? true,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		const isCardFile = /card|surface/i.test(file.path);
+		if (!isCardFile && !/data-slot="[^"]*card[^"]*"|role="article"/i.test(file.code)) return [];
+		const patterns = [
+			/\bbg-[a-z0-9-]+(?:\/[0-9]{1,2})\b/g,
+			/\bopacity-[0-9]{1,2}\b/g
+		];
+		return patterns.flatMap((pattern) => [...matches(file.code, pattern)].map((m) => ({
+			index: m.index,
+			message: `Opacidade proibida em card: \`${m[0]}\`. Cards devem ter cor 100% sólida.`
+		})));
+	}
+};
 const staticZuzu = {
 	id: "brand/static-zuzu",
 	law: "Marca",
@@ -539,6 +560,7 @@ export const RULES = [
 	tokensOnly,
 	noArbitraryValues,
 	noGradientsOrGlass,
+	noCardOpacity,
 	staticZuzu,
 	canonicalBackButton,
 	solidInputs,

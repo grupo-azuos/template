@@ -218,8 +218,8 @@
   --muted-foreground: #9ca3af;
   --accent: #1e293b;
   --accent-foreground: var(--ink-100);
-  --border: rgb(248 250 252 / 0.12);
-  --input: rgb(248 250 252 / 0.12);
+  --border: #2b2c3d;
+  --input: #2b2c3d;
 
   --crust: #060b14;
   --mantle: #0b1220;

@@ -240,4 +240,15 @@ describe("regras de marca estendidas (Azuos 2.0)", () => {
 		const good = rulesFor('<input type="text" className="bg-muted border" />', "src/features/login.tsx");
 		assert.ok(!good.includes("brand/solid-inputs"));
 	});
+
+	it("no-card-opacity: bloqueia classes de opacidade e transparência em cards", () => {
+		const bad1 = rulesFor('<div className="bg-card/80 p-4" data-slot="card" />', "src/components/my-card.tsx");
+		assert.ok(bad1.includes("brand/no-card-opacity"));
+
+		const bad2 = rulesFor('<div className="bg-primary opacity-60 p-4" data-slot="azuos-hero-card" />', "src/components/my-card.tsx");
+		assert.ok(bad2.includes("brand/no-card-opacity"));
+
+		const good = rulesFor('<div className="bg-card text-card-foreground p-4" data-slot="card" />', "src/components/my-card.tsx");
+		assert.ok(!good.includes("brand/no-card-opacity"));
+	});
 });
