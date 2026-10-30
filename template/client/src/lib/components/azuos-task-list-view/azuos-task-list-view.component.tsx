@@ -178,7 +178,7 @@ function TaskListBody({ data, state, actions }: AzuosTaskListViewProps) {
 
   return (
     <section className="flex flex-col gap-3" aria-label="Lista de tarefas">
-      <div className="text-ink-500 flex flex-wrap items-center justify-between gap-2 text-sm">
+      <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-2 text-sm">
         <span>
           {data.tasks.length} de {data.total} {data.total === 1 ? 'tarefa' : 'tarefas'}
         </span>
@@ -214,34 +214,34 @@ function TaskItem({
   const canEdit = state.canEdit ?? true;
 
   return (
-    <li className="border-ink-300 bg-card rounded-surface flex flex-col gap-3 border p-4 sm:flex-row sm:items-start">
+    <li className="border-border bg-card rounded-surface flex flex-col justify-between gap-3 border p-4 sm:flex-row sm:items-start">
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <p
             className={cn(
-              'text-ink-900 font-semibold break-words',
-              isDone && 'text-ink-500 line-through',
+              'text-foreground min-w-0 font-semibold break-words [overflow-wrap:anywhere]',
+              isDone && 'text-muted-foreground line-through',
             )}
           >
             {task.title}
           </p>
           <AzuosStatusBadge
             data={{ label: TASK_STATUS_LABELS[task.status] }}
-            ui={{ tone: taskStatusTone(task.status), size: 'sm' }}
+            ui={{ tone: taskStatusTone(task.status), size: 'sm', className: 'shrink-0' }}
           />
         </div>
         {task.description ? (
-          <p className="text-ink-700 mt-1 text-sm break-words whitespace-pre-line">
+          <p className="text-muted-foreground mt-1 text-sm break-words [overflow-wrap:anywhere] whitespace-pre-line">
             {task.description}
           </p>
         ) : null}
-        <p className="text-ink-500 mt-2 text-xs">
+        <p className="text-muted-foreground mt-2 text-xs">
           Criada em {formatDateTime(task.createdAt)} por {task.createdBy}
         </p>
       </div>
 
       {canEdit ? (
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 items-center gap-1 sm:self-start">
           <AzuosActionButton
             data={{ label: isDone ? 'Reabrir tarefa' : 'Marcar como concluída' }}
             ui={{
@@ -282,7 +282,7 @@ function TaskListSkeleton() {
   return (
     <div className="flex flex-col gap-2" aria-busy="true" aria-label="Carregando tarefas">
       {Array.from({ length: 4 }, (_, index) => (
-        <div key={index} className="border-ink-300 bg-card rounded-surface border p-4">
+        <div key={index} className="border-border bg-card rounded-surface border p-4">
           <Skeleton className="h-4 w-2/3" />
           <Skeleton className="mt-2 h-3 w-1/3" />
         </div>
