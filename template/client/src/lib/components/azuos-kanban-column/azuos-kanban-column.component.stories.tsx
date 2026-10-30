@@ -8,7 +8,7 @@ const card = (text: string) => (
 );
 
 const meta = {
-  title: 'Importados/AzuosKanbanColumn',
+  title: 'Listas e tabelas/AzuosKanbanColumn',
   component: AzuosKanbanColumn,
   args: {
     data: { title: 'Desenvolvimento', count: 2 },

@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosProgressRing } from './azuos-progress-ring.component';
 
 const meta = {
-  title: 'Importados/AzuosProgressRing',
+  title: 'Gráficos e números/AzuosProgressRing',
   component: AzuosProgressRing,
   args: { data: { done: 13, total: 28 } },
 } satisfies Meta<typeof AzuosProgressRing>;

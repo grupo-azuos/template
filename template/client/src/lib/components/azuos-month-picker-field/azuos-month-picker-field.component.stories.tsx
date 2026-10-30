@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosMonthPickerField } from './azuos-month-picker-field.component';
 
 const meta = {
-  title: 'Importados/AzuosMonthPickerField',
+  title: 'Formulários/AzuosMonthPickerField',
   component: AzuosMonthPickerField,
   decorators: [
     (Story) => (

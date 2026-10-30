@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosColorSwatchField } from './azuos-color-swatch-field.component';
 
 const meta = {
-  title: 'Importados/AzuosColorSwatchField',
+  title: 'Formulários/AzuosColorSwatchField',
   component: AzuosColorSwatchField,
   args: { data: { value: '' }, actions: { onChange: fn() } },
 } satisfies Meta<typeof AzuosColorSwatchField>;

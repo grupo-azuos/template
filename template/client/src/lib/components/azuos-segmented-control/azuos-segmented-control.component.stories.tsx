@@ -12,7 +12,7 @@ const options = [
 ];
 
 const meta = {
-  title: 'Importados/AzuosSegmentedControl',
+  title: 'Formulários/AzuosSegmentedControl',
   component: AzuosSegmentedControl,
   args: {
     data: { value: 'all', options },

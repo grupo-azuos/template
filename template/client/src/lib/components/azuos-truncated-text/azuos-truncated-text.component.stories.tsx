@@ -4,7 +4,7 @@ import { AzuosStatusBadge } from '../azuos-status-badge/azuos-status-badge.compo
 import { AzuosTruncatedText } from './azuos-truncated-text.component';
 
 const meta = {
-  title: 'Importados/AzuosTruncatedText',
+  title: 'Conteúdo e marcadores/AzuosTruncatedText',
   component: AzuosTruncatedText,
   decorators: [
     (Story) => (

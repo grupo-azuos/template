@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosCreatableComboboxField } from './azuos-creatable-combobox-field.component';
 
 const meta = {
-  title: 'Importados/AzuosCreatableComboboxField',
+  title: 'Formulários/AzuosCreatableComboboxField',
   component: AzuosCreatableComboboxField,
   decorators: [
     (Story) => (

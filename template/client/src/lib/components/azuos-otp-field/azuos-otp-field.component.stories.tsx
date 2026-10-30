@@ -4,7 +4,7 @@ import { AzuosOtpField } from './azuos-otp-field.component';
 const ACCESS_CODE_LENGTH = 6;
 
 const meta = {
-  title: 'Importados/AzuosOtpField',
+  title: 'Formulários/AzuosOtpField',
   component: AzuosOtpField,
 } satisfies Meta<typeof AzuosOtpField>;
 

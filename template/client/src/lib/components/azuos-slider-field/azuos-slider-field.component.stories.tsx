@@ -6,7 +6,7 @@ import { AzuosSliderField } from './azuos-slider-field.component';
 const noop = () => undefined;
 
 const meta = {
-  title: 'Importados/AzuosSliderField',
+  title: 'Formulários/AzuosSliderField',
   component: AzuosSliderField,
   args: {
     data: { label: 'Zoom', value: 1.5, min: 1, max: 4, step: 0.05 },

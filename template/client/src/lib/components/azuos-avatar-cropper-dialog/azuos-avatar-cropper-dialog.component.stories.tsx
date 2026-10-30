@@ -13,7 +13,7 @@ const LANDSCAPE =
 const noop = () => undefined;
 
 const meta = {
-  title: 'Importados/AzuosAvatarCropperDialog',
+  title: 'Diálogos/AzuosAvatarCropperDialog',
   component: AzuosAvatarCropperDialog,
   args: {
     data: { imageUrl: PORTRAIT },

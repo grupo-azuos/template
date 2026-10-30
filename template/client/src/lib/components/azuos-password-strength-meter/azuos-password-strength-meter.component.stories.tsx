@@ -4,7 +4,7 @@ import { toPasswordStrength } from '../../view-models/password-strength.util';
 import { AzuosPasswordStrengthMeter } from './azuos-password-strength-meter.component';
 
 const meta = {
-  title: 'Importados/AzuosPasswordStrengthMeter',
+  title: 'Formulários/AzuosPasswordStrengthMeter',
   component: AzuosPasswordStrengthMeter,
 } satisfies Meta<typeof AzuosPasswordStrengthMeter>;
 

@@ -3,7 +3,7 @@ import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosInfiniteScrollFooter } from './azuos-infinite-scroll-footer.component';
 
 const meta = {
-  title: 'Importados/AzuosInfiniteScrollFooter',
+  title: 'Listas e tabelas/AzuosInfiniteScrollFooter',
   component: AzuosInfiniteScrollFooter,
   args: {
     ui: { itemNoun: { singular: 'empresa', plural: 'empresas' } },

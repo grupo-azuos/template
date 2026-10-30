@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '../ui/dialog';
 import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
-import { AzuosErrorNotice } from '../azuos-error-notice/azuos-error-notice.component';
+import { AzuosErrorState } from '../azuos-error-state/azuos-error-state.component';
 import { AzuosSliderField } from '../azuos-slider-field/azuos-slider-field.component';
 
 /**
@@ -147,7 +147,9 @@ function CropEditor({
         />
       </div>
 
-      {state.error ? <AzuosErrorNotice data={{ message: state.error }} /> : null}
+      {state.error ? (
+        <AzuosErrorState data={{ message: state.error }} ui={{ variant: 'inline' }} />
+      ) : null}
 
       <DialogFooter>
         <AzuosActionButton

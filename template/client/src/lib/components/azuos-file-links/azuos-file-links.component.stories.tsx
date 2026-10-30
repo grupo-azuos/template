@@ -4,7 +4,7 @@ import { Paperclip } from 'lucide-react';
 import { AzuosFileLinks } from './azuos-file-links.component';
 
 const meta = {
-  title: 'Importados/AzuosFileLinks',
+  title: 'Ações/AzuosFileLinks',
   component: AzuosFileLinks,
   args: {
     data: {

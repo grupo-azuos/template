@@ -16,7 +16,7 @@ const OPTIONS = [
 ];
 
 const meta = {
-  title: 'Importados/AzuosIconPicker',
+  title: 'Formulários/AzuosIconPicker',
   component: AzuosIconPicker,
   args: {
     data: { value: 'bookmark-check', options: OPTIONS },

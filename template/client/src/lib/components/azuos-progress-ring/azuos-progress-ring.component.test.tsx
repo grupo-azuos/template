@@ -19,7 +19,7 @@ describe('AzuosProgressRing', () => {
     const { container } = render(<AzuosProgressRing data={{ done: 28, total: 28 }} />);
 
     expect(screen.getByText('100%')).toBeInTheDocument();
-    expect(container.querySelector('.stroke-emerald-500')).not.toBeNull();
+    expect(container.querySelector('.stroke-success')).not.toBeNull();
   });
 
   // triste
@@ -28,7 +28,7 @@ describe('AzuosProgressRing', () => {
     const { container } = render(<AzuosProgressRing data={{ done: 0, total: 0 }} />);
 
     expect(screen.getByText('—')).toBeInTheDocument();
-    expect(container.querySelector('.stroke-red-500')).toBeNull();
+    expect(container.querySelector('.stroke-destructive')).toBeNull();
   });
 
   it('never goes over 100% when the count is inconsistent', () => {

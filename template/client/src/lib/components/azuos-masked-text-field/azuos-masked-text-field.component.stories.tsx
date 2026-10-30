@@ -27,7 +27,7 @@ function Playground({
 }
 
 const meta = {
-  title: 'Importados/AzuosMaskedTextField',
+  title: 'Formulários/AzuosMaskedTextField',
   component: AzuosMaskedTextField,
   parameters: { layout: 'padded' },
   args: {
