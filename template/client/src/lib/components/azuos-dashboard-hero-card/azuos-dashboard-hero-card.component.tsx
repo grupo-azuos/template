@@ -57,7 +57,7 @@ const STAT_TONE_STYLES: Record<
 > = {
   default: {
     value: 'text-primary-foreground',
-    icon: 'text-primary-soft',
+    icon: 'text-primary-foreground/80',
     label: 'text-primary-soft',
   },
   danger: {
@@ -71,18 +71,18 @@ const STAT_TONE_STYLES: Record<
     label: 'text-accent-hero',
   },
   info: {
-    value: 'text-info-soft',
-    icon: 'text-info-soft',
-    label: 'text-info-soft',
+    value: 'text-primary-foreground',
+    icon: 'text-primary-foreground/80',
+    label: 'text-primary-foreground/80',
   },
   success: {
-    value: 'text-success-soft',
-    icon: 'text-success-soft',
-    label: 'text-success-soft',
+    value: 'text-primary-foreground',
+    icon: 'text-primary-foreground/80',
+    label: 'text-primary-foreground/80',
   },
   brand: {
     value: 'text-primary-foreground',
-    icon: 'text-primary-soft',
+    icon: 'text-primary-foreground/80',
     label: 'text-primary-foreground',
   },
 };

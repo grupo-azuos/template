@@ -47,30 +47,30 @@ export type AzuosStatCardProps = {
 const TONE_CARD: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-card border-border border text-card-foreground',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
+  success: 'bg-success text-success-foreground',
+  warning: 'bg-warning text-warning-foreground',
   danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
+  info: 'bg-info text-info-foreground',
 };
 
 /** Selecionado: o fundo na cor CHEIA do tom, e todo o texto claro por cima — nunca um contorno. */
 const TONE_SELECTED: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-ink-700 text-primary-foreground',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
+  neutral: 'bg-muted-foreground text-background',
+  success: 'bg-success text-success-foreground',
+  warning: 'bg-warning text-warning-foreground',
   danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
+  info: 'bg-info text-info-foreground',
 };
 
 /** A pastilha no tom (prazo, situação): fundo sólido contrastante. */
 export const STAT_TONE_BADGE: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-muted text-ink-700',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
+  success: 'bg-success text-success-foreground',
+  warning: 'bg-warning text-warning-foreground',
   danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
+  info: 'bg-info text-info-foreground',
 };
 
 const TONE_LABEL: Record<AzuosStatCardTone, string> = {

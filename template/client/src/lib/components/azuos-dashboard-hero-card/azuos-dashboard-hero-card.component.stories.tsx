@@ -143,7 +143,7 @@ export const IdeaWithChildren: Story = {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            className="rounded-control bg-accent-hero text-accent-hero-foreground font-bold px-4 py-2 text-sm shadow-xs hover:bg-accent-hero/90 cursor-pointer transition-colors"
+            className="rounded-control bg-accent-hero text-accent-hero-foreground font-bold px-4 py-2 text-sm shadow-xs hover:bg-accent-strong cursor-pointer transition-colors"
           >
             Configurar Notificações
           </button>

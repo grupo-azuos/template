@@ -34,10 +34,10 @@ export type AzuosToneCardProps = {
 const SOLID: Record<AzuosToneCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-card text-card-foreground border border-border',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
+  success: 'bg-success text-success-foreground',
+  warning: 'bg-warning text-warning-foreground',
   danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
+  info: 'bg-info text-info-foreground',
 };
 
 const BASE = 'rounded-surface relative p-4 shadow-card';
