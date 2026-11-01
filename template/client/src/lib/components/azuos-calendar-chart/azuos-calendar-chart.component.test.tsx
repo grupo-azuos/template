@@ -1,11 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { themeColor } from '../../utils/theme-color.util';
 import {
   AzuosCalendarChart,
+  calendarOption,
   calendarRange,
   firstDayOfMonth,
 } from './azuos-calendar-chart.component';
+
+
 
 describe('calendarRange', () => {
   // feliz
@@ -44,5 +48,38 @@ describe('AzuosCalendarChart', () => {
 
     expect(screen.getByText('Nada vence')).toBeInTheDocument();
     expect(screen.queryByText('Menos')).not.toBeInTheDocument();
+  });
+});
+
+describe('calendarOption', () => {
+  const THEME = {
+    track: themeColor('--muted'),
+    surface: themeColor('--card'),
+    muted: themeColor('--muted-foreground'),
+  };
+
+  // feliz
+  it('writes the day the Brazilian way with the count in the balloon', () => {
+    const option = calendarOption(
+      [{ date: '2026-10-24', count: 3 }],
+      ['2026-10-01', '2027-09-30'],
+      'vencimentos',
+      THEME,
+    ) as { tooltip: { formatter: (params: unknown) => string } };
+
+    expect(option.tooltip.formatter({ value: ['2026-10-24', 3] })).toBe(
+      '<b>24/10/2026</b><br/>3 vencimentos',
+    );
+  });
+
+  // triste
+  it('does not break on a day without a value', () => {
+    const option = calendarOption([], ['2026-10-01', '2027-09-30'], 'vencimentos', THEME) as {
+      tooltip: { formatter: (params: unknown) => string };
+      visualMap: { max: number };
+    };
+
+    expect(option.tooltip.formatter({ value: [] })).toBe('<b>undefined/undefined/</b><br/>0 vencimentos');
+    expect(option.visualMap.max).toBe(1);
   });
 });

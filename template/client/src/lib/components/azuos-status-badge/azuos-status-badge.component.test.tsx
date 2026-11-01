@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react';
+import { Siren } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
+
+import { themeColor } from '../../utils/theme-color.util';
 
 import { AzuosStatusBadge } from './azuos-status-badge.component';
 
@@ -54,5 +57,29 @@ describe('AzuosStatusBadge', () => {
 
     expect(container.firstElementChild?.className).toContain('ml-4');
     expect(container.firstElementChild?.className).toContain('bg-success-soft');
+  });
+
+  // feliz
+  /* Cor livre (a da etapa cadastrada pela pessoa): o fundo é a mesma cor diluída, para o texto
+     continuar legível sem escolher uma segunda cor à mão. */
+  it('paints a free colour as text with a diluted background, and draws the icon', () => {
+    const color = themeColor('--primary');
+    const { container } = render(
+      <AzuosStatusBadge data={{ label: 'Triagem' }} ui={{ color, icon: Siren, size: 'sm' }} />,
+    );
+
+    const badge = container.firstElementChild as HTMLElement;
+    expect(badge.style.color).toBeTruthy();
+    expect(badge.style.backgroundColor).toContain('color-mix');
+    expect(badge.querySelector('svg')).not.toBeNull();
+  });
+
+  // triste
+  it('ignores an empty colour and draws no icon when none was given', () => {
+    const { container } = render(<AzuosStatusBadge data={{ label: 'Triagem' }} ui={{ color: null }} />);
+
+    const badge = container.firstElementChild as HTMLElement;
+    expect(badge.getAttribute('style')).toBeNull();
+    expect(badge.querySelector('svg')).toBeNull();
   });
 });

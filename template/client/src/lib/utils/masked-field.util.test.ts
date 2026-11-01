@@ -67,4 +67,23 @@ describe('applyMaskedInput', () => {
   it('does not run past the end when the cursor is beyond the text', () => {
     expect(run('123', 99).selectionStart).toBe('123'.length);
   });
+
+  // triste
+  /* Formato que ENCURTA o texto (um teto de dígitos, por exemplo): o cursor não pode apontar para
+     além do que sobrou. */
+  it('clamps the cursor to the field when the format drops content before it', () => {
+    const keepTwo = (value: string) => value.slice(0, 2);
+
+    expect(
+      applyMaskedInput({ value: '12345', selectionStart: 5 }, digitsOnly, keepTwo).selectionStart,
+    ).toBe(2);
+  });
+
+  it('clamps the cursor to the start when the format drops content after it', () => {
+    const keepTwo = (value: string) => value.slice(0, 2);
+
+    expect(
+      applyMaskedInput({ value: '12345', selectionStart: 0 }, digitsOnly, keepTwo, 'end').selectionStart,
+    ).toBe(0);
+  });
 });

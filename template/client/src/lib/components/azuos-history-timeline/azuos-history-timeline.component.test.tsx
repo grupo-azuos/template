@@ -115,4 +115,18 @@ describe('AzuosHistoryTimeline', () => {
 
     expect(screen.queryByText(/Estágio/)).not.toBeInTheDocument();
   });
+
+  // triste
+  it('shows the failure instead of the entries', () => {
+    render(<AzuosHistoryTimeline data={{ entries: [ENTRY] }} state={{ error: 'O histórico não carregou.' }} />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('O histórico não carregou.');
+    expect(screen.queryByText('Mariana Ribeiro')).not.toBeInTheDocument();
+  });
+
+  it('says it is loading before any entry', () => {
+    render(<AzuosHistoryTimeline data={{ entries: [] }} state={{ isLoading: true }} />);
+
+    expect(screen.getByText('Carregando a linha do tempo…')).toBeInTheDocument();
+  });
 });

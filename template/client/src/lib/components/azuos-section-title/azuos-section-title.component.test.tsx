@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { UserRound } from 'lucide-react';
+import { UserRound, Trash2 } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
 
 import { AzuosSectionTitle } from './azuos-section-title.component';
@@ -37,5 +37,17 @@ describe('AzuosSectionTitle', () => {
     );
 
     expect(container.querySelector('p')).toBeNull();
+  });
+
+  // triste
+  /* O tom `danger` é só para a zona de perigo: o vermelho no título avisa antes do botão. */
+  it('paints the danger zone red, in the icon and in the title', () => {
+    render(
+      <AzuosSectionTitle data={{ title: 'Excluir conta' }} ui={{ icon: Trash2, tone: 'danger' }} />,
+    );
+
+    const heading = screen.getByRole('heading', { name: 'Excluir conta' });
+    expect(heading.className).toContain('text-destructive');
+    expect(heading.parentElement?.previousElementSibling?.className).toContain('bg-destructive-soft');
   });
 });

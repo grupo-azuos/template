@@ -77,4 +77,22 @@ describe('AzuosSegmentedControl', () => {
 
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  // feliz
+  /* A variante grande dos painéis: pílulas cheias, lado a lado, sem a bandeja cinza por trás. */
+  it('draws the prominent variant with filled pills', () => {
+    render(
+      <AzuosSegmentedControl
+        data={{ value: 'all', options }}
+        ui={{ ariaLabel: 'Recorte', variant: 'prominent', className: 'mt-2' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    const group = screen.getByRole('group', { name: 'Recorte' });
+    expect(group.className).toContain('bg-transparent');
+    expect(group.className).toContain('mt-2');
+    expect(screen.getByRole('button', { name: 'Todas as empresas' }).className).toContain('bg-primary ');
+    expect(screen.getByRole('button', { name: 'Ano em dia' }).className).toContain('bg-primary/10');
+  });
 });

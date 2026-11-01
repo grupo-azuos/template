@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Siren } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AzuosOptionPicker } from './azuos-option-picker.component';
@@ -156,5 +157,28 @@ describe('AzuosOptionPicker com muitas opções', () => {
     await userEvent.type(screen.getByLabelText('Buscar nas opções'), 'jurídico');
 
     expect(screen.getByText('Nada encontrado.')).toBeInTheDocument();
+  });
+});
+
+describe('AzuosOptionPicker icons', () => {
+  // feliz
+  /* O ícone vence o pontinho de tom: uma opção com os dois mostra só o ícone. */
+  it('draws the icon of an option in the list, instead of the tone dot', async () => {
+    const withIcon = [
+      { value: 'alert', label: 'Alerta', icon: Siren, tone: 'danger' as const },
+      ...MANY,
+    ];
+    render(
+      <AzuosOptionPicker
+        data={{ value: 'alert', options: withIcon }}
+        ui={{ ariaLabel: 'Departamento' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /Departamento/ }));
+
+    const option = screen.getByRole('button', { name: 'Alerta' });
+    expect(option.querySelector('svg')).not.toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -120,6 +120,35 @@ describe('useMyProfileModel', () => {
 
     expect(result.current.data.person).toBeNull();
     expect(result.current.state.error).toBeTruthy();
+  });
+
+  // feliz
+  /* Tentar de novo pede às TRÊS fontes: a do sistema e as duas da conta. Só uma delas deixaria a
+     ficha pela metade. */
+  it('asks every source again on retry', async () => {
+    vi.mocked(accountProfileApi.me).mockRejectedValue(new Error('sem sessão'));
+    vi.mocked(accountProfileApi.systems).mockRejectedValue(new Error('sem sessão'));
+    const onRetry = vi.fn();
+
+    const { result } = setup({ person: null, onRetry });
+    await waitFor(() => expect(result.current.state.isLoading).toBe(false));
+    vi.mocked(accountProfileApi.me).mockResolvedValue(account);
+    vi.mocked(accountProfileApi.systems).mockResolvedValue(systems);
+
+    act(() => result.current.actions.onRetry());
+
+    expect(onRetry).toHaveBeenCalledOnce();
+    await waitFor(() => expect(result.current.data.person?.name).toBe('Ana Souza'));
+  });
+
+  it('retries without a local source to call', async () => {
+    vi.mocked(accountProfileApi.me).mockRejectedValue(new Error('sem sessão'));
+    vi.mocked(accountProfileApi.systems).mockRejectedValue(new Error('sem sessão'));
+
+    const { result } = setup({ person: null, onRetry: undefined });
+    await waitFor(() => expect(result.current.state.isLoading).toBe(false));
+
+    expect(() => act(() => result.current.actions.onRetry())).not.toThrow();
   });
 });
 

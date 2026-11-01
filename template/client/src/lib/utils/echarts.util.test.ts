@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { themeColor } from './theme-color.util';
 import {
   formatCount,
   resolveColor,
@@ -75,4 +76,31 @@ describe('echarts.util', () => {
   it('draws no tooltip when the chart asked for none', () => {
     expect(withChartTheme({}, THEME).tooltip).toBeUndefined();
   });
+
+  // feliz
+  /* O jsdom não resolve `var()`: a cor sai do `tokens.css`, a mesma do tema claro no navegador. */
+  it('resolves a token colour from the tokens file when the browser cannot', () => {
+    expect(resolveColor('var(--primary)')).toBe(themeColor('--primary'));
+  });
+
+  it('reads the clicked item by its id when it has one, and by name otherwise', () => {
+    expect(selectionOf({ name: 'Outros (2)', data: { id: '__others__' } }).name).toBe('__others__');
+    expect(selectionOf({ name: 'Goiânia', data: { id: 7 } }).name).toBe('Goiânia');
+    expect(selectionOf({}).name).toBe('');
+  });
+
+  it('dresses the first tooltip when the chart gave a list of them', () => {
+    const option = withChartTheme({ tooltip: [{ trigger: 'axis' }] }, THEME);
+
+    expect(option.tooltip).toMatchObject({ trigger: 'axis' });
+  });
+
+  // triste
+  it('falls back when the token does not exist', () => {
+    expect(resolveColor('var(--does-not-exist)', 'fallback')).toBe('fallback');
+    expect(resolveColor('var(--does-not-exist)')).toBe(THEME_FALLBACK_MUTED);
+  });
 });
+
+/* O `muted` padrão de `FALLBACK_THEME`, lido pelo mesmo caminho do util. */
+const THEME_FALLBACK_MUTED = themeColor('--muted-foreground');

@@ -36,4 +36,16 @@ describe('AzuosProgressRing', () => {
 
     expect(screen.getByText('100%')).toBeInTheDocument();
   });
+
+  // feliz
+  /* Os degraus de cor: quase lá em amarelo, metade em laranja, pouco em vermelho. */
+  it.each([
+    [20, 28, 'stroke-warning'],
+    [12, 28, 'stroke-chart-5'],
+    [3, 28, 'stroke-destructive'],
+  ])('paints %i of %i with %s', (done, total, stroke) => {
+    const { container } = render(<AzuosProgressRing data={{ done, total }} />);
+
+    expect(container.querySelector(`.${stroke}`)).not.toBeNull();
+  });
 });

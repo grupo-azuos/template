@@ -109,4 +109,26 @@ describe('AzuosDashboardHeroCard', () => {
 
     expect(screen.getByRole('button', { name: 'Ação Especial' })).toBeInTheDocument();
   });
+
+  // feliz
+  it('turns a stat into a button when it opens something, and keeps the hint', () => {
+    const onClick = vi.fn();
+    render(
+      <AzuosDashboardHeroCard
+        data={{
+          title: 'Resumo',
+          stats: [
+            { label: 'Vencidos', value: 3, tone: 'danger', icon: Siren, hint: 'hoje', onClick },
+            { label: 'No prazo', value: 12, tone: 'warning' },
+          ],
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Vencidos/ }));
+
+    expect(onClick).toHaveBeenCalledOnce();
+    expect(screen.getByText('hoje')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /No prazo/ })).not.toBeInTheDocument();
+  });
 });

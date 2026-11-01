@@ -73,4 +73,17 @@ describe('AzuosBackButton', () => {
     fireEvent.click(button);
     expect(handleClick).not.toHaveBeenCalled();
   });
+
+  // triste
+  it('swallows the click while disabled, so the page does not go back', () => {
+    const onClick = vi.fn();
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+    render(<AzuosBackButton data={{ destination: 'empresas' }} state={{ isDisabled: true }} actions={{ onClick }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /voltar para empresas/i }));
+
+    expect(onClick).not.toHaveBeenCalled();
+    expect(back).not.toHaveBeenCalled();
+    back.mockRestore();
+  });
 });

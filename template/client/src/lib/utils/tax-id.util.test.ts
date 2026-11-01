@@ -37,4 +37,36 @@ describe('tax-id.util', () => {
     expect(isValidTaxId(null)).toBe(false);
     expect(handleTaxIdInput({ value: '1122' }).isComplete).toBe(false);
   });
+
+  // feliz
+  /* Resto menor que 2 vira dígito 0 — a regra da Receita, e a que mais se erra ao copiar. */
+  it('writes a zero check digit when the remainder is below two', () => {
+    expect(taxIdCheckDigits('000000070001')).toBe('03');
+    expect(isValidTaxId('00.000.007/0001-03')).toBe(true);
+  });
+
+  it('masks a partial value piece by piece while it is typed', () => {
+    expect(maskTaxId('1')).toBe('1');
+    expect(maskTaxId('112')).toBe('11.2');
+    expect(maskTaxId('11222333')).toBe('11.222.333');
+    expect(maskTaxId('112223330001')).toBe('11.222.333/0001');
+    expect(maskTaxId('1122233300018199')).toBe('11.222.333/0001-81');
+  });
+
+  // triste
+  it('gives no check digits for a base of the wrong size', () => {
+    expect(taxIdCheckDigits('1122')).toBe('');
+    expect(taxIdCheckDigits('')).toBe('');
+  });
+
+  it('refuses letters in the check digits and a value made of one repeated character', () => {
+    expect(isValidTaxId('12ABC34501DEAB')).toBe(false);
+    expect(isValidTaxId('11111111111111')).toBe(false);
+  });
+
+  it('returns what it got when there is nothing to format', () => {
+    expect(formatTaxId('1122')).toBe('1122');
+    expect(formatTaxId(null)).toBe('');
+    expect(formatTaxId(undefined)).toBe('');
+  });
 });
