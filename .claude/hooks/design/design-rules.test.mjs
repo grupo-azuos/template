@@ -272,5 +272,11 @@ describe("regras de marca estendidas (Azuos 2.0)", () => {
 
 		const withPaste = rulesFor('<div className="dropzone" onPaste={handlePaste}><input type="file" /></div>', "src/lib/components/azuos-attachment-picker.tsx");
 		assert.ok(!withPaste.includes("brand/paste-file-attachment"));
+
+		const anyName = rulesFor('<div><button>Anexar</button><input type="file" /></div>', "src/routes/employees/components/azuos-employee-card.component.tsx");
+		assert.ok(anyName.includes("brand/paste-file-attachment"));
+
+		const withUtil = rulesFor('<div onPaste={pasteFilesIntoInput}><input type="file" /></div>', "src/routes/employees/components/azuos-employee-card.component.tsx");
+		assert.ok(!withUtil.includes("brand/paste-file-attachment"));
 	});
 });

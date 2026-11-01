@@ -292,13 +292,13 @@ const pasteFileAttachment = {
 	law: "Marca",
 	severity: "warning",
 	description: "Locais de anexar arquivos devem suportar colagem de arquivos/imagens via Ctrl+V.",
-	hint: "Adicione handler `onPaste` para capturar arquivos da área de transferência (clipboardData).",
+	hint: "Ponha `onPaste={pasteFilesIntoInput}` (lib/utils/paste-files.util) no elemento que contém o campo de arquivo.",
 	enabled: (c) => c.brandRules?.pasteFileAttachment ?? true,
 	check: (file) => {
-		if (file.path.includes("/ui/") || file.isTokenFile) return [];
-		const isUploadFile = /(?:attachment|file).*picker|upload|dropzone/i.test(file.path);
-		if (!isUploadFile) return [];
-		if (/type=["']file["']/i.test(file.code) && !/\bonPaste\b/i.test(file.code)) {
+		if (file.path.includes("/ui/") || file.isTokenFile || /\.(test|stories)\.[jt]sx?$/.test(file.path)) return [];
+		/* Todo campo de arquivo, e não só os que têm "upload" no nome: a regra vale para qualquer
+		   lugar de anexar. `pasteFilesIntoInput` (lib/utils) é o jeito pronto de cumprir. */
+		if (/type=["']file["']/i.test(file.code) && !/\bonPaste\b|pasteFilesIntoInput/.test(file.code)) {
 			return [{
 				index: 0,
 				message: "Componente de anexo de arquivo sem suporte a Ctrl+V (área de transferência)."
