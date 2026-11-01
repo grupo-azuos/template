@@ -1,3 +1,5 @@
+import { type LucideIcon } from 'lucide-react';
+
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -15,7 +17,19 @@ export type AzuosStatusBadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 
 
 export type AzuosStatusBadgeProps = {
   data: { label: string | null | undefined };
-  ui?: { tone?: AzuosStatusBadgeTone; size?: 'sm' | 'md'; className?: string };
+  ui?: {
+    tone?: AzuosStatusBadgeTone;
+    /**
+     * Uma cor que a PESSOA escolheu (`#rrggbb`, o status criado pela equipe) — vence o tom. Vai por
+     * `style`: não há token para uma cor que só se sabe quando alguém a escolhe. O fundo é a mesma
+     * cor bem diluída, como o `-soft` dos tons.
+     */
+    color?: string | null;
+    /** Um ícone pequeno antes do texto — o do status criado pela equipe, por exemplo. */
+    icon?: LucideIcon;
+    size?: 'sm' | 'md';
+    className?: string;
+  };
 };
 
 const TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
@@ -37,13 +51,36 @@ export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full text-xs font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1 rounded-full text-xs font-semibold whitespace-nowrap',
         ui?.size === 'sm' ? 'px-2 py-0.5' : 'px-2.5 py-1',
-        TONE_CLASSES[ui?.tone ?? 'neutral'],
+        resolveToneClass(ui),
         ui?.className,
       )}
+      style={resolveColorStyle(ui?.color)}
     >
-      {data.label}
+      <BadgeIcon icon={ui?.icon} />
+      {/* O texto num `span` próprio: com `max-w-*` em `ui.className`, o selo corta com reticências
+          em vez de empurrar a coluna — quem precisa do texto inteiro o mostra num tooltip. */}
+      <span className="min-w-0 truncate">{data.label}</span>
     </span>
   );
+}
+
+/** A cor escolhida vence o tom: com ela, nenhuma classe de cor entra para disputar. */
+function resolveToneClass(ui: AzuosStatusBadgeProps['ui']): string {
+  if (ui?.color) return '';
+
+  return TONE_CLASSES[ui?.tone ?? 'neutral'];
+}
+
+function resolveColorStyle(color: string | null | undefined) {
+  if (!color) return undefined;
+
+  return { color, backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` };
+}
+
+function BadgeIcon({ icon: Icon }: { icon?: LucideIcon }) {
+  if (!Icon) return null;
+
+  return <Icon className="size-3 shrink-0" aria-hidden="true" />;
 }

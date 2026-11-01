@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useId } from 'react';
 
 import { cn } from '../../utils/cn.util';
 
@@ -24,19 +24,25 @@ export type AzuosPanelCardProps = {
 };
 
 export function AzuosPanelCard({ data, ui, tools, children }: AzuosPanelCardProps) {
+  /* O título dá nome à seção: o leitor de tela anuncia "região, Receitas por mês" e dá para
+     pular de painel em painel pelos marcos da página. */
+  const titleId = useId();
+
   return (
     <section
-      className={cn('bg-card border-border rounded-surface border p-5 shadow-card', ui?.className)}
+      aria-labelledby={titleId}
+      className={cn('bg-card border-border rounded-surface shadow-card border p-5', ui?.className)}
     >
       {/* Empilhado no celular: título e controle lado a lado a 360px espremem os dois. */}
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          <h2
+            id={titleId}
+            className="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
+          >
             {data.title}
           </h2>
-          {data.hint ? (
-            <p className="text-muted-foreground mt-0.5 text-xs">{data.hint}</p>
-          ) : null}
+          {data.hint ? <p className="text-muted-foreground mt-0.5 text-xs">{data.hint}</p> : null}
         </div>
         {tools ? <div className="shrink-0">{tools}</div> : null}
       </div>

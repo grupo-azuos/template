@@ -33,9 +33,13 @@ export type AzuosComboboxFieldProps = {
     emptyLabel?: string;
     createLabel?: string;
     ariaLabel?: string;
+    /** O id do gatilho, para um `<label htmlFor>` de fora apontar para ele. */
+    id?: string;
+    /** O id da mensagem que descreve o campo (o erro, a dica), para o leitor de tela. */
+    describedBy?: string;
     className?: string;
   };
-  state?: { isDisabled?: boolean };
+  state?: { isDisabled?: boolean; isInvalid?: boolean };
   actions: { onChange: (value: string) => void; onCreate?: (label: string) => void };
 };
 
@@ -104,11 +108,14 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           type="button"
           role="combobox"
           aria-expanded={isOpen}
+          id={ui?.id}
           aria-label={texts.ariaLabel}
+          aria-invalid={state?.isInvalid || undefined}
+          aria-describedby={ui?.describedBy}
           disabled={state?.isDisabled}
           title={selectedOption?.label}
           className={cn(
-            'control-lg rounded-control border-input flex w-full max-w-full min-w-0 items-center justify-between gap-2 border bg-muted text-foreground px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
+            'control-lg rounded-control border-input bg-muted text-foreground flex w-full max-w-full min-w-0 items-center justify-between gap-2 border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
             'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-50',
             texts.className,
@@ -163,7 +170,9 @@ function TriggerLabel({
   const Icon = data.option?.icon;
 
   return (
-    <span className={cn('flex min-w-0 items-center gap-2', !data.option && 'text-muted-foreground')}>
+    <span
+      className={cn('flex min-w-0 items-center gap-2', !data.option && 'text-muted-foreground')}
+    >
       {Icon ? (
         <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
       ) : null}

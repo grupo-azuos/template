@@ -86,7 +86,7 @@ describe('AzuosInputGroup', () => {
     );
     const group = () => container.querySelector('[data-slot="input-group"]');
 
-    expect(group()).toHaveClass('bg-card');
+    expect(group()).toHaveClass('bg-muted');
     expect(group()).not.toHaveClass('bg-destructive-soft');
 
     rerender(

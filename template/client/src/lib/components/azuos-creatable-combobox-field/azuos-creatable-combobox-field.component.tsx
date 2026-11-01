@@ -183,7 +183,7 @@ function ComboboxTrigger({
       className={cn(
         /* O degrau `lg` da régua de medidas (`lib/theme/tokens.css`) e o raio de controle, os mesmos do
            `AzuosTextField` e do `AzuosSelectField`. */
-        'control-lg rounded-control flex w-full items-center justify-between gap-2 border border-input bg-transparent px-3 text-left text-sm shadow-xs outline-none transition-[color,box-shadow]',
+        'control-lg rounded-control flex w-full items-center justify-between gap-2 border border-input bg-muted text-foreground px-3 text-left text-sm shadow-xs outline-none transition-[color,box-shadow]',
         'focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
         ui?.className,
       )}
