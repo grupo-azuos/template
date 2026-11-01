@@ -100,6 +100,8 @@ function isColorHex(code, index, hex) {
 		6,
 		8
 	].includes(hex.length)) return false;
+	/* `#104`, `#2026`: número de PR, de protocolo, de chamado — não é cor. Cor curta de verdade tem letra. */
+	if (hex.length <= 4 && /^\d+$/.test(hex)) return false;
 	const before = code.slice(Math.max(0, index - 6), index);
 	if (/[\w&]$/.test(before)) return false;
 	return !/(?:href=["']?|url\(\s*["']?|id=["']?)$/.test(before);

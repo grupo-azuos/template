@@ -2,18 +2,10 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { cn } from '../../utils/cn.util';
-import {
-  AzuosZuzu,
-  type AzuosZuzuPose,
-} from '../azuos-zuzu/azuos-zuzu.component';
+import { AzuosZuzu, type AzuosZuzuPose } from '../azuos-zuzu/azuos-zuzu.component';
 
 export type AzuosDashboardHeroCardStatTone =
-  | 'default'
-  | 'danger'
-  | 'warning'
-  | 'info'
-  | 'success'
-  | 'brand';
+  'default' | 'danger' | 'warning' | 'info' | 'success' | 'brand';
 
 export type AzuosDashboardHeroCardStat = {
   label: string;
@@ -58,12 +50,12 @@ const STAT_TONE_STYLES: Record<
   default: {
     value: 'text-primary-foreground',
     icon: 'text-primary-foreground/80',
-    label: 'text-primary-soft',
+    label: 'text-primary-foreground/80',
   },
   danger: {
-    value: 'text-destructive-soft',
-    icon: 'text-destructive-soft',
-    label: 'text-destructive-soft',
+    value: 'text-primary-foreground',
+    icon: 'text-primary-foreground/80',
+    label: 'text-primary-foreground/80',
   },
   warning: {
     value: 'text-accent-hero',
@@ -102,10 +94,12 @@ function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
               styles.icon,
             )}
           >
-            <Icon size={22} className="size-5.5 shrink-0 block stroke-[1.8]" aria-hidden="true" />
+            <Icon size={22} className="block size-5.5 shrink-0 stroke-[1.8]" aria-hidden="true" />
           </span>
         ) : null}
-        <span className={cn('text-xs font-bold uppercase tracking-wider leading-none', styles.label)}>
+        <span
+          className={cn('text-xs leading-none font-bold tracking-wider uppercase', styles.label)}
+        >
           {stat.label}
         </span>
       </div>
@@ -115,16 +109,13 @@ function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
       </strong>
 
       {stat.hint ? (
-        <span className="text-primary-soft mt-1 block text-xs">
-          {stat.hint}
-        </span>
+        <span className="text-primary-foreground/80 mt-1 block text-xs">{stat.hint}</span>
       ) : null}
     </>
   );
 
   /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido */
-  const containerClass =
-    'rounded-surface bg-brand-blue-800 p-4 text-left transition-colors';
+  const containerClass = 'rounded-surface bg-brand-blue-800 p-4 text-left transition-colors';
 
   if (stat.onClick) {
     return (
@@ -153,13 +144,11 @@ function DashboardEyebrowHeader({
   if (!eyebrow && !timestamp) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider">
-      {Icon ? (
-        <Icon size={18} className="text-accent-hero shrink-0" aria-hidden="true" />
-      ) : null}
+    <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
+      {Icon ? <Icon size={18} className="text-accent-hero shrink-0" aria-hidden="true" /> : null}
       {eyebrow ? <span className="text-primary-foreground">{eyebrow}</span> : null}
       {timestamp ? (
-        <span className="text-primary-soft font-normal tracking-normal normal-case">
+        <span className="text-primary-foreground/80 font-normal tracking-normal normal-case">
           — {timestamp}
         </span>
       ) : null}
@@ -167,30 +156,22 @@ function DashboardEyebrowHeader({
   );
 }
 
-function DashboardHeroBody({
-  data,
-}: {
-  data: AzuosDashboardHeroCardProps['data'];
-}) {
+function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data'] }) {
   const zuzuPose = data.zuzu?.pose ?? 'alert';
   const zuzuSize = data.zuzu?.size ?? 128;
 
   return (
     <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start sm:gap-6">
-      <div
-        data-slot="dashboard-zuzu"
-        className="shrink-0 select-none"
-        aria-hidden="true"
-      >
+      <div data-slot="dashboard-zuzu" className="shrink-0 select-none" aria-hidden="true">
         <AzuosZuzu data={{ pose: zuzuPose }} ui={{ size: zuzuSize }} />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left min-h-[120px]">
-        <h2 className="text-primary-foreground text-xl font-bold tracking-tight leading-snug sm:text-2xl">
+      <div className="flex min-h-[120px] min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left">
+        <h2 className="text-primary-foreground text-xl leading-snug font-bold tracking-tight sm:text-2xl">
           {data.title}
         </h2>
         {data.description ? (
-          <p className="text-primary-soft text-sm font-normal leading-relaxed sm:text-base">
+          <p className="text-primary-foreground/80 text-sm leading-relaxed font-normal sm:text-base">
             {data.description}
           </p>
         ) : null}
@@ -218,17 +199,14 @@ function DashboardStatsGrid({ stats }: { stats?: AzuosDashboardHeroCardStat[] })
   );
 }
 
-export function AzuosDashboardHeroCard({
-  data,
-  ui,
-}: AzuosDashboardHeroCardProps) {
+export function AzuosDashboardHeroCard({ data, ui }: AzuosDashboardHeroCardProps) {
   return (
     <div
       role="region"
       aria-label={data.eyebrow ?? data.title}
       data-slot="azuos-dashboard-hero-card"
       className={cn(
-        'rounded-surface shadow-card relative flex w-full flex-col gap-6 overflow-hidden bg-brand-blue-900 p-6 sm:p-7 text-primary-foreground',
+        'rounded-surface shadow-card bg-brand-blue-900 text-primary-foreground relative flex w-full flex-col gap-6 overflow-hidden p-6 sm:p-7',
         ui?.className,
       )}
     >
