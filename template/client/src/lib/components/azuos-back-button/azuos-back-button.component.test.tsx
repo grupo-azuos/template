@@ -10,6 +10,16 @@ describe('AzuosBackButton', () => {
     expect(screen.getByRole('button', { name: /voltar para empresas/i })).toBeInTheDocument();
   });
 
+  // feliz
+  it('tem o desenho do voltar do paralegal: texto azul, sem negrito, sublinhado no hover', () => {
+    render(<AzuosBackButton data={{ destination: 'empresas' }} />);
+
+    const button = screen.getByRole('button', { name: /voltar para empresas/i });
+    expect(button).toHaveClass('text-brand-blue-700', 'text-sm', 'gap-1', 'hover:underline');
+    expect(button).not.toHaveClass('font-medium');
+    expect(button.querySelector('svg')).toHaveClass('size-3.5');
+  });
+
   it('renderiza com label customizado quando fornecido explicitamente', () => {
     render(<AzuosBackButton data={{ label: 'Retornar ao início' }} />);
 
@@ -31,7 +41,9 @@ describe('AzuosBackButton', () => {
 
   it('executa actions.onClick quando acionado', () => {
     const handleClick = vi.fn();
-    render(<AzuosBackButton data={{ destination: 'empresas' }} actions={{ onClick: handleClick }} />);
+    render(
+      <AzuosBackButton data={{ destination: 'empresas' }} actions={{ onClick: handleClick }} />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /voltar para empresas/i }));
     expect(handleClick).toHaveBeenCalledTimes(1);

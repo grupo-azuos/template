@@ -8,8 +8,9 @@ import { cn } from '../../utils/cn.util';
  *
  * Regra absoluta de navegação da casa: todo retorno de página de detalhe/entidade utiliza
  * EXCLUSIVAMENTE este formato (`← Voltar para [destino]`). É um link de texto limpo, sem moldura,
- * sem caixa cinza, sem sombra e sem fundo espalhafatoso, usando a cor primária da marca
- * (`text-primary`) com seta fina à esquerda (`ArrowLeft`).
+ * sem caixa cinza, sem sombra e sem fundo espalhafatoso: texto azul da marca (`text-brand-blue-700`),
+ * sublinhado no hover, com seta fina de 14px à esquerda (`ArrowLeft`). É cópia fiel do voltar do
+ * paralegal ("Voltar para empresas"), que é a referência do grupo — não mude o desenho aqui.
  *
  * É proibido criar botões de voltar com variantes `outline`, circulares com ícone isolado,
  * botões cinzas ou textos arbitrários fora dessa convenção.
@@ -36,7 +37,8 @@ export type AzuosBackButtonProps = {
 };
 
 export function AzuosBackButton({ data, ui, state, actions }: AzuosBackButtonProps) {
-  const displayText = data.label ?? (data.destination ? `Voltar para ${data.destination}` : 'Voltar');
+  const displayText =
+    data.label ?? (data.destination ? `Voltar para ${data.destination}` : 'Voltar');
   const isDisabled = Boolean(state?.isDisabled);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -54,8 +56,8 @@ export function AzuosBackButton({ data, ui, state, actions }: AzuosBackButtonPro
   };
 
   const sharedClassName = cn(
-    'group inline-flex items-center gap-1.5 py-1 text-sm font-medium text-primary transition-colors',
-    'hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-control',
+    'text-brand-blue-700 inline-flex items-center gap-1 self-start text-sm hover:underline',
+    'focus-visible:ring-ring rounded-control focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
     isDisabled && 'pointer-events-none opacity-50',
     ui?.className,
   );
@@ -68,7 +70,7 @@ export function AzuosBackButton({ data, ui, state, actions }: AzuosBackButtonPro
         className={sharedClassName}
         data-slot="azuos-back-button"
       >
-        <ArrowLeft className="size-4 shrink-0 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
+        <ArrowLeft className="size-3.5 shrink-0" aria-hidden="true" />
         <span>{displayText}</span>
       </a>
     );
@@ -82,7 +84,7 @@ export function AzuosBackButton({ data, ui, state, actions }: AzuosBackButtonPro
       className={sharedClassName}
       data-slot="azuos-back-button"
     >
-      <ArrowLeft className="size-4 shrink-0 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
+      <ArrowLeft className="size-3.5 shrink-0" aria-hidden="true" />
       <span>{displayText}</span>
     </button>
   );
