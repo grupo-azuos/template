@@ -27,6 +27,7 @@ export const FIELD_MASKS = [
   'money',
   'integer',
   'cnh',
+  'phone',
 ] as const;
 
 export type FieldMask = (typeof FIELD_MASKS)[number];
@@ -114,7 +115,18 @@ const RULES: Record<Exclude<FieldMask, 'cnpj'>, MaskRule> = {
     length: null,
   },
   cnh: { normalize: digits(11), format: (raw) => raw, length: 11 },
+  /* Telefone fixo tem 10 dígitos (62 3000-0000) e celular 11 (62 90000-0000): o tamanho não é um
+     só, então o "completo" é a partir de 10 — ver `MIN_PHONE_DIGITS`. */
+  phone: {
+    normalize: digits(11),
+    format: (raw) =>
+      (raw.length <= 10 ? pattern([2, 4, 4], [' ', '-']) : pattern([2, 5, 4], [' ', '-']))(raw),
+    length: null,
+  },
 };
+
+/** DDD + 8 dígitos: o menor telefone completo. */
+export const MIN_PHONE_DIGITS = 10;
 
 const INCOMPLETE: Record<Exclude<FieldMask, 'money' | 'integer'>, string> = {
   cpf: 'O CPF tem 11 números',
@@ -123,6 +135,7 @@ const INCOMPLETE: Record<Exclude<FieldMask, 'money' | 'integer'>, string> = {
   cep: 'O CEP tem 8 números',
   cnae: 'O CNAE tem 7 números (0000-0/00)',
   cnh: 'O número da CNH tem 11 dígitos',
+  phone: 'O telefone tem DDD e número (10 ou 11 dígitos)',
 };
 
 /**
@@ -143,7 +156,10 @@ export function handleFieldMask(mask: FieldMask, input: MaskedFieldInput): Field
   /* Dinheiro e quantidade crescem da direita para a esquerda: o cursor se conta pelo fim. */
   const anchor = mask === 'money' || mask === 'integer' ? 'end' : 'start';
   const result = applyMaskedInput(input, rule.normalize, rule.format, anchor);
-  const isComplete = rule.length === null || result.raw.length === rule.length;
+  const isComplete =
+    mask === 'phone'
+      ? result.raw.length >= MIN_PHONE_DIGITS
+      : rule.length === null || result.raw.length === rule.length;
 
   return { ...result, isComplete, error: maskError(mask, result.raw, isComplete) };
 }

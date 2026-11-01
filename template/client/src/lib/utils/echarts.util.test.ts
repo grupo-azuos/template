@@ -44,7 +44,9 @@ describe('echarts.util', () => {
   /* REGRESSÃO: dentro de um quadro com rolagem, o balão no próprio gráfico fazia a barra de
      rolagem aparecer e sumir, e o gráfico piscava no hover. O balão mora no `body`. */
   it('puts the tooltip in the page body, outside any scrolling box', () => {
-    const tooltip = withChartTheme({ tooltip: { trigger: 'item' } }, THEME).tooltip as { appendTo: string };
+    const tooltip = withChartTheme({ tooltip: { trigger: 'item' } }, THEME).tooltip as {
+      appendTo: string;
+    };
 
     expect(tooltip.appendTo).toBe('body');
   });

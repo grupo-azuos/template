@@ -23,3 +23,26 @@ export function formatMoney(value: number | null | undefined): string {
 export function formatMoneyRange(min: number, max: number): string {
   return `${formatMoney(min)} a ${formatMoney(max)}`;
 }
+
+const MONEY_WITH_CENTS = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+/**
+ * Dinheiro de VERDADE, em centavos inteiros (`R$ 1.234,56`): o valor de um lançamento, e não uma
+ * estimativa — aqui o centavo importa. Sem valor vira travessão, pelo mesmo motivo do `formatMoney`.
+ */
+export function formatMoneyCents(cents: number | null | undefined): string {
+  if (cents === null || cents === undefined || Number.isNaN(cents)) return '—';
+
+  return MONEY_WITH_CENTS.format(cents / 100);
+}
+
+/**
+ * O mesmo valor COM SINAL escrito: `+R$ 1.234,56` a favor, `−R$ 1.234,56` contra, zero sem sinal.
+ * Cor sozinha não diz se o dinheiro entra ou sai — quem não distingue verde de vermelho lê o sinal.
+ */
+export function formatSignedMoneyCents(cents: number | null | undefined): string {
+  if (cents === null || cents === undefined || Number.isNaN(cents)) return '—';
+  if (cents === 0) return formatMoneyCents(0);
+
+  return `${cents > 0 ? '+' : '−'}${formatMoneyCents(Math.abs(cents))}`;
+}

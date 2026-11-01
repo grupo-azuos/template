@@ -93,7 +93,9 @@ export function readChartTheme(): ChartTheme {
     border: resolveColor('var(--border)', FALLBACK_THEME.border),
     surface: resolveColor('var(--popover)', FALLBACK_THEME.surface),
     track: resolveColor('var(--muted)', FALLBACK_THEME.track),
-    font: getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || FALLBACK_THEME.font,
+    font:
+      getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() ||
+      FALLBACK_THEME.font,
     success: resolveColor('var(--success)', FALLBACK_THEME.success),
     info: resolveColor('var(--info)', FALLBACK_THEME.info),
     warning: resolveColor('var(--warning)', FALLBACK_THEME.warning),
@@ -157,7 +159,11 @@ export function withChartTheme(option: ChartOption, theme: ChartTheme): ChartOpt
  */
 export type ChartSelection = { name: string; kind?: string; row?: string; column?: string };
 
-export function selectionOf(params: { name?: unknown; data?: unknown; dataType?: unknown }): ChartSelection {
+export function selectionOf(params: {
+  name?: unknown;
+  data?: unknown;
+  dataType?: unknown;
+}): ChartSelection {
   const data = params.data as { row?: unknown; column?: unknown; id?: unknown } | undefined;
   const name = typeof data?.id === 'string' ? data.id : String(params.name ?? '');
 
