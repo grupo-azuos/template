@@ -13,12 +13,12 @@ type Story = StoryObj<typeof meta>;
 
 const DATA = {
   nodes: [
-    { id: 'type:Contrato', label: 'Contrato', color: '#3b82f6' },
-    { id: 'type:Parecer', label: 'Parecer', color: '#8b5cf6' },
-    { id: 'owner:Ana', label: 'Ana', color: '#10b981' },
-    { id: 'owner:Caio', label: 'Caio', color: '#06b6d4' },
-    { id: 'stage:Feito', label: 'Feito', color: '#047857' },
-    { id: 'stage:Parado', label: 'Parado', color: '#b45309' },
+    { id: 'type:Contrato', label: 'Contrato', color: 'var(--chart-1)' },
+    { id: 'type:Parecer', label: 'Parecer', color: 'var(--chart-5)' },
+    { id: 'owner:Ana', label: 'Ana', color: 'var(--chart-2)' },
+    { id: 'owner:Caio', label: 'Caio', color: 'var(--info)' },
+    { id: 'stage:Feito', label: 'Feito', color: 'var(--success)' },
+    { id: 'stage:Parado', label: 'Parado', color: 'var(--warning)' },
   ],
   links: [
     { from: 'type:Contrato', to: 'owner:Ana', value: 12 },

@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { AzuosCalendarChart, calendarRange, firstDayOfMonth } from './azuos-calendar-chart.component';
+import {
+  AzuosCalendarChart,
+  calendarRange,
+  firstDayOfMonth,
+} from './azuos-calendar-chart.component';
 
 describe('calendarRange', () => {
   // feliz
@@ -19,7 +23,11 @@ describe('AzuosCalendarChart', () => {
   // feliz
   /* A escala vem ESCRITA ("Menos … Mais"): a cor não pode ser o único jeito de ler o quadro. */
   it('writes the scale next to the colours', () => {
-    render(<AzuosCalendarChart data={{ days: [{ date: '2026-11-10', count: 3 }], seriesLabel: 'vencimentos' }} />);
+    render(
+      <AzuosCalendarChart
+        data={{ days: [{ date: '2026-11-10', count: 3 }], seriesLabel: 'vencimentos' }}
+      />,
+    );
 
     expect(screen.getByText('Menos')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /3 vencimentos/ })).toBeInTheDocument();
@@ -27,7 +35,12 @@ describe('AzuosCalendarChart', () => {
 
   // triste
   it('says there is nothing due instead of drawing an empty calendar', () => {
-    render(<AzuosCalendarChart data={{ days: [], seriesLabel: 'vencimentos' }} ui={{ emptyLabel: 'Nada vence' }} />);
+    render(
+      <AzuosCalendarChart
+        data={{ days: [], seriesLabel: 'vencimentos' }}
+        ui={{ emptyLabel: 'Nada vence' }}
+      />,
+    );
 
     expect(screen.getByText('Nada vence')).toBeInTheDocument();
     expect(screen.queryByText('Menos')).not.toBeInTheDocument();
