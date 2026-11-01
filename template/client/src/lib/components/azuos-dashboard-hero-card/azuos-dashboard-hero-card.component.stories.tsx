@@ -131,7 +131,8 @@ export const IdeaWithChildren: Story = {
       eyebrow: 'Dica do Zuzu',
       eyebrowIcon: Sparkles,
       title: 'Otimização de processos ativa',
-      description: 'Centralize suas certidões para receber notificações automáticas antes do vencimento.',
+      description:
+        'Centralize suas certidões para receber notificações automáticas antes do vencimento.',
       badge: 'Novidade',
       zuzu: {
         pose: 'idea',
@@ -143,13 +144,13 @@ export const IdeaWithChildren: Story = {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            className="rounded-control bg-accent-hero text-accent-hero-foreground font-bold px-4 py-2 text-sm shadow-xs hover:bg-accent-strong cursor-pointer transition-colors"
+            className="rounded-control bg-accent-hero text-accent-hero-foreground hover:bg-accent-strong cursor-pointer px-4 py-2 text-sm font-bold shadow-xs transition-colors"
           >
             Configurar Notificações
           </button>
           <button
             type="button"
-            className="rounded-control bg-brand-blue-800 text-primary-foreground font-medium px-4 py-2 text-sm hover:bg-brand-blue-700 cursor-pointer transition-colors"
+            className="rounded-control bg-brand-blue-800 text-primary-foreground hover:bg-brand-blue-700 cursor-pointer px-4 py-2 text-sm font-medium transition-colors"
           >
             Saiba Mais
           </button>

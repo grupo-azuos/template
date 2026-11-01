@@ -130,7 +130,9 @@ describe('AzuosStatCard', () => {
   });
 
   it('never paints a colored border or a side stripe', () => {
-    const { container } = render(<AzuosStatCard data={{ label: 'Em dia', value: 8 }} ui={{ tone: 'success' }} />);
+    const { container } = render(
+      <AzuosStatCard data={{ label: 'Em dia', value: 8 }} ui={{ tone: 'success' }} />,
+    );
     const card = container.firstElementChild as HTMLElement;
 
     expect(card.className).not.toMatch(/border-(success|primary|destructive|warning|info)/);
@@ -138,7 +140,11 @@ describe('AzuosStatCard', () => {
   });
   it('uses the color the person picked as the card background, soft at rest and full when selected', () => {
     const { container, rerender } = render(
-      <AzuosStatCard data={{ label: 'Depositada', value: 4 }} ui={{ color: '#0ea5e9' }} actions={{ onClick: () => {} }} />,
+      <AzuosStatCard
+        data={{ label: 'Depositada', value: 4 }}
+        ui={{ color: '#0ea5e9' }}
+        actions={{ onClick: () => {} }}
+      />,
     );
     const card = () => container.firstElementChild as HTMLElement;
 

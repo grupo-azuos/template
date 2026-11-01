@@ -46,6 +46,10 @@
   --brand-blue-700: #22429c;
   --brand-blue-600: #2e52b8;
   --brand-blue-500: #4265d4;
+  /* Os dois tons claros existem para o TEMA ESCURO: lá o azul principal precisa ser claro o
+     bastante para ser texto legível sobre o fundo escuro e sobre o `primary-soft`. */
+  --brand-blue-400: #7a92e8;
+  --brand-blue-300: #a7b7f0;
   --brand-blue-100: #e1e6f5;
 
   --brand-yellow-500: #f5c518; /* AMARELO OFICIAL (o ponto da logo) */
@@ -147,6 +151,10 @@
   --black: #111827;
   --white: #f8fafc;
   --backdrop: var(--black);
+  /* Texto sobre um fundo que é SEMPRE escuro (`bg-brand-blue-900`, `bg-backdrop`) ou sempre
+     claro, nos dois temas. `foreground`/`primary-foreground` viram no escuro; estes não. */
+  --on-dark: var(--white);
+  --on-light: var(--black);
 
   /**
    * ---- O ACENTO DE DESTAQUE ----
@@ -232,9 +240,11 @@
   --card-foreground: #f3f4f6;
   --popover: #111827;
   --popover-foreground: #f3f4f6;
-  --primary: var(--brand-blue-500);
-  --primary-foreground: #f8fafc;
-  --primary-strong: var(--brand-blue-500);
+  /* No escuro o azul principal SOBE para o tom 400: é texto sobre fundo escuro e sobre o
+     `primary-soft` (4,7:1), e fundo de botão com texto escuro por cima. */
+  --primary: var(--brand-blue-400);
+  --primary-foreground: #0b1220;
+  --primary-strong: var(--brand-blue-300);
   --primary-soft: #16265c;
   --secondary: #1f2937;
   --secondary-foreground: #f3f4f6;
@@ -297,6 +307,8 @@
   --color-brand-blue-700: var(--brand-blue-700);
   --color-brand-blue-600: var(--brand-blue-600);
   --color-brand-blue-500: var(--brand-blue-500);
+  --color-brand-blue-400: var(--brand-blue-400);
+  --color-brand-blue-300: var(--brand-blue-300);
   --color-brand-blue-100: var(--brand-blue-100);
 
   --color-brand-yellow-500: var(--brand-yellow-500);
@@ -346,6 +358,8 @@
   --color-black: var(--black);
   --color-white: var(--white);
   --color-backdrop: var(--backdrop);
+  --color-on-dark: var(--on-dark);
+  --color-on-light: var(--on-light);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

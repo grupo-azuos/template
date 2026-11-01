@@ -83,6 +83,15 @@ const TONE_LABEL: Record<AzuosStatCardTone, string> = {
 };
 
 /** Cor SÓLIDA do quadrado do ícone — 100% sólida sem opacidade ou tons pastéis. */
+/** O chip do ícone no cartão selecionado: o inverso do fundo, com o ícone na cor do tom. */
+const TONE_ICON_SELECTED: Record<AzuosStatCardTone, string> = {
+  brand: 'bg-primary-foreground text-primary',
+  neutral: 'bg-background text-foreground',
+  success: 'bg-success-foreground text-success',
+  warning: 'bg-warning-foreground text-warning',
+  danger: 'bg-destructive-foreground text-destructive',
+  info: 'bg-info-foreground text-info',
+};
 const TONE_ICON: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary-foreground text-primary',
   neutral: 'bg-foreground text-background',
@@ -101,13 +110,15 @@ const TONE_ICON: Record<AzuosStatCardTone, string> = {
  * cor cheia do tom (o tom é escolhido aqui, um OU outro, para nunca haver dois fundos brigando).
  */
 const statCard = tv({
-  base: 'rounded-surface p-5 shadow-card transition-all',
+  base: 'rounded-surface shadow-card p-5 transition-all',
   variants: {
     isClickable: {
       true: 'relative cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
       false: '',
     },
-    isSelected: { true: 'text-primary-foreground **:text-primary-foreground', false: '' },
+    /* Selecionado, o fundo é a cor cheia do tom e o texto é o do tom (`TONE_SELECTED`); só a cor
+       escolhida pela pessoa (escura, da paleta) força texto claro, nos dois temas. */
+    isSelected: { true: '', false: '' },
   },
   defaultVariants: { isClickable: false, isSelected: false },
 });
@@ -129,7 +140,11 @@ function rootPropsOf(input: {
   return {
     className: cn(
       statCard({ isClickable: input.isClickable, isSelected: input.isSelected }),
-      color ? '' : surfaceOf(input.tone, input.isSelected),
+      color
+        ? input.isSelected
+          ? 'text-on-dark **:text-on-dark'
+          : ''
+        : surfaceOf(input.tone, input.isSelected),
       input.ui?.className,
     ),
     style: customSurfaceOf(color, input.isSelected),
@@ -159,7 +174,7 @@ export function AzuosStatCard({ data, ui, state, actions }: AzuosStatCardProps) 
       {state?.isLoading ? (
         <Skeleton className="mt-1 h-8 w-20" />
       ) : (
-        <StatCardValue data={data} ui={ui} tone={tone} />
+        <StatCardValue data={data} ui={ui} tone={tone} isSelected={Boolean(state?.isSelected)} />
       )}
     </div>
   );
@@ -170,16 +185,18 @@ function StatCardValue({
   data,
   ui,
   tone,
+  isSelected,
 }: {
   data: AzuosStatCardProps['data'];
   ui: AzuosStatCardProps['ui'];
   tone: AzuosStatCardTone;
+  isSelected: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       <p
         className={cn(
-          tone === 'neutral' ? 'text-foreground' : 'text-inherit',
+          isSelected ? 'text-current' : tone === 'neutral' ? 'text-foreground' : 'text-inherit',
           'font-bold tabular-nums',
           ui?.size === 'lg' ? 'text-4xl' : 'text-3xl font-semibold tracking-tight',
         )}
@@ -187,7 +204,11 @@ function StatCardValue({
         {data.value}
       </p>
 
-      {data.hint ? <p className={cn('mt-0.5 text-xs', TONE_LABEL[tone])}>{data.hint}</p> : null}
+      {data.hint ? (
+        <p className={cn('mt-0.5 text-xs', isSelected ? 'text-current' : TONE_LABEL[tone])}>
+          {data.hint}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -215,6 +236,28 @@ function StatCardClickTarget({
   );
 }
 
+/** A cor do rótulo: a escolhida pela pessoa vai por `style`; selecionado, segue o texto do tom. */
+function labelToneClass(
+  tone: AzuosStatCardTone,
+  isSelected: boolean,
+  color: string | null | undefined,
+): string {
+  if (color) return '';
+
+  return isSelected ? 'text-current' : TONE_LABEL[tone];
+}
+
+/** O chip do ícone: sobre a cor escolhida, texto claro; selecionado, o inverso do fundo do tom. */
+function iconToneClass(
+  tone: AzuosStatCardTone,
+  isSelected: boolean,
+  color: string | null | undefined,
+): string {
+  if (color) return 'text-on-dark';
+
+  return isSelected ? TONE_ICON_SELECTED[tone] : TONE_ICON[tone];
+}
+
 /** Com ícone, o rótulo fica ao lado do quadrado; sem ícone, sozinho em cima do número. */
 function StatCardLabel({
   data,
@@ -228,13 +271,13 @@ function StatCardLabel({
   isSelected: boolean;
 }) {
   const Icon = ui?.icon;
-  /* Selecionado, o fundo JÁ é a cor: o rótulo fica claro, como o resto do texto do card. */
+  /* Selecionado, o fundo JÁ é a cor: o rótulo segue o texto do tom, como o resto do card. */
   const color = isSelected ? null : ui?.color;
   const label = (
     <p
       className={cn(
-        'text-xs font-semibold tracking-wider uppercase leading-none',
-        color ? '' : TONE_LABEL[tone],
+        'text-xs leading-none font-semibold tracking-wider uppercase',
+        labelToneClass(tone, isSelected, color),
       )}
       style={color ? { color } : undefined}
     >
@@ -249,11 +292,11 @@ function StatCardLabel({
       <span
         className={cn(
           'rounded-chip inline-flex size-8 shrink-0 items-center justify-center [&>svg]:block [&>svg]:shrink-0',
-          color ? 'text-primary-foreground' : TONE_ICON[tone],
+          iconToneClass(tone, isSelected, color),
         )}
         style={color ? { backgroundColor: color } : undefined}
       >
-        <Icon size={16} className="size-4 shrink-0 block stroke-[1.8]" aria-hidden="true" />
+        <Icon size={16} className="block size-4 shrink-0 stroke-[1.8]" aria-hidden="true" />
       </span>
       {label}
     </div>

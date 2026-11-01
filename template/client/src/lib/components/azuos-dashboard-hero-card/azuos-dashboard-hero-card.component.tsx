@@ -48,14 +48,14 @@ const STAT_TONE_STYLES: Record<
   }
 > = {
   default: {
-    value: 'text-primary-foreground',
-    icon: 'text-primary-foreground/80',
-    label: 'text-primary-foreground/80',
+    value: 'text-on-dark',
+    icon: 'text-on-dark/80',
+    label: 'text-on-dark/80',
   },
   danger: {
-    value: 'text-primary-foreground',
-    icon: 'text-primary-foreground/80',
-    label: 'text-primary-foreground/80',
+    value: 'text-on-dark',
+    icon: 'text-on-dark/80',
+    label: 'text-on-dark/80',
   },
   warning: {
     value: 'text-accent-hero',
@@ -63,19 +63,19 @@ const STAT_TONE_STYLES: Record<
     label: 'text-accent-hero',
   },
   info: {
-    value: 'text-primary-foreground',
-    icon: 'text-primary-foreground/80',
-    label: 'text-primary-foreground/80',
+    value: 'text-on-dark',
+    icon: 'text-on-dark/80',
+    label: 'text-on-dark/80',
   },
   success: {
-    value: 'text-primary-foreground',
-    icon: 'text-primary-foreground/80',
-    label: 'text-primary-foreground/80',
+    value: 'text-on-dark',
+    icon: 'text-on-dark/80',
+    label: 'text-on-dark/80',
   },
   brand: {
-    value: 'text-primary-foreground',
-    icon: 'text-primary-foreground/80',
-    label: 'text-primary-foreground',
+    value: 'text-on-dark',
+    icon: 'text-on-dark/80',
+    label: 'text-on-dark',
   },
 };
 
@@ -108,9 +108,7 @@ function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
         {stat.value}
       </strong>
 
-      {stat.hint ? (
-        <span className="text-primary-foreground/80 mt-1 block text-xs">{stat.hint}</span>
-      ) : null}
+      {stat.hint ? <span className="text-on-dark/80 mt-1 block text-xs">{stat.hint}</span> : null}
     </>
   );
 
@@ -146,9 +144,9 @@ function DashboardEyebrowHeader({
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
       {Icon ? <Icon size={18} className="text-accent-hero shrink-0" aria-hidden="true" /> : null}
-      {eyebrow ? <span className="text-primary-foreground">{eyebrow}</span> : null}
+      {eyebrow ? <span className="text-on-dark">{eyebrow}</span> : null}
       {timestamp ? (
-        <span className="text-primary-foreground/80 font-normal tracking-normal normal-case">
+        <span className="text-on-dark/80 font-normal tracking-normal normal-case">
           — {timestamp}
         </span>
       ) : null}
@@ -167,11 +165,11 @@ function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data']
       </div>
 
       <div className="flex min-h-[120px] min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left">
-        <h2 className="text-primary-foreground text-xl leading-snug font-bold tracking-tight sm:text-2xl">
+        <h2 className="text-on-dark text-xl leading-snug font-bold tracking-tight sm:text-2xl">
           {data.title}
         </h2>
         {data.description ? (
-          <p className="text-primary-foreground/80 text-sm leading-relaxed font-normal sm:text-base">
+          <p className="text-on-dark/80 text-sm leading-relaxed font-normal sm:text-base">
             {data.description}
           </p>
         ) : null}
@@ -206,7 +204,7 @@ export function AzuosDashboardHeroCard({ data, ui }: AzuosDashboardHeroCardProps
       aria-label={data.eyebrow ?? data.title}
       data-slot="azuos-dashboard-hero-card"
       className={cn(
-        'rounded-surface shadow-card bg-brand-blue-900 text-primary-foreground relative flex w-full flex-col gap-6 overflow-hidden p-6 sm:p-7',
+        'rounded-surface shadow-card bg-brand-blue-900 text-on-dark relative flex w-full flex-col gap-6 overflow-hidden p-6 sm:p-7',
         ui?.className,
       )}
     >

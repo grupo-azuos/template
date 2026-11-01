@@ -63,7 +63,7 @@ describe('AzuosDashboardHeroCard', () => {
 
     const root = container.querySelector('[data-slot="azuos-dashboard-hero-card"]');
     expect(root).toHaveClass('bg-brand-blue-900');
-    expect(root).toHaveClass('text-primary-foreground');
+    expect(root).toHaveClass('text-on-dark');
   });
 
   it('renderiza grade de indicadores (stats) com cores e valores', () => {
