@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { sessionUserSchema, USER_ROLE_LABELS, userRoleSchema } from './user.schema';
+import { USER_ROLE_LABELS, sessionUserSchema, userRoleLabel, userRoleSchema } from './user.schema';
 
 describe('userRoleSchema', () => {
   it('has a screen label for every role', () => {
@@ -31,5 +31,13 @@ describe('sessionUserSchema', () => {
 
   it('refuses an e-mail that is not an e-mail', () => {
     expect(sessionUserSchema.safeParse({ ...valid, email: 'dev' }).success).toBe(false);
+  });
+});
+
+describe('userRoleLabel', () => {
+  // feliz
+  it('gives the screen name of a role', () => {
+    expect(userRoleLabel('admin')).toBe('Administrador');
+    expect(userRoleLabel('viewer')).toBe('Consulta');
   });
 });
