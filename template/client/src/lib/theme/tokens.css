@@ -199,6 +199,107 @@
   --success-fill: #047857;
 
   /**
+   * ---- Os MATIZES de card ----
+   *
+   * A ÚNICA paleta de card colorido nos 13 sistemas, com o MESMO valor nos dois temas: fundo
+   * pastel (`surface`), texto escuro do mesmo matiz (`text`), hover mais CLARO (`hover`) e o
+   * pastel médio do selecionado e da bolinha do ícone (`chip`). Sem opacidade, sem cor cheia,
+   * sem neon: todo card colorido sai daqui (`lib/utils/card-tone.util.ts`). Contraste do texto
+   * ≥ 6,3:1 em todos os estados.
+   */
+  /* vermelho */
+  --tone-red-surface: #ffd8d6;
+  --tone-red-text: #662f2f;
+  --tone-red-hover: #feebea;
+  --tone-red-chip: #f9bcb9;
+  /* laranja */
+  --tone-orange-surface: #fddbc9;
+  --tone-orange-text: #633416;
+  --tone-orange-hover: #ffece2;
+  --tone-orange-chip: #f4c1a5;
+  /* âmbar */
+  --tone-amber-surface: #f4e0c2;
+  --tone-amber-text: #593c02;
+  --tone-amber-hover: #faefde;
+  --tone-amber-chip: #e7c99a;
+  /* amarelo */
+  --tone-yellow-surface: #eae4c2;
+  --tone-yellow-text: #4e4201;
+  --tone-yellow-hover: #f4f1de;
+  --tone-yellow-chip: #dacf9a;
+  /* lima */
+  --tone-lime-surface: #dce9c8;
+  --tone-lime-text: #394914;
+  --tone-lime-hover: #ecf3e1;
+  --tone-lime-chip: #c3d6a4;
+  /* verde */
+  --tone-green-surface: #cfecd3;
+  --tone-green-text: #1d4e2b;
+  --tone-green-hover: #e5f5e7;
+  --tone-green-chip: #aedbb6;
+  /* esmeralda */
+  --tone-emerald-surface: #c8eddc;
+  --tone-emerald-text: #004f38;
+  --tone-emerald-hover: #e2f6ec;
+  --tone-emerald-chip: #a3ddc2;
+  /* turquesa */
+  --tone-teal-surface: #c3ede7;
+  --tone-teal-text: #024e47;
+  --tone-teal-hover: #dff6f2;
+  --tone-teal-chip: #99ddd4;
+  /* ciano */
+  --tone-cyan-surface: #c1ecf4;
+  --tone-cyan-text: #044b55;
+  --tone-cyan-hover: #def5f9;
+  --tone-cyan-chip: #97dbe7;
+  /* céu */
+  --tone-sky-surface: #c7e9fd;
+  --tone-sky-text: #014867;
+  --tone-sky-hover: #e1f3ff;
+  --tone-sky-chip: #a1d6f5;
+  /* índigo */
+  --tone-indigo-surface: #dbe2fe;
+  --tone-indigo-text: #363e6c;
+  --tone-indigo-hover: #ecefff;
+  --tone-indigo-chip: #c0cbfc;
+  /* violeta */
+  --tone-violet-surface: #e7ddfd;
+  --tone-violet-text: #493766;
+  --tone-violet-hover: #f2edff;
+  --tone-violet-chip: #d4c4f6;
+  /* rosa */
+  --tone-pink-surface: #fcd7e7;
+  --tone-pink-text: #612f48;
+  --tone-pink-hover: #feeaf2;
+  --tone-pink-chip: #f2bcd4;
+  /* grafite */
+  --tone-slate-surface: #dfe3eb;
+  --tone-slate-text: #384354;
+  --tone-slate-hover: #eef0f4;
+  --tone-slate-chip: #c7ceda;
+  /* cinza */
+  --tone-gray-surface: #eaebed;
+  --tone-gray-text: #3f4348;
+  --tone-gray-hover: #f4f5f6;
+  --tone-gray-chip: #d6d7da;
+  /* azul-acinzentado */
+  --tone-bluegray-surface: #deedfe;
+  --tone-bluegray-text: #2e445b;
+  --tone-bluegray-hover: #eff6fe;
+  --tone-bluegray-chip: #c3daf3;
+  /* aço */
+  --tone-steel-surface: #dfeef4;
+  --tone-steel-text: #32464e;
+  --tone-steel-hover: #eff7fa;
+  --tone-steel-chip: #c7dbe4;
+
+  /* O fundo do hero (o painel de destaque com o Zuzu): claro no tema claro, azul-ardósia no escuro. */
+  --hero-surface: #f3f7fe;
+  --hero-foreground: #1e293b;
+  --hero-muted: #475569;
+  --hero-accent: #593c02;
+
+  /**
    * ---- As cores de CATEGORIA dos gráficos ----
    *
    * A ordem é fixa e percorrida, nunca sorteada: sorteio faria a mesma fatia mudar de cor a
@@ -306,6 +407,11 @@
      separação entre menu e conteúdo. */
   --sidebar: #16265c;
 
+  --hero-surface: #2a3755;
+  --hero-foreground: #f3f7fe;
+  --hero-muted: #c7d2e8;
+  --hero-accent: #f4e0c2;
+
   color-scheme: dark;
 }
 
@@ -388,6 +494,78 @@
   --color-warning-fill: var(--warning-fill);
   --color-info-fill: var(--info-fill);
   --color-success-fill: var(--success-fill);
+  --color-tone-red-surface: var(--tone-red-surface);
+  --color-tone-red-text: var(--tone-red-text);
+  --color-tone-red-hover: var(--tone-red-hover);
+  --color-tone-red-chip: var(--tone-red-chip);
+  --color-tone-orange-surface: var(--tone-orange-surface);
+  --color-tone-orange-text: var(--tone-orange-text);
+  --color-tone-orange-hover: var(--tone-orange-hover);
+  --color-tone-orange-chip: var(--tone-orange-chip);
+  --color-tone-amber-surface: var(--tone-amber-surface);
+  --color-tone-amber-text: var(--tone-amber-text);
+  --color-tone-amber-hover: var(--tone-amber-hover);
+  --color-tone-amber-chip: var(--tone-amber-chip);
+  --color-tone-yellow-surface: var(--tone-yellow-surface);
+  --color-tone-yellow-text: var(--tone-yellow-text);
+  --color-tone-yellow-hover: var(--tone-yellow-hover);
+  --color-tone-yellow-chip: var(--tone-yellow-chip);
+  --color-tone-lime-surface: var(--tone-lime-surface);
+  --color-tone-lime-text: var(--tone-lime-text);
+  --color-tone-lime-hover: var(--tone-lime-hover);
+  --color-tone-lime-chip: var(--tone-lime-chip);
+  --color-tone-green-surface: var(--tone-green-surface);
+  --color-tone-green-text: var(--tone-green-text);
+  --color-tone-green-hover: var(--tone-green-hover);
+  --color-tone-green-chip: var(--tone-green-chip);
+  --color-tone-emerald-surface: var(--tone-emerald-surface);
+  --color-tone-emerald-text: var(--tone-emerald-text);
+  --color-tone-emerald-hover: var(--tone-emerald-hover);
+  --color-tone-emerald-chip: var(--tone-emerald-chip);
+  --color-tone-teal-surface: var(--tone-teal-surface);
+  --color-tone-teal-text: var(--tone-teal-text);
+  --color-tone-teal-hover: var(--tone-teal-hover);
+  --color-tone-teal-chip: var(--tone-teal-chip);
+  --color-tone-cyan-surface: var(--tone-cyan-surface);
+  --color-tone-cyan-text: var(--tone-cyan-text);
+  --color-tone-cyan-hover: var(--tone-cyan-hover);
+  --color-tone-cyan-chip: var(--tone-cyan-chip);
+  --color-tone-sky-surface: var(--tone-sky-surface);
+  --color-tone-sky-text: var(--tone-sky-text);
+  --color-tone-sky-hover: var(--tone-sky-hover);
+  --color-tone-sky-chip: var(--tone-sky-chip);
+  --color-tone-indigo-surface: var(--tone-indigo-surface);
+  --color-tone-indigo-text: var(--tone-indigo-text);
+  --color-tone-indigo-hover: var(--tone-indigo-hover);
+  --color-tone-indigo-chip: var(--tone-indigo-chip);
+  --color-tone-violet-surface: var(--tone-violet-surface);
+  --color-tone-violet-text: var(--tone-violet-text);
+  --color-tone-violet-hover: var(--tone-violet-hover);
+  --color-tone-violet-chip: var(--tone-violet-chip);
+  --color-tone-pink-surface: var(--tone-pink-surface);
+  --color-tone-pink-text: var(--tone-pink-text);
+  --color-tone-pink-hover: var(--tone-pink-hover);
+  --color-tone-pink-chip: var(--tone-pink-chip);
+  --color-tone-slate-surface: var(--tone-slate-surface);
+  --color-tone-slate-text: var(--tone-slate-text);
+  --color-tone-slate-hover: var(--tone-slate-hover);
+  --color-tone-slate-chip: var(--tone-slate-chip);
+  --color-tone-gray-surface: var(--tone-gray-surface);
+  --color-tone-gray-text: var(--tone-gray-text);
+  --color-tone-gray-hover: var(--tone-gray-hover);
+  --color-tone-gray-chip: var(--tone-gray-chip);
+  --color-tone-bluegray-surface: var(--tone-bluegray-surface);
+  --color-tone-bluegray-text: var(--tone-bluegray-text);
+  --color-tone-bluegray-hover: var(--tone-bluegray-hover);
+  --color-tone-bluegray-chip: var(--tone-bluegray-chip);
+  --color-tone-steel-surface: var(--tone-steel-surface);
+  --color-tone-steel-text: var(--tone-steel-text);
+  --color-tone-steel-hover: var(--tone-steel-hover);
+  --color-tone-steel-chip: var(--tone-steel-chip);
+  --color-hero-surface: var(--hero-surface);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-accent: var(--hero-accent);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);

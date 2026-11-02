@@ -1,5 +1,6 @@
 import { AlertTriangle, RotateCw } from 'lucide-react';
 
+import { cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -29,13 +30,13 @@ export function AzuosErrorState({ data, ui, state, actions }: AzuosErrorStatePro
     <div
       role="alert"
       className={cn(
-        'rounded-box bg-destructive/10 text-destructive flex gap-3',
+        cn('rounded-box flex gap-3', cardToneClasses('danger').surface),
         isInline ? 'items-center px-3 py-2' : 'items-start p-4',
         ui?.className,
       )}
     >
       <AlertTriangle
-        className={cn('text-destructive shrink-0', isInline ? 'size-4' : 'mt-0.5 size-5')}
+        className={cn('shrink-0', isInline ? 'size-4' : 'mt-0.5 size-5')}
         aria-hidden="true"
       />
 

@@ -1,5 +1,6 @@
 import { type LucideIcon } from 'lucide-react';
 
+import { cardHueFromHex, cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -32,13 +33,15 @@ export type AzuosStatusBadgeProps = {
   };
 };
 
+/* O selo usa a mesma paleta dos cards (`lib/utils/card-tone.util.ts`): pastel e texto escuro do
+   matiz, iguais nos dois temas — no escuro, os `-soft` antigos viravam marrom e bordô. */
 const TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
-  neutral: 'bg-ink-100 text-ink-700',
-  info: 'bg-info-soft text-info',
-  success: 'bg-success-soft text-success',
-  warning: 'bg-warning-soft text-warning',
-  danger: 'bg-destructive-soft text-destructive',
-  brand: 'bg-primary-soft text-primary',
+  neutral: cardToneClasses('neutral').surface,
+  info: cardToneClasses('info').surface,
+  success: cardToneClasses('success').surface,
+  warning: cardToneClasses('warning').surface,
+  danger: cardToneClasses('danger').surface,
+  brand: cardToneClasses('brand').surface,
 };
 
 export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
@@ -56,7 +59,6 @@ export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
         resolveToneClass(ui),
         ui?.className,
       )}
-      style={resolveColorStyle(ui?.color)}
     >
       <BadgeIcon icon={ui?.icon} />
       {/* O texto num `span` próprio: com `max-w-*` em `ui.className`, o selo corta com reticências
@@ -66,17 +68,11 @@ export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
   );
 }
 
-/** A cor escolhida vence o tom: com ela, nenhuma classe de cor entra para disputar. */
+/** A cor escolhida vence o tom: vira o matiz mais próximo da paleta, sem mistura com opacidade. */
 function resolveToneClass(ui: AzuosStatusBadgeProps['ui']): string {
-  if (ui?.color) return '';
+  if (ui?.color) return cardToneClasses(cardHueFromHex(ui.color)).surface;
 
   return TONE_CLASSES[ui?.tone ?? 'neutral'];
-}
-
-function resolveColorStyle(color: string | null | undefined) {
-  if (!color) return undefined;
-
-  return { color, backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` };
 }
 
 function BadgeIcon({ icon: Icon }: { icon?: LucideIcon }) {

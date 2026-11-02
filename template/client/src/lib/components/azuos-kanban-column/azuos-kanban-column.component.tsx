@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
+import { cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 import { readDragItem } from '../../utils/drag-item.util';
 
@@ -25,12 +26,12 @@ export type AzuosKanbanColumnProps = {
 
 /** A faixa colorida do cabeçalho — a cor da etapa, como nos selos de situação. */
 const TONE_HEADER: Record<AzuosKanbanColumnTone, string> = {
-  neutral: 'bg-muted text-foreground',
-  info: 'bg-info text-info-foreground',
-  warning: 'bg-warning text-warning-foreground',
-  brand: 'bg-primary text-primary-foreground',
-  success: 'bg-success text-success-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
+  neutral: cardToneClasses('neutral').chip,
+  info: cardToneClasses('info').chip,
+  warning: cardToneClasses('warning').chip,
+  brand: cardToneClasses('brand').chip,
+  success: cardToneClasses('success').chip,
+  danger: cardToneClasses('danger').chip,
 };
 
 export function AzuosKanbanColumn({ data, ui, actions, children }: AzuosKanbanColumnProps) {
@@ -42,7 +43,7 @@ export function AzuosKanbanColumn({ data, ui, actions, children }: AzuosKanbanCo
       aria-label={data.title}
       className={cn(
         'bg-mantle rounded-surface flex w-72 shrink-0 flex-col sm:w-80',
-        isOver && 'bg-accent/80',
+        isOver && 'bg-accent',
         ui?.className,
       )}
       onDragOver={(event) => {

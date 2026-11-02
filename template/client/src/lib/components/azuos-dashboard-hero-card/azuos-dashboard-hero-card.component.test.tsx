@@ -46,7 +46,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(zuzuSlot?.parentElement?.querySelector('.rounded-full')).toBeNull();
   });
 
-  it('renderiza título, descrição e badge com alto contraste em fundo escuro', () => {
+  it('renderiza título, descrição e badge no fundo do hero, que acompanha o tema', () => {
     const { container } = render(
       <AzuosDashboardHeroCard
         data={{
@@ -62,8 +62,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(screen.getByText('Parabéns!')).toBeInTheDocument();
 
     const root = container.querySelector('[data-slot="azuos-dashboard-hero-card"]');
-    expect(root).toHaveClass('bg-brand-blue-900');
-    expect(root).toHaveClass('text-on-dark');
+    expect(root).toHaveClass('bg-hero-surface', 'text-hero-foreground');
   });
 
   it('renderiza grade de indicadores (stats) com cores e valores', () => {
@@ -133,7 +132,7 @@ describe('AzuosDashboardHeroCard', () => {
   });
 
   // feliz
-  it('marks the chosen stat as pressed, with the full color of its tone', () => {
+  it('marks the chosen stat as pressed, with the middle pastel of its hue and the icon inverted', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -155,18 +154,20 @@ describe('AzuosDashboardHeroCard', () => {
 
     const chosen = screen.getByRole('button', { name: /Vencidos/ });
     expect(chosen).toHaveAttribute('aria-pressed', 'true');
-    expect(chosen).toHaveClass('bg-destructive-fill', 'text-on-dark');
-    expect(chosen.className).not.toMatch(/border/);
-    // o tom de TEXTO não vira fundo: no tema escuro ele clareia e pedia texto preto
-    expect(chosen.className).not.toMatch(/\bbg-destructive(?!-)/);
+    expect(chosen).toHaveClass('bg-tone-red-chip', 'text-tone-red-text');
+    expect(chosen.className).not.toMatch(/border|-fill/);
+    expect(chosen.querySelector('svg')?.parentElement).toHaveClass(
+      'bg-tone-red-text',
+      'text-tone-red-surface',
+    );
 
     const other = screen.getByRole('button', { name: /Próximos/ });
     expect(other).toHaveAttribute('aria-pressed', 'false');
-    expect(other).toHaveClass('bg-warning-soft', 'text-warning');
+    expect(other).toHaveClass('bg-tone-amber-surface', 'text-tone-amber-text');
   });
 
   // feliz
-  it('paints each stat with the solid background of its tone, never a border', () => {
+  it('paints each stat with the pastel of its hue, never a border or opacity', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -178,27 +179,27 @@ describe('AzuosDashboardHeroCard', () => {
             { label: 'Certo', value: 4, tone: 'success' },
             { label: 'Marca', value: 5, tone: 'brand', hint: 'dica escura' },
             { label: 'Neutro', value: 6 },
+            { label: 'Revisão', value: 7, tone: 'violet' },
           ],
         }}
       />,
     );
 
     const cardOf = (label: string) => screen.getByText(label).closest('div.rounded-surface');
-    expect(cardOf('Perigo')).toHaveClass('bg-destructive-soft', 'text-destructive');
-    expect(cardOf('Atenção')).toHaveClass('bg-warning-soft', 'text-warning');
-    expect(cardOf('Aviso')).toHaveClass('bg-info-soft', 'text-info');
-    expect(cardOf('Certo')).toHaveClass('bg-success-soft', 'text-success');
-    expect(cardOf('Marca')).toHaveClass('bg-brand-blue-800', 'text-on-dark');
-    expect(cardOf('Neutro')).toHaveClass('bg-muted', 'text-foreground');
-    expect(screen.getByText('dica clara')).toHaveClass('text-foreground/70');
-    expect(screen.getByText('dica escura')).toHaveClass('text-on-dark/80');
-    for (const label of ['Perigo', 'Atenção', 'Aviso', 'Certo', 'Marca', 'Neutro']) {
-      expect(cardOf(label)?.className).not.toMatch(/border/);
+    expect(cardOf('Perigo')).toHaveClass('bg-tone-red-surface', 'text-tone-red-text');
+    expect(cardOf('Atenção')).toHaveClass('bg-tone-amber-surface', 'text-tone-amber-text');
+    expect(cardOf('Aviso')).toHaveClass('bg-tone-sky-surface', 'text-tone-sky-text');
+    expect(cardOf('Certo')).toHaveClass('bg-tone-emerald-surface', 'text-tone-emerald-text');
+    expect(cardOf('Marca')).toHaveClass('bg-tone-indigo-surface', 'text-tone-indigo-text');
+    expect(cardOf('Neutro')).toHaveClass('bg-tone-gray-surface', 'text-tone-gray-text');
+    expect(cardOf('Revisão')).toHaveClass('bg-tone-violet-surface', 'text-tone-violet-text');
+    for (const label of ['Perigo', 'Atenção', 'Aviso', 'Certo', 'Marca', 'Neutro', 'Revisão']) {
+      expect(cardOf(label)?.className).not.toMatch(/border|\/\d/);
     }
   });
 
   // feliz
-  it('fills a clickable stat with the full color of its tone on hover', () => {
+  it('lightens a clickable stat on hover, lifting it with a shadow, never darkening it', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -219,14 +220,14 @@ describe('AzuosDashboardHeroCard', () => {
     );
 
     const danger = screen.getByRole('button', { name: /Vencidos/ });
-    expect(danger).toHaveClass('cursor-pointer', 'hover:bg-destructive-fill', 'hover:text-on-dark');
-    expect(danger.className).not.toMatch(/translate|shadow|\/\d+/);
-    expect(screen.getByText('ver')).toHaveClass('group-hover/stat:text-on-dark');
-    expect(screen.getByRole('button', { name: /Revisões/ })).toHaveClass('hover:bg-brand-blue-600');
+    expect(danger).toHaveClass('cursor-pointer', 'hover:bg-tone-red-hover', 'hover:shadow-xl');
+    expect(screen.getByRole('button', { name: /Revisões/ })).toHaveClass(
+      'hover:bg-tone-indigo-hover',
+    );
   });
 
   // feliz
-  it('takes the chosen brand stat down to the darkest blue, with white text', () => {
+  it('takes the chosen brand stat to the middle pastel of its hue', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -239,8 +240,8 @@ describe('AzuosDashboardHeroCard', () => {
     );
 
     expect(screen.getByRole('button', { name: /Pendentes/ })).toHaveClass(
-      'bg-brand-blue-900',
-      'text-on-dark',
+      'bg-tone-indigo-chip',
+      'text-tone-indigo-text',
     );
   });
 
@@ -257,7 +258,7 @@ describe('AzuosDashboardHeroCard', () => {
   });
 
   // triste
-  it('falls back to the neutral look when the tone is unknown', () => {
+  it('falls back to the gray hue when the tone is unknown', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -274,8 +275,7 @@ describe('AzuosDashboardHeroCard', () => {
     );
 
     expect(screen.getByText('Estranho').closest('div.rounded-surface')).toHaveClass(
-      'bg-muted',
-      'text-foreground',
+      'bg-tone-gray-surface',
     );
   });
 
@@ -304,7 +304,7 @@ describe('AzuosDashboardHeroCard', () => {
       />,
     );
 
-    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-accent-hero');
+    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-hero-accent');
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
       'Bom dia! Acumulou 3 alvarás vencidos.',
     );
@@ -318,6 +318,6 @@ describe('AzuosDashboardHeroCard', () => {
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toHaveTextContent('Dia tranquilo.');
-    expect(heading.querySelector('.text-accent-hero')).toBeNull();
+    expect(heading.querySelector('.text-hero-accent')).toBeNull();
   });
 });

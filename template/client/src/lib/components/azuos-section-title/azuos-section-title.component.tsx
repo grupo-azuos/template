@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
 
+import { cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -28,7 +29,7 @@ export function AzuosSectionTitle({ data, ui, adornment }: AzuosSectionTitleProp
       <span
         className={cn(
           'rounded-chip flex size-9 shrink-0 items-center justify-center',
-          isDanger ? 'bg-destructive-soft text-destructive' : 'bg-primary-soft text-primary',
+          isDanger ? cardToneClasses('danger').chip : cardToneClasses('brand').chip,
         )}
       >
         <Icon className="size-4" aria-hidden />

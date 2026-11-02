@@ -118,7 +118,12 @@ describe('AzuosHistoryTimeline', () => {
 
   // triste
   it('shows the failure instead of the entries', () => {
-    render(<AzuosHistoryTimeline data={{ entries: [ENTRY] }} state={{ error: 'O histórico não carregou.' }} />);
+    render(
+      <AzuosHistoryTimeline
+        data={{ entries: [ENTRY] }}
+        state={{ error: 'O histórico não carregou.' }}
+      />,
+    );
 
     expect(screen.getByRole('alert')).toHaveTextContent('O histórico não carregou.');
     expect(screen.queryByText('Mariana Ribeiro')).not.toBeInTheDocument();

@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
 
+import { cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -28,9 +29,9 @@ export type AzuosTimelineStepProps = {
 
 const ICON_TONE_CLASSES = {
   neutral: 'border-border bg-card text-foreground',
-  brand: 'bg-primary/10 text-primary',
-  success: 'bg-success/10 text-success',
-  danger: 'bg-destructive-soft text-destructive',
+  brand: cardToneClasses('brand').chip,
+  success: cardToneClasses('success').chip,
+  danger: cardToneClasses('danger').chip,
 } as const;
 
 export function AzuosTimelineStep({ data, ui, children }: AzuosTimelineStepProps) {

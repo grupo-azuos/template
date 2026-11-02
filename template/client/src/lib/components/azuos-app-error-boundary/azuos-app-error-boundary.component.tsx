@@ -1,5 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
+import { cardToneClasses } from '../../utils/card-tone.util';
+import { cn } from '../../utils/cn.util';
+
 /**
  * Nenhum erro derruba a tela em silêncio.
  *
@@ -40,7 +43,10 @@ export class AzuosAppErrorBoundary extends Component<
       <div className="bg-ink-100 flex min-h-screen items-center justify-center p-6">
         <div
           role="alert"
-          className="bg-destructive-soft rounded-surface w-full max-w-lg p-6 shadow-xl"
+          className={cn(
+            cardToneClasses('danger').surface,
+            'rounded-surface w-full max-w-lg p-6 shadow-xl',
+          )}
         >
           <h1 className="text-destructive text-lg font-bold">A tela não carregou</h1>
           <p className="text-ink-700 mt-2 text-sm">

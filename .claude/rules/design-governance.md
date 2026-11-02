@@ -58,3 +58,8 @@ Todo código gerado ou modificado nos 14 sistemas do Grupo Azuos DEVE seguir est
 - As regras `brand/tokens-only` e `brand/no-pure-black-white` são erro e NÃO aceitam `design-ignore-next-line` nem `design-ignore-file`. Cor nova entra primeiro no `tokens.css` do `template`, e só depois nos sistemas.
 - Os `text-white`/`bg-black` dos primitivos do shadcn (`lib/components/ui/`, que não se editam) resolvem para os tokens `--white`/`--black` da marca, remapeados no `@theme` do `tokens.css`.
 
+
+## 14. Paleta Única de Card
+- Todo card colorido (estatística, tom, hero, selo de situação, bolinha de ícone, cabeçalho de etapa) usa SÓ a paleta de 17 matizes de `lib/theme/tokens.css` (`--tone-<matiz>-surface|text|hover|chip`), pelas classes de `lib/utils/card-tone.util.ts`.
+- Os valores são os mesmos nos dois temas: fundo pastel, texto escuro do mesmo matiz. Hover fica mais CLARO e com sombra, nunca mais escuro. Selecionado é o pastel médio (`chip`), com a bolinha do ícone invertida.
+- Proibido em card: cor cheia (`*-fill`, `bg-destructive`, `bg-primary`…), `*-soft`, opacidade (`/10`, `opacity-*`), `color-mix`. Cor escolhida pela pessoa vira o matiz mais próximo (`cardHueFromHex`).

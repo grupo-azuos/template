@@ -31,20 +31,21 @@ describe('AzuosStatCard', () => {
   });
 
   /* O token do tom, e não a paleta crua: cor sólida cheia da marca. */
-  it('paints the whole card with the solid tone token', () => {
+  it('paints the whole card with the pastel of its hue and the dark text of the same hue', () => {
     const { container } = render(
       <AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-success-fill');
-    // texto branco nos dois temas: o tom de texto não vira fundo
-    expect(container.firstElementChild).toHaveClass('text-on-dark');
+    expect(container.firstElementChild).toHaveClass(
+      'bg-tone-emerald-surface',
+      'text-tone-emerald-text',
+    );
   });
 
-  it('keeps the neutral card with a border, since it has no tone to separate it from the page', () => {
+  it('paints the card without a tone in the gray hue, like every other card', () => {
     const { container } = render(<AzuosStatCard data={{ label: 'Total', value: 7 }} />);
 
-    expect(container.firstElementChild?.className).toContain('border');
+    expect(container.firstElementChild).toHaveClass('bg-tone-gray-surface');
   });
 
   /* O quadrado do ícone é a identidade da categoria: cor sólida, perfeitamente centralizado. */
@@ -126,8 +127,8 @@ describe('AzuosStatCard', () => {
     );
     const card = container.firstElementChild as HTMLElement;
 
-    expect(card).toHaveClass('bg-destructive-fill', 'text-on-dark');
-    expect(card).not.toHaveClass('bg-destructive-soft');
+    expect(card).toHaveClass('bg-tone-red-chip', 'text-tone-red-text');
+    expect(card).not.toHaveClass('bg-tone-red-surface');
     expect(card.className).not.toMatch(/\bring-/);
   });
 
@@ -140,7 +141,7 @@ describe('AzuosStatCard', () => {
     expect(card.className).not.toMatch(/border-(success|primary|destructive|warning|info)/);
     expect(container.querySelector('.inset-y-0')).toBeNull();
   });
-  it('uses the color the person picked as the card background, soft at rest and full when selected', () => {
+  it('turns the colour the person picked into the nearest hue, never a mix with opacity', () => {
     const { container, rerender } = render(
       <AzuosStatCard
         data={{ label: 'Depositada', value: 4 }}
@@ -150,8 +151,8 @@ describe('AzuosStatCard', () => {
     );
     const card = () => container.firstElementChild as HTMLElement;
 
-    expect(card().getAttribute('style')).toContain('color-mix');
-    expect(card().className).not.toMatch(/border-(primary|destructive|success|warning|info)/);
+    expect(card()).toHaveClass('bg-tone-sky-surface', 'hover:bg-tone-sky-hover');
+    expect(card().getAttribute('style')).toBeNull();
 
     rerender(
       <AzuosStatCard
@@ -161,7 +162,6 @@ describe('AzuosStatCard', () => {
         actions={{ onClick: () => {} }}
       />,
     );
-    expect(card().getAttribute('style')).not.toContain('color-mix');
-    expect(screen.getByText('Depositada').style.color).toBe('');
+    expect(card()).toHaveClass('bg-tone-sky-chip');
   });
 });

@@ -65,7 +65,9 @@ describe('AzuosHeroCard', () => {
       />,
     );
 
-    expect(containerSuccess.querySelector('[data-slot="azuos-hero-card"]')).toHaveClass('bg-success');
+    expect(containerSuccess.querySelector('[data-slot="azuos-hero-card"]')).toHaveClass(
+      'bg-tone-emerald-surface',
+    );
 
     const { container: containerAccent } = render(
       <AzuosHeroCard
@@ -77,7 +79,9 @@ describe('AzuosHeroCard', () => {
       />,
     );
 
-    expect(containerAccent.querySelector('[data-slot="azuos-hero-card"]')).toHaveClass('bg-accent-hero');
+    expect(containerAccent.querySelector('[data-slot="azuos-hero-card"]')).toHaveClass(
+      'bg-tone-yellow-surface',
+    );
   });
 
   it('renderiza children adicionais no rodapé', () => {
@@ -109,10 +113,11 @@ describe('AzuosHeroCard', () => {
 
     const iconSlot = container.querySelector('[data-slot="hero-card-icon"]');
     expect(iconSlot).toBeInTheDocument();
-    expect(iconSlot).toHaveClass('opacity-15');
-    // Card container deve ser 100% sólido bg-primary
+    // a marca d'água é o pastel médio do matiz, sem opacidade
+    expect(iconSlot).toHaveClass('text-tone-indigo-chip');
+    expect(iconSlot?.className).not.toMatch(/opacity-/);
     const card = container.querySelector('[data-slot="azuos-hero-card"]');
-    expect(card).toHaveClass('bg-primary');
+    expect(card).toHaveClass('bg-tone-indigo-surface', 'hover:bg-tone-indigo-hover');
     expect(card?.className).not.toMatch(/bg-[a-z0-9-]+\/[0-9]/);
   });
 });
