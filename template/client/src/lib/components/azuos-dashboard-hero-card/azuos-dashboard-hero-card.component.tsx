@@ -71,10 +71,11 @@ type StatToneStyle = {
 };
 
 /*
- * A cor de cada cartão vem do FUNDO — nunca de borda. Nos tons claros (`*-soft`) a dica fica no
- * texto principal um pouco apagado; nos escuros, no claro de sempre. Selecionado usa o
- * `*-foreground` do tom, e não um branco fixo: no tema escuro a cor cheia é clara e pede texto
- * escuro (`lib/theme/tokens.css`).
+ * A cor de cada cartão vem do FUNDO — nunca de borda. Parado, o cartão é o `*-soft` do tom com o
+ * texto no tom. Escolhido, ou sob o mouse quando é clicável, vai para o PREENCHIMENTO cheio
+ * (`*-fill`) com texto branco (`on-dark`): os `*-fill` são os mesmos nos dois temas e passam de
+ * 4,5:1 com o branco. O tom de texto (`bg-destructive`…) não serve de fundo: no escuro ele clareia
+ * e pedia texto preto (`lib/theme/tokens.css`).
  */
 const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = {
   default: {
@@ -83,64 +84,63 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     icon: 'bg-foreground text-background',
     activeIcon: 'bg-background text-foreground',
     hint: 'text-foreground/70',
-    activeHint: 'text-background/80',
+    activeHint: 'text-background',
     hoverSurface: 'hover:bg-foreground hover:text-background',
     hoverIcon: 'group-hover/stat:bg-background group-hover/stat:text-foreground',
     hoverHint: 'group-hover/stat:text-background',
   },
   danger: {
     surface: 'bg-destructive-soft text-destructive',
-    active: 'bg-destructive text-destructive-foreground',
-    icon: 'bg-destructive text-destructive-foreground',
-    activeIcon: 'bg-destructive-foreground text-destructive',
+    active: 'bg-destructive-fill text-on-dark',
+    icon: 'bg-destructive-fill text-on-dark',
+    activeIcon: 'bg-destructive-fill text-on-dark',
     hint: 'text-foreground/70',
-    activeHint: 'text-destructive-foreground/80',
-    hoverSurface: 'hover:bg-destructive hover:text-destructive-foreground',
-    hoverIcon: 'group-hover/stat:bg-destructive-foreground group-hover/stat:text-destructive',
-    hoverHint: 'group-hover/stat:text-destructive-foreground',
+    activeHint: 'text-on-dark',
+    hoverSurface: 'hover:bg-destructive-fill hover:text-on-dark',
+    hoverIcon: '',
+    hoverHint: 'group-hover/stat:text-on-dark',
   },
   warning: {
     surface: 'bg-warning-soft text-warning',
-    active: 'bg-warning text-warning-foreground',
-    icon: 'bg-warning text-warning-foreground',
-    activeIcon: 'bg-warning-foreground text-warning',
+    active: 'bg-warning-fill text-on-dark',
+    icon: 'bg-warning-fill text-on-dark',
+    activeIcon: 'bg-warning-fill text-on-dark',
     hint: 'text-foreground/70',
-    activeHint: 'text-warning-foreground/80',
-    hoverSurface: 'hover:bg-warning hover:text-warning-foreground',
-    hoverIcon: 'group-hover/stat:bg-warning-foreground group-hover/stat:text-warning',
-    hoverHint: 'group-hover/stat:text-warning-foreground',
+    activeHint: 'text-on-dark',
+    hoverSurface: 'hover:bg-warning-fill hover:text-on-dark',
+    hoverIcon: '',
+    hoverHint: 'group-hover/stat:text-on-dark',
   },
   info: {
     surface: 'bg-info-soft text-info',
-    active: 'bg-info text-info-foreground',
-    icon: 'bg-info text-info-foreground',
-    activeIcon: 'bg-info-foreground text-info',
+    active: 'bg-info-fill text-on-dark',
+    icon: 'bg-info-fill text-on-dark',
+    activeIcon: 'bg-info-fill text-on-dark',
     hint: 'text-foreground/70',
-    activeHint: 'text-info-foreground/80',
-    hoverSurface: 'hover:bg-info hover:text-info-foreground',
-    hoverIcon: 'group-hover/stat:bg-info-foreground group-hover/stat:text-info',
-    hoverHint: 'group-hover/stat:text-info-foreground',
+    activeHint: 'text-on-dark',
+    hoverSurface: 'hover:bg-info-fill hover:text-on-dark',
+    hoverIcon: '',
+    hoverHint: 'group-hover/stat:text-on-dark',
   },
   success: {
     surface: 'bg-success-soft text-success',
-    active: 'bg-success text-success-foreground',
-    icon: 'bg-success text-success-foreground',
-    activeIcon: 'bg-success-foreground text-success',
+    active: 'bg-success-fill text-on-dark',
+    icon: 'bg-success-fill text-on-dark',
+    activeIcon: 'bg-success-fill text-on-dark',
     hint: 'text-foreground/70',
-    activeHint: 'text-success-foreground/80',
-    hoverSurface: 'hover:bg-success hover:text-success-foreground',
-    hoverIcon: 'group-hover/stat:bg-success-foreground group-hover/stat:text-success',
-    hoverHint: 'group-hover/stat:text-success-foreground',
+    activeHint: 'text-on-dark',
+    hoverSurface: 'hover:bg-success-fill hover:text-on-dark',
+    hoverIcon: '',
+    hoverHint: 'group-hover/stat:text-on-dark',
   },
-  /* O azul da marca já é escuro: o cartão escolhido CLAREIA um degrau (o 600), porque o 900 é o
-     fundo do próprio hero e o cartão sumiria nele. */
+  /* O azul da marca já é escuro: o escolhido desce ao 900, e o hover sobe um degrau (o 600). */
   brand: {
     surface: 'bg-brand-blue-800 text-on-dark',
-    active: 'bg-brand-blue-600 text-on-dark',
+    active: 'bg-brand-blue-900 text-on-dark',
     icon: 'bg-brand-blue-900 text-accent-hero',
-    activeIcon: 'bg-brand-blue-900 text-accent-hero',
+    activeIcon: 'bg-brand-blue-800 text-accent-hero',
     hint: 'text-on-dark/80',
-    activeHint: 'text-on-dark/80',
+    activeHint: 'text-on-dark',
     hoverSurface: 'hover:bg-brand-blue-600',
     hoverIcon: '',
     hoverHint: 'group-hover/stat:text-on-dark',

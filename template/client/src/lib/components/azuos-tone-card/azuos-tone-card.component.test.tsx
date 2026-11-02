@@ -14,7 +14,7 @@ describe('AzuosToneCard', () => {
     );
 
     const card = screen.getByRole('group', { name: 'Vencidos' });
-    expect(card).toHaveClass('bg-destructive', 'text-destructive-foreground');
+    expect(card).toHaveClass('bg-destructive-fill', 'text-on-dark');
     expect(card.className).not.toMatch(/border-(destructive|primary|success|warning|info)/);
     expect(card).not.toHaveClass('hover-fill');
   });
@@ -37,7 +37,11 @@ describe('AzuosToneCard', () => {
   it('turns the whole card into a button when it is clickable', async () => {
     const onClick = vi.fn();
     render(
-      <AzuosToneCard data={{ label: 'Pendentes' }} ui={{ tone: 'warning', mode: 'interactive' }} actions={{ onClick }}>
+      <AzuosToneCard
+        data={{ label: 'Pendentes' }}
+        ui={{ tone: 'warning', mode: 'interactive' }}
+        actions={{ onClick }}
+      >
         2
       </AzuosToneCard>,
     );
@@ -49,7 +53,11 @@ describe('AzuosToneCard', () => {
 
   it('marks the selected card with the full tone color', () => {
     render(
-      <AzuosToneCard data={{ label: 'Todos' }} ui={{ tone: 'brand', mode: 'interactive' }} state={{ isSelected: true }}>
+      <AzuosToneCard
+        data={{ label: 'Todos' }}
+        ui={{ tone: 'brand', mode: 'interactive' }}
+        state={{ isSelected: true }}
+      >
         12
       </AzuosToneCard>,
     );

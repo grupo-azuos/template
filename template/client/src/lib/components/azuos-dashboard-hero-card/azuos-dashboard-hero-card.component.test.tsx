@@ -155,8 +155,10 @@ describe('AzuosDashboardHeroCard', () => {
 
     const chosen = screen.getByRole('button', { name: /Vencidos/ });
     expect(chosen).toHaveAttribute('aria-pressed', 'true');
-    expect(chosen).toHaveClass('bg-destructive', 'text-destructive-foreground');
+    expect(chosen).toHaveClass('bg-destructive-fill', 'text-on-dark');
     expect(chosen.className).not.toMatch(/border/);
+    // o tom de TEXTO não vira fundo: no tema escuro ele clareia e pedia texto preto
+    expect(chosen.className).not.toMatch(/\bbg-destructive(?!-)/);
 
     const other = screen.getByRole('button', { name: /Próximos/ });
     expect(other).toHaveAttribute('aria-pressed', 'false');
@@ -217,14 +219,29 @@ describe('AzuosDashboardHeroCard', () => {
     );
 
     const danger = screen.getByRole('button', { name: /Vencidos/ });
-    expect(danger).toHaveClass(
-      'cursor-pointer',
-      'hover:bg-destructive',
-      'hover:text-destructive-foreground',
-    );
+    expect(danger).toHaveClass('cursor-pointer', 'hover:bg-destructive-fill', 'hover:text-on-dark');
     expect(danger.className).not.toMatch(/translate|shadow|\/\d+/);
-    expect(screen.getByText('ver')).toHaveClass('group-hover/stat:text-destructive-foreground');
+    expect(screen.getByText('ver')).toHaveClass('group-hover/stat:text-on-dark');
     expect(screen.getByRole('button', { name: /Revisões/ })).toHaveClass('hover:bg-brand-blue-600');
+  });
+
+  // feliz
+  it('takes the chosen brand stat down to the darkest blue, with white text', () => {
+    render(
+      <AzuosDashboardHeroCard
+        data={{
+          title: 'Revisões',
+          stats: [
+            { label: 'Pendentes', value: 2, tone: 'brand', isActive: true, onClick: vi.fn() },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /Pendentes/ })).toHaveClass(
+      'bg-brand-blue-900',
+      'text-on-dark',
+    );
   });
 
   // triste

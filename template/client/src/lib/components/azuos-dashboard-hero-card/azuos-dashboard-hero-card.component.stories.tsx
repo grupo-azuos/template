@@ -214,7 +214,7 @@ export const WithActiveStat: Story = {
   },
 };
 
-/** O escolhido no azul da marca clareia um degrau, para não sumir no fundo do próprio hero. */
+/** O escolhido no azul da marca desce ao 900, com texto branco; o hover sobe ao 600. */
 export const WithActiveBrandStat: Story = {
   args: {
     data: {

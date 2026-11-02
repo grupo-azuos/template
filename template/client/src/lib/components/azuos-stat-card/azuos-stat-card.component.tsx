@@ -43,43 +43,47 @@ export type AzuosStatCardProps = {
   actions?: { onClick?: () => void };
 };
 
-/** O fundo do cartão inteiro: colorido usa cor sólida cheia; neutro usa `bg-card` com borda. */
+/**
+ * O fundo do cartão inteiro: colorido usa o PREENCHIMENTO cheio do tom (`*-fill`) com texto branco
+ * (`on-dark`), igual nos dois temas; neutro usa `bg-card` com borda. O tom de texto
+ * (`bg-destructive`…) não serve de fundo: no tema escuro ele clareia e pedia texto preto.
+ */
 const TONE_CARD: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-card border-border border text-card-foreground',
-  success: 'bg-success text-success-foreground',
-  warning: 'bg-warning text-warning-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-info-foreground',
+  success: 'bg-success-fill text-on-dark',
+  warning: 'bg-warning-fill text-on-dark',
+  danger: 'bg-destructive-fill text-on-dark',
+  info: 'bg-info-fill text-on-dark',
 };
 
 /** Selecionado: o fundo na cor CHEIA do tom, e todo o texto claro por cima — nunca um contorno. */
 const TONE_SELECTED: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-muted-foreground text-background',
-  success: 'bg-success text-success-foreground',
-  warning: 'bg-warning text-warning-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-info-foreground',
+  success: 'bg-success-fill text-on-dark',
+  warning: 'bg-warning-fill text-on-dark',
+  danger: 'bg-destructive-fill text-on-dark',
+  info: 'bg-info-fill text-on-dark',
 };
 
 /** A pastilha no tom (prazo, situação): fundo sólido contrastante. */
 export const STAT_TONE_BADGE: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-muted text-ink-700',
-  success: 'bg-success text-success-foreground',
-  warning: 'bg-warning text-warning-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-info-foreground',
+  success: 'bg-success-fill text-on-dark',
+  warning: 'bg-warning-fill text-on-dark',
+  danger: 'bg-destructive-fill text-on-dark',
+  info: 'bg-info-fill text-on-dark',
 };
 
 const TONE_LABEL: Record<AzuosStatCardTone, string> = {
   brand: 'text-primary-foreground/80',
   neutral: 'text-ink-500',
-  success: 'text-primary-foreground/80',
-  warning: 'text-primary-foreground/80',
-  danger: 'text-destructive-foreground/80',
-  info: 'text-primary-foreground/80',
+  success: 'text-on-dark/80',
+  warning: 'text-on-dark/80',
+  danger: 'text-on-dark/80',
+  info: 'text-on-dark/80',
 };
 
 /** Cor SÓLIDA do quadrado do ícone — 100% sólida sem opacidade ou tons pastéis. */
@@ -87,18 +91,18 @@ const TONE_LABEL: Record<AzuosStatCardTone, string> = {
 const TONE_ICON_SELECTED: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary-foreground text-primary',
   neutral: 'bg-background text-foreground',
-  success: 'bg-success-foreground text-success',
-  warning: 'bg-warning-foreground text-warning',
-  danger: 'bg-destructive-foreground text-destructive',
-  info: 'bg-info-foreground text-info',
+  success: 'bg-on-dark text-success-fill',
+  warning: 'bg-on-dark text-warning-fill',
+  danger: 'bg-on-dark text-destructive-fill',
+  info: 'bg-on-dark text-info-fill',
 };
 const TONE_ICON: Record<AzuosStatCardTone, string> = {
   brand: 'bg-primary-foreground text-primary',
   neutral: 'bg-foreground text-background',
-  success: 'bg-primary-foreground text-success',
-  warning: 'bg-primary-foreground text-warning',
-  danger: 'bg-destructive-foreground text-destructive',
-  info: 'bg-primary-foreground text-info',
+  success: 'bg-on-dark text-success-fill',
+  warning: 'bg-on-dark text-warning-fill',
+  danger: 'bg-on-dark text-destructive-fill',
+  info: 'bg-on-dark text-info-fill',
 };
 
 /**

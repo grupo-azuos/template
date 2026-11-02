@@ -36,7 +36,9 @@ describe('AzuosStatCard', () => {
       <AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-success');
+    expect(container.firstElementChild?.className).toContain('bg-success-fill');
+    // texto branco nos dois temas: o tom de texto não vira fundo
+    expect(container.firstElementChild).toHaveClass('text-on-dark');
   });
 
   it('keeps the neutral card with a border, since it has no tone to separate it from the page', () => {
@@ -124,7 +126,7 @@ describe('AzuosStatCard', () => {
     );
     const card = container.firstElementChild as HTMLElement;
 
-    expect(card).toHaveClass('bg-destructive');
+    expect(card).toHaveClass('bg-destructive-fill', 'text-on-dark');
     expect(card).not.toHaveClass('bg-destructive-soft');
     expect(card.className).not.toMatch(/\bring-/);
   });

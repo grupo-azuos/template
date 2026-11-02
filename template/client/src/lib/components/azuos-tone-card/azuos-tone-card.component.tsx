@@ -34,10 +34,10 @@ export type AzuosToneCardProps = {
 const SOLID: Record<AzuosToneCardTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   neutral: 'bg-card text-card-foreground border border-border',
-  success: 'bg-success text-success-foreground',
-  warning: 'bg-warning text-warning-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-info-foreground',
+  success: 'bg-success-fill text-on-dark',
+  warning: 'bg-warning-fill text-on-dark',
+  danger: 'bg-destructive-fill text-on-dark',
+  info: 'bg-info-fill text-on-dark',
 };
 
 const BASE = 'rounded-surface relative p-4 shadow-card';
@@ -47,7 +47,12 @@ export function AzuosToneCard({ data, ui, state, actions, children }: AzuosToneC
 
   if (state?.isSelected) {
     return (
-      <Surface data={data} actions={actions} className={cn(BASE, SOLID[tone], ui?.className)} isSelected>
+      <Surface
+        data={data}
+        actions={actions}
+        className={cn(BASE, SOLID[tone], ui?.className)}
+        isSelected
+      >
         {children}
       </Surface>
     );
@@ -86,7 +91,11 @@ function InteractiveCard({
     <Surface
       data={data}
       actions={actions}
-      className={cn(BASE, 'hover-fill bg-card text-card-foreground border-border border', className)}
+      className={cn(
+        BASE,
+        'hover-fill bg-card text-card-foreground border-border border',
+        className,
+      )}
       handlers={fill.handlers}
       style={fill.style}
     >
