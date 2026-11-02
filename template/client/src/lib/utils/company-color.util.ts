@@ -1,3 +1,5 @@
+import { themeColor } from './theme-color.util';
+
 /**
  * As cores sugeridas para as tags de empresa — a cor da principal é a que pinta o cartão.
  *
@@ -5,15 +7,16 @@
  * cartão na grade — com vinte tons, dois vizinhos quase iguais deixam de ser distinguíveis e
  * a cor para de ajudar. Outra cor continua possível pelo seletor livre.
  *
- * Os cinco tons são escuros o bastante para texto branco por cima (contraste ≥ 4,5:1). É o
- * que permite o cartão inteiro ser colorido sem o nome da empresa sumir nele.
+ * Os cinco tons são escuros o bastante para texto claro por cima (contraste ≥ 4,5:1). É o
+ * que permite o cartão inteiro ser colorido sem o nome da empresa sumir nele. Vêm do
+ * `tokens.css` (ver `theme-color.util`): o hex guardado no banco é a cor do tema claro.
  */
 export const COMPANY_COLOR_PALETTE = [
-  '#2563eb',
-  '#047857',
-  '#7c3aed',
-  '#e11d48',
-  '#b45309',
+  themeColor('--brand-blue-600'),
+  themeColor('--success'),
+  themeColor('--tertiary-strong'),
+  themeColor('--destructive'),
+  themeColor('--warning'),
 ] as const;
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;

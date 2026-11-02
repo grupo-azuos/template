@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDate, formatDateTime } from './format-date.util';
+import { formatCalendarDate, formatDate, formatDateTime } from './format-date.util';
 
 describe('formatDate', () => {
   // feliz
@@ -29,5 +29,30 @@ describe('formatDateTime', () => {
   // triste
   it('shows a dash for text that is not a date', () => {
     expect(formatDateTime('amanhã')).toBe('—');
+  });
+});
+
+describe('formatDate for a calendar day', () => {
+  // feliz
+  it('keeps the same day whatever the time zone of who is looking', () => {
+    expect(formatDate('2026-10-15')).toBe('15/10/2026');
+  });
+
+  // triste
+  it('shows a dash for what is not a date', () => {
+    expect(formatDate('2026-13-45')).toBe('—');
+  });
+});
+
+describe('formatCalendarDate', () => {
+  // feliz
+  it('writes the day the Brazilian way without a time zone', () => {
+    expect(formatCalendarDate('2026-03-15')).toBe('15/03/2026');
+  });
+
+  // triste
+  it('shows a dash for what is not a calendar day', () => {
+    expect(formatCalendarDate('15/03/2026')).toBe('—');
+    expect(formatCalendarDate(null)).toBe('—');
   });
 });

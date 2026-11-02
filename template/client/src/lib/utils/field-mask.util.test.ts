@@ -118,3 +118,20 @@ describe('fieldMaskError', () => {
     expect(fieldMaskError('cnae', '4712-1/00')).toBeNull();
   });
 });
+
+describe('phone formatting', () => {
+  // feliz
+  it('formats a landline and a mobile number', () => {
+    expect(formatFieldMask('phone', '6230001234')).toBe('62 3000-1234');
+    expect(formatFieldMask('phone', '(62) 99876-5432')).toBe('62 99876-5432');
+    expect(fieldMaskError('phone', '62 3000-1234')).toBeNull();
+  });
+
+  // triste
+  it('asks for the area code and the whole number', () => {
+    expect(fieldMaskError('phone', '62 3000')).toBe(
+      'O telefone tem DDD e número (10 ou 11 dígitos)',
+    );
+    expect(fieldMaskError('phone', '')).toBeNull();
+  });
+});

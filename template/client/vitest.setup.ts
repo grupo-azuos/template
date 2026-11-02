@@ -68,6 +68,26 @@ if (!window.ResizeObserver) {
 }
 
 /**
+ * Nem `IntersectionObserver`. O Embla (por trás do `AzuosCarousel`) o usa para saber quais itens
+ * estão à vista — sem o stub, toda tela com faixa deslizante quebra na montagem. Calado basta:
+ * nenhum teste depende de "o que está à vista", e no jsdom nada está.
+ */
+if (!window.IntersectionObserver) {
+  window.IntersectionObserver = class {
+    readonly root = null;
+    readonly rootMargin = '';
+    readonly thresholds: number[] = [];
+
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+  } as unknown as typeof IntersectionObserver;
+}
+
+/**
  * O jsdom também não implementa `matchMedia`. O `Sidebar` do shadcn o consulta na montagem,
  * por `useIsMobile`, para decidir entre a barra e a gaveta — sem o stub toda tela que tem
  * menu quebra antes de renderizar qualquer coisa.

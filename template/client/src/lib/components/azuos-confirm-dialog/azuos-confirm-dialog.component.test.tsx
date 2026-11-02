@@ -63,4 +63,16 @@ describe('AzuosConfirmDialog', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
+
+  // triste
+  /* Esc e clique no fundo passam pelo MESMO `onCancel` do botão: a tela só tem um jeito de saber
+     que o diálogo fechou. */
+  it('cancels when dismissed with Escape', async () => {
+    const actions = renderDialog();
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(actions.onCancel).toHaveBeenCalledOnce();
+    expect(actions.onConfirm).not.toHaveBeenCalled();
+  });
 });

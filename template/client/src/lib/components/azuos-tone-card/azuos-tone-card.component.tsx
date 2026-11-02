@@ -1,23 +1,15 @@
-import { type CSSProperties, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
-import { type FillTone, useHoverFill } from '../../motion/use-hover-fill';
-import { cn } from '../../utils/cn.util';
+import { type AzuosCardTone } from '../../utils/card-tone.util';
+import { AzuosCardSurface } from '../azuos-card-surface/azuos-card-surface.component';
 
 /**
- * O CARD COLORIDO do grupo — o padrão do Chamados, igual nos 13 sistemas.
- *
- * A cor vem do FUNDO, nunca da borda: borda colorida (faixa na lateral, contorno no tom) é
- * proibida em qualquer componente. Dois modos:
- *
- * - **`static`** — o fundo suave do tom, parado. Sem hover, sem nada: é informação.
- * - **`interactive`** — neutro em repouso; no hover, a cor do tom entra em círculo a partir de
- *   onde o mouse entrou (a utilidade `hover-fill` + `useHoverFill`, as mesmas do Chamados, que já
- *   respeitam o modo leve e quem pediu menos movimento). Com `onClick`, o card inteiro vira um
- *   botão de verdade.
- *
- * Selecionado (`state.isSelected`) é o fundo na cor CHEIA do tom — nunca um contorno.
+ * O card de uso geral com tom, sobre a `AzuosCardSurface`: superfície da marca, hover com a mancha
+ * do GSAP (no tom quando `mode="interactive"`) e escolhido no azul claro da marca. Mantido para as
+ * telas que já o usam; card novo usa um dos quatro formatos (`AzuosStatCard`,
+ * `AzuosMiniStatCard`, `AzuosContentCard`, `AzuosDashboardHeroCard`).
  */
-export type AzuosToneCardTone = 'brand' | 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+export type AzuosToneCardTone = AzuosCardTone;
 
 export type AzuosToneCardProps = {
   data?: { label?: string };
@@ -31,108 +23,19 @@ export type AzuosToneCardProps = {
   children: ReactNode;
 };
 
-const SOLID: Record<AzuosToneCardTone, string> = {
-  brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-card text-card-foreground border border-border',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
-};
-
-const BASE = 'rounded-surface relative p-4 shadow-card';
-
 export function AzuosToneCard({ data, ui, state, actions, children }: AzuosToneCardProps) {
-  const tone = ui?.tone ?? 'neutral';
-
-  if (state?.isSelected) {
-    return (
-      <Surface data={data} actions={actions} className={cn(BASE, SOLID[tone], ui?.className)} isSelected>
-        {children}
-      </Surface>
-    );
-  }
-  if (ui?.mode === 'interactive') {
-    return (
-      <InteractiveCard data={data} tone={tone} actions={actions} className={ui.className}>
-        {children}
-      </InteractiveCard>
-    );
-  }
-
   return (
-    <Surface data={data} actions={actions} className={cn(BASE, SOLID[tone], ui?.className)}>
-      {children}
-    </Surface>
-  );
-}
-
-function InteractiveCard({
-  data,
-  tone,
-  actions,
-  className,
-  children,
-}: {
-  data: AzuosToneCardProps['data'];
-  tone: FillTone;
-  actions: AzuosToneCardProps['actions'];
-  className?: string;
-  children: ReactNode;
-}) {
-  const fill = useHoverFill(tone);
-
-  return (
-    <Surface
+    <AzuosCardSurface
       data={data}
+      ui={{
+        className: ['p-4', ui?.className].filter(Boolean).join(' '),
+        isHoverColored: ui?.mode === 'interactive',
+        hoverTone: ui?.tone,
+      }}
+      state={state}
       actions={actions}
-      className={cn(BASE, 'hover-fill bg-card text-card-foreground border-border border', className)}
-      handlers={fill.handlers}
-      style={fill.style}
     >
       {children}
-    </Surface>
-  );
-}
-
-function Surface({
-  data,
-  actions,
-  className,
-  handlers,
-  style,
-  isSelected,
-  children,
-}: {
-  data: AzuosToneCardProps['data'];
-  actions: AzuosToneCardProps['actions'];
-  className: string;
-  handlers?: ReturnType<typeof useHoverFill>['handlers'];
-  style?: CSSProperties;
-  isSelected?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      role="group"
-      aria-label={data?.label}
-      data-selected={isSelected ? 'true' : undefined}
-      className={cn(className, actions?.onClick && 'cursor-pointer')}
-      style={style}
-      {...handlers}
-    >
-      {/* O clique é um BOTÃO de verdade, por cima do card inteiro: alcançável pelo teclado e
-          anunciado pelo leitor de tela, sem trocar a marcação do conteúdo. */}
-      {actions?.onClick ? (
-        <button
-          type="button"
-          aria-label={data?.label}
-          aria-pressed={isSelected ?? false}
-          onClick={actions.onClick}
-          className="rounded-surface focus-visible:ring-ring absolute inset-0 z-10 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-        />
-      ) : null}
-      {children}
-    </div>
+    </AzuosCardSurface>
   );
 }

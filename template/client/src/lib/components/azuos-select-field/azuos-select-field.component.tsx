@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react';
 
 import { cn } from '../../utils/cn.util';
+import { AzuosPersonAvatar } from '../azuos-person-avatar/azuos-person-avatar.component';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
 
 /**
@@ -13,7 +14,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
  * que continua recebendo `''`.
  */
 /** `icon` é opcional: um desenho na frente do texto, no gatilho e em cada linha da lista. */
-export type AzuosSelectFieldOption = { value: string; label: string; icon?: LucideIcon };
+export type AzuosSelectFieldOption = {
+  value: string;
+  label: string;
+  icon?: LucideIcon;
+  /** A pessoa da opção: quando existe, a foto (ou as iniciais) vem antes do rótulo. */
+  personName?: string;
+  /** A foto da pessoa. Sem ela, ficam as iniciais de `personName`. */
+  avatarUrl?: string | null;
+};
 
 export type AzuosSelectFieldProps = {
   data: { value: string; options: AzuosSelectFieldOption[] };
@@ -53,10 +62,11 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
           de um `AzuosTextField` ou dentro de um formulário, e vinha 4px mais baixo e com um raio só
           dele, destoando de tudo em volta.
 
-          `min-w-0` + `max-w-full`: sem os dois, uma opção de nome longo faz o gatilho crescer além
-          do espaço que ele tem e empurra a largura de quem está em volta — dentro de um diálogo,
-          isso vira barra de rolagem horizontal na tela inteira. O nome completo continua acessível
-          pelo `title` e pela lista aberta.
+          `max-w-full`: sem ele, uma opção de nome longo faz o gatilho crescer além do espaço que
+          ele tem e empurra a largura de quem está em volta — dentro de um diálogo, isso vira barra
+          de rolagem horizontal na tela inteira. O nome completo continua acessível pelo `title` e
+          pela lista aberta. `min-w-40` é o piso: abaixo de 10rem o gatilho cortava o próprio
+          valor ("Todas as ci…"), e o piso é do campo, não de cada tela.
 
           `data-[size=default]:h-(--control-lg)`: o gatilho baixado impõe a altura dele DENTRO de
           uma variante (`data-[size=default]:h-9`), e uma variante ganha de classe solta — o
@@ -66,7 +76,7 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
         aria-label={ui?.ariaLabel}
         title={selectedLabel || undefined}
         className={cn(
-          'control-lg rounded-control max-w-full min-w-0 text-sm data-[size=default]:h-(--control-lg)',
+          'control-lg rounded-control max-w-full min-w-40 text-sm data-[size=default]:h-(--control-lg)',
           ui?.className,
         )}
       >
@@ -85,7 +95,7 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
       <SelectContent
         position="popper"
         sideOffset={4}
-        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-select-trigger-width)"
+        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-select-trigger-width))]"
       >
         {data.options.map((option) => (
           <OptionRow key={option.value || EMPTY_VALUE} data={{ option }} />
@@ -107,28 +117,46 @@ function SelectedValue({
   data: { option?: AzuosSelectFieldOption };
   ui: { placeholder?: string };
 }) {
-  const Icon = data.option?.icon;
-
   return (
     <span data-slot="select-value" className="flex min-w-0 items-center gap-2">
-      {Icon ? (
-        <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
-      ) : null}
+      <OptionLead data={{ option: data.option }} />
       <span className="truncate">{data.option?.label || (ui.placeholder ?? '')}</span>
     </span>
   );
 }
 
+/**
+ * O que vem antes do rótulo: a foto (ou as iniciais) quando a opção é uma PESSOA, ou o ícone da
+ * opção. A foto é a regra do grupo para todo seletor de pessoa — o olho acha o rosto antes de ler o
+ * nome. Fica `aria-hidden` porque o nome já está escrito ao lado; lido duas vezes, vira ruído.
+ */
+function OptionLead({ data }: { data: { option?: AzuosSelectFieldOption } }) {
+  const option = data.option;
+  if (option?.personName) {
+    return (
+      <span aria-hidden="true" className="flex shrink-0">
+        <AzuosPersonAvatar
+          name={option.personName}
+          avatarUrl={option.avatarUrl}
+          ui={{ size: 'sm' }}
+        />
+      </span>
+    );
+  }
+
+  const Icon = option?.icon;
+  if (!Icon) return null;
+
+  return <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />;
+}
+
 /** Uma linha da lista aberta. `truncate` para a opção comprida ser cortada, não a tela. */
 function OptionRow({ data }: { data: { option: AzuosSelectFieldOption } }) {
   const { option } = data;
-  const Icon = option.icon;
 
   return (
     <SelectItem value={option.value || EMPTY_VALUE}>
-      {Icon ? (
-        <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
-      ) : null}
+      <OptionLead data={{ option }} />
       <span className="truncate">{option.label}</span>
     </SelectItem>
   );

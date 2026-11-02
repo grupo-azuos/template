@@ -17,6 +17,10 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    /* Por padrão o vitest devolve vazio para todo `.css` importado — inclusive o `?raw` que o
+       `theme-color.util` usa para ler o `tokens.css` como texto. Ligado, o CSS passa inteiro;
+       nenhum teste importa folha de estilo, então não custa nada. */
+    css: true,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

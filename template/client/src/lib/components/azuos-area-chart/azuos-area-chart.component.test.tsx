@@ -64,4 +64,18 @@ describe('AzuosAreaChart', () => {
 
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
   });
+
+  // feliz
+  /* Uma série em porcentagem ganha teto fixo em 105: no teto exato (100) a linha fica achatada
+     contra a borda e ninguém distingue "bateu no teto" de "foi cortado". */
+  it('draws the percent scale, the stacked layout and the hourly tick without failing', () => {
+    render(
+      <AzuosAreaChart
+        data={{ points: POINTS, series: SERIES }}
+        ui={{ isPercent: true, layout: 'stack', tick: 'hour', heightClass: 'h-40', className: 'mt-2' }}
+      />,
+    );
+
+    expect(screen.getByRole('img')).toBeInTheDocument();
+  });
 });

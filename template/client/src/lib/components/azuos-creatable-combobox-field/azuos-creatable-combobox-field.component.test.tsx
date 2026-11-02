@@ -147,4 +147,49 @@ describe('AzuosCreatableComboboxField', () => {
 
     expect(actions.onSearch).not.toHaveBeenCalled();
   });
+
+  it('does not walk past the ends of the list and ignores other keys', () => {
+    const actions = renderField();
+    open();
+    const input = screen.getByPlaceholderText('Buscar cidade...');
+
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    fireEvent.keyDown(input, { key: 'Tab' });
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(actions.onChange).toHaveBeenCalledWith('Goiânia');
+  });
+
+  /* O mouse e a seta mexem no MESMO destaque: passar o mouse e dar Enter escolhe o item sob ele. */
+  it('highlights the item under the mouse so Enter chooses it', () => {
+    const actions = renderField();
+    open();
+
+    fireEvent.mouseMove(screen.getByRole('option', { name: /Goiânia/ }));
+    fireEvent.keyDown(screen.getByPlaceholderText('Buscar cidade...'), { key: 'Enter' });
+
+    expect(actions.onChange).toHaveBeenCalledWith('Goiânia');
+  });
+
+  it('clears the value from the clear option', () => {
+    const actions = renderField({
+      data: { value: 'Goiás', options: ['Goiás'] },
+      ui: { ariaLabel: 'Cidade', clearLabel: 'Sem cidade', searchPlaceholder: 'Buscar cidade...' },
+    });
+    open();
+
+    fireEvent.click(screen.getByRole('option', { name: /Sem cidade/ }));
+
+    expect(actions.onChange).toHaveBeenCalledWith('');
+  });
+
+  it('says it is searching while the list is empty and loading', () => {
+    renderField({ data: { value: '', options: [] }, state: { isLoading: true, isCreating: true } });
+    open();
+
+    expect(screen.getByText('Buscando…')).toBeInTheDocument();
+  });
 });

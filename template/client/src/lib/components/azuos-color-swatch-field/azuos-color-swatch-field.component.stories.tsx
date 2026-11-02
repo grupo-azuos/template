@@ -1,6 +1,8 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import { fn } from 'storybook/test';
 
+import { COMPANY_COLOR_PALETTE } from '../../utils/company-color.util';
+import { themeColor } from '../../utils/theme-color.util';
 import { AzuosColorSwatchField } from './azuos-color-swatch-field.component';
 
 const meta = {
@@ -17,16 +19,16 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const PaletteColorSelected: Story = {
-  args: { data: { value: '#7c3aed' } },
+  args: { data: { value: COMPANY_COLOR_PALETTE[2] } },
 };
 
 /** Cor livre, fora da paleta: o quadrado do seletor assume a cor e fica marcado. */
 export const CustomColorSelected: Story = {
-  args: { data: { value: '#0f766e' } },
+  args: { data: { value: themeColor('--brand-blue-900') } },
 };
 
 export const Disabled: Story = {
-  args: { data: { value: '#2563eb' }, state: { isDisabled: true } },
+  args: { data: { value: COMPANY_COLOR_PALETTE[0] }, state: { isDisabled: true } },
 };
 
 /** Caso limite: largura estreita — os quadrados quebram linha em vez de estourar. */

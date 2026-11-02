@@ -1,24 +1,27 @@
 import { type LucideIcon } from 'lucide-react';
-import { tv } from 'tailwind-variants';
 
+import {
+  type AzuosCardSemanticTone,
+  type AzuosCardTone,
+  cardHueFromHex,
+  cardToneClasses,
+} from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
+import { AzuosCardSurface } from '../azuos-card-surface/azuos-card-surface.component';
 import { Skeleton } from '../ui/skeleton';
 
 /**
- * O número que se lê de relance, no alto do painel.
+ * O CARD DE PAINEL e o FILTRO GRANDE com ícone: o número que se lê de relance.
  *
- * Quando o cartão tem um tom (danger, info, success, brand, warning), ele ganha o fundo SÓLIDO da
- * cor correspondente, sem borda (o token `-soft` do tom). Sem tom escolhido (neutral), fica neutro
- * com a borda padrão. Borda ou faixa colorida, nunca: é regra do grupo, igual nos 13 sistemas.
- *
- * O `-soft` é sólido de propósito: com opacidade, o cartão mudava de cor conforme o que estivesse
- * atrás dele, e o mesmo indicador ficava de dois tons em duas telas.
+ * Fica na superfície da marca (`AzuosCardSurface`); o tom é só sotaque: a bolinha do ícone e o
+ * número. Com `onClick` vira filtro, e o escolhido fica no azul claro da marca com texto branco e
+ * a bolinha invertida. O tom aceita o nome de estado (`danger`…) ou o sotaque (`plum`…); a cor que
+ * a PESSOA escolheu (`ui.color`) vira o sotaque mais próximo.
  *
  * `hint` existe para o número que EXCLUI algo — "exclui 1.067 arquivados", escrito miúdo ao lado do
- * total. Um número que exclui algo precisa dizer o que excluiu, ou viram dois painéis discordando
- * sobre a mesma base.
+ * total. Um número que exclui algo precisa dizer o que excluiu.
  */
-export type AzuosStatCardTone = 'brand' | 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+export type AzuosStatCardTone = AzuosCardTone;
 
 export type AzuosStatCardProps = {
   data: {
@@ -31,8 +34,10 @@ export type AzuosStatCardProps = {
     size?: 'md' | 'lg';
     className?: string;
     icon?: LucideIcon;
-    /** Uma cor que a PESSOA escolheu (`#rrggbb`) para o rótulo e o quadrado do ícone — vence o tom. */
+    /** Uma cor que a PESSOA escolheu (`#rrggbb`): vira o sotaque mais próximo e vence o tom. */
     color?: string | null;
+    /** O hover pinta a mancha no sotaque do card, em vez do véu neutro. */
+    isHoverColored?: boolean;
   };
   state?: {
     isLoading?: boolean;
@@ -43,217 +48,107 @@ export type AzuosStatCardProps = {
   actions?: { onClick?: () => void };
 };
 
-/** O fundo do cartão inteiro: colorido usa cor sólida cheia; neutro usa `bg-card` com borda. */
-const TONE_CARD: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-card border-border border text-card-foreground',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
+/** A pastilha no tom (prazo, situação): a superfície neutra com o texto no sotaque. */
+export const STAT_TONE_BADGE: Record<AzuosCardSemanticTone, string> = {
+  brand: cn('bg-muted', cardToneClasses('brand').text),
+  neutral: cn('bg-muted', cardToneClasses('neutral').text),
+  default: cn('bg-muted', cardToneClasses('default').text),
+  success: cn('bg-muted', cardToneClasses('success').text),
+  warning: cn('bg-muted', cardToneClasses('warning').text),
+  danger: cn('bg-muted', cardToneClasses('danger').text),
+  info: cn('bg-muted', cardToneClasses('info').text),
 };
 
-/** Selecionado: o fundo na cor CHEIA do tom, e todo o texto claro por cima — nunca um contorno. */
-const TONE_SELECTED: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-ink-700 text-primary-foreground',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
-};
+/** O tom do cartão: a cor escolhida pela pessoa, se houver, vira o sotaque; senão, o tom pedido. */
+function toneOf(ui: AzuosStatCardProps['ui']): AzuosCardTone {
+  if (ui?.color) return cardHueFromHex(ui.color);
 
-/** A pastilha no tom (prazo, situação): fundo sólido contrastante. */
-export const STAT_TONE_BADGE: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary text-primary-foreground',
-  neutral: 'bg-muted text-ink-700',
-  success: 'bg-success text-primary-foreground',
-  warning: 'bg-warning text-primary-foreground',
-  danger: 'bg-destructive text-destructive-foreground',
-  info: 'bg-info text-primary-foreground',
-};
-
-const TONE_LABEL: Record<AzuosStatCardTone, string> = {
-  brand: 'text-primary-foreground/80',
-  neutral: 'text-ink-500',
-  success: 'text-primary-foreground/80',
-  warning: 'text-primary-foreground/80',
-  danger: 'text-destructive-foreground/80',
-  info: 'text-primary-foreground/80',
-};
-
-/** Cor SÓLIDA do quadrado do ícone — 100% sólida sem opacidade ou tons pastéis. */
-const TONE_ICON: Record<AzuosStatCardTone, string> = {
-  brand: 'bg-primary-foreground text-primary',
-  neutral: 'bg-foreground text-background',
-  success: 'bg-primary-foreground text-success',
-  warning: 'bg-primary-foreground text-warning',
-  danger: 'bg-destructive-foreground text-destructive',
-  info: 'bg-primary-foreground text-info',
-};
-
-/**
- * A casca do cartão. Cartão é SUPERFÍCIE: o mesmo raio do `Card`, do diálogo e da tabela
- * (`lib/theme/tokens.css`) — com raio de controle ele encostava visualmente nos botões em volta e
- * parecia um botão grande.
- *
- * Clicável: sobe um pouco no hover, para avisar que responde ao clique. Selecionado: o fundo na
- * cor cheia do tom (o tom é escolhido aqui, um OU outro, para nunca haver dois fundos brigando).
- */
-const statCard = tv({
-  base: 'rounded-surface p-5 shadow-card transition-all',
-  variants: {
-    isClickable: {
-      true: 'relative cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
-      false: '',
-    },
-    isSelected: { true: 'text-primary-foreground **:text-primary-foreground', false: '' },
-  },
-  defaultVariants: { isClickable: false, isSelected: false },
-});
-
-/** O fundo: o suave do tom, ou a cor cheia quando selecionado — um OU outro, nunca os dois. */
-function surfaceOf(tone: AzuosStatCardTone, isSelected: boolean | undefined): string {
-  return isSelected ? TONE_SELECTED[tone] : TONE_CARD[tone];
-}
-
-/** A casca do cartão: a régua comum, o fundo (tom ou cor escolhida) e o que a tela acrescenta. */
-function rootPropsOf(input: {
-  tone: AzuosStatCardTone;
-  isClickable: boolean;
-  isSelected: boolean;
-  ui: AzuosStatCardProps['ui'];
-}) {
-  const color = input.ui?.color;
-
-  return {
-    className: cn(
-      statCard({ isClickable: input.isClickable, isSelected: input.isSelected }),
-      color ? '' : surfaceOf(input.tone, input.isSelected),
-      input.ui?.className,
-    ),
-    style: customSurfaceOf(color, input.isSelected),
-  };
-}
-
-/**
- * Com uma cor que a PESSOA escolheu, o fundo é ela — a mesma regra dos tons: suave parado (misturada
- * com o fundo do card, legível nos dois temas), cheia quando selecionado. Nunca borda.
- */
-function customSurfaceOf(color: string | null | undefined, isSelected: boolean | undefined) {
-  if (!color) return undefined;
-
-  return { backgroundColor: isSelected ? color : `color-mix(in srgb, ${color} 18%, var(--card))` };
+  return ui?.tone ?? 'neutral';
 }
 
 export function AzuosStatCard({ data, ui, state, actions }: AzuosStatCardProps) {
-  const tone = ui?.tone ?? 'neutral';
-  const isClickable = Boolean(actions?.onClick);
+  const tone = toneOf(ui);
+  const isSelected = Boolean(state?.isSelected);
+  /* O nome lido pelo leitor de tela leva o número, e diz o que o próximo clique faz. */
+  const named = `${data.label} ${data.value}`;
+  const label = isSelected ? `${named}: tirar o filtro` : `${named}: filtrar a lista`;
 
   return (
-    <div {...rootPropsOf({ tone, isClickable, ui, isSelected: Boolean(state?.isSelected) })}>
-      {isClickable ? <StatCardClickTarget data={data} state={state} actions={actions} /> : null}
-
-      <StatCardLabel data={data} tone={tone} ui={ui} isSelected={Boolean(state?.isSelected)} />
+    <AzuosCardSurface
+      data={{ label: actions?.onClick ? label : data.label }}
+      ui={{
+        className: cn('p-5', ui?.className),
+        isHoverColored: ui?.isHoverColored,
+        hoverTone: tone,
+      }}
+      state={{ isSelected, isDisabled: state?.isLoading }}
+      actions={actions}
+    >
+      <StatCardLabel data={data} tone={tone} ui={ui} />
 
       {state?.isLoading ? (
         <Skeleton className="mt-1 h-8 w-20" />
       ) : (
         <StatCardValue data={data} ui={ui} tone={tone} />
       )}
-    </div>
+    </AzuosCardSurface>
   );
 }
 
-/** O número e a ressalva ao lado dele. `items-baseline` alinha os dois pela linha do texto. */
+/** O número no sotaque, e a ressalva ao lado dele. No escolhido, tudo branco. */
 function StatCardValue({
   data,
   ui,
   tone,
-}: {
-  data: AzuosStatCardProps['data'];
-  ui: AzuosStatCardProps['ui'];
-  tone: AzuosStatCardTone;
-}) {
+}: Pick<AzuosStatCardProps, 'data' | 'ui'> & { tone: AzuosCardTone }) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       <p
         className={cn(
-          tone === 'neutral' ? 'text-foreground' : 'text-inherit',
-          'font-bold tabular-nums',
-          ui?.size === 'lg' ? 'text-4xl' : 'text-3xl font-semibold tracking-tight',
+          'font-bold tabular-nums group-data-[selected=true]/card:text-on-card-selected',
+          cardToneClasses(tone).text,
+          ui?.size === 'lg' ? 'text-4xl' : 'text-3xl tracking-tight',
         )}
       >
         {data.value}
       </p>
 
-      {data.hint ? <p className={cn('mt-0.5 text-xs', TONE_LABEL[tone])}>{data.hint}</p> : null}
+      {data.hint ? (
+        <p className="text-muted-foreground group-data-[selected=true]/card:text-on-card-selected mt-0.5 text-xs">
+          {data.hint}
+        </p>
+      ) : null}
     </div>
   );
 }
 
-/**
- * O clique é um BOTÃO de verdade, estendido por cima do cartão inteiro: alcançável pelo teclado e
- * anunciado pelo leitor de tela, sem trocar a marcação do cartão — parágrafo dentro de botão não é
- * HTML válido, e envolver tudo num `<button>` é o jeito mais comum de quebrar isso.
- */
-function StatCardClickTarget({
-  data,
-  state,
-  actions,
-}: Pick<AzuosStatCardProps, 'data' | 'state' | 'actions'>) {
-  return (
-    <button
-      type="button"
-      className="rounded-surface absolute inset-0 cursor-pointer"
-      aria-pressed={Boolean(state?.isSelected)}
-      aria-label={
-        state?.isSelected ? `${data.label}: tirar o filtro` : `${data.label}: filtrar a lista`
-      }
-      onClick={actions?.onClick}
-    />
-  );
-}
-
-/** Com ícone, o rótulo fica ao lado do quadrado; sem ícone, sozinho em cima do número. */
+/** Com ícone, o rótulo fica ao lado da bolinha; sem ícone, sozinho em cima do número. */
 function StatCardLabel({
   data,
   tone,
   ui,
-  isSelected,
 }: {
   data: AzuosStatCardProps['data'];
-  tone: AzuosStatCardTone;
+  tone: AzuosCardTone;
   ui: AzuosStatCardProps['ui'];
-  isSelected: boolean;
 }) {
   const Icon = ui?.icon;
-  /* Selecionado, o fundo JÁ é a cor: o rótulo fica claro, como o resto do texto do card. */
-  const color = isSelected ? null : ui?.color;
   const label = (
-    <p
-      className={cn(
-        'text-xs font-semibold tracking-wider uppercase leading-none',
-        color ? '' : TONE_LABEL[tone],
-      )}
-      style={color ? { color } : undefined}
-    >
-      {data.label}
-    </p>
+    <p className="text-xs leading-none font-semibold tracking-wider uppercase">{data.label}</p>
   );
 
-  if (!Icon) return <div className="mb-1">{label}</div>;
+  if (!Icon) return <div className="mb-1.5">{label}</div>;
 
   return (
-    <div className="mb-2.5 flex items-center gap-2.5">
+    <div className="mb-3 flex items-center gap-2.5">
       <span
         className={cn(
-          'rounded-chip inline-flex size-8 shrink-0 items-center justify-center [&>svg]:block [&>svg]:shrink-0',
-          color ? 'text-primary-foreground' : TONE_ICON[tone],
+          'rounded-chip inline-flex size-9 shrink-0 items-center justify-center',
+          'group-data-[selected=true]/card:bg-on-card-selected group-data-[selected=true]/card:text-card-selected',
+          cardToneClasses(tone).dot,
         )}
-        style={color ? { backgroundColor: color } : undefined}
       >
-        <Icon size={16} className="size-4 shrink-0 block stroke-[1.8]" aria-hidden="true" />
+        <Icon size={18} className="block size-4.5 shrink-0 stroke-[1.8]" aria-hidden="true" />
       </span>
       {label}
     </div>

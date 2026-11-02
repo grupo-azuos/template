@@ -40,6 +40,7 @@ const PLACEHOLDERS: Partial<Record<FieldMask, string>> = {
   cep: '00000-000',
   cnae: '0000-0/00',
   money: '0,00',
+  phone: '62 90000-0000',
 };
 
 /** Dinheiro e CNPJ (alfanumérico) abrem o teclado certo no celular; o resto, só números. */
@@ -52,6 +53,7 @@ const INPUT_MODES: Record<FieldMask, 'numeric' | 'decimal' | 'text'> = {
   money: 'decimal',
   integer: 'numeric',
   cnh: 'numeric',
+  phone: 'numeric',
 };
 
 export function AzuosMaskedTextField({ data, ui, state, actions }: AzuosMaskedTextFieldProps) {
@@ -76,7 +78,7 @@ export function AzuosMaskedTextField({ data, ui, state, actions }: AzuosMaskedTe
 
   return (
     <div className={cn('flex flex-col gap-1.5', ui.className)}>
-      <label htmlFor={inputId} className="text-sm font-medium text-ink-700">
+      <label htmlFor={inputId} className="text-ink-700 text-sm font-medium">
         {data.label}
         {data.isRequired ? (
           <span className="text-destructive" aria-hidden="true">
@@ -104,13 +106,13 @@ export function AzuosMaskedTextField({ data, ui, state, actions }: AzuosMaskedTe
           actions.onBlur?.();
         }}
         className={cn(
-          'control-lg w-full rounded-control border text-sm text-foreground tabular-nums transition-colors',
+          'control-lg rounded-control text-foreground w-full border text-sm tabular-nums transition-colors',
           'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
-          hasError ? 'border-border bg-destructive-soft' : 'border-input bg-card',
+          hasError ? 'border-border bg-destructive-soft' : 'border-input bg-muted text-foreground',
         )}
       />
       {hasError ? (
-        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
+        <p id={errorId} role="alert" className="text-destructive text-xs font-medium">
           {error}
         </p>
       ) : null}

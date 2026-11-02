@@ -1,4 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { useTableView } from './use-table-view';
@@ -54,5 +55,16 @@ describe('useTableView', () => {
     act(() => button.click());
 
     expect(button.textContent).toBe(before);
+  });
+
+  // triste
+  it('starts automatic on the server, where nothing is saved', () => {
+    function Probe() {
+      const { view } = useTableView();
+
+      return <output>{view}</output>;
+    }
+
+    expect(renderToString(<Probe />)).toContain('auto');
   });
 });

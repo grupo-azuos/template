@@ -129,12 +129,7 @@ function HistoryRow({
           e não solta no ar. O marco fica na altura do cabeçalho ao lado. */}
       <div className="flex w-3 shrink-0 flex-col items-center" aria-hidden="true">
         <span className={cn('h-0.5 w-px', ui.isFirst ? 'bg-transparent' : 'bg-border')} />
-        <span
-          className={cn(
-            'my-1 size-3 shrink-0 rounded-full',
-            DOT_TONE_CLASSES[entry.tone],
-          )}
-        />
+        <span className={cn('my-1 size-3 shrink-0 rounded-full', DOT_TONE_CLASSES[entry.tone])} />
         {ui.isLast ? null : <span className="bg-border w-px flex-1" />}
       </div>
 
@@ -178,7 +173,7 @@ function HistoryRow({
           </div>
         ) : null}
 
-        <p className="rounded-box border-border/70 bg-muted/20 text-foreground/90 border px-3.5 py-2.5 text-sm whitespace-pre-line">
+        <p className="rounded-box border-border bg-muted text-foreground border px-3.5 py-2.5 text-sm whitespace-pre-line">
           {entry.description}
         </p>
 

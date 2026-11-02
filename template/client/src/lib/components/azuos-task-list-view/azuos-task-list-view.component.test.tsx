@@ -140,4 +140,21 @@ describe('AzuosTaskListView', () => {
     expect(screen.getByRole('button', { name: 'Editar tarefa' })).toBeInTheDocument();
     expect(screen.getByText('Em andamento')).toBeInTheDocument();
   });
+
+  // feliz
+  it('reports the chosen situation filter', async () => {
+    const actions = renderView();
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Situação' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Concluída' }));
+
+    expect(actions.onStatusChange).toHaveBeenCalledWith('done');
+  });
+
+  // triste
+  it('invites to create the first task when nothing exists', () => {
+    renderView({ data: { tasks: [], total: 0 }, state: { isEmpty: true } });
+
+    expect(screen.getByText(/Nenhuma tarefa/)).toBeInTheDocument();
+  });
 });

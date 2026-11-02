@@ -173,4 +173,44 @@ describe('AzuosDateRangeField', () => {
 
     expect(trigger()).toBeDisabled();
   });
+
+  // feliz
+  /* O calendário é o segundo caminho para o mesmo rascunho: clicar dois dias monta o período, e
+     ele só sai pelo "Aplicar", como o digitado. */
+  it('completes the period by clicking a day on the calendar', () => {
+    const { onChange } = renderField({ from: '2026-03-05', to: null });
+    open();
+
+    fireEvent.click(screen.getByRole('button', { name: /20 de março de 2026/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
+
+    expect(onChange).toHaveBeenCalledWith({ from: '2026-03-05', to: '2026-03-20' });
+  });
+
+  // triste
+  /* Apagar o texto de uma ponta esvazia essa ponta no rascunho: o "Aplicar" volta a travar. */
+  it('empties an edge when its text is erased', () => {
+    renderField(MARCH);
+    open();
+
+    type('De', '');
+
+    expect(screen.getByRole('button', { name: 'Aplicar' })).toBeDisabled();
+    expect(screen.getByText('Escolha a data de início e a de fim.')).toBeInTheDocument();
+  });
+
+  /* Ao sair, o campo volta a mostrar a data que está valendo: texto pela metade some, em vez de
+     ficar parecendo uma data aceita. */
+  it('drops a half-typed date when the edge loses focus', () => {
+    renderField(MARCH);
+    open();
+    const from = screen.getByRole('textbox', { name: 'De' });
+
+    fireEvent.change(from, { target: { value: '15/0' } });
+    expect(from).toHaveValue('15/0');
+
+    fireEvent.blur(from);
+
+    expect(from).toHaveValue('01/03/2026');
+  });
 });
