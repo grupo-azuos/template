@@ -195,6 +195,50 @@ describe('AzuosDashboardHeroCard', () => {
     }
   });
 
+  // feliz
+  it('fills a clickable stat with the full color of its tone on hover', () => {
+    render(
+      <AzuosDashboardHeroCard
+        data={{
+          title: 'Resumo do Dia',
+          stats: [
+            {
+              label: 'Vencidos',
+              value: 3,
+              tone: 'danger',
+              icon: Siren,
+              hint: 'ver',
+              onClick: vi.fn(),
+            },
+            { label: 'Revisões', value: 2, tone: 'brand', onClick: vi.fn() },
+          ],
+        }}
+      />,
+    );
+
+    const danger = screen.getByRole('button', { name: /Vencidos/ });
+    expect(danger).toHaveClass(
+      'cursor-pointer',
+      'hover:bg-destructive',
+      'hover:text-destructive-foreground',
+    );
+    expect(danger.className).not.toMatch(/translate|shadow|\/\d+/);
+    expect(screen.getByText('ver')).toHaveClass('group-hover/stat:text-destructive-foreground');
+    expect(screen.getByRole('button', { name: /Revisões/ })).toHaveClass('hover:bg-brand-blue-600');
+  });
+
+  // triste
+  it('keeps a stat that only shows a number free of hover color', () => {
+    render(
+      <AzuosDashboardHeroCard
+        data={{ title: 'Resumo do Dia', stats: [{ label: 'Total', value: 9, tone: 'success' }] }}
+      />,
+    );
+
+    const card = screen.getByText('Total').closest('div.rounded-surface');
+    expect(card?.className).not.toMatch(/hover:/);
+  });
+
   // triste
   it('falls back to the neutral look when the tone is unknown', () => {
     render(

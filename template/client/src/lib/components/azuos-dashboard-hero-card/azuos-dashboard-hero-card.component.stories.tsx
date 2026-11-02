@@ -251,3 +251,56 @@ export const WithActiveBrandStat: Story = {
     },
   },
 };
+
+/** Os seis tons clicáveis: passe o mouse — cada cartão vai para a cor cheia do seu tom. */
+export const ClickableTones: Story = {
+  args: {
+    data: {
+      title: 'Passe o mouse nos cartões',
+      zuzu: { pose: 'idea', size: 120 },
+      stats: [
+        {
+          label: 'Vencidos',
+          value: 12,
+          hint: 'danger',
+          tone: 'danger',
+          icon: Siren,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Próximas',
+          value: 6,
+          hint: 'warning',
+          tone: 'warning',
+          icon: AlarmClock,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Sem data',
+          value: 4,
+          hint: 'info',
+          tone: 'info',
+          icon: Megaphone,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Novas',
+          value: 3,
+          hint: 'success',
+          tone: 'success',
+          icon: CheckCircle2,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Revisões',
+          value: 904,
+          hint: 'brand',
+          tone: 'brand',
+          icon: ClipboardCheck,
+          onClick: () => undefined,
+        },
+        { label: 'Neutro', value: 0, hint: 'default', icon: UserX, onClick: () => undefined },
+      ],
+    },
+  },
+};

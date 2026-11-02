@@ -60,6 +60,14 @@ type StatToneStyle = {
   activeIcon: string;
   hint: string;
   activeHint: string;
+  /**
+   * O hover de um cartão clicável: a cor CHEIA do tom, a mesma do escolhido. O ícone e a dica
+   * acompanham pelo `group-hover`, senão a pastilha do ícone sumia no fundo da mesma cor. Classes
+   * inteiras escritas aqui, e não montadas, para o Tailwind encontrá-las.
+   */
+  hoverSurface: string;
+  hoverIcon: string;
+  hoverHint: string;
 };
 
 /*
@@ -76,6 +84,9 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     activeIcon: 'bg-background text-foreground',
     hint: 'text-foreground/70',
     activeHint: 'text-background/80',
+    hoverSurface: 'hover:bg-foreground hover:text-background',
+    hoverIcon: 'group-hover/stat:bg-background group-hover/stat:text-foreground',
+    hoverHint: 'group-hover/stat:text-background',
   },
   danger: {
     surface: 'bg-destructive-soft text-destructive',
@@ -84,6 +95,9 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     activeIcon: 'bg-destructive-foreground text-destructive',
     hint: 'text-foreground/70',
     activeHint: 'text-destructive-foreground/80',
+    hoverSurface: 'hover:bg-destructive hover:text-destructive-foreground',
+    hoverIcon: 'group-hover/stat:bg-destructive-foreground group-hover/stat:text-destructive',
+    hoverHint: 'group-hover/stat:text-destructive-foreground',
   },
   warning: {
     surface: 'bg-warning-soft text-warning',
@@ -92,6 +106,9 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     activeIcon: 'bg-warning-foreground text-warning',
     hint: 'text-foreground/70',
     activeHint: 'text-warning-foreground/80',
+    hoverSurface: 'hover:bg-warning hover:text-warning-foreground',
+    hoverIcon: 'group-hover/stat:bg-warning-foreground group-hover/stat:text-warning',
+    hoverHint: 'group-hover/stat:text-warning-foreground',
   },
   info: {
     surface: 'bg-info-soft text-info',
@@ -100,6 +117,9 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     activeIcon: 'bg-info-foreground text-info',
     hint: 'text-foreground/70',
     activeHint: 'text-info-foreground/80',
+    hoverSurface: 'hover:bg-info hover:text-info-foreground',
+    hoverIcon: 'group-hover/stat:bg-info-foreground group-hover/stat:text-info',
+    hoverHint: 'group-hover/stat:text-info-foreground',
   },
   success: {
     surface: 'bg-success-soft text-success',
@@ -108,6 +128,9 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     activeIcon: 'bg-success-foreground text-success',
     hint: 'text-foreground/70',
     activeHint: 'text-success-foreground/80',
+    hoverSurface: 'hover:bg-success hover:text-success-foreground',
+    hoverIcon: 'group-hover/stat:bg-success-foreground group-hover/stat:text-success',
+    hoverHint: 'group-hover/stat:text-success-foreground',
   },
   /* O azul da marca já é escuro: o cartão escolhido CLAREIA um degrau (o 600), porque o 900 é o
      fundo do próprio hero e o cartão sumiria nele. */
@@ -118,14 +141,23 @@ const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = 
     activeIcon: 'bg-brand-blue-900 text-accent-hero',
     hint: 'text-on-dark/80',
     activeHint: 'text-on-dark/80',
+    hoverSurface: 'hover:bg-brand-blue-600',
+    hoverIcon: '',
+    hoverHint: 'group-hover/stat:text-on-dark',
   },
 };
 
 function resolveStatStyles(stat: AzuosDashboardHeroCardStat) {
   const tone = STAT_TONE_STYLES[stat.tone ?? 'default'] ?? STAT_TONE_STYLES.default;
   if (stat.isActive) return { surface: tone.active, icon: tone.activeIcon, hint: tone.activeHint };
+  if (!stat.onClick) return { surface: tone.surface, icon: tone.icon, hint: tone.hint };
 
-  return { surface: tone.surface, icon: tone.icon, hint: tone.hint };
+  /* Clicável e não escolhido: o hover pinta o cartão na cor cheia do tom. */
+  return {
+    surface: cn(tone.surface, tone.hoverSurface),
+    icon: cn(tone.icon, tone.hoverIcon),
+    hint: cn(tone.hint, tone.hoverHint),
+  };
 }
 
 function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
@@ -160,17 +192,17 @@ function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
   );
 
   /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido. */
-  const containerClass = cn('rounded-surface p-4 text-left transition-all', styles.surface);
+  const containerClass = cn('rounded-surface p-4 text-left transition-colors', styles.surface);
 
   if (stat.onClick) {
-    /* O clique se anuncia pelo cursor e por um leve levantar — a cor não muda no hover, para o
-       contraste do texto continuar o mesmo em qualquer tom e tema. */
+    /* O clique se anuncia pelo cursor e pelo hover na cor CHEIA do tom — a mesma do escolhido,
+       com o texto de contraste dela (`*-foreground`), sem opacidade solta. */
     return (
       <button
         type="button"
         onClick={stat.onClick}
         aria-pressed={stat.isActive === undefined ? undefined : stat.isActive}
-        className={cn(containerClass, 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl')}
+        className={cn(containerClass, 'group/stat cursor-pointer')}
       >
         {content}
       </button>
