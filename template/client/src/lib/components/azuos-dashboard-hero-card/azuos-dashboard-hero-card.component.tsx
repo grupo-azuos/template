@@ -16,9 +16,8 @@ export type AzuosDashboardHeroCardStat = {
   onClick?: () => void;
   /**
    * O cartão escolhido, quando os cartões trocam o que a tela mostra (uma fila, um filtro). Fica
-   * com o fundo mais fechado e o rótulo e o ícone no amarelo de destaque — a cor vem do FUNDO,
-   * nunca de uma borda. Com `onClick`, vira `aria-pressed`, para o leitor de tela dizer qual está
-   * ligado.
+   * com o fundo na cor cheia do tom — a cor vem do FUNDO, nunca de uma borda. Com `onClick`, vira
+   * `aria-pressed`, para o leitor de tela dizer qual está ligado.
    */
   isActive?: boolean;
 };
@@ -52,106 +51,126 @@ export type AzuosDashboardHeroCardProps = {
   };
 };
 
-const STAT_TONE_STYLES: Record<
-  AzuosDashboardHeroCardStatTone,
-  {
-    value: string;
-    icon: string;
-    label: string;
-  }
-> = {
+type StatToneStyle = {
+  /** Fundo sólido do cartão parado, com o texto no tom (como o `AzuosStatCard` da tela Empresas). */
+  surface: string;
+  /** O escolhido: o fundo na cor CHEIA do tom, com o texto de contraste dela nos dois temas. */
+  active: string;
+  icon: string;
+  activeIcon: string;
+  hint: string;
+  activeHint: string;
+};
+
+/*
+ * A cor de cada cartão vem do FUNDO — nunca de borda. Nos tons claros (`*-soft`) a dica fica no
+ * texto principal um pouco apagado; nos escuros, no claro de sempre. Selecionado usa o
+ * `*-foreground` do tom, e não um branco fixo: no tema escuro a cor cheia é clara e pede texto
+ * escuro (`lib/theme/tokens.css`).
+ */
+const STAT_TONE_STYLES: Record<AzuosDashboardHeroCardStatTone, StatToneStyle> = {
   default: {
-    value: 'text-on-dark',
-    icon: 'text-on-dark/80',
-    label: 'text-on-dark/80',
+    surface: 'bg-muted text-foreground',
+    active: 'bg-foreground text-background',
+    icon: 'bg-foreground text-background',
+    activeIcon: 'bg-background text-foreground',
+    hint: 'text-foreground/70',
+    activeHint: 'text-background/80',
   },
   danger: {
-    value: 'text-on-dark',
-    icon: 'text-on-dark/80',
-    label: 'text-on-dark/80',
+    surface: 'bg-destructive-soft text-destructive',
+    active: 'bg-destructive text-destructive-foreground',
+    icon: 'bg-destructive text-destructive-foreground',
+    activeIcon: 'bg-destructive-foreground text-destructive',
+    hint: 'text-foreground/70',
+    activeHint: 'text-destructive-foreground/80',
   },
   warning: {
-    value: 'text-accent-hero',
-    icon: 'text-accent-hero',
-    label: 'text-accent-hero',
+    surface: 'bg-warning-soft text-warning',
+    active: 'bg-warning text-warning-foreground',
+    icon: 'bg-warning text-warning-foreground',
+    activeIcon: 'bg-warning-foreground text-warning',
+    hint: 'text-foreground/70',
+    activeHint: 'text-warning-foreground/80',
   },
   info: {
-    value: 'text-on-dark',
-    icon: 'text-on-dark/80',
-    label: 'text-on-dark/80',
+    surface: 'bg-info-soft text-info',
+    active: 'bg-info text-info-foreground',
+    icon: 'bg-info text-info-foreground',
+    activeIcon: 'bg-info-foreground text-info',
+    hint: 'text-foreground/70',
+    activeHint: 'text-info-foreground/80',
   },
   success: {
-    value: 'text-on-dark',
-    icon: 'text-on-dark/80',
-    label: 'text-on-dark/80',
+    surface: 'bg-success-soft text-success',
+    active: 'bg-success text-success-foreground',
+    icon: 'bg-success text-success-foreground',
+    activeIcon: 'bg-success-foreground text-success',
+    hint: 'text-foreground/70',
+    activeHint: 'text-success-foreground/80',
   },
+  /* O azul da marca já é escuro: o cartão escolhido CLAREIA um degrau (o 600), porque o 900 é o
+     fundo do próprio hero e o cartão sumiria nele. */
   brand: {
-    value: 'text-on-dark',
-    icon: 'text-on-dark/80',
-    label: 'text-on-dark',
+    surface: 'bg-brand-blue-800 text-on-dark',
+    active: 'bg-brand-blue-600 text-on-dark',
+    icon: 'bg-brand-blue-900 text-accent-hero',
+    activeIcon: 'bg-brand-blue-900 text-accent-hero',
+    hint: 'text-on-dark/80',
+    activeHint: 'text-on-dark/80',
   },
 };
 
-/** O escolhido troca rótulo e ícone pelo amarelo de destaque; o valor segue o tom. */
-const ACTIVE_STYLES = { icon: 'text-accent-hero', label: 'text-accent-hero' } as const;
-
 function resolveStatStyles(stat: AzuosDashboardHeroCardStat) {
-  const styles = STAT_TONE_STYLES[stat.tone ?? 'default'] ?? STAT_TONE_STYLES.default;
-  if (!stat.isActive) return styles;
+  const tone = STAT_TONE_STYLES[stat.tone ?? 'default'] ?? STAT_TONE_STYLES.default;
+  if (stat.isActive) return { surface: tone.active, icon: tone.activeIcon, hint: tone.activeHint };
 
-  return { ...styles, ...ACTIVE_STYLES };
+  return { surface: tone.surface, icon: tone.icon, hint: tone.hint };
 }
 
 function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
   const styles = resolveStatStyles(stat);
   const Icon = stat.icon;
 
+  /* Rótulo e valor herdam a cor do cartão (`text-current`): o tom vem de um lugar só. */
   const content = (
     <>
       <div className="flex items-center gap-3">
         {Icon ? (
           <span
             className={cn(
-              'rounded-chip bg-brand-blue-900 inline-flex size-10 shrink-0 items-center justify-center',
+              'rounded-chip inline-flex size-10 shrink-0 items-center justify-center',
               styles.icon,
             )}
           >
             <Icon size={22} className="block size-5.5 shrink-0 stroke-[1.8]" aria-hidden="true" />
           </span>
         ) : null}
-        <span
-          className={cn('text-xs leading-none font-bold tracking-wider uppercase', styles.label)}
-        >
+        <span className="text-xs leading-none font-bold tracking-wider uppercase">
           {stat.label}
         </span>
       </div>
 
-      <strong className={cn('mt-2.5 block text-3xl font-bold tabular-nums', styles.value)}>
-        {stat.value}
-      </strong>
+      <strong className="mt-2.5 block text-3xl font-bold tabular-nums">{stat.value}</strong>
 
-      {stat.hint ? <span className="text-on-dark/80 mt-1 block text-xs">{stat.hint}</span> : null}
+      {stat.hint ? (
+        <span className={cn('mt-1 block text-xs', styles.hint)}>{stat.hint}</span>
+      ) : null}
     </>
   );
 
-  /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido. O escolhido
-     tem o fundo mais fechado, e o texto continua o claro de sempre — legível em qualquer estado. */
-  const containerClass = cn(
-    'rounded-surface p-4 text-left transition-colors',
-    stat.isActive ? 'bg-brand-blue-900' : 'bg-brand-blue-800',
-  );
+  /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido. */
+  const containerClass = cn('rounded-surface p-4 text-left transition-all', styles.surface);
 
   if (stat.onClick) {
+    /* O clique se anuncia pelo cursor e por um leve levantar — a cor não muda no hover, para o
+       contraste do texto continuar o mesmo em qualquer tom e tema. */
     return (
       <button
         type="button"
         onClick={stat.onClick}
         aria-pressed={stat.isActive === undefined ? undefined : stat.isActive}
-        className={cn(
-          containerClass,
-          'cursor-pointer',
-          stat.isActive ? 'hover:bg-brand-blue-900' : 'hover:bg-brand-blue-700',
-        )}
+        className={cn(containerClass, 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl')}
       >
         {content}
       </button>

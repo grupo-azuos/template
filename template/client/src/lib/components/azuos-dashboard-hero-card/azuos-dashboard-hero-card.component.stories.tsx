@@ -63,7 +63,7 @@ export const Default: Story = {
           label: 'Novas Empresas',
           value: 578,
           hint: 'Aguardando sua análise',
-          tone: 'default',
+          tone: 'success',
           icon: BadgePlus,
         },
         {
@@ -161,8 +161,8 @@ export const IdeaWithChildren: Story = {
 };
 
 /**
- * Cartões que trocam a fila da tela: o escolhido (`isActive`) tem o fundo mais fechado e o rótulo
- * no amarelo de destaque. Sem borda — a cor vem do fundo.
+ * Cartões que trocam a fila da tela: cada tom dá o fundo sólido do cartão, e o escolhido
+ * (`isActive`) fica com o fundo na cor cheia do tom. Sem borda — a cor vem do fundo.
  */
 export const WithActiveStat: Story = {
   args: {
@@ -197,6 +197,53 @@ export const WithActiveStat: Story = {
           hint: 'Alvarás sem dono atribuído',
           tone: 'default',
           icon: UserX,
+          isActive: false,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Revisões Pendentes',
+          value: 904,
+          hint: 'Aguardando checklist',
+          tone: 'brand',
+          icon: ClipboardCheck,
+          isActive: false,
+          onClick: () => undefined,
+        },
+      ],
+    },
+  },
+};
+
+/** O escolhido no azul da marca clareia um degrau, para não sumir no fundo do próprio hero. */
+export const WithActiveBrandStat: Story = {
+  args: {
+    data: {
+      title: 'Revisões da semana',
+      zuzu: { pose: 'idea', size: 120 },
+      stats: [
+        {
+          label: 'Revisões Pendentes',
+          value: 904,
+          hint: 'Aguardando checklist',
+          tone: 'brand',
+          icon: ClipboardCheck,
+          isActive: true,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Concluídas',
+          value: 37,
+          hint: 'Nesta semana',
+          tone: 'success',
+          icon: CheckCircle2,
+          isActive: false,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Sem Próxima Atualização',
+          value: 4,
+          tone: 'info',
+          icon: TriangleAlert,
           isActive: false,
           onClick: () => undefined,
         },
