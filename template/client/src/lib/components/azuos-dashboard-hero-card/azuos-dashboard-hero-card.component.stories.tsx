@@ -159,3 +159,47 @@ export const IdeaWithChildren: Story = {
     },
   },
 };
+
+/**
+ * Cartões que trocam a fila da tela: o escolhido (`isActive`) tem o fundo mais fechado e o rótulo
+ * no amarelo de destaque. Sem borda — a cor vem do fundo.
+ */
+export const WithActiveStat: Story = {
+  args: {
+    data: {
+      eyebrow: 'Azuos Alerta',
+      eyebrowIcon: Megaphone,
+      title: 'Bom dia! Você tem 12 alvarás para olhar hoje.',
+      zuzu: { pose: 'alert', size: 120 },
+      stats: [
+        {
+          label: 'Alvarás Vencidos',
+          value: 12,
+          hint: 'Regularização imediata',
+          tone: 'danger',
+          icon: Siren,
+          isActive: true,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Pendências Próximas',
+          value: 6,
+          hint: 'Vencem nos próximos 30 dias',
+          tone: 'warning',
+          icon: AlarmClock,
+          isActive: false,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Sem Responsável',
+          value: 0,
+          hint: 'Alvarás sem dono atribuído',
+          tone: 'default',
+          icon: UserX,
+          isActive: false,
+          onClick: () => undefined,
+        },
+      ],
+    },
+  },
+};

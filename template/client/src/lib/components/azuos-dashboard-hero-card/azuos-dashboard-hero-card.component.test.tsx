@@ -131,4 +131,43 @@ describe('AzuosDashboardHeroCard', () => {
     expect(screen.getByText('hoje')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /No prazo/ })).not.toBeInTheDocument();
   });
+
+  // feliz
+  it('marks the chosen stat as pressed, with the darker fill and the highlight label', () => {
+    render(
+      <AzuosDashboardHeroCard
+        data={{
+          title: 'Resumo do Dia',
+          stats: [
+            { label: 'Vencidos', value: 3, icon: Siren, isActive: true, onClick: vi.fn() },
+            { label: 'Próximos', value: 1, isActive: false, onClick: vi.fn() },
+          ],
+        }}
+      />,
+    );
+
+    const chosen = screen.getByRole('button', { name: /Vencidos/ });
+    expect(chosen).toHaveAttribute('aria-pressed', 'true');
+    expect(chosen).toHaveClass('bg-brand-blue-900');
+    expect(chosen.className).not.toMatch(/border/);
+    expect(screen.getByText('Vencidos')).toHaveClass('text-accent-hero');
+
+    const other = screen.getByRole('button', { name: /Próximos/ });
+    expect(other).toHaveAttribute('aria-pressed', 'false');
+    expect(other).toHaveClass('bg-brand-blue-800');
+  });
+
+  // triste
+  it('says nothing about pressed when the stat is not a toggle', () => {
+    render(
+      <AzuosDashboardHeroCard
+        data={{
+          title: 'Resumo do Dia',
+          stats: [{ label: 'Vencidos', value: 3, onClick: vi.fn() }],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /Vencidos/ })).not.toHaveAttribute('aria-pressed');
+  });
 });

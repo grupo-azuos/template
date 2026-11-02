@@ -14,6 +14,13 @@ export type AzuosDashboardHeroCardStat = {
   tone?: AzuosDashboardHeroCardStatTone;
   icon?: LucideIcon;
   onClick?: () => void;
+  /**
+   * O cartão escolhido, quando os cartões trocam o que a tela mostra (uma fila, um filtro). Fica
+   * com o fundo mais fechado e o rótulo e o ícone no amarelo de destaque — a cor vem do FUNDO,
+   * nunca de uma borda. Com `onClick`, vira `aria-pressed`, para o leitor de tela dizer qual está
+   * ligado.
+   */
+  isActive?: boolean;
 };
 
 export type AzuosDashboardHeroCardProps = {
@@ -79,9 +86,18 @@ const STAT_TONE_STYLES: Record<
   },
 };
 
+/** O escolhido troca rótulo e ícone pelo amarelo de destaque; o valor segue o tom. */
+const ACTIVE_STYLES = { icon: 'text-accent-hero', label: 'text-accent-hero' } as const;
+
+function resolveStatStyles(stat: AzuosDashboardHeroCardStat) {
+  const styles = STAT_TONE_STYLES[stat.tone ?? 'default'] ?? STAT_TONE_STYLES.default;
+  if (!stat.isActive) return styles;
+
+  return { ...styles, ...ACTIVE_STYLES };
+}
+
 function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
-  const tone = stat.tone ?? 'default';
-  const styles = STAT_TONE_STYLES[tone] ?? STAT_TONE_STYLES.default;
+  const styles = resolveStatStyles(stat);
   const Icon = stat.icon;
 
   const content = (
@@ -112,15 +128,24 @@ function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
     </>
   );
 
-  /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido */
-  const containerClass = 'rounded-surface bg-brand-blue-800 p-4 text-left transition-colors';
+  /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido. O escolhido
+     tem o fundo mais fechado, e o texto continua o claro de sempre — legível em qualquer estado. */
+  const containerClass = cn(
+    'rounded-surface p-4 text-left transition-colors',
+    stat.isActive ? 'bg-brand-blue-900' : 'bg-brand-blue-800',
+  );
 
   if (stat.onClick) {
     return (
       <button
         type="button"
         onClick={stat.onClick}
-        className={cn(containerClass, 'hover:bg-brand-blue-700 cursor-pointer')}
+        aria-pressed={stat.isActive === undefined ? undefined : stat.isActive}
+        className={cn(
+          containerClass,
+          'cursor-pointer',
+          stat.isActive ? 'hover:bg-brand-blue-900' : 'hover:bg-brand-blue-700',
+        )}
       >
         {content}
       </button>
