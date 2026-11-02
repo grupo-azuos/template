@@ -29,7 +29,7 @@ export function AzuosSectionTitle({ data, ui, adornment }: AzuosSectionTitleProp
       <span
         className={cn(
           'rounded-chip flex size-9 shrink-0 items-center justify-center',
-          isDanger ? cardToneClasses('danger').chip : cardToneClasses('brand').chip,
+          isDanger ? cardToneClasses('danger').dot : cardToneClasses('brand').dot,
         )}
       >
         <Icon className="size-4" aria-hidden />

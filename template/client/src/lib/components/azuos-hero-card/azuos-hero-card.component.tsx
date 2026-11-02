@@ -36,13 +36,12 @@ export type AzuosHeroCardProps = {
 };
 
 /**
- * O tom do card vem da paleta única de card (`lib/utils/card-tone.util.ts`): fundo pastel, texto
- * escuro do mesmo matiz, hover mais claro, pastilha no pastel médio. `brand` é o índigo e `accent`
- * o amarelo da paleta. Sem cor cheia e sem opacidade, igual nos dois temas.
+ * O card fica na superfície da marca; o tom é sotaque (`lib/utils/card-tone.util.ts`): o ícone
+ * grande no canto e a pastilha. `accent` usa o âmbar. Sem fundo colorido, sem opacidade.
  */
 const TONE_HUE: Record<AzuosHeroCardTone, AzuosCardTone> = {
   brand: 'brand',
-  accent: 'yellow',
+  accent: 'amber',
   success: 'success',
   warning: 'warning',
   danger: 'danger',
@@ -54,11 +53,11 @@ function stylesOf(tone: AzuosHeroCardTone) {
   const classes = cardToneClasses(TONE_HUE[tone] ?? 'brand');
 
   return {
-    container: cn(classes.surface, classes.hover),
+    container: 'bg-card text-card-foreground hover:shadow-xl',
     title: '',
-    description: '',
-    badge: classes.chip,
-    iconColor: classes.mark,
+    description: 'text-muted-foreground',
+    badge: classes.dot,
+    iconColor: classes.text,
   };
 }
 

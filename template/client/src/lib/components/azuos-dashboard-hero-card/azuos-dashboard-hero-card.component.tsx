@@ -1,7 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import { type AzuosCardTone, cardToneClasses } from '../../utils/card-tone.util';
+import { type AzuosCardTone } from '../../utils/card-tone.util';
+import { AzuosStatCard } from '../azuos-stat-card/azuos-stat-card.component';
 import { cn } from '../../utils/cn.util';
 import { AzuosZuzu, type AzuosZuzuPose } from '../azuos-zuzu/azuos-zuzu.component';
 
@@ -52,69 +53,17 @@ export type AzuosDashboardHeroCardProps = {
   };
 };
 
-/*
- * A cor de cada cartão vem da paleta única de card (`lib/utils/card-tone.util.ts`): pastel do
- * matiz parado, mais CLARO e com sombra no hover, pastel médio quando escolhido. Igual nos dois
- * temas, sem opacidade e sem cor cheia. A bolinha do ícone é o pastel médio; no escolhido, inverte.
- */
-function resolveStatStyles(stat: AzuosDashboardHeroCardStat) {
-  const tone = cardToneClasses(stat.tone ?? 'default');
-  if (stat.isActive) return { surface: cn(tone.selected, 'shadow-xl'), icon: tone.chipSelected };
-  if (!stat.onClick) return { surface: tone.surface, icon: tone.chip };
-
-  return {
-    surface: cn(tone.surface, tone.hover, 'hover:-translate-y-0.5 hover:shadow-xl'),
-    icon: tone.chip,
-  };
-}
-
+/** Cada indicador do hero é um card de painel (`AzuosStatCard`): superfície da marca, sotaque
+    na bolinha e no número, escolhido no azul claro da marca. */
 function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
-  const styles = resolveStatStyles(stat);
-  const Icon = stat.icon;
-
-  /* Rótulo e valor herdam a cor do cartão (`text-current`): o tom vem de um lugar só. */
-  const content = (
-    <>
-      <div className="flex items-center gap-3">
-        {Icon ? (
-          <span
-            className={cn(
-              'rounded-chip inline-flex size-10 shrink-0 items-center justify-center',
-              styles.icon,
-            )}
-          >
-            <Icon size={22} className="block size-5.5 shrink-0 stroke-[1.8]" aria-hidden="true" />
-          </span>
-        ) : null}
-        <span className="text-xs leading-none font-bold tracking-wider uppercase">
-          {stat.label}
-        </span>
-      </div>
-
-      <strong className="mt-2.5 block text-3xl font-bold tabular-nums">{stat.value}</strong>
-
-      {stat.hint ? <span className="mt-1 block text-xs font-medium">{stat.hint}</span> : null}
-    </>
+  return (
+    <AzuosStatCard
+      data={{ label: stat.label, value: stat.value, hint: stat.hint }}
+      ui={{ tone: stat.tone, icon: stat.icon, className: 'p-4 text-left' }}
+      state={{ isSelected: stat.isActive }}
+      actions={stat.onClick ? { onClick: stat.onClick } : undefined}
+    />
   );
-
-  /* Cartões coloridos nunca usam borda no padrão Azuos: a cor vem do fundo sólido. */
-  const containerClass = cn('rounded-surface p-4 text-left transition-all', styles.surface);
-
-  if (stat.onClick) {
-    /* O clique se anuncia pelo cursor e pelo hover mais claro, que sobe e ganha sombra. */
-    return (
-      <button
-        type="button"
-        onClick={stat.onClick}
-        aria-pressed={stat.isActive === undefined ? undefined : stat.isActive}
-        className={cn(containerClass, 'cursor-pointer')}
-      >
-        {content}
-      </button>
-    );
-  }
-
-  return <div className={containerClass}>{content}</div>;
 }
 
 function DashboardEyebrowHeader({
@@ -130,10 +79,10 @@ function DashboardEyebrowHeader({
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
-      {Icon ? <Icon size={18} className="text-hero-accent shrink-0" aria-hidden="true" /> : null}
-      {eyebrow ? <span>{eyebrow}</span> : null}
+      {Icon ? <Icon size={18} className="text-accent-hero shrink-0" aria-hidden="true" /> : null}
+      {eyebrow ? <span className="text-on-dark">{eyebrow}</span> : null}
       {timestamp ? (
-        <span className="text-hero-muted font-normal tracking-normal normal-case">
+        <span className="text-on-dark/80 font-normal tracking-normal normal-case">
           — {timestamp}
         </span>
       ) : null}
@@ -148,7 +97,7 @@ function HighlightedTitle({ data }: { data: { text: string; highlight?: string |
   return (
     <>
       {data.text.slice(0, at)}
-      <span className="text-hero-accent">{data.highlight}</span>
+      <span className="text-accent-hero">{data.highlight}</span>
       {data.text.slice(at + data.highlight.length)}
     </>
   );
@@ -165,11 +114,11 @@ function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data']
       </div>
 
       <div className="flex min-h-[120px] min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left">
-        <h2 className="text-xl leading-snug font-bold tracking-tight sm:text-2xl">
+        <h2 className="text-on-dark text-xl leading-snug font-bold tracking-tight sm:text-2xl">
           <HighlightedTitle data={{ text: data.title, highlight: data.titleHighlight }} />
         </h2>
         {data.description ? (
-          <p className="text-hero-muted text-sm leading-relaxed font-normal sm:text-base">
+          <p className="text-on-dark/80 text-sm leading-relaxed font-normal sm:text-base">
             {data.description}
           </p>
         ) : null}
@@ -204,7 +153,7 @@ export function AzuosDashboardHeroCard({ data, ui }: AzuosDashboardHeroCardProps
       aria-label={data.eyebrow ?? data.title}
       data-slot="azuos-dashboard-hero-card"
       className={cn(
-        'rounded-surface shadow-card bg-hero-surface text-hero-foreground relative flex w-full flex-col gap-6 overflow-hidden p-6 sm:p-7',
+        'rounded-surface shadow-card bg-brand-blue-900 text-on-dark relative flex w-full flex-col gap-6 overflow-hidden p-6 sm:p-7',
         ui?.className,
       )}
     >

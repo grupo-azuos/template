@@ -33,15 +33,14 @@ export type AzuosStatusBadgeProps = {
   };
 };
 
-/* O selo usa a mesma paleta dos cards (`lib/utils/card-tone.util.ts`): pastel e texto escuro do
-   matiz, iguais nos dois temas — no escuro, os `-soft` antigos viravam marrom e bordô. */
+/* O selo segue os cards: fundo neutro, texto no sotaque do tom (`lib/utils/card-tone.util.ts`). */
 const TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
-  neutral: cardToneClasses('neutral').surface,
-  info: cardToneClasses('info').surface,
-  success: cardToneClasses('success').surface,
-  warning: cardToneClasses('warning').surface,
-  danger: cardToneClasses('danger').surface,
-  brand: cardToneClasses('brand').surface,
+  neutral: cn('bg-muted', cardToneClasses('neutral').text),
+  info: cn('bg-muted', cardToneClasses('info').text),
+  success: cn('bg-muted', cardToneClasses('success').text),
+  warning: cn('bg-muted', cardToneClasses('warning').text),
+  danger: cn('bg-muted', cardToneClasses('danger').text),
+  brand: cn('bg-muted', cardToneClasses('brand').text),
 };
 
 export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
@@ -70,7 +69,7 @@ export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
 
 /** A cor escolhida vence o tom: vira o matiz mais próximo da paleta, sem mistura com opacidade. */
 function resolveToneClass(ui: AzuosStatusBadgeProps['ui']): string {
-  if (ui?.color) return cardToneClasses(cardHueFromHex(ui.color)).surface;
+  if (ui?.color) return cn('bg-muted', cardToneClasses(cardHueFromHex(ui.color)).text);
 
   return TONE_CLASSES[ui?.tone ?? 'neutral'];
 }

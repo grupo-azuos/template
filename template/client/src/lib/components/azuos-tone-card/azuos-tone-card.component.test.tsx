@@ -6,7 +6,7 @@ import { AzuosToneCard } from './azuos-tone-card.component';
 
 describe('AzuosToneCard', () => {
   // feliz
-  it('paints a static card with the pastel of its hue, never a full colour or a coloured border', () => {
+  it('sits on the brand surface whatever the tone, never a coloured background', () => {
     render(
       <AzuosToneCard data={{ label: 'Vencidos' }} ui={{ tone: 'danger' }}>
         3
@@ -14,73 +14,49 @@ describe('AzuosToneCard', () => {
     );
 
     const card = screen.getByRole('group', { name: 'Vencidos' });
-    expect(card).toHaveClass('bg-tone-red-surface', 'text-tone-red-text');
-    expect(card.className).not.toMatch(/border-|-fill|\/\d/);
-    expect(card).not.toHaveClass('hover:bg-tone-red-hover');
+    expect(card).toHaveClass('bg-card');
+    expect(card.className).not.toMatch(/bg-hue|border-(?!border)|-fill/);
   });
 
-  it('lightens an interactive card on hover, instead of darkening it', () => {
-    render(
+  it('colours the hover wash with its tone when interactive', () => {
+    const { container } = render(
       <AzuosToneCard data={{ label: 'Em dia' }} ui={{ tone: 'success', mode: 'interactive' }}>
         8
       </AzuosToneCard>,
     );
 
-    expect(screen.getByRole('group', { name: 'Em dia' })).toHaveClass(
-      'bg-tone-emerald-surface',
-      'hover:bg-tone-emerald-hover',
-      'hover:shadow-xl',
-    );
-  });
-
-  it('accepts a hue by name, as well as a state name', () => {
-    render(
-      <AzuosToneCard data={{ label: 'Revisões' }} ui={{ tone: 'violet' }}>
-        6
-      </AzuosToneCard>,
-    );
-
-    expect(screen.getByRole('group', { name: 'Revisões' })).toHaveClass('bg-tone-violet-surface');
+    const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
+    expect(wash.style.backgroundColor).toContain('--hue-green');
   });
 
   it('turns the whole card into a button when it is clickable', async () => {
     const onClick = vi.fn();
     render(
-      <AzuosToneCard
-        data={{ label: 'Pendentes' }}
-        ui={{ tone: 'warning', mode: 'interactive' }}
-        actions={{ onClick }}
-      >
+      <AzuosToneCard data={{ label: 'Pendentes' }} actions={{ onClick }}>
         2
       </AzuosToneCard>,
     );
 
     await userEvent.click(screen.getByRole('button', { name: 'Pendentes' }));
-
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it('marks the selected card with the middle pastel of its hue', () => {
+  it('marks the selected card in the light blue of the brand', () => {
     render(
-      <AzuosToneCard
-        data={{ label: 'Todos' }}
-        ui={{ tone: 'brand', mode: 'interactive' }}
-        state={{ isSelected: true }}
-      >
+      <AzuosToneCard data={{ label: 'Todos' }} ui={{ tone: 'brand' }} state={{ isSelected: true }}>
         12
       </AzuosToneCard>,
     );
 
-    const card = screen.getByRole('group', { name: 'Todos' });
-    expect(card).toHaveClass('bg-tone-indigo-chip', 'text-tone-indigo-text');
-    expect(card).toHaveAttribute('data-selected', 'true');
+    expect(screen.getByRole('group', { name: 'Todos' })).toHaveClass('bg-card-selected');
   });
 
   // triste
-  it('falls back to the gray hue without a tone, and is not a button without an action', () => {
-    render(<AzuosToneCard data={{ label: 'Neutro' }}>x</AzuosToneCard>);
+  it('keeps a neutral wash on a static card, and is not a button without an action', () => {
+    const { container } = render(<AzuosToneCard data={{ label: 'Neutro' }}>x</AzuosToneCard>);
 
-    expect(screen.getByRole('group', { name: 'Neutro' })).toHaveClass('bg-tone-gray-surface');
+    const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
+    expect(wash.style.backgroundColor).toContain('--foreground');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

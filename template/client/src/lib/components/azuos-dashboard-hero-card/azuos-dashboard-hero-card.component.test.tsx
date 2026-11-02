@@ -46,7 +46,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(zuzuSlot?.parentElement?.querySelector('.rounded-full')).toBeNull();
   });
 
-  it('renderiza título, descrição e badge no fundo do hero, que acompanha o tema', () => {
+  it('renderiza título, descrição e badge com alto contraste em fundo escuro', () => {
     const { container } = render(
       <AzuosDashboardHeroCard
         data={{
@@ -62,7 +62,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(screen.getByText('Parabéns!')).toBeInTheDocument();
 
     const root = container.querySelector('[data-slot="azuos-dashboard-hero-card"]');
-    expect(root).toHaveClass('bg-hero-surface', 'text-hero-foreground');
+    expect(root).toHaveClass('bg-brand-blue-900', 'text-on-dark');
   });
 
   it('renderiza grade de indicadores (stats) com cores e valores', () => {
@@ -132,165 +132,54 @@ describe('AzuosDashboardHeroCard', () => {
   });
 
   // feliz
-  it('marks the chosen stat as pressed, with the middle pastel of its hue and the icon inverted', () => {
+  it('marks the chosen stat as pressed, in the light blue of the brand', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
           title: 'Resumo do Dia',
           stats: [
-            {
-              label: 'Vencidos',
-              value: 3,
-              icon: Siren,
-              tone: 'danger',
-              isActive: true,
-              onClick: vi.fn(),
-            },
+            { label: 'Vencidos', value: 3, icon: Siren, tone: 'danger', isActive: true, onClick: vi.fn() },
             { label: 'Próximos', value: 1, tone: 'warning', isActive: false, onClick: vi.fn() },
           ],
         }}
       />,
     );
 
-    const chosen = screen.getByRole('button', { name: /Vencidos/ });
-    expect(chosen).toHaveAttribute('aria-pressed', 'true');
-    expect(chosen).toHaveClass('bg-tone-red-chip', 'text-tone-red-text');
-    expect(chosen.className).not.toMatch(/border|-fill/);
-    expect(chosen.querySelector('svg')?.parentElement).toHaveClass(
-      'bg-tone-red-text',
-      'text-tone-red-surface',
-    );
-
-    const other = screen.getByRole('button', { name: /Próximos/ });
-    expect(other).toHaveAttribute('aria-pressed', 'false');
-    expect(other).toHaveClass('bg-tone-amber-surface', 'text-tone-amber-text');
+    expect(screen.getByRole('button', { name: /Vencidos/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('group', { name: /Vencidos/ })).toHaveClass('bg-card-selected');
+    expect(screen.getByRole('button', { name: /Próximos/ })).toHaveAttribute('aria-pressed', 'false');
   });
 
   // feliz
-  it('paints each stat with the pastel of its hue, never a border or opacity', () => {
+  it('shows each stat as a dashboard card, with the number in the accent of its tone', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
           title: 'Resumo do Dia',
           stats: [
-            { label: 'Perigo', value: 1, tone: 'danger', hint: 'dica clara' },
-            { label: 'Atenção', value: 2, tone: 'warning' },
-            { label: 'Aviso', value: 3, tone: 'info' },
-            { label: 'Certo', value: 4, tone: 'success' },
-            { label: 'Marca', value: 5, tone: 'brand', hint: 'dica escura' },
+            { label: 'Perigo', value: 1, tone: 'danger' },
+            { label: 'Revisão', value: 7, tone: 'plum' },
             { label: 'Neutro', value: 6 },
-            { label: 'Revisão', value: 7, tone: 'violet' },
           ],
         }}
       />,
     );
 
-    const cardOf = (label: string) => screen.getByText(label).closest('div.rounded-surface');
-    expect(cardOf('Perigo')).toHaveClass('bg-tone-red-surface', 'text-tone-red-text');
-    expect(cardOf('Atenção')).toHaveClass('bg-tone-amber-surface', 'text-tone-amber-text');
-    expect(cardOf('Aviso')).toHaveClass('bg-tone-sky-surface', 'text-tone-sky-text');
-    expect(cardOf('Certo')).toHaveClass('bg-tone-emerald-surface', 'text-tone-emerald-text');
-    expect(cardOf('Marca')).toHaveClass('bg-tone-indigo-surface', 'text-tone-indigo-text');
-    expect(cardOf('Neutro')).toHaveClass('bg-tone-gray-surface', 'text-tone-gray-text');
-    expect(cardOf('Revisão')).toHaveClass('bg-tone-violet-surface', 'text-tone-violet-text');
-    for (const label of ['Perigo', 'Atenção', 'Aviso', 'Certo', 'Marca', 'Neutro', 'Revisão']) {
-      expect(cardOf(label)?.className).not.toMatch(/border|\/\d/);
-    }
-  });
-
-  // feliz
-  it('lightens a clickable stat on hover, lifting it with a shadow, never darkening it', () => {
-    render(
-      <AzuosDashboardHeroCard
-        data={{
-          title: 'Resumo do Dia',
-          stats: [
-            {
-              label: 'Vencidos',
-              value: 3,
-              tone: 'danger',
-              icon: Siren,
-              hint: 'ver',
-              onClick: vi.fn(),
-            },
-            { label: 'Revisões', value: 2, tone: 'brand', onClick: vi.fn() },
-          ],
-        }}
-      />,
-    );
-
-    const danger = screen.getByRole('button', { name: /Vencidos/ });
-    expect(danger).toHaveClass('cursor-pointer', 'hover:bg-tone-red-hover', 'hover:shadow-xl');
-    expect(screen.getByRole('button', { name: /Revisões/ })).toHaveClass(
-      'hover:bg-tone-indigo-hover',
-    );
-  });
-
-  // feliz
-  it('takes the chosen brand stat to the middle pastel of its hue', () => {
-    render(
-      <AzuosDashboardHeroCard
-        data={{
-          title: 'Revisões',
-          stats: [
-            { label: 'Pendentes', value: 2, tone: 'brand', isActive: true, onClick: vi.fn() },
-          ],
-        }}
-      />,
-    );
-
-    expect(screen.getByRole('button', { name: /Pendentes/ })).toHaveClass(
-      'bg-tone-indigo-chip',
-      'text-tone-indigo-text',
-    );
+    expect(screen.getByRole('group', { name: 'Perigo' })).toHaveClass('bg-card');
+    expect(screen.getByText('1')).toHaveClass('text-hue-red');
+    expect(screen.getByText('7')).toHaveClass('text-hue-plum');
+    expect(screen.getByText('6')).toHaveClass('text-hue-slate');
   });
 
   // triste
-  it('keeps a stat that only shows a number free of hover color', () => {
+  it('keeps a stat that only shows a number free of a button', () => {
     render(
       <AzuosDashboardHeroCard
         data={{ title: 'Resumo do Dia', stats: [{ label: 'Total', value: 9, tone: 'success' }] }}
       />,
     );
 
-    const card = screen.getByText('Total').closest('div.rounded-surface');
-    expect(card?.className).not.toMatch(/hover:/);
-  });
-
-  // triste
-  it('falls back to the gray hue when the tone is unknown', () => {
-    render(
-      <AzuosDashboardHeroCard
-        data={{
-          title: 'Resumo do Dia',
-          stats: [
-            {
-              label: 'Estranho',
-              value: 0,
-              tone: 'unknown' as unknown as 'default',
-            },
-          ],
-        }}
-      />,
-    );
-
-    expect(screen.getByText('Estranho').closest('div.rounded-surface')).toHaveClass(
-      'bg-tone-gray-surface',
-    );
-  });
-
-  // triste
-  it('says nothing about pressed when the stat is not a toggle', () => {
-    render(
-      <AzuosDashboardHeroCard
-        data={{
-          title: 'Resumo do Dia',
-          stats: [{ label: 'Vencidos', value: 3, onClick: vi.fn() }],
-        }}
-      />,
-    );
-
-    expect(screen.getByRole('button', { name: /Vencidos/ })).not.toHaveAttribute('aria-pressed');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   // feliz
@@ -304,7 +193,7 @@ describe('AzuosDashboardHeroCard', () => {
       />,
     );
 
-    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-hero-accent');
+    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-accent-hero');
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
       'Bom dia! Acumulou 3 alvarás vencidos.',
     );
@@ -318,6 +207,6 @@ describe('AzuosDashboardHeroCard', () => {
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toHaveTextContent('Dia tranquilo.');
-    expect(heading.querySelector('.text-hero-accent')).toBeNull();
+    expect(heading.querySelector('.text-accent-hero')).toBeNull();
   });
 });

@@ -21,14 +21,14 @@ describe('AzuosStatusBadge', () => {
       <AzuosStatusBadge data={{ label: 'Concluída' }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-tone-emerald-surface');
-    expect(container.firstElementChild?.className).toContain('text-tone-emerald-text');
+    expect(container.firstElementChild?.className).toContain('bg-muted');
+    expect(container.firstElementChild?.className).toContain('text-hue-green');
   });
 
   it('falls back to neutral when no tone was given, instead of having no color', () => {
     const { container } = render(<AzuosStatusBadge data={{ label: 'A fazer' }} />);
 
-    expect(container.firstElementChild?.className).toContain('bg-tone-gray-surface');
+    expect(container.firstElementChild?.className).toContain('bg-muted');
   });
 
   // triste
@@ -56,7 +56,7 @@ describe('AzuosStatusBadge', () => {
     );
 
     expect(container.firstElementChild?.className).toContain('ml-4');
-    expect(container.firstElementChild?.className).toContain('bg-tone-emerald-surface');
+    expect(container.firstElementChild?.className).toContain('bg-muted');
   });
 
   // feliz
@@ -69,7 +69,7 @@ describe('AzuosStatusBadge', () => {
     );
 
     const badge = container.firstElementChild as HTMLElement;
-    expect(badge.className).toMatch(/bg-tone-[a-z]+-surface/);
+    expect(badge.className).toMatch(/text-hue-[a-z]+/);
     expect(badge.getAttribute('style')).toBeNull();
     expect(badge.querySelector('svg')).not.toBeNull();
   });

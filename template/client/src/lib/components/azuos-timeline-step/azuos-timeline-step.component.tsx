@@ -29,9 +29,9 @@ export type AzuosTimelineStepProps = {
 
 const ICON_TONE_CLASSES = {
   neutral: 'border-border bg-card text-foreground',
-  brand: cardToneClasses('brand').chip,
-  success: cardToneClasses('success').chip,
-  danger: cardToneClasses('danger').chip,
+  brand: cardToneClasses('brand').dot,
+  success: cardToneClasses('success').dot,
+  danger: cardToneClasses('danger').dot,
 } as const;
 
 export function AzuosTimelineStep({ data, ui, children }: AzuosTimelineStepProps) {

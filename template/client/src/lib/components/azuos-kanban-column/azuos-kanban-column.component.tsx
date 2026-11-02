@@ -26,12 +26,12 @@ export type AzuosKanbanColumnProps = {
 
 /** A faixa colorida do cabeçalho — a cor da etapa, como nos selos de situação. */
 const TONE_HEADER: Record<AzuosKanbanColumnTone, string> = {
-  neutral: cardToneClasses('neutral').chip,
-  info: cardToneClasses('info').chip,
-  warning: cardToneClasses('warning').chip,
-  brand: cardToneClasses('brand').chip,
-  success: cardToneClasses('success').chip,
-  danger: cardToneClasses('danger').chip,
+  neutral: cardToneClasses('neutral').dot,
+  info: cardToneClasses('info').dot,
+  warning: cardToneClasses('warning').dot,
+  brand: cardToneClasses('brand').dot,
+  success: cardToneClasses('success').dot,
+  danger: cardToneClasses('danger').dot,
 };
 
 export function AzuosKanbanColumn({ data, ui, actions, children }: AzuosKanbanColumnProps) {

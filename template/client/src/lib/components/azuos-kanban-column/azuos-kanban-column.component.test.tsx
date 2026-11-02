@@ -92,7 +92,7 @@ describe('AzuosKanbanColumn', () => {
     render(<AzuosKanbanColumn data={{ title: 'Erro', count: 1 }} ui={{ tone: 'danger' }} />);
 
     expect(screen.getByRole('heading', { name: 'Erro' }).parentElement?.className).toContain(
-      'bg-tone-red-chip',
+      'bg-hue-red',
     );
   });
 });

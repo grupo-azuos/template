@@ -1,6 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
-import { cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -44,7 +43,7 @@ export class AzuosAppErrorBoundary extends Component<
         <div
           role="alert"
           className={cn(
-            cardToneClasses('danger').surface,
+            'bg-card text-destructive border border-border',
             'rounded-surface w-full max-w-lg p-6 shadow-xl',
           )}
         >

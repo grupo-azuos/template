@@ -49,7 +49,7 @@ describe('AzuosSectionTitle', () => {
     const heading = screen.getByRole('heading', { name: 'Excluir conta' });
     expect(heading.className).toContain('text-destructive');
     expect(heading.parentElement?.previousElementSibling?.className).toContain(
-      'bg-tone-red-chip',
+      'bg-hue-red',
     );
   });
 });
