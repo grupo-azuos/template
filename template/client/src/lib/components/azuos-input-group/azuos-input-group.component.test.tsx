@@ -86,12 +86,17 @@ describe('AzuosInputGroup', () => {
     );
     const group = () => container.querySelector('[data-slot="input-group"]');
 
-    expect(group()).toHaveClass('bg-muted');
+    expect(group()).toHaveClass('bg-muted', 'dark:bg-muted');
     expect(group()).not.toHaveClass('bg-destructive-soft');
+    /* O véu claro do shadcn no escuro deixava o grupo diferente do `AzuosTextField` ao lado. */
+    expect(group()).not.toHaveClass('dark:bg-input/30');
 
     rerender(
-      <AzuosInputGroup data={{ label: 'Meta', name: 'goal', value: '' }} state={{ error: 'Obrigatório' }} />,
+      <AzuosInputGroup
+        data={{ label: 'Meta', name: 'goal', value: '' }}
+        state={{ error: 'Obrigatório' }}
+      />,
     );
-    expect(group()).toHaveClass('bg-destructive-soft');
+    expect(group()).toHaveClass('bg-destructive-soft', 'dark:bg-destructive-soft');
   });
 });

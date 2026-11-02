@@ -100,6 +100,37 @@ describe('AzuosDateField', () => {
     expect(screen.getByText('Data de nascimento')).toHaveClass('sr-only');
   });
 
+  // feliz
+  /* O `ui/input-group` traz `dark:bg-input/30`, que vencia o fundo sólido no tema escuro. */
+  it('keeps the same solid fill as the text field, also in the dark theme', () => {
+    const { container } = render(
+      <AzuosDateField
+        data={{ label: 'Data de nascimento', name: 'birthDate', value: null }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+    const group = container.querySelector('[data-slot="input-group"]');
+
+    expect(group).toHaveClass('bg-muted', 'dark:bg-muted');
+    expect(group).not.toHaveClass('dark:bg-input/30');
+  });
+
+  // triste
+  it('paints the field red, also in the dark theme, when there is an error', () => {
+    const { container } = render(
+      <AzuosDateField
+        data={{ label: 'Data de nascimento', name: 'birthDate', value: null }}
+        state={{ error: 'Obrigatório' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    expect(container.querySelector('[data-slot="input-group"]')).toHaveClass(
+      'bg-destructive-soft',
+      'dark:bg-destructive-soft',
+    );
+  });
+
   // triste
   /* O aviso só vem ao sair do campo: avisar a cada tecla acusaria quem ainda está digitando. */
   it('warns about an incomplete date only when the person leaves the field', () => {

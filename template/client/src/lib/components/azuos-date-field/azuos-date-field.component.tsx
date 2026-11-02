@@ -80,6 +80,16 @@ function resolveCompletedIso(text: string, min?: string, max?: string): string |
   return null;
 }
 
+/**
+ * O fundo do grupo, repetido no escuro de propósito: o `ui/input-group` do shadcn traz
+ * `dark:bg-input/30`, que vence um `bg-muted` solto no tema escuro e deixava este campo mais claro
+ * que o `AzuosTextField` ao lado. Só a mesma variante (`dark:`) derruba a dele.
+ */
+const FILL_CLASS = {
+  normal: 'bg-muted dark:bg-muted',
+  error: 'bg-destructive-soft dark:bg-destructive-soft',
+} as const;
+
 export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps) {
   const inputId = useId();
   const errorId = inputId + '-error';
@@ -137,7 +147,10 @@ export function AzuosDateField({ data, ui, state, actions }: AzuosDateFieldProps
       {/* A régua de medidas (`lib/theme/tokens.css`), como no `AzuosInputGroup`: `px-0!` porque
           quem dá o respiro lateral aqui é o input de dentro e o botão do calendário. */}
       <InputGroup
-        className={cn('control-lg rounded-control px-0!', hasError ? 'bg-destructive-soft' : 'bg-muted')}
+        className={cn(
+          'control-lg rounded-control px-0!',
+          hasError ? FILL_CLASS.error : FILL_CLASS.normal,
+        )}
       >
         <InputGroupInput
           id={inputId}
