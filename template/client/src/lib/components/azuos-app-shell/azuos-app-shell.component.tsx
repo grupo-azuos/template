@@ -101,9 +101,13 @@ export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellP
   const twoColumn = isTwoColumn(data.areas);
 
   return (
+    /* A moldura CORTA o que passa da borda, mas não pode rolar: com `overflow-hidden` o navegador
+       ainda a rola quando uma ação leva a tela até um ponto (âncora `#…`, foco num campo lá embaixo,
+       lista que cresce) — o conteúdo sobe dentro dela e sobra uma faixa vazia, branca ou escura
+       conforme o tema. `overflow-clip` corta igual e proíbe essa rolagem; quem rola é o `<main>`. */
     <SidebarProvider
       defaultOpen={!state?.isCollapsed}
-      className="h-svh overflow-hidden"
+      className="h-svh overflow-clip"
       style={twoColumn ? TWO_COLUMN_WIDTH : undefined}
     >
       <ShellFrame data={data} state={state} actions={actions} twoColumn={twoColumn}>
@@ -131,7 +135,8 @@ function ShellFrame({
         <OneColumnSidebar data={data} state={state} actions={actions} />
       )}
 
-      <SidebarInset className="border-sidebar-border bg-background min-w-0 overflow-hidden md:border">
+      {/* O painel também corta sem rolar: ver o comentário da moldura, em `AzuosAppShell`. */}
+      <SidebarInset className="border-sidebar-border bg-background min-w-0 overflow-clip md:border">
         {/* O gatilho vive no conteúdo: dentro da barra ele sumiria junto com o que colapsa.
             No celular não há barra lateral — o menu é a barra de baixo. */}
         <header className="hidden h-12 shrink-0 items-center gap-2 px-4 md:flex">
