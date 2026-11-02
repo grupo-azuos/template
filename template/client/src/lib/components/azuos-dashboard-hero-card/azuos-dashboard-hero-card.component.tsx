@@ -26,6 +26,12 @@ export type AzuosDashboardHeroCardStat = {
 export type AzuosDashboardHeroCardProps = {
   data: {
     title: string;
+    /**
+     * O trecho do título que importa ("47 alvarás vencidos"), pintado no amarelo de destaque. É
+     * TEXTO, comparado como texto — nunca HTML montado: a frase pode trazer nome digitado por
+     * alguém, e nome não pode virar marcação. Se o trecho não estiver no título, nada muda.
+     */
+    titleHighlight?: string | null;
     description?: string;
     eyebrow?: string;
     eyebrowIcon?: LucideIcon;
@@ -179,6 +185,19 @@ function DashboardEyebrowHeader({
   );
 }
 
+function HighlightedTitle({ data }: { data: { text: string; highlight?: string | null } }) {
+  const at = data.highlight ? data.text.indexOf(data.highlight) : -1;
+  if (!data.highlight || at < 0) return <>{data.text}</>;
+
+  return (
+    <>
+      {data.text.slice(0, at)}
+      <span className="text-accent-hero">{data.highlight}</span>
+      {data.text.slice(at + data.highlight.length)}
+    </>
+  );
+}
+
 function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data'] }) {
   const zuzuPose = data.zuzu?.pose ?? 'alert';
   const zuzuSize = data.zuzu?.size ?? 128;
@@ -191,7 +210,7 @@ function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data']
 
       <div className="flex min-h-[120px] min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left">
         <h2 className="text-on-dark text-xl leading-snug font-bold tracking-tight sm:text-2xl">
-          {data.title}
+          <HighlightedTitle data={{ text: data.title, highlight: data.titleHighlight }} />
         </h2>
         {data.description ? (
           <p className="text-on-dark/80 text-sm leading-relaxed font-normal sm:text-base">

@@ -170,4 +170,32 @@ describe('AzuosDashboardHeroCard', () => {
 
     expect(screen.getByRole('button', { name: /Vencidos/ })).not.toHaveAttribute('aria-pressed');
   });
+
+  // feliz
+  it('paints the highlighted part of the title, as text', () => {
+    render(
+      <AzuosDashboardHeroCard
+        data={{
+          title: 'Bom dia! Acumulou 3 alvarás vencidos.',
+          titleHighlight: '3 alvarás vencidos',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-accent-hero');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
+      'Bom dia! Acumulou 3 alvarás vencidos.',
+    );
+  });
+
+  // triste
+  it('keeps the plain title when the highlight is not in it', () => {
+    render(
+      <AzuosDashboardHeroCard data={{ title: 'Dia tranquilo.', titleHighlight: '<b>x</b>' }} />,
+    );
+
+    const heading = screen.getByRole('heading', { level: 2 });
+    expect(heading).toHaveTextContent('Dia tranquilo.');
+    expect(heading.querySelector('.text-accent-hero')).toBeNull();
+  });
 });

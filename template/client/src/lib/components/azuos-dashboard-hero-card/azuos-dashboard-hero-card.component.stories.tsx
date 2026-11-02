@@ -170,6 +170,7 @@ export const WithActiveStat: Story = {
       eyebrow: 'Azuos Alerta',
       eyebrowIcon: Megaphone,
       title: 'Bom dia! Você tem 12 alvarás para olhar hoje.',
+      titleHighlight: '12 alvarás',
       zuzu: { pose: 'alert', size: 120 },
       stats: [
         {
