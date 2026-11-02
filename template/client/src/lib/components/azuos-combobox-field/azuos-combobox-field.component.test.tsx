@@ -138,3 +138,42 @@ describe('AzuosComboboxField', () => {
     expect(screen.queryByPlaceholderText('Pesquisar…')).not.toBeInTheDocument();
   });
 });
+
+const people = [
+  { value: 'ana', label: 'Ana Souza', personName: 'Ana Souza', avatarUrl: null },
+  { value: 'caio', label: 'Caio Ribeiro', personName: 'Caio Ribeiro' },
+];
+
+describe('AzuosComboboxField with people', () => {
+  // feliz
+  it('shows the initials next to the name, in the trigger and in each option', () => {
+    render(
+      <AzuosComboboxField
+        data={{ value: 'ana', options: people }}
+        ui={{ ariaLabel: 'Responsável' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', { name: 'Responsável' });
+    expect(trigger).toHaveTextContent('AS');
+    expect(trigger).toHaveTextContent('Ana Souza');
+
+    open('Responsável');
+
+    expect(screen.getByRole('option', { name: /Caio Ribeiro/ })).toHaveTextContent('CR');
+  });
+
+  // triste
+  it('draws no avatar for an option that is not a person', () => {
+    render(
+      <AzuosComboboxField
+        data={{ value: 'financeiro', options: tags }}
+        ui={{ ariaLabel: 'Etiqueta' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    expect(document.querySelector('[data-slot="avatar"]')).toBeNull();
+  });
+});

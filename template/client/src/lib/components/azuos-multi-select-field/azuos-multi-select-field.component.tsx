@@ -4,6 +4,7 @@ import { type KeyboardEvent, useId, useState } from 'react';
 import { cn } from '../../utils/cn.util';
 import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
 import { AzuosCheckboxField } from '../azuos-checkbox-field/azuos-checkbox-field.component';
+import { AzuosPersonAvatar } from '../azuos-person-avatar/azuos-person-avatar.component';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 /**
@@ -21,7 +22,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
  * `onChange` devolve a lista NA ORDEM DAS OPÇÕES, e não na ordem em que foram marcadas: a mesma
  * escolha vira sempre a mesma lista, o que faz a URL e o cache da consulta serem os mesmos.
  */
-export type AzuosMultiSelectFieldOption = { value: string; label: string };
+export type AzuosMultiSelectFieldOption = {
+  value: string;
+  label: string;
+  /** A pessoa da opção: quando existe, a foto (ou as iniciais) vem antes do rótulo. */
+  personName?: string;
+  /** A foto da pessoa. Sem ela, ficam as iniciais de `personName`. */
+  avatarUrl?: string | null;
+};
 
 export type AzuosMultiSelectFieldProps = {
   data: {
@@ -79,16 +87,19 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
         aria-label={`${ariaLabel}: ${fullLabel}`}
         title={fullLabel}
         className={cn(
-          'control-lg rounded-control border-input bg-muted text-foreground flex w-full items-center justify-between gap-2 border px-3 text-sm whitespace-nowrap outline-none',
+          'control-lg rounded-control border-input bg-muted text-foreground flex w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm whitespace-nowrap outline-none',
           'focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
           ui?.className,
         )}
       >
-        <span className="min-w-0 truncate">{summarizeSelection(data)}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <SelectedFaces data={{ values: data.values, options: data.options }} />
+          <span className="min-w-0 truncate">{summarizeSelection(data)}</span>
+        </span>
         <ChevronDown className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="w-72 p-0">
+      <PopoverContent align="start" className="w-72 min-w-64 p-0">
         <ul
           role="group"
           aria-label={ariaLabel}
@@ -96,8 +107,13 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
           className="max-h-72 overflow-y-auto p-2"
         >
           {data.options.map((option) => (
-            <li key={option.value} className="hover:bg-accent rounded-box px-2">
+            <li
+              key={option.value}
+              className="hover:bg-accent rounded-box flex items-center gap-2 px-2"
+            >
+              <PersonFace data={{ option }} />
               <AzuosCheckboxField
+                ui={{ className: 'min-w-0 flex-1' }}
                 data={{
                   label: option.label,
                   name: `${fieldId}-${option.value}`,
@@ -118,6 +134,54 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+/**
+ * A foto (ou as iniciais) de uma opção que é PESSOA — a regra do grupo para todo seletor de pessoa.
+ * `aria-hidden`: o nome já está escrito ao lado, e lido duas vezes vira ruído.
+ */
+function PersonFace({ data }: { data: { option: AzuosMultiSelectFieldOption } }) {
+  if (!data.option.personName) return null;
+
+  return (
+    <span aria-hidden="true" className="flex shrink-0">
+      <AzuosPersonAvatar
+        name={data.option.personName}
+        avatarUrl={data.option.avatarUrl}
+        ui={{ size: 'sm' }}
+      />
+    </span>
+  );
+}
+
+/**
+ * No botão, os rostos de quem está marcado, sobrepostos — no máximo três, que é até onde o resumo
+ * ainda mostra nomes ou a contagem cabe ao lado.
+ */
+const MAX_FACES = 3;
+
+function SelectedFaces({
+  data,
+}: {
+  data: { values: string[]; options: AzuosMultiSelectFieldOption[] };
+}) {
+  const people = data.options
+    .filter((option) => option.personName && data.values.includes(option.value))
+    .slice(0, MAX_FACES);
+  if (people.length === 0) return null;
+
+  return (
+    <span aria-hidden="true" className="flex shrink-0 -space-x-1.5">
+      {people.map((option) => (
+        <AzuosPersonAvatar
+          key={option.value}
+          name={option.personName ?? option.label}
+          avatarUrl={option.avatarUrl}
+          ui={{ size: 'sm', className: 'ring-background ring-2' }}
+        />
+      ))}
+    </span>
   );
 }
 

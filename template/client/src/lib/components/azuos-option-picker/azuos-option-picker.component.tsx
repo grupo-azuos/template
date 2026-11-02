@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { tv } from 'tailwind-variants';
 
 import { cn } from '../../utils/cn.util';
+import { AzuosPersonAvatar } from '../azuos-person-avatar/azuos-person-avatar.component';
 import { type AzuosStatusBadgeTone } from '../azuos-status-badge/azuos-status-badge.component';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
@@ -22,6 +23,10 @@ export type AzuosOptionPickerOption = {
   label: string;
   tone?: AzuosStatusBadgeTone;
   icon?: LucideIcon;
+  /** A pessoa da opção: quando existe, a foto (ou as iniciais) vem antes do rótulo. */
+  personName?: string;
+  /** A foto da pessoa. Sem ela, ficam as iniciais de `personName`. */
+  avatarUrl?: string | null;
 };
 
 export type AzuosOptionPickerProps = {
@@ -190,7 +195,7 @@ export function AzuosOptionPicker({ data, ui, state, actions }: AzuosOptionPicke
           estreito (e o balão parecia solto, fora do lugar). O teto impede que uma opção de nome
           comprido estique o balão pela tela — a opção é cortada, não a tela. */}
       <PopoverContent
-        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-popover-trigger-width) p-0"
+        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-popover-trigger-width))] p-0"
         align="start"
       >
         <OptionSearch data={{ query }} actions={{ onQueryChange: setQuery }} />
@@ -224,7 +229,7 @@ function PickerTrigger({
       aria-label={ui?.ariaLabel}
       className={cn(
         'control-lg',
-        'rounded-control border-border/70 bg-card text-foreground hover:bg-muted/40 inline-flex w-full cursor-pointer items-center justify-between gap-2 border text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+        'rounded-control border-border/70 bg-card text-foreground hover:bg-muted/40 inline-flex w-full min-w-40 cursor-pointer items-center justify-between gap-2 border text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
         ui?.fullWidth ? 'sm:w-full' : 'sm:w-auto sm:min-w-[180px]',
         ui?.className,
       )}
@@ -285,18 +290,49 @@ function SelectedLabel({
   ui: { placeholder?: string };
 }) {
   const selected = data.options.find((option) => option.value === data.value) ?? null;
-  const Icon = selected?.icon;
 
   return (
     <span className="flex min-w-0 items-center gap-2">
-      {Icon ? (
-        <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
-      ) : selected?.tone ? (
-        <span className={optionDot({ tone: selected.tone })} aria-hidden="true" />
-      ) : null}
+      <OptionLead data={{ option: selected }} ui={{ iconClassName: 'text-muted-foreground' }} />
       <span className="truncate">{selected?.label ?? ui.placeholder ?? 'Selecione'}</span>
     </span>
   );
+}
+
+/**
+ * O que vem antes do rótulo: a foto (ou as iniciais) quando a opção é uma PESSOA — a regra do grupo
+ * para todo seletor de pessoa —, senão o ícone, senão a bolinha do tom. A foto fica `aria-hidden`
+ * porque o nome já está escrito ao lado. `isToneHidden`: na pastilha escolhida o fundo já é o tom.
+ */
+function OptionLead({
+  data,
+  ui,
+  state,
+}: {
+  data: { option: AzuosOptionPickerOption | null };
+  ui?: { iconClassName?: string };
+  state?: { isToneHidden?: boolean };
+}) {
+  const option = data.option;
+  if (!option) return null;
+  if (option.personName) {
+    return (
+      <span aria-hidden="true" className="flex shrink-0">
+        <AzuosPersonAvatar
+          name={option.personName}
+          avatarUrl={option.avatarUrl}
+          ui={{ size: 'sm' }}
+        />
+      </span>
+    );
+  }
+
+  const Icon = option.icon;
+  if (Icon)
+    return <Icon className={cn('size-3.5 shrink-0', ui?.iconClassName)} aria-hidden="true" />;
+  if (!option.tone || state?.isToneHidden) return null;
+
+  return <span className={optionDot({ tone: option.tone })} aria-hidden="true" />;
 }
 
 function OptionPill({
@@ -311,7 +347,6 @@ function OptionPill({
   actions: { onSelect: () => void };
 }) {
   const { option } = data;
-  const Icon = option.icon;
 
   return (
     <button
@@ -325,11 +360,7 @@ function OptionPill({
         tone: option.tone,
       })}
     >
-      {Icon ? (
-        <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-      ) : option.tone && !state.isSelected ? (
-        <span className={optionDot({ tone: option.tone })} aria-hidden="true" />
-      ) : null}
+      <OptionLead data={{ option }} state={{ isToneHidden: state.isSelected }} />
       {option.label}
     </button>
   );
@@ -385,7 +416,6 @@ function OptionList({
       ) : (
         filtered.map((option) => {
           const isSelected = option.value === data.value;
-          const Icon = option.icon;
 
           return (
             <button
@@ -400,11 +430,7 @@ function OptionList({
                   : 'text-foreground hover:bg-muted/60',
               )}
             >
-              {Icon ? (
-                <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-              ) : option.tone ? (
-                <span className={optionDot({ tone: option.tone })} aria-hidden="true" />
-              ) : null}
+              <OptionLead data={{ option }} />
               <span className="flex-1 truncate">{option.label}</span>
               {isSelected ? <Check className="size-3.5 shrink-0" aria-hidden="true" /> : null}
             </button>

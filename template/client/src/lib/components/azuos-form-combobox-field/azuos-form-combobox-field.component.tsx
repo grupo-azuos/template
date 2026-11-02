@@ -43,7 +43,7 @@ export function AzuosFormComboboxField({ data, ui, state, actions }: AzuosFormCo
   const messageId = useId();
 
   return (
-    <div className={cn('flex min-w-0 flex-col gap-1.5', ui?.className)}>
+    <div className={cn('flex min-w-40 flex-col gap-1.5', ui?.className)}>
       {data.label ? (
         <FieldLabel data={{ label: data.label }} state={{ isRequired: state?.isRequired }} />
       ) : null}

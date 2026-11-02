@@ -94,3 +94,31 @@ describe('AzuosMultiSelectField', () => {
     expect(screen.queryByRole('checkbox')).toBeNull();
   });
 });
+
+describe('AzuosMultiSelectField with people', () => {
+  const PEOPLE = [
+    { value: 'ana', label: 'Ana Souza', personName: 'Ana Souza', avatarUrl: null },
+    { value: 'caio', label: 'Caio Ribeiro', personName: 'Caio Ribeiro' },
+  ];
+  const PEOPLE_DATA = { values: ['ana'], options: PEOPLE, placeholder: 'Todos', noun: 'pessoas' };
+
+  // feliz
+  it('shows the face of who is marked on the button and of everyone in the list', () => {
+    render(<AzuosMultiSelectField data={PEOPLE_DATA} actions={{ onChange: vi.fn() }} />);
+
+    const trigger = screen.getByRole('button', { name: 'Todos: Ana Souza' });
+    expect(trigger).toHaveTextContent('AS');
+
+    fireEvent.click(trigger);
+
+    expect(screen.getByRole('checkbox', { name: 'Caio Ribeiro' })).toBeInTheDocument();
+    expect(screen.getByText('CR')).toBeInTheDocument();
+  });
+
+  // triste
+  it('draws no face when the options are not people', () => {
+    render(<AzuosMultiSelectField data={DATA} actions={{ onChange: vi.fn() }} />);
+
+    expect(document.querySelector('[data-slot="avatar"]')).toBeNull();
+  });
+});

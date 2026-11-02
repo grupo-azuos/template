@@ -56,7 +56,8 @@ export function buildComboboxItems(input: {
   const items: ComboboxItem[] = [];
   const typed = input.term.trim().replace(/\s+/g, ' ');
 
-  if (input.clearLabel && input.hasValue && !typed) items.push({ kind: 'clear', label: input.clearLabel });
+  if (input.clearLabel && input.hasValue && !typed)
+    items.push({ kind: 'clear', label: input.clearLabel });
   for (const option of input.options) items.push({ kind: 'option', label: option });
 
   /* Enquanto a busca não voltou, a lista é a da tecla anterior: oferecer "Cadastrar" nela
@@ -70,7 +71,12 @@ export function buildComboboxItems(input: {
   return items;
 }
 
-export function AzuosCreatableComboboxField({ data, ui, state, actions }: AzuosCreatableComboboxFieldProps) {
+export function AzuosCreatableComboboxField({
+  data,
+  ui,
+  state,
+  actions,
+}: AzuosCreatableComboboxFieldProps) {
   const listId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [term, setTerm] = useState('');
@@ -130,15 +136,15 @@ export function AzuosCreatableComboboxField({ data, ui, state, actions }: AzuosC
     /* `modal`: dentro do diálogo da empresa, o bloqueio de rolagem do diálogo engoliria a
        roda do mouse na lista, que é renderizada fora dele. Modal, o popover assume o bloqueio. */
     <Popover open={isOpen} onOpenChange={changeOpen} modal>
-      <ComboboxTrigger
-        data={{ value: data.value, listId }}
-        ui={ui}
-        state={{ ...state, isOpen }}
-      />
+      <ComboboxTrigger data={{ value: data.value, listId }} ui={ui} state={{ ...state, isOpen }} />
 
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-56 p-0">
+      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-64 p-0">
         <ComboboxSearch
-          data={{ term, listId, activeId: items[activeIndex] ? `${listId}-${activeIndex}` : undefined }}
+          data={{
+            term,
+            listId,
+            activeId: items[activeIndex] ? `${listId}-${activeIndex}` : undefined,
+          }}
           ui={ui}
           state={state}
           actions={{ onTermChange: changeTerm, onKeyDown }}
@@ -183,8 +189,8 @@ function ComboboxTrigger({
       className={cn(
         /* O degrau `lg` da régua de medidas (`lib/theme/tokens.css`) e o raio de controle, os mesmos do
            `AzuosTextField` e do `AzuosSelectField`. */
-        'control-lg rounded-control flex w-full items-center justify-between gap-2 border border-input bg-muted text-foreground px-3 text-left text-sm shadow-xs outline-none transition-[color,box-shadow]',
-        'focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+        'control-lg rounded-control border-input bg-muted text-foreground flex w-full min-w-40 items-center justify-between gap-2 border px-3 text-left text-sm shadow-xs transition-[color,box-shadow] outline-none',
+        'focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
         ui?.className,
       )}
     >
@@ -216,7 +222,7 @@ function ComboboxSearch({
 }) {
   return (
     <div className="flex items-center gap-2 border-b px-3">
-      <Search size={14} aria-hidden="true" className="shrink-0 text-muted-foreground" />
+      <Search size={14} aria-hidden="true" className="text-muted-foreground shrink-0" />
       <input
         autoFocus
         value={data.term}
@@ -226,13 +232,13 @@ function ComboboxSearch({
         aria-label={ui?.searchPlaceholder ?? ui?.ariaLabel}
         aria-controls={data.listId}
         aria-activedescendant={data.activeId}
-        className="control-lg w-full rounded-control bg-muted px-2 text-sm outline-none placeholder:text-muted-foreground"
+        className="control-lg rounded-control bg-muted placeholder:text-muted-foreground w-full px-2 text-sm outline-none"
       />
       {state?.isLoading ? (
         <LoaderCircle
           size={14}
           aria-hidden="true"
-          className="shrink-0 animate-spin text-muted-foreground"
+          className="text-muted-foreground shrink-0 animate-spin"
         />
       ) : null}
     </div>
@@ -250,7 +256,7 @@ function ComboboxList({
 }) {
   if (data.items.length === 0) {
     return (
-      <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+      <p className="text-muted-foreground px-3 py-4 text-center text-xs">
         {state.isLoading ? 'Buscando…' : 'Digite para buscar ou cadastrar'}
       </p>
     );
@@ -267,9 +273,9 @@ function ComboboxList({
           onMouseMove={() => actions.onHighlight(index)}
           onClick={() => actions.onChoose(item)}
           className={cn(
-            'flex cursor-default items-center gap-2 rounded-chip px-2 py-1.5 text-sm select-none',
+            'rounded-chip flex cursor-default items-center gap-2 px-2 py-1.5 text-sm select-none',
             index === data.activeIndex && 'bg-accent text-accent-foreground',
-            item.kind === 'create' && 'mt-1 border-t pt-2 font-medium text-brand-blue-800',
+            item.kind === 'create' && 'text-brand-blue-800 mt-1 border-t pt-2 font-medium',
             item.kind === 'clear' && 'text-muted-foreground italic',
           )}
         >
@@ -297,7 +303,10 @@ function ComboboxItemLabel({ data }: { data: { item: ComboboxItem; value: string
       <Check
         size={14}
         aria-hidden="true"
-        className={cn('shrink-0', item.kind === 'option' && item.label === data.value ? 'opacity-100' : 'opacity-0')}
+        className={cn(
+          'shrink-0',
+          item.kind === 'option' && item.label === data.value ? 'opacity-100' : 'opacity-0',
+        )}
       />
       <span className="truncate">{item.label}</span>
     </>

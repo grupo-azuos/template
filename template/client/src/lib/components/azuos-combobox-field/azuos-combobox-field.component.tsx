@@ -2,6 +2,7 @@ import { Check, ChevronsUpDown, type LucideIcon, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { cn } from '../../utils/cn.util';
+import { AzuosPersonAvatar } from '../azuos-person-avatar/azuos-person-avatar.component';
 import {
   Command,
   CommandEmpty,
@@ -23,7 +24,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
  * fechado e alimentar um catálogo que cresce com o uso — e quem sabe qual dos dois é a tela, que
  * é quem tem como gravar o item novo. O componente continua puro: ele avisa, não cria.
  */
-export type AzuosComboboxFieldOption = { value: string; label: string; icon?: LucideIcon };
+export type AzuosComboboxFieldOption = {
+  value: string;
+  label: string;
+  icon?: LucideIcon;
+  /** A pessoa da opção: quando existe, a foto (ou as iniciais) vem antes do rótulo. */
+  personName?: string;
+  /** A foto da pessoa. Sem ela, ficam as iniciais de `personName`. */
+  avatarUrl?: string | null;
+};
 
 export type AzuosComboboxFieldProps = {
   data: { value: string; options: AzuosComboboxFieldOption[] };
@@ -102,7 +111,10 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
       {/* O degrau `lg` da RÉGUA DE MEDIDAS: este campo fica ao lado de um `AzuosTextField` ou
           dentro de um formulário, e precisa nascer na mesma altura e no mesmo raio dos vizinhos.
           As demais classes repetem as do gatilho do `AzuosSelectField` de propósito — os dois são
-          o mesmo campo aos olhos de quem usa, e só diferem por ter busca. */}
+          o mesmo campo aos olhos de quem usa, e só diferem por ter busca.
+
+          `min-w-40`: abaixo de 10rem o gatilho cortava o próprio valor ("Todas as ci…", "Bras…"),
+          e quem estreitava era a tela por fora. O piso é do campo, não de cada tela. */}
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -115,7 +127,7 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           disabled={state?.isDisabled}
           title={selectedOption?.label}
           className={cn(
-            'control-lg rounded-control border-input bg-muted text-foreground flex w-full max-w-full min-w-0 items-center justify-between gap-2 border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
+            'control-lg rounded-control border-input bg-muted text-foreground flex w-full max-w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
             'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-50',
             texts.className,
@@ -126,9 +138,10 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
         </button>
       </PopoverTrigger>
 
-      {/* A LARGURA DA LISTA É A DO GATILHO. Sem amarrar, ela se estica até o nome mais comprido e
-          nasce mais larga que o diálogo em volta, vazando pelos dois lados. */}
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
+      {/* A LARGURA DA LISTA É A DO GATILHO, com um piso. Sem amarrar, ela se estica até o nome mais
+          comprido e nasce mais larga que o diálogo em volta, vazando pelos dois lados; sem o piso
+          (`min-w-64`), sob um gatilho estreito a lista cortava cada opção no meio. */}
+      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-64 p-0">
         {/* O filtro é o do próprio `cmdk`, por pontuação de semelhança — então "ana s" ainda acha
             "Ana Souza", o que um `includes` não faria. */}
         <Command>
@@ -167,18 +180,39 @@ function TriggerLabel({
   data: { option?: AzuosComboboxFieldOption };
   ui: { placeholder: string };
 }) {
-  const Icon = data.option?.icon;
-
   return (
     <span
       className={cn('flex min-w-0 items-center gap-2', !data.option && 'text-muted-foreground')}
     >
-      {Icon ? (
-        <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
-      ) : null}
+      <OptionLead data={{ option: data.option }} />
       <span className="truncate">{data.option?.label || ui.placeholder}</span>
     </span>
   );
+}
+
+/**
+ * O que vem antes do rótulo: a foto (ou as iniciais) quando a opção é uma PESSOA, ou o ícone da
+ * opção. A foto é a regra do grupo para todo seletor de pessoa — o olho acha o rosto antes de ler o
+ * nome. Fica `aria-hidden` porque o nome já está escrito ao lado; lido duas vezes, vira ruído.
+ */
+function OptionLead({ data }: { data: { option?: AzuosComboboxFieldOption } }) {
+  const option = data.option;
+  if (option?.personName) {
+    return (
+      <span aria-hidden="true" className="flex shrink-0">
+        <AzuosPersonAvatar
+          name={option.personName}
+          avatarUrl={option.avatarUrl}
+          ui={{ size: 'sm' }}
+        />
+      </span>
+    );
+  }
+
+  const Icon = option?.icon;
+  if (!Icon) return null;
+
+  return <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />;
 }
 
 /** Uma opção da lista. O "visto" marca a escolhida; `truncate` corta o nome, não a tela. */
@@ -192,7 +226,6 @@ function OptionRow({
   actions: { onSelect: () => void };
 }) {
   const { option } = data;
-  const Icon = option.icon;
 
   return (
     <CommandItem value={option.label} onSelect={actions.onSelect}>
@@ -200,9 +233,7 @@ function OptionRow({
         className={cn('size-4 shrink-0', !state.isSelected && 'opacity-0')}
         aria-hidden="true"
       />
-      {Icon ? (
-        <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
-      ) : null}
+      <OptionLead data={{ option }} />
       <span className="truncate">{option.label}</span>
     </CommandItem>
   );

@@ -48,3 +48,33 @@ export const ManySelected: Story = {
 };
 
 export const Disabled: Story = { args: { state: { isDisabled: true } } };
+
+/** Pessoas inventadas: duas com foto e uma sem, que fica com as iniciais. */
+const people = [
+  {
+    value: 'ana',
+    label: 'Ana Souza',
+    personName: 'Ana Souza',
+    avatarUrl: 'https://i.pravatar.cc/64?img=5',
+  },
+  { value: 'caio', label: 'Caio Ribeiro', personName: 'Caio Ribeiro', avatarUrl: null },
+  {
+    value: 'dani',
+    label: 'Dani Albuquerque',
+    personName: 'Dani Albuquerque',
+    avatarUrl: 'https://i.pravatar.cc/64?img=9',
+  },
+];
+
+/** Seletor de pessoas: os rostos de quem está marcado no botão, e a foto em cada linha. */
+export const WithPeople: Story = {
+  args: {
+    data: {
+      values: ['ana', 'caio'],
+      options: people,
+      placeholder: 'Todos os responsáveis',
+      noun: 'pessoas',
+    },
+    ui: { ariaLabel: 'Responsáveis', className: 'max-w-72' },
+  },
+};

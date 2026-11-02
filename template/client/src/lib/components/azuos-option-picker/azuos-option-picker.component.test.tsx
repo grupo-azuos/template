@@ -182,3 +182,42 @@ describe('AzuosOptionPicker icons', () => {
     expect(option.querySelector('svg')).not.toBeNull();
   });
 });
+
+describe('AzuosOptionPicker with people', () => {
+  const PEOPLE = Array.from({ length: 8 }, (_, index) => ({
+    value: `p${index}`,
+    label: `Pessoa ${index} Teste`,
+    personName: `Pessoa ${index} Teste`,
+  }));
+
+  // feliz
+  it('shows the initials of each person, in the button and in the list', async () => {
+    render(
+      <AzuosOptionPicker
+        data={{ value: 'p1', options: PEOPLE }}
+        ui={{ ariaLabel: 'Responsável' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    const trigger = screen.getByRole('button', { name: /Responsável/ });
+    expect(trigger).toHaveTextContent('P1');
+
+    await userEvent.click(trigger);
+
+    expect(screen.getByRole('button', { name: 'Pessoa 2 Teste' })).toHaveTextContent('P2');
+  });
+
+  // triste
+  it('draws no avatar when the options are not people', () => {
+    render(
+      <AzuosOptionPicker
+        data={{ value: 'todo', options: STATUS }}
+        ui={{ ariaLabel: 'Situação' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    expect(document.querySelector('[data-slot="avatar"]')).toBeNull();
+  });
+});

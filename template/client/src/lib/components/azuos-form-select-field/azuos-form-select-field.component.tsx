@@ -35,7 +35,7 @@ export function AzuosFormSelectField({ data, ui, state, actions }: AzuosFormSele
   const { error, message, isLabelHidden, isDisabled } = resolveField(data, ui, state);
 
   return (
-    <div className={cn('flex min-w-0 flex-col gap-1.5', ui?.className)} title={data.hint}>
+    <div className={cn('flex min-w-40 flex-col gap-1.5', ui?.className)} title={data.hint}>
       <span className={cn('text-ink-700 text-sm font-medium', isLabelHidden && 'sr-only')}>
         {data.label}
         {/* O `*` é desenho: o leitor de tela já ouve "obrigatório" pelo contexto do formulário. */}
