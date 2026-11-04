@@ -2,7 +2,7 @@
 
 [[repo]]
 name = "template-prod"
-tags = ["template", "core", "prod"]
+tags = ["context:apps", "env:core", "server:core"]
 [repo.config]
 server = "core"
 git_provider = "github.com"
@@ -35,7 +35,7 @@ docker run --rm --security-opt label=disable --network host \
 
 [[repo]]
 name = "template-staging"
-tags = ["template", "homo", "staging"]
+tags = ["context:apps", "env:homo", "server:homo"]
 [repo.config]
 server = "homo"
 git_provider = "github.com"
