@@ -1,3 +1,5 @@
+> Infraestrutura e autenticação de produção: siga [o contrato atual de deploy](docs/production-deployment.md). As instruções antigas de Coolify/Traefik e tokens de vínculo abaixo são do arranjo anterior.
+
 # Template de MVP · Grupo Azuos
 
 Um ponto de partida para construir um **MVP** — a primeira versão de um sistema, para validar
@@ -11,20 +13,20 @@ commit).
 
 O template já vem com uma funcionalidade de exemplo — **Tarefas** — funcionando de ponta a
 ponta: banco, API, tela, testes e dados de teste. Ela é o molde para as próximas. Quando não
-servir mais, peça ao Claude: *"remove o exemplo de tarefas"*.
+servir mais, peça ao Claude: _"remove o exemplo de tarefas"_.
 
 ---
 
 ## O que você precisa ter instalado
 
-| Ferramenta | Versão | Para quê |
-|---|---|---|
-| **Node.js** | **24 LTS** (não 25) | Roda o sistema |
-| **Git** | qualquer recente | Guarda o histórico das mudanças |
-| **VS Code** | qualquer recente | Onde você trabalha |
-| **Claude Code** (extensão do VS Code) | — | Quem constrói com você |
-| **Tower** | qualquer recente | Ver o histórico e as branches (Git-Flow) — opcional |
-| **Python** | 3.12 | Usado por algumas ferramentas do Claude |
+| Ferramenta                            | Versão              | Para quê                                            |
+| ------------------------------------- | ------------------- | --------------------------------------------------- |
+| **Node.js**                           | **24 LTS** (não 25) | Roda o sistema                                      |
+| **Git**                               | qualquer recente    | Guarda o histórico das mudanças                     |
+| **VS Code**                           | qualquer recente    | Onde você trabalha                                  |
+| **Claude Code** (extensão do VS Code) | —                   | Quem constrói com você                              |
+| **Tower**                             | qualquer recente    | Ver o histórico e as branches (Git-Flow) — opcional |
+| **Python**                            | 3.12                | Usado por algumas ferramentas do Claude             |
 
 Não precisa instalar banco de dados: o **SQLite** é um arquivo, e vem junto.
 
@@ -67,36 +69,36 @@ Abra **http://localhost:5009**. A documentação da API fica em **http://localho
 
 Fale do **resultado**, não do código:
 
-> *"Quero cadastrar clientes com nome, telefone e cidade, e ver a lista filtrando por cidade."*
+> _"Quero cadastrar clientes com nome, telefone e cidade, e ver a lista filtrando por cidade."_
 
-> *"Na tela de clientes, quero um botão para exportar a lista."*
+> _"Na tela de clientes, quero um botão para exportar a lista."_
 
-> *"Preciso de dados de teste com uns 20 clientes de cidades diferentes."*
+> _"Preciso de dados de teste com uns 20 clientes de cidades diferentes."_
 
-> *"Deu esse erro quando cliquei em salvar: (cole o erro aqui)"*
+> _"Deu esse erro quando cliquei em salvar: (cole o erro aqui)"_
 
 ### As skills
 
 Skills são receitas prontas. O Claude usa sozinho quando o pedido combina, e você também pode
 chamar pelo nome, com `/`:
 
-| Skill | Para quê |
-|---|---|
-| `/comecar` | Primeiro uso: instala, sobe o sistema e explica o que tem aqui |
-| `/renomear-projeto` | Coloca o nome do seu MVP no título das telas e no README |
-| `/nova-feature` | Uma funcionalidade inteira: banco, API, tela, testes e seed |
-| `/componente-ui` | Um componente de tela novo, com story e teste |
-| `/ui-padrao` | As regras de visual e de texto — cores, estados, botões, mensagens |
-| `/banco-de-dados` | Criar ou mudar tabela, gerar migration, recriar o banco |
-| `/dados-de-teste` | Criar ou mudar os dados de teste (seeds) |
-| `/git-commit` | Salvar o trabalho no histórico, no formato certo |
-| `/git-fluxo` | O ciclo de toda mudança: branch de feature → trabalho → seu OK → develop |
-| `/resolver-conflito` | Explica e resolve conflito pela tela afetada, com quem mudou e quando |
-| `/verificar` | Conferir se está tudo pronto para entregar (lint, testes, build) |
-| `/remover-exemplo` | Tirar a feature de exemplo de Tarefas |
-| `/socorro` | Os problemas mais comuns e como resolver |
-| `/limites-do-mvp` | O que o MVP não faz (login, dados em outro PC) e a quem pedir |
-| `/suporte` | Erro grande: para, guarda o trabalho e prepara o relatório para o suporte |
+| Skill                | Para quê                                                                  |
+| -------------------- | ------------------------------------------------------------------------- |
+| `/comecar`           | Primeiro uso: instala, sobe o sistema e explica o que tem aqui            |
+| `/renomear-projeto`  | Coloca o nome do seu MVP no título das telas e no README                  |
+| `/nova-feature`      | Uma funcionalidade inteira: banco, API, tela, testes e seed               |
+| `/componente-ui`     | Um componente de tela novo, com story e teste                             |
+| `/ui-padrao`         | As regras de visual e de texto — cores, estados, botões, mensagens        |
+| `/banco-de-dados`    | Criar ou mudar tabela, gerar migration, recriar o banco                   |
+| `/dados-de-teste`    | Criar ou mudar os dados de teste (seeds)                                  |
+| `/git-commit`        | Salvar o trabalho no histórico, no formato certo                          |
+| `/git-fluxo`         | O ciclo de toda mudança: branch de feature → trabalho → seu OK → develop  |
+| `/resolver-conflito` | Explica e resolve conflito pela tela afetada, com quem mudou e quando     |
+| `/verificar`         | Conferir se está tudo pronto para entregar (lint, testes, build)          |
+| `/remover-exemplo`   | Tirar a feature de exemplo de Tarefas                                     |
+| `/socorro`           | Os problemas mais comuns e como resolver                                  |
+| `/limites-do-mvp`    | O que o MVP não faz (login, dados em outro PC) e a quem pedir             |
+| `/suporte`           | Erro grande: para, guarda o trabalho e prepara o relatório para o suporte |
 
 ---
 
@@ -156,17 +158,17 @@ template/                              # raiz do repositório git
 
 ## Stack
 
-| Camada | Escolha |
-|---|---|
-| **Backend** | NestJS 11 + Swagger (`nestjs-zod`) |
-| **Banco** | **SQLite** via **Drizzle ORM** (`better-sqlite3`) |
-| **Frontend** | React 19 + Vite + TypeScript |
-| **Rotas / Dados / Formulários** | TanStack Router · Query · Form |
-| **Validação** | Zod — o mesmo schema na API e na tela |
-| **UI** | shadcn/ui + Tailwind v4 · ícones Lucide · animação GSAP |
-| **Documentação de UI** | Storybook |
-| **Testes** | Vitest · Testing Library · Supertest · Playwright · Stryker |
-| **Qualidade** | ESLint + Prettier · commitlint + husky |
+| Camada                          | Escolha                                                     |
+| ------------------------------- | ----------------------------------------------------------- |
+| **Backend**                     | NestJS 11 + Swagger (`nestjs-zod`)                          |
+| **Banco**                       | **SQLite** via **Drizzle ORM** (`better-sqlite3`)           |
+| **Frontend**                    | React 19 + Vite + TypeScript                                |
+| **Rotas / Dados / Formulários** | TanStack Router · Query · Form                              |
+| **Validação**                   | Zod — o mesmo schema na API e na tela                       |
+| **UI**                          | shadcn/ui + Tailwind v4 · ícones Lucide · animação GSAP     |
+| **Documentação de UI**          | Storybook                                                   |
+| **Testes**                      | Vitest · Testing Library · Supertest · Playwright · Stryker |
+| **Qualidade**                   | ESLint + Prettier · commitlint + husky                      |
 
 ### Por que SQLite
 
@@ -184,20 +186,20 @@ não reescrever o sistema.
 
 Todos rodam dentro de `template/`:
 
-| Comando | O que faz |
-|---|---|
-| `npm run dev` | Sobe API (:3009) e tela (:5009), recarregando a cada mudança |
-| `npm run seed:all` | Grava os dados de teste (pode rodar quantas vezes quiser) |
-| `npm run db:reset` | **Apaga** o banco e recria com os dados de teste |
-| `npm run db:generate` | Gera a migration depois de mudar uma tabela |
-| `npm run db:studio` | Abre o Drizzle Studio para olhar o banco |
-| `npm test` | Testes de unidade e de componente |
-| `npm run test:e2e` | E2E da API e da tela (a tela pede `npx playwright install chromium` uma vez) |
-| `npm run test:mutation` | Stryker — lento de propósito |
-| `npm run lint` / `npm run format` | ESLint / Prettier |
-| `npm run typecheck` | Confere os tipos do TypeScript |
-| `npm run build` | Build de produção |
-| `npm run storybook` | Catálogo de componentes em :6006 |
+| Comando                           | O que faz                                                                    |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `npm run dev`                     | Sobe API (:3009) e tela (:5009), recarregando a cada mudança                 |
+| `npm run seed:all`                | Grava os dados de teste (pode rodar quantas vezes quiser)                    |
+| `npm run db:reset`                | **Apaga** o banco e recria com os dados de teste                             |
+| `npm run db:generate`             | Gera a migration depois de mudar uma tabela                                  |
+| `npm run db:studio`               | Abre o Drizzle Studio para olhar o banco                                     |
+| `npm test`                        | Testes de unidade e de componente                                            |
+| `npm run test:e2e`                | E2E da API e da tela (a tela pede `npx playwright install chromium` uma vez) |
+| `npm run test:mutation`           | Stryker — lento de propósito                                                 |
+| `npm run lint` / `npm run format` | ESLint / Prettier                                                            |
+| `npm run typecheck`               | Confere os tipos do TypeScript                                               |
+| `npm run build`                   | Build de produção                                                            |
+| `npm run storybook`               | Catálogo de componentes em :6006                                             |
 
 ### Docker
 
@@ -273,8 +275,8 @@ Tower abre com tudo inicializado.
 5. **Só com o seu OK** ele junta na `develop` (`merge --no-ff`) e envia para o GitHub.
 
 Se duas pessoas mexeram na mesma parte, o Claude explica o conflito pela tela, por exemplo:
-*"na tela Clientes, dia 14/09, a Ana mudou o botão de cadastro; nesta mudança, colocamos o
-filtro por cidade no mesmo lugar"*. Ele mantém as duas mudanças quando dá, e pergunta quando
+_"na tela Clientes, dia 14/09, a Ana mudou o botão de cadastro; nesta mudança, colocamos o
+filtro por cidade no mesmo lugar"_. Ele mantém as duas mudanças quando dá, e pergunta quando
 não dá.
 
 **A `main` é de quem administra o projeto.** O git recusa commit, merge e envio para ela em
@@ -303,12 +305,12 @@ Ela libera as duas travas: o hook do git e o hook do Claude Code.
 As listas do que é protegido ficam em `template/scripts/git/protected-*.txt` (§17 do
 CONTRIBUTING).
 
-No GitHub, proteja a `main` (o hook local não pega merge *fast-forward*, e quem tem o clone
+No GitHub, proteja a `main` (o hook local não pega merge _fast-forward_, e quem tem o clone
 pode desligar hooks): **Settings → Branches → Add branch ruleset** para `main`, com
-*Restrict updates* e *Require a pull request before merging*, liberando só você. Marque também
+_Restrict updates_ e _Require a pull request before merging_, liberando só você. Marque também
 o repositório como **Template repository** (Settings → General).
 
-Versões: a partir da `develop`, pelo Git-Flow do Tower (*Start Release* / *Finish Release*),
+Versões: a partir da `develop`, pelo Git-Flow do Tower (_Start Release_ / _Finish Release_),
 com tag `v<versão>`.
 
 Consulte o [índice da documentação](docs/index.md) para os guias do projeto, métricas e privacidade.
