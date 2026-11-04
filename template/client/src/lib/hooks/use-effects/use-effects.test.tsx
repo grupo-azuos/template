@@ -88,6 +88,8 @@ describe('useEffects measuring the machine', () => {
 
   beforeEach(() => {
     queuedFrames = [];
+    /* O runner do CI tem 2 núcleos, e com isso o palpite já nasceria `lite`, sem medir nada. */
+    vi.spyOn(navigator, 'hardwareConcurrency', 'get').mockReturnValue(8);
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       queuedFrames.push(callback);
 
@@ -232,6 +234,7 @@ describe('detectLevel guessing from the hardware', () => {
   // feliz
   it('starts full on a machine with a real graphics card', async () => {
     stubRenderer('ANGLE (NVIDIA, Test GPU)');
+    vi.stubGlobal('navigator', { hardwareConcurrency: 8 });
     const { detectLevel } = await freshModule();
 
     expect(detectLevel()).toBe('full');
