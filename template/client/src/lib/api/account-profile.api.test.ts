@@ -24,17 +24,21 @@ describe('accountProfileApi', () => {
     await expect(accountProfileApi.me()).resolves.toEqual(user);
 
     const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
-    expect(url.href).toBe('https://admin-console.test/api/me/profile');
+    expect(url.href).toBe('https://admin-console.test/api/v1/me/profile');
     expect(init.credentials).toBe('include');
     expect(init.method ?? 'GET').toBe('GET');
   });
 
   it('reads the systems the person opens', async () => {
     const systems = [{ name: 'Paralegal' }];
-    fetchMock.mockResolvedValue(new Response(JSON.stringify({ data: { systems } }), { status: 200 }));
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ data: { systems } }), { status: 200 }),
+    );
 
     await expect(accountProfileApi.systems()).resolves.toEqual(systems);
-    expect((fetchMock.mock.calls[0] as [URL])[0].href).toBe('https://admin-console.test/api/me/systems');
+    expect((fetchMock.mock.calls[0] as [URL])[0].href).toBe(
+      'https://admin-console.test/api/v1/me/systems',
+    );
   });
 
   // triste

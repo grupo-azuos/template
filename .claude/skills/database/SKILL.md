@@ -3,7 +3,9 @@ name: database
 description: Cria ou muda tabelas do SQLite com Drizzle — arquivo de schema, registro, geração e revisão da migration, mensagens de erro do banco, recriar o banco e olhar os dados. Use quando a pessoa pede um campo novo, uma tabela nova, relação entre cadastros, "apaga o banco", "zera os dados", "quero ver o que está no banco", ou aparece erro de tabela/coluna inexistente.
 ---
 
-# Banco de dados (SQLite + Drizzle)
+# Banco de dados (SQLite no MVP; PostgreSQL após promoção)
+
+Se o app vai para Staging/Prod, carregue `../production-standard/SKILL.md` antes de alterar o provider. As instruções SQLite abaixo só valem enquanto `production.json.stage` for `mvp`.
 
 Caminhos relativos a `template/`.
 
@@ -60,6 +62,7 @@ npm run db:generate
 Se o nome gerado for aleatório, tudo bem.
 
 Regras:
+
 - **Nunca edite** migration que já foi commitada, nem `server/drizzle/meta/`. Errou? Gere uma
   nova que corrige.
 - Migration ainda **não** commitada e errada: apague o `.sql` **e** a entrada correspondente em

@@ -1,3 +1,5 @@
+import { docsAccess } from './lib/http/docs-access.middleware';
+import { packageVersion } from './lib/http/api-version';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -15,6 +17,7 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { logger: logLevels(env.API_LOG_LEVEL) });
   /* Fecha o banco com Ctrl+C: é o que grava o WAL de volta no arquivo principal. */
   app.enableShutdownHooks();
+  app.getHttpAdapter().getInstance().set('trust proxy', env.TRUST_PROXY_HOPS);
 
   setupApp(app, env);
 
@@ -41,7 +44,7 @@ async function bootstrap(): Promise<void> {
             'Uma requisição SEM nenhum desses cabeçalhos assume o usuário de demonstração (administrador). Uma requisição COM os cabeçalhos presentes e malformados é recusada com 401 — e nunca cai no usuário de demonstração.',
           ].join('\n'),
         )
-        .setVersion('0.1.0')
+        .setVersion(packageVersion())
         /* Não é `addBearerAuth`: não existe token para enviar. O que autentica é o conjunto
            de cabeçalhos que o proxy injeta, e é isso que o "Authorize" do Swagger oferece. */
         .addApiKey(
@@ -67,9 +70,22 @@ async function bootstrap(): Promise<void> {
     ),
   );
 
+  app.use(['/docs', '/docs-json'], docsAccess(env.NODE_ENV));
+  SwaggerModule.setup('docs/v1', app, document, {
+    ui: false,
+    raw: ['json'],
+    jsonDocumentUrl: 'docs/v1-json',
+  });
+
   SwaggerModule.setup('docs', app, document, {
     jsonDocumentUrl: 'docs-json',
-    swaggerOptions: { persistAuthorization: true },
+    raw: ['json'],
+    explorer: true,
+    swaggerOptions: {
+      filter: true,
+      persistAuthorization: true,
+      urls: [{ name: 'v1', url: '/docs/v1-json' }],
+    },
   });
 
   await app.listen(env.API_PORT);

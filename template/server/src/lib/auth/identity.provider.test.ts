@@ -25,6 +25,16 @@ describe('readForwardedIdentity', () => {
     });
   });
 
+  it.each([
+    ['manager', 'editor'],
+    ['user', 'viewer'],
+    ['admin', 'admin'],
+  ])('maps admin-console role %s to %s', (incoming, expected) => {
+    expect(
+      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: incoming })?.role,
+    ).toBe(expected);
+  });
+
   it('trims spaces around the value', () => {
     const padded = { ...complete, [FORWARDED_IDENTITY_HEADERS.name]: '  Ana  ' };
 
@@ -57,7 +67,7 @@ describe('readForwardedIdentity', () => {
 
   it('returns null when the role does not exist in the system', () => {
     expect(
-      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: 'manager' }),
+      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: 'owner' }),
     ).toBeNull();
   });
 

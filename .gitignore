@@ -34,3 +34,7 @@ desktop.ini
 
 # Ajuste local do Claude Code — é de quem programa, não do projeto.
 .claude/settings.local.json
+
+# Config do Komodo é código; bootstrap e exports continuam ignorados
+.komodo/*
+!.komodo/komodo.toml

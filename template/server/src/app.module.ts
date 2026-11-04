@@ -1,3 +1,5 @@
+import { HealthController } from './lib/http/health.controller';
+import { ValkeyModule } from './lib/cache/valkey.module';
 import { join } from 'node:path';
 
 import { Module } from '@nestjs/common';
@@ -12,7 +14,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
 
 /**
  * Serve o build do client — sem Nginx, sem container à parte. Atrás do Traefik, esta
- * imagem responde `/` (SPA) e `/api` (Nest) sozinha. Em desenvolvimento a pasta não existe
+ * imagem responde `/` (SPA) e `/api/v1` (Nest) sozinha. Em desenvolvimento a pasta não existe
  * (o Vite serve o client em :5173), e o `express.static` por baixo simplesmente devolve 404
  * em silêncio — não derruba o boot.
  */
@@ -27,9 +29,10 @@ const CLIENT_DIST = join(__dirname, '..', '..', 'client', 'dist');
  */
 @Module({
   imports: [
+    ValkeyModule,
     ServeStaticModule.forRoot({
       rootPath: CLIENT_DIST,
-      exclude: ['/api/{*path}', '/docs', '/docs-json'],
+      exclude: ['/api/{*path}', '/docs', '/docs/{*path}', '/docs-json'],
     }),
     AppConfigModule,
     /* `@Global` só vale a partir do momento em que o módulo é registrado UMA vez. Sem esta
@@ -38,6 +41,7 @@ const CLIENT_DIST = join(__dirname, '..', '..', 'client', 'dist');
     AuthModule,
     TasksModule,
   ],
+  controllers: [HealthController],
   providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }],
 })
 export class AppModule {}
