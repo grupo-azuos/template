@@ -28,6 +28,16 @@ export type AzuosInputGroupProps = {
   suffix?: ReactNode;
 };
 
+/**
+ * O fundo do grupo, repetido no escuro de propósito: o `ui/input-group` do shadcn traz
+ * `dark:bg-input/30`, que vence um `bg-muted` solto no tema escuro e deixava este campo mais claro
+ * que o `AzuosTextField` ao lado. Só a mesma variante (`dark:`) derruba a dele.
+ */
+const FILL_CLASS = {
+  normal: 'bg-muted dark:bg-muted',
+  error: 'bg-destructive-soft dark:bg-destructive-soft',
+} as const;
+
 export function AzuosInputGroup({
   data,
   ui,
@@ -51,7 +61,10 @@ export function AzuosInputGroup({
       {/* `px-0!`: o `control-lg` traz o respiro lateral de um campo sozinho; aqui quem dá o respiro
           é o prefixo, o sufixo e o próprio input de dentro. */}
       <InputGroup
-        className={cn('control-lg rounded-control px-0!', hasError ? 'bg-destructive-soft' : 'bg-card')}
+        className={cn(
+          'control-lg rounded-control px-0!',
+          hasError ? FILL_CLASS.error : FILL_CLASS.normal,
+        )}
       >
         {prefix ? <InputGroupAddon>{prefix}</InputGroupAddon> : null}
 

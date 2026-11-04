@@ -7,7 +7,7 @@ import {
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { BarChart3, ListChecks, Settings, Wrench } from 'lucide-react';
 import { useEffect } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { type AppShellNavigation } from '../navigation/app-shell-navigation';
 import { accountProfileUrl } from '../api/account-session.api';
@@ -102,5 +102,18 @@ describe('useAppShellNavigationModel', () => {
     await renderAt('/tasks', false, withoutProfile);
 
     expect(seen.model?.data.profile).toEqual({ href: accountProfileUrl() });
+  });
+
+  // triste
+  /* Sem tela de perfil E sem conta configurada (domínio desconhecido), o atalho aponta para a
+     raiz: um link quebrado no menu seria pior que um link para a própria casa. */
+  it('points the profile to the root when there is no account for this domain', async () => {
+    vi.stubEnv('VITE_ACCOUNT_URL', 'invalid-url');
+    const withoutProfile = { areas: config.areas, items: config.items, actions: config.actions };
+
+    await renderAt('/tasks', false, withoutProfile);
+
+    expect(seen.model?.data.profile).toEqual({ href: '/' });
+    vi.unstubAllEnvs();
   });
 });

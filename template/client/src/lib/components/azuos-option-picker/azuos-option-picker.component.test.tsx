@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Siren } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AzuosOptionPicker } from './azuos-option-picker.component';
@@ -156,5 +157,67 @@ describe('AzuosOptionPicker com muitas opções', () => {
     await userEvent.type(screen.getByLabelText('Buscar nas opções'), 'jurídico');
 
     expect(screen.getByText('Nada encontrado.')).toBeInTheDocument();
+  });
+});
+
+describe('AzuosOptionPicker icons', () => {
+  // feliz
+  /* O ícone vence o pontinho de tom: uma opção com os dois mostra só o ícone. */
+  it('draws the icon of an option in the list, instead of the tone dot', async () => {
+    const withIcon = [
+      { value: 'alert', label: 'Alerta', icon: Siren, tone: 'danger' as const },
+      ...MANY,
+    ];
+    render(
+      <AzuosOptionPicker
+        data={{ value: 'alert', options: withIcon }}
+        ui={{ ariaLabel: 'Departamento' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /Departamento/ }));
+
+    const option = screen.getByRole('button', { name: 'Alerta' });
+    expect(option.querySelector('svg')).not.toBeNull();
+  });
+});
+
+describe('AzuosOptionPicker with people', () => {
+  const PEOPLE = Array.from({ length: 8 }, (_, index) => ({
+    value: `p${index}`,
+    label: `Pessoa ${index} Teste`,
+    personName: `Pessoa ${index} Teste`,
+  }));
+
+  // feliz
+  it('shows the initials of each person, in the button and in the list', async () => {
+    render(
+      <AzuosOptionPicker
+        data={{ value: 'p1', options: PEOPLE }}
+        ui={{ ariaLabel: 'Responsável' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    const trigger = screen.getByRole('button', { name: /Responsável/ });
+    expect(trigger).toHaveTextContent('P1');
+
+    await userEvent.click(trigger);
+
+    expect(screen.getByRole('button', { name: 'Pessoa 2 Teste' })).toHaveTextContent('P2');
+  });
+
+  // triste
+  it('draws no avatar when the options are not people', () => {
+    render(
+      <AzuosOptionPicker
+        data={{ value: 'todo', options: STATUS }}
+        ui={{ ariaLabel: 'Situação' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    expect(document.querySelector('[data-slot="avatar"]')).toBeNull();
   });
 });

@@ -1,3 +1,5 @@
+import { resolveColor } from './echarts.util';
+
 /**
  * AS CORES DE CATEGORIA DOS GRÁFICOS.
  *
@@ -11,28 +13,31 @@
  * valor desenhado e tooltip — a cor nunca é o único jeito de saber qual fatia é qual.
  */
 export const CATEGORY_COLORS: Record<string, string> = {
-  Concluída: '#10b981',
-  'Em andamento': '#3b82f6',
-  'A fazer': '#9ca3af',
+  Concluída: 'var(--success)',
+  'Em andamento': 'var(--info)',
+  'A fazer': 'var(--muted-foreground)',
 };
 
 /** A lista de reserva, na ordem — percorrida, nunca sorteada. */
 export const FALLBACK_COLORS = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#06b6d4',
-  '#ec4899',
-  '#84cc16',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--info)',
+  'var(--tertiary-strong)',
+  'var(--warning)',
 ];
 
 export type ChartSlice = { label: string; value: number };
 
-/** A cor de uma fatia: o mapa de categorias manda; sem ele, a posição na lista de reserva. */
+/**
+ * A cor de uma fatia: o mapa de categorias manda; sem ele, a posição na lista de reserva.
+ * Sai resolvida (`#hex`/`rgb()`), porque o SVG do ECharts não entende `var()`.
+ */
 export function colorOfSlice(label: string, index: number): string {
-  return CATEGORY_COLORS[label] ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]!;
+  return resolveColor(CATEGORY_COLORS[label] ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]!);
 }
 
 /**

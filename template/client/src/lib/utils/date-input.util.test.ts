@@ -109,4 +109,26 @@ describe('rangeHint', () => {
   it('says nothing when there is no limit', () => {
     expect(rangeHint()).toBe('');
   });
+
+  // feliz
+  it('explains the limit in words, for the error of the field', () => {
+    expect(rangeHint('2026-01-01', '2026-12-31')).toBe(
+      'Escolha uma data entre 01/01/2026 e 31/12/2026.',
+    );
+    expect(rangeHint('2026-01-01')).toBe('Escolha uma data a partir de 01/01/2026.');
+    expect(rangeHint(null, '2026-12-31')).toBe('Escolha uma data até 31/12/2026.');
+  });
+
+  it('accepts a date inside the limits and refuses one outside', () => {
+    expect(isIsoWithin('2026-06-15', '2026-01-01', '2026-12-31')).toBe(true);
+    expect(isIsoWithin('2026-06-15')).toBe(true);
+    expect(isIsoWithin('2025-12-31', '2026-01-01')).toBe(false);
+    expect(isIsoWithin('2027-01-01', null, '2026-12-31')).toBe(false);
+  });
+
+  // triste
+  it('has nothing to explain without limits', () => {
+    expect(rangeHint()).toBe('');
+    expect(rangeHint(null, null)).toBe('');
+  });
 });

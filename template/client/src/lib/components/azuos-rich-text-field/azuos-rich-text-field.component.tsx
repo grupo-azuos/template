@@ -59,7 +59,7 @@ export const FIELD_LABEL_OFFSET_SM = 'sm:mt-[1.625rem]';
  * A cor da borda é de quem chama: `border-input` normal e, quando recusado, o fundo vermelho claro (`bg-destructive-soft`).
  */
 export const FIELD_CONTROL_CLASS =
-  'control-lg rounded-control bg-card text-foreground w-full border text-sm transition-colors';
+  'control-lg rounded-control bg-muted text-foreground w-full border text-sm transition-colors';
 
 /**
  * O FUNDO DE QUEM ABRE UMA LISTA (select, combobox, campo com sugestões).
@@ -336,7 +336,7 @@ export function FieldError({ data }: { data: { id: string; message: string } }) 
 
 const HINT_TONES: Record<AzuosRichTextFieldHint['tone'], string> = {
   neutral: 'text-ink-500',
-  calculated: 'text-brand-blue-800',
+  calculated: 'text-brand-blue-800 dark:text-foreground',
   error: 'text-warning',
 };
 

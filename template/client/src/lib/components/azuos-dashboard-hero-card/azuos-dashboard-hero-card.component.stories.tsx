@@ -63,7 +63,7 @@ export const Default: Story = {
           label: 'Novas Empresas',
           value: 578,
           hint: 'Aguardando sua análise',
-          tone: 'default',
+          tone: 'success',
           icon: BadgePlus,
         },
         {
@@ -131,7 +131,8 @@ export const IdeaWithChildren: Story = {
       eyebrow: 'Dica do Zuzu',
       eyebrowIcon: Sparkles,
       title: 'Otimização de processos ativa',
-      description: 'Centralize suas certidões para receber notificações automáticas antes do vencimento.',
+      description:
+        'Centralize suas certidões para receber notificações automáticas antes do vencimento.',
       badge: 'Novidade',
       zuzu: {
         pose: 'idea',
@@ -143,18 +144,163 @@ export const IdeaWithChildren: Story = {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            className="rounded-control bg-accent-hero text-accent-hero-foreground font-bold px-4 py-2 text-sm shadow-xs hover:bg-accent-hero/90 cursor-pointer transition-colors"
+            className="rounded-control bg-accent-hero text-accent-hero-foreground hover:bg-accent-strong cursor-pointer px-4 py-2 text-sm font-bold shadow-xs transition-colors"
           >
             Configurar Notificações
           </button>
           <button
             type="button"
-            className="rounded-control bg-brand-blue-800 text-primary-foreground font-medium px-4 py-2 text-sm hover:bg-brand-blue-700 cursor-pointer transition-colors"
+            className="rounded-control bg-brand-blue-800 text-primary-foreground hover:bg-brand-blue-700 cursor-pointer px-4 py-2 text-sm font-medium transition-colors"
           >
             Saiba Mais
           </button>
         </div>
       ),
+    },
+  },
+};
+
+/**
+ * Cartões que trocam a fila da tela: cada tom dá o fundo sólido do cartão, e o escolhido
+ * (`isActive`) fica com o fundo na cor cheia do tom. Sem borda — a cor vem do fundo.
+ */
+export const WithActiveStat: Story = {
+  args: {
+    data: {
+      eyebrow: 'Azuos Alerta',
+      eyebrowIcon: Megaphone,
+      title: 'Bom dia! Você tem 12 alvarás para olhar hoje.',
+      titleHighlight: '12 alvarás',
+      zuzu: { pose: 'alert', size: 120 },
+      stats: [
+        {
+          label: 'Alvarás Vencidos',
+          value: 12,
+          hint: 'Regularização imediata',
+          tone: 'danger',
+          icon: Siren,
+          isActive: true,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Pendências Próximas',
+          value: 6,
+          hint: 'Vencem nos próximos 30 dias',
+          tone: 'warning',
+          icon: AlarmClock,
+          isActive: false,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Sem Responsável',
+          value: 0,
+          hint: 'Alvarás sem dono atribuído',
+          tone: 'default',
+          icon: UserX,
+          isActive: false,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Revisões Pendentes',
+          value: 904,
+          hint: 'Aguardando checklist',
+          tone: 'brand',
+          icon: ClipboardCheck,
+          isActive: false,
+          onClick: () => undefined,
+        },
+      ],
+    },
+  },
+};
+
+/** O escolhido no azul da marca desce ao 900, com texto branco; o hover sobe ao 600. */
+export const WithActiveBrandStat: Story = {
+  args: {
+    data: {
+      title: 'Revisões da semana',
+      zuzu: { pose: 'idea', size: 120 },
+      stats: [
+        {
+          label: 'Revisões Pendentes',
+          value: 904,
+          hint: 'Aguardando checklist',
+          tone: 'brand',
+          icon: ClipboardCheck,
+          isActive: true,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Concluídas',
+          value: 37,
+          hint: 'Nesta semana',
+          tone: 'success',
+          icon: CheckCircle2,
+          isActive: false,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Sem Próxima Atualização',
+          value: 4,
+          tone: 'info',
+          icon: TriangleAlert,
+          isActive: false,
+          onClick: () => undefined,
+        },
+      ],
+    },
+  },
+};
+
+/** Os seis tons clicáveis: passe o mouse — cada cartão vai para a cor cheia do seu tom. */
+export const ClickableTones: Story = {
+  args: {
+    data: {
+      title: 'Passe o mouse nos cartões',
+      zuzu: { pose: 'idea', size: 120 },
+      stats: [
+        {
+          label: 'Vencidos',
+          value: 12,
+          hint: 'danger',
+          tone: 'danger',
+          icon: Siren,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Próximas',
+          value: 6,
+          hint: 'warning',
+          tone: 'warning',
+          icon: AlarmClock,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Sem data',
+          value: 4,
+          hint: 'info',
+          tone: 'info',
+          icon: Megaphone,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Novas',
+          value: 3,
+          hint: 'success',
+          tone: 'success',
+          icon: CheckCircle2,
+          onClick: () => undefined,
+        },
+        {
+          label: 'Revisões',
+          value: 904,
+          hint: 'brand',
+          tone: 'brand',
+          icon: ClipboardCheck,
+          onClick: () => undefined,
+        },
+        { label: 'Neutro', value: 0, hint: 'default', icon: UserX, onClick: () => undefined },
+      ],
     },
   },
 };

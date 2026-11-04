@@ -31,21 +31,19 @@ describe('AzuosStatCard', () => {
   });
 
   /* O token do tom, e não a paleta crua: cor sólida cheia da marca. */
-  it('paints the whole card with the solid tone token', () => {
-    const { container } = render(
-      <AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />,
-    );
+  it('sits on the brand surface with the number in the accent of its tone', () => {
+    render(<AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />);
 
-    expect(container.firstElementChild?.className).toContain('bg-success');
+    expect(screen.getByRole('group', { name: 'Concluídas' })).toHaveClass('bg-card');
+    expect(screen.getByText('74')).toHaveClass('text-hue-green');
   });
 
-  it('keeps the neutral card with a border, since it has no tone to separate it from the page', () => {
-    const { container } = render(<AzuosStatCard data={{ label: 'Total', value: 7 }} />);
+  it('uses the slate accent when no tone was given', () => {
+    render(<AzuosStatCard data={{ label: 'Total', value: 7 }} />);
 
-    expect(container.firstElementChild?.className).toContain('border');
+    expect(screen.getByText('7')).toHaveClass('text-hue-slate');
   });
 
-  /* O quadrado do ícone é a identidade da categoria: cor sólida, perfeitamente centralizado. */
   it('draws the icon square when it was given an icon with perfect centering', () => {
     const { container } = render(
       <AzuosStatCard data={{ label: 'Clientes', value: 7 }} ui={{ icon: Building2 }} />,
@@ -53,9 +51,9 @@ describe('AzuosStatCard', () => {
 
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('size-4', 'block');
+    expect(svg).toHaveClass('size-4.5', 'block');
     const badge = svg?.parentElement;
-    expect(badge).toHaveClass('size-8', 'inline-flex', 'items-center', 'justify-center');
+    expect(badge).toHaveClass('size-9', 'inline-flex', 'items-center', 'justify-center');
   });
 
   it('becomes a real button when it filters the list, so the keyboard reaches it', async () => {
@@ -113,47 +111,46 @@ describe('AzuosStatCard', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('marks the selected card with the full tone color, never a ring', () => {
-    const { container } = render(
+  it('marks the selected card in the light blue of the brand, with the icon dot inverted', () => {
+    render(
       <AzuosStatCard
         data={{ label: 'Vencidos', value: 3 }}
-        ui={{ tone: 'danger' }}
+        ui={{ tone: 'danger', icon: Building2 }}
         state={{ isSelected: true }}
         actions={{ onClick: () => {} }}
       />,
     );
-    const card = container.firstElementChild as HTMLElement;
+    const card = screen.getByRole('group', { name: /Vencidos/ });
 
-    expect(card).toHaveClass('bg-destructive');
-    expect(card).not.toHaveClass('bg-destructive-soft');
+    expect(card).toHaveClass('bg-card-selected', 'text-on-card-selected');
+    expect(card.querySelector('svg')?.parentElement).toHaveClass(
+      'group-data-[selected=true]/card:bg-on-card-selected',
+    );
     expect(card.className).not.toMatch(/\bring-/);
   });
 
   it('never paints a colored border or a side stripe', () => {
-    const { container } = render(<AzuosStatCard data={{ label: 'Em dia', value: 8 }} ui={{ tone: 'success' }} />);
+    const { container } = render(
+      <AzuosStatCard data={{ label: 'Em dia', value: 8 }} ui={{ tone: 'success' }} />,
+    );
     const card = container.firstElementChild as HTMLElement;
 
     expect(card.className).not.toMatch(/border-(success|primary|destructive|warning|info)/);
     expect(container.querySelector('.inset-y-0')).toBeNull();
   });
-  it('uses the color the person picked as the card background, soft at rest and full when selected', () => {
-    const { container, rerender } = render(
-      <AzuosStatCard data={{ label: 'Depositada', value: 4 }} ui={{ color: '#0ea5e9' }} actions={{ onClick: () => {} }} />,
-    );
-    const card = () => container.firstElementChild as HTMLElement;
-
-    expect(card().getAttribute('style')).toContain('color-mix');
-    expect(card().className).not.toMatch(/border-(primary|destructive|success|warning|info)/);
-
-    rerender(
+  it('turns the colour the person picked into the nearest accent, never a coloured background', () => {
+    render(
       <AzuosStatCard
         data={{ label: 'Depositada', value: 4 }}
-        ui={{ color: '#0ea5e9' }}
-        state={{ isSelected: true }}
+        ui={{ color: '#0ea5e9', icon: Building2 }}
         actions={{ onClick: () => {} }}
       />,
     );
-    expect(card().getAttribute('style')).not.toContain('color-mix');
-    expect(screen.getByText('Depositada').style.color).toBe('');
+    const card = screen.getByRole('group', { name: /Depositada/ });
+
+    expect(screen.getByText('4')).toHaveClass('text-hue-steel');
+    expect(card.querySelector('svg')?.parentElement).toHaveClass('bg-hue-steel');
+    expect(card.getAttribute('style')).toBeNull();
   });
+
 });

@@ -74,3 +74,25 @@ export const WithIcons: Story = {
     actions: { onChange: fn() },
   },
 };
+
+/** Pessoas inventadas: duas com foto e uma sem, que fica com as iniciais. */
+const people = [
+  {
+    value: 'ana',
+    label: 'Ana Souza',
+    personName: 'Ana Souza',
+    avatarUrl: 'https://i.pravatar.cc/64?img=5',
+  },
+  { value: 'caio', label: 'Caio Ribeiro', personName: 'Caio Ribeiro', avatarUrl: null },
+  {
+    value: 'dani',
+    label: 'Dani Albuquerque',
+    personName: 'Dani Albuquerque',
+    avatarUrl: 'https://i.pravatar.cc/64?img=9',
+  },
+];
+
+/** Seletor de pessoa: a foto (ou as iniciais) vem antes do nome, no gatilho e em cada linha. */
+export const WithPeople: Story = {
+  args: { ...Default.args, data: { value: 'caio', options: people } },
+};

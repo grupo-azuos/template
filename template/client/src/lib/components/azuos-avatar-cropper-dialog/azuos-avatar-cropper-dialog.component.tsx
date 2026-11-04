@@ -101,7 +101,7 @@ function CropEditor({
     <div className="flex flex-col gap-4">
       {/* Mais baixo no celular: 288px de recorte mais o cabeçalho, o zoom e os botões não
           cabem numa tela de 640px de altura sem empurrar "Salvar" para fora da dobra. */}
-      <div className="bg-ink-900 rounded-box relative h-56 w-full overflow-hidden sm:h-72">
+      <div className="bg-backdrop rounded-box relative h-56 w-full overflow-hidden sm:h-72">
         <Cropper
           image={data.imageUrl}
           crop={crop}

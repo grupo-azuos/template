@@ -1,5 +1,10 @@
 import { useIsMobile } from '../../hooks/ui/use-mobile';
-import { type ChartOption, type ChartTheme, formatCount } from '../../utils/echarts.util';
+import {
+  type ChartOption,
+  type ChartTheme,
+  formatCount,
+  resolveColor,
+} from '../../utils/echarts.util';
 import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
@@ -32,12 +37,19 @@ const DESKTOP_MONTHS = 12;
 const MOBILE_MONTHS = 4;
 
 /** Do mais claro ao mais forte: vencimento é atenção, então a escala vai do amarelo ao vermelho. */
-// design-ignore-next-line brand/tokens-only: gradiente de calor contínuo do calendário
-const HEAT_COLORS = ['#fde68a', '#fbbf24', '#f97316', '#dc2626'];
+const HEAT_COLORS = [
+  'var(--brand-yellow-300)',
+  'var(--brand-yellow-500)',
+  'var(--warning)',
+  'var(--destructive)',
+];
 
 export function AzuosCalendarChart({ data, state, ui }: AzuosCalendarChartProps) {
   const isMobile = useIsMobile();
-  const range = calendarRange(data.from ?? firstDayOfMonth(new Date()), isMobile ? MOBILE_MONTHS : DESKTOP_MONTHS);
+  const range = calendarRange(
+    data.from ?? firstDayOfMonth(new Date()),
+    isMobile ? MOBILE_MONTHS : DESKTOP_MONTHS,
+  );
   const total = data.days.reduce((sum, day) => sum + day.count, 0);
 
   return (
@@ -61,7 +73,12 @@ function HeatLegend() {
     <div className="text-muted-foreground flex items-center justify-end gap-1 text-xs">
       <span>Menos</span>
       {HEAT_COLORS.map((color) => (
-        <span key={color} className="rounded-chip size-3" style={{ backgroundColor: color }} aria-hidden="true" />
+        <span
+          key={color}
+          className="rounded-chip size-3"
+          style={{ backgroundColor: color }}
+          aria-hidden="true"
+        />
       ))}
       <span>Mais</span>
     </div>
@@ -102,7 +119,7 @@ export function calendarOption(
       show: false,
       min: 1,
       max: top,
-      inRange: { color: HEAT_COLORS },
+      inRange: { color: HEAT_COLORS.map((color) => resolveColor(color)) },
       outOfRange: { color: theme.track },
     },
     calendar: {
@@ -113,11 +130,34 @@ export function calendarOption(
       bottom: 4,
       cellSize: ['auto', 'auto'],
       splitLine: { show: false },
-      itemStyle: { color: theme.track, borderColor: theme.surface, borderWidth: 3, borderRadius: 4 },
+      itemStyle: {
+        color: theme.track,
+        borderColor: theme.surface,
+        borderWidth: 3,
+        borderRadius: 4,
+      },
       yearLabel: { show: false },
-      dayLabel: { firstDay: 0, nameMap: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'], color: theme.muted, fontSize: 10 },
+      dayLabel: {
+        firstDay: 0,
+        nameMap: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
+        color: theme.muted,
+        fontSize: 10,
+      },
       monthLabel: {
-        nameMap: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        nameMap: [
+          'Jan',
+          'Fev',
+          'Mar',
+          'Abr',
+          'Mai',
+          'Jun',
+          'Jul',
+          'Ago',
+          'Set',
+          'Out',
+          'Nov',
+          'Dez',
+        ],
         color: theme.muted,
         fontSize: 11,
       },

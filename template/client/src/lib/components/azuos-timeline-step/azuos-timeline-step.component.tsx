@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
 
+import { cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -17,14 +18,20 @@ export type AzuosTimelineStepProps = {
     description?: string;
     icon: LucideIcon;
   };
-  ui?: { isLast?: boolean; tone?: 'neutral' | 'brand' | 'success'; className?: string };
+  ui?: {
+    isLast?: boolean;
+    /** `danger`: o passo que NÃO aconteceu (uma consulta recusada, por exemplo). */
+    tone?: 'neutral' | 'brand' | 'success' | 'danger';
+    className?: string;
+  };
   children: ReactNode;
 };
 
 const ICON_TONE_CLASSES = {
   neutral: 'border-border bg-card text-foreground',
-  brand: 'bg-primary/10 text-primary',
-  success: 'bg-success/10 text-success',
+  brand: cardToneClasses('brand').dot,
+  success: cardToneClasses('success').dot,
+  danger: cardToneClasses('danger').dot,
 } as const;
 
 export function AzuosTimelineStep({ data, ui, children }: AzuosTimelineStepProps) {

@@ -1,4 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { useTheme } from './theme';
@@ -61,5 +62,12 @@ describe('useTheme', () => {
     act(() => button.click());
 
     expect(button.textContent).toBe(before);
+  });
+
+  // triste
+  /* No servidor não há navegador para ler a preferência: a primeira pintura sai no tema claro, o
+     padrão do grupo, e o navegador corrige se a pessoa escolheu o escuro. */
+  it('renders light on the server, where nothing is saved', () => {
+    expect(renderToString(<Probe />)).toContain('light');
   });
 });

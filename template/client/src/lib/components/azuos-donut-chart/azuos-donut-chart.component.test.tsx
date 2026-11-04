@@ -1,8 +1,40 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AzuosDonutChart } from './azuos-donut-chart.component';
+import type * as EchartsUtil from '../../utils/echarts.util';
+import { themeColor } from '../../utils/theme-color.util';
+import {
+  AzuosDonutChart,
+  donutOption,
+} from './azuos-donut-chart.component';
+
+
+/* Um ECharts de mentira, como no teste do `AzuosEchart`: o desenho em si é do ECharts; o que este
+   componente decide é QUAL clique vira seleção e com que nome. */
+const fakeChart = vi.hoisted(() => ({
+  on: vi.fn(),
+  setOption: vi.fn(),
+  resize: vi.fn(),
+  dispose: vi.fn(),
+}));
+
+vi.mock('../../utils/echarts.util', async (importOriginal) => ({
+  ...(await importOriginal<typeof EchartsUtil>()),
+  loadECharts: () => Promise.resolve({ init: () => fakeChart }),
+}));
+
+/** O que o ECharts chamaria num clique no desenho. */
+async function chartClick(): Promise<(params: unknown) => void> {
+  await waitFor(() => expect(fakeChart.on).toHaveBeenCalledWith('click', expect.any(Function)));
+  const call = [...fakeChart.on.mock.calls].reverse().find((entry: unknown[]) => entry[0] === 'click');
+
+  return call?.[1] as (params: unknown) => void;
+}
+
+afterEach(() => {
+  fakeChart.on.mockClear();
+});
 
 const SLICES = [
   { label: 'A fazer', value: 6 },
@@ -79,5 +111,38 @@ describe('AzuosDonutChart', () => {
 
     expect(screen.getByText('0%')).toBeInTheDocument();
     expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
+  });
+});
+
+describe('donutOption', () => {
+  // feliz
+  it('writes the name, the count and the share in the balloon', () => {
+    const option = donutOption(SLICES, 'Tarefas', { surface: themeColor('--card') }) as {
+      tooltip: { formatter: (params: unknown) => string };
+    };
+
+    expect(option.tooltip.formatter({ name: 'A fazer', value: 6 })).toBe('<b>A fazer</b><br/>Tarefas: 6 (60%)');
+  });
+
+  // triste
+  it('does not divide by zero in the balloon of an empty ring', () => {
+    const option = donutOption([{ label: 'Nada', value: 0 }], 'Tarefas', { surface: themeColor('--card') }) as {
+      tooltip: { formatter: (params: unknown) => string };
+    };
+
+    expect(option.tooltip.formatter({ name: 'Nada', value: 0 })).toBe('<b>Nada</b><br/>Tarefas: 0 (0%)');
+  });
+});
+
+describe('AzuosDonutChart selection on the ring', () => {
+  // feliz
+  it('opens the breakdown of the clicked slice', async () => {
+    const onSelect = vi.fn();
+    render(<AzuosDonutChart data={{ slices: SLICES, seriesLabel: 'Tarefas' }} actions={{ onSelect }} />);
+    const click = await chartClick();
+
+    act(() => click({ name: 'Em andamento' }));
+
+    expect(onSelect).toHaveBeenCalledWith('Em andamento');
   });
 });

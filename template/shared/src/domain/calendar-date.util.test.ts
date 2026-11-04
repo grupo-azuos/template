@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   addDaysIso,
+  addMonthsIso,
+  addMonthsUtc,
   daysBetween,
   isValidIsoDate,
   parseIsoDate,
+  toIsoDate,
   todayIso,
 } from './calendar-date.util';
 
@@ -40,5 +43,34 @@ describe('calendar dates', () => {
   it('refuses text that is not in the calendar date format', () => {
     expect(isValidIsoDate('15/03/2026')).toBe(false);
     expect(daysBetween('', '2026-01-01')).toBeNull();
+  });
+});
+
+describe('calendar date helpers', () => {
+  // feliz
+  it('tells a valid calendar date from text that only looks like one', () => {
+    expect(isValidIsoDate('2026-02-28')).toBe(true);
+    expect(isValidIsoDate('2026-02-30')).toBe(false);
+    expect(isValidIsoDate(null)).toBe(false);
+  });
+
+  it('writes a date back as AAAA-MM-DD', () => {
+    expect(toIsoDate(new Date(Date.UTC(2026, 0, 5)))).toBe('2026-01-05');
+  });
+
+  it('adds months keeping the day, clamped to the last day of a shorter month', () => {
+    expect(addMonthsIso('2026-01-31', 1)).toBe('2026-02-28');
+    expect(addMonthsIso('2026-03-31', -1)).toBe('2026-02-28');
+    expect(addMonthsIso('2026-11-15', 2)).toBe('2027-01-15');
+
+    const date = new Date(Date.UTC(2024, 0, 31));
+    addMonthsUtc(date, 1);
+    expect(toIsoDate(date)).toBe('2024-02-29');
+  });
+
+  // triste
+  it('answers empty instead of a wrong date when the input is not a date', () => {
+    expect(addDaysIso('ontem', 1)).toBe('');
+    expect(addMonthsIso(undefined, 1)).toBe('');
   });
 });

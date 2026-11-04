@@ -147,4 +147,88 @@ describe('AzuosAppShellMobileBar', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
+
+  it('snaps back when the drag is cancelled by the system', async () => {
+    renderBar({ state: { isMenuOpen: true } });
+
+    const sheet = await screen.findByRole('dialog');
+    const handle = sheet.querySelector('[data-slot="sheet-drag-handle"]')!;
+    fireEvent.pointerDown(handle, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientY: 160, pointerId: 1 });
+    expect(sheet.style.transform).toBe('translateY(60px)');
+
+    fireEvent.pointerCancel(handle, { pointerId: 1 });
+
+    expect(sheet.style.transform).toBe('');
+    fireEvent.pointerMove(handle, { clientY: 300, pointerId: 1 });
+    expect(sheet.style.transform).toBe('');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  // feliz
+  /* O puxão rápido fecha mesmo sem descer os 96px, como no Android — mas só depois de um mínimo:
+     um toque que treme não fecha nada. */
+  it('closes the sheet on a quick flick downwards', async () => {
+    renderBar({ state: { isMenuOpen: true } });
+
+    const sheet = await screen.findByRole('dialog');
+    const handle = sheet.querySelector('[data-slot="sheet-drag-handle"]')!;
+    const stamped = (type: string, clientY: number, timeStamp: number) => {
+      const event = new PointerEvent(type, { clientY, pointerId: 1, bubbles: true });
+      Object.defineProperty(event, 'timeStamp', { value: timeStamp });
+
+      return event;
+    };
+    fireEvent(handle, stamped('pointerdown', 100, 1000));
+    fireEvent(handle, stamped('pointerup', 160, 1040));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('shows the badge on the bar icon and next to the row in the sheet', async () => {
+    renderBar({
+      data: {
+        user: { name: 'Ana Souza', role: 'Administradora' },
+        items,
+        actions: [],
+        profile: { to: '/profile' },
+        areas: [],
+        badges: { tasks: 3 },
+      },
+    });
+
+    const bar = await screen.findByRole('navigation', { name: 'Menu principal' });
+    expect(within(bar).getByRole('link', { name: /Tarefas/ })).toHaveTextContent('3');
+    await userEvent.click(within(bar).getByRole('button', { name: 'Abrir o menu' }));
+    const sheet = await screen.findByRole('dialog');
+    expect(within(sheet).getByRole('link', { name: /Tarefas/ })).toHaveTextContent('3');
+  });
+
+  it('lists the shortcuts of the system inside the sheet', async () => {
+    renderBar({
+      data: {
+        user: { name: 'Ana Souza', role: 'Administradora' },
+        items,
+        actions: [{ key: 'help', label: 'Ajuda', icon: Wrench, href: 'https://ajuda.exemplo.test' }],
+        profile: { to: '/profile' },
+        areas: [],
+      },
+      state: { isMenuOpen: true },
+    });
+
+    const sheet = await screen.findByRole('dialog');
+    expect(within(sheet).getByRole('link', { name: 'Ajuda' })).toHaveAttribute(
+      'href',
+      'https://ajuda.exemplo.test',
+    );
+  });
+
+  // triste
+  it('locks the sign out while leaving and shows why it failed', async () => {
+    renderBar({ state: { isMenuOpen: true, isSigningOut: true, signOutError: 'Sem conexão.' } });
+
+    const sheet = await screen.findByRole('dialog');
+    expect(within(sheet).getByRole('button', { name: 'Saindo…' })).toBeDisabled();
+    expect(within(sheet).getByRole('alert')).toHaveTextContent('Sem conexão.');
+  });
 });
