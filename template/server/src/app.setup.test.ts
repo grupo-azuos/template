@@ -1,4 +1,4 @@
-import { type INestApplication } from '@nestjs/common';
+import { type INestApplication, VersioningType } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import { setupApp } from './app.setup';
@@ -8,6 +8,8 @@ import { HttpExceptionFilter } from './lib/http/http-exception.filter';
 function appSpy() {
   return {
     setGlobalPrefix: vi.fn(),
+    enableVersioning: vi.fn(),
+    use: vi.fn(),
     enableCors: vi.fn(),
     useGlobalFilters: vi.fn(),
   };
@@ -15,7 +17,7 @@ function appSpy() {
 
 describe('setupApp', () => {
   // feliz
-  it('prefixes the API, opens CORS for each listed origin and installs the error filter', () => {
+  it('prefixes and versions the API, opens CORS for each listed origin and installs the error filter', () => {
     const app = appSpy();
 
     setupApp(
@@ -24,10 +26,15 @@ describe('setupApp', () => {
     );
 
     expect(app.setGlobalPrefix).toHaveBeenCalledWith('api');
+    expect(app.enableVersioning).toHaveBeenCalledWith({
+      type: VersioningType.URI,
+      defaultVersion: '1',
+    });
     expect(app.enableCors).toHaveBeenCalledWith({
       origin: ['http://localhost:5009', 'https://app.exemplo.com.br'],
       credentials: true,
     });
+    expect(app.useGlobalFilters).toHaveBeenCalledOnce();
     expect(app.useGlobalFilters).toHaveBeenCalledWith(expect.any(HttpExceptionFilter));
   });
 

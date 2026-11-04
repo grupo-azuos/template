@@ -1,8 +1,7 @@
-import { applyHttpConventions } from './lib/http/api-version';
 import { type INestApplication } from '@nestjs/common';
 
 import { type Env } from './lib/config/env.schema';
-import { HttpExceptionFilter } from './lib/http/http-exception.filter';
+import { applyHttpConventions } from './lib/http/api-version';
 
 /**
  * O que toda instância da API precisa ter — a de verdade e a dos testes E2E.
@@ -20,6 +19,5 @@ export function setupApp(app: INestApplication, env: Env): void {
   /* A validação é o `ZodValidationPipe`, registrado como pipe global no AppModule. O
      `ValidationPipe` do Nest não entra aqui: ele exige `class-validator`, e ter dois
      validadores significaria dois lugares definindo o contrato — exatamente o que o schema
-     único em `shared` existe para impedir. */
-  app.useGlobalFilters(new HttpExceptionFilter());
+     único em `shared` existe para impedir. O filtro de erro entra em `applyHttpConventions`. */
 }
