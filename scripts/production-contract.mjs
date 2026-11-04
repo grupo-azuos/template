@@ -18,9 +18,11 @@ function files(directory) {
 function apiRules(project) {
   const version = read(project, 'template/server/src/lib/http/api-version.ts');
   const main = read(project, 'template/server/src/main.ts');
+  const docs = read(project, 'template/server/src/lib/http/openapi-document.ts');
   return [
     ...rule(version.includes('VersioningType.URI') && version.includes('API-Version'), 'Use URI versioning /api/v1 and API-Version from the package version'),
-    ...rule(main.includes('packageVersion()') && main.includes('docs/v1-json'), 'Publish versioned Swagger using the application version'),
+    ...rule(main.includes('packageVersion()') && main.includes('setupOpenApiDocs(app'), 'Publish versioned Swagger using the application version'),
+    ...rule(docs.includes('PUBLISHED_MAJORS') && docs.includes('docs/v${major}-json') && docs.includes('filter: true'), 'Swagger needs the version selector and the search box'),
   ];
 }
 
