@@ -1,4 +1,5 @@
 import { docsAccess } from './lib/http/docs-access.middleware';
+import { setupOpenApiDocs } from './lib/http/openapi-document';
 import { packageVersion } from './lib/http/api-version';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -71,22 +72,7 @@ async function bootstrap(): Promise<void> {
   );
 
   app.use(['/docs', '/docs-json'], docsAccess(env.NODE_ENV));
-  SwaggerModule.setup('docs/v1', app, document, {
-    ui: false,
-    raw: ['json'],
-    jsonDocumentUrl: 'docs/v1-json',
-  });
-
-  SwaggerModule.setup('docs', app, document, {
-    jsonDocumentUrl: 'docs-json',
-    raw: ['json'],
-    explorer: true,
-    swaggerOptions: {
-      filter: true,
-      persistAuthorization: true,
-      urls: [{ name: 'v1', url: '/docs/v1-json' }],
-    },
-  });
+  setupOpenApiDocs(app, document, 'Template');
 
   await app.listen(env.API_PORT);
 
