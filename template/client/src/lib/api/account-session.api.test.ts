@@ -24,7 +24,7 @@ describe('account session', () => {
     vi.stubGlobal('fetch', fetchMock);
     await signOutAccount();
     const [url, options] = fetchMock.mock.calls[0]!;
-    expect(new URL(url).pathname).toBe('/api/auth/logout');
+    expect(new URL(url).pathname).toBe('/api/v1/auth/logout');
     expect(options).toMatchObject({
       method: 'POST',
       credentials: 'include',

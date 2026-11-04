@@ -33,7 +33,7 @@ const account = {
   email: 'ana@grupoazuos.com.br',
   role: 'admin' as const,
   profile: {
-    avatarUrl: 'https://admin-console.test/api/users/1/avatar',
+    avatarUrl: 'https://admin-console.test/api/v1/users/1/avatar',
     jobTitle: 'Analista',
     department: 'Fiscal',
     phone: '11912345678',
@@ -42,7 +42,11 @@ const account = {
   },
 };
 const systems = [
-  { name: 'Paralegal', presentation: { url: 'https://paralegal.test' }, access: { role: 'user' as const } },
+  {
+    name: 'Paralegal',
+    presentation: { url: 'https://paralegal.test' },
+    access: { role: 'user' as const },
+  },
 ];
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -77,7 +81,7 @@ describe('useMyProfileModel', () => {
       name: 'Ana Souza',
       email: 'ana@grupoazuos.com.br',
       roleLabel: 'Gestor',
-      avatarUrl: 'https://admin-console.test/api/users/1/avatar',
+      avatarUrl: 'https://admin-console.test/api/v1/users/1/avatar',
       jobTitle: 'Analista',
       department: 'Fiscal',
       phone: '11912345678',

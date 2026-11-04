@@ -14,7 +14,7 @@ export function accountOrigin(
 }
 
 export async function signOutAccount(): Promise<void> {
-  const response = await fetch(new URL('/api/auth/logout', accountOrigin()), {
+  const response = await fetch(new URL('/api/v1/auth/logout', accountOrigin()), {
     method: 'POST',
     credentials: 'include',
     headers: { 'content-type': 'application/json', accept: 'application/json' },

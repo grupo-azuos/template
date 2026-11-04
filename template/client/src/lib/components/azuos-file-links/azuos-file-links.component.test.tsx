@@ -6,8 +6,8 @@ import { AzuosFileLinks } from './azuos-file-links.component';
 
 const FILE = {
   fileName: 'Atestado médico.pdf',
-  viewUrl: '/api/employees/7/medical-certificates/1/file?mode=view',
-  downloadUrl: '/api/employees/7/medical-certificates/1/file',
+  viewUrl: '/api/v1/employees/7/medical-certificates/1/file?mode=view',
+  downloadUrl: '/api/v1/employees/7/medical-certificates/1/file',
 };
 
 describe('AzuosFileLinks', () => {

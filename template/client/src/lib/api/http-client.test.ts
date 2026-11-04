@@ -29,7 +29,7 @@ describe('apiRequest', () => {
 
     await apiRequest('/tasks', { query: { search: '', status: 'done', page: 1, owner: null } });
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/tasks?status=done&page=1');
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/tasks?status=done&page=1');
   });
 
   it('answers undefined for 204, instead of failing to parse an empty body', async () => {
