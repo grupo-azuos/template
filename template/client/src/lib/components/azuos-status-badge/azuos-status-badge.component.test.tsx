@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react';
+import { Siren } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
+
+import { themeColor } from '../../utils/theme-color.util';
 
 import { AzuosStatusBadge } from './azuos-status-badge.component';
 
@@ -18,14 +21,14 @@ describe('AzuosStatusBadge', () => {
       <AzuosStatusBadge data={{ label: 'Concluída' }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-success-soft');
-    expect(container.firstElementChild?.className).toContain('text-success');
+    expect(container.firstElementChild?.className).toContain('bg-muted');
+    expect(container.firstElementChild?.className).toContain('text-hue-green');
   });
 
   it('falls back to neutral when no tone was given, instead of having no color', () => {
     const { container } = render(<AzuosStatusBadge data={{ label: 'A fazer' }} />);
 
-    expect(container.firstElementChild?.className).toContain('bg-ink-100');
+    expect(container.firstElementChild?.className).toContain('bg-muted');
   });
 
   // triste
@@ -53,6 +56,32 @@ describe('AzuosStatusBadge', () => {
     );
 
     expect(container.firstElementChild?.className).toContain('ml-4');
-    expect(container.firstElementChild?.className).toContain('bg-success-soft');
+    expect(container.firstElementChild?.className).toContain('bg-muted');
+  });
+
+  // feliz
+  /* Cor livre (a da etapa cadastrada pela pessoa): o fundo é a mesma cor diluída, para o texto
+     continuar legível sem escolher uma segunda cor à mão. */
+  it('turns a free colour into the nearest hue of the card palette, and draws the icon', () => {
+    const color = themeColor('--primary');
+    const { container } = render(
+      <AzuosStatusBadge data={{ label: 'Triagem' }} ui={{ color, icon: Siren, size: 'sm' }} />,
+    );
+
+    const badge = container.firstElementChild as HTMLElement;
+    expect(badge.className).toMatch(/text-hue-[a-z]+/);
+    expect(badge.getAttribute('style')).toBeNull();
+    expect(badge.querySelector('svg')).not.toBeNull();
+  });
+
+  // triste
+  it('ignores an empty colour and draws no icon when none was given', () => {
+    const { container } = render(
+      <AzuosStatusBadge data={{ label: 'Triagem' }} ui={{ color: null }} />,
+    );
+
+    const badge = container.firstElementChild as HTMLElement;
+    expect(badge.getAttribute('style')).toBeNull();
+    expect(badge.querySelector('svg')).toBeNull();
   });
 });

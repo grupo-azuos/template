@@ -106,7 +106,9 @@ export function AzuosDatePicker({ data, ui, state, actions }: AzuosDatePickerPro
               /* O degrau `lg` da régua de medidas: este campo fica ao lado de um `AzuosTextField`
                  num formulário, e tem de ter a altura dele. */
               'control-lg rounded-control',
-              'border-border bg-card hover:bg-accent/40 w-full justify-start text-left font-normal shadow-xs transition-colors',
+              /* Fundo sólido de campo, também no escuro: a variante `outline` do `ui/button` traz
+                 `dark:bg-input/30`, e só a mesma variante (`dark:`) a derruba. */
+              'border-input bg-muted dark:bg-muted hover:bg-accent/40 dark:hover:bg-accent/40 text-foreground w-full justify-start text-left font-normal shadow-xs transition-colors',
               !selected && 'text-muted-foreground',
             )}
           >

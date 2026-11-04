@@ -1,24 +1,151 @@
-# Este compose sobe só a aplicação — um serviço, que responde `/api` e o SPA na mesma porta.
-#
-# O banco é um ARQUIVO SQLite, e ele mora num volume. Sem o volume, cada `up --build`
-# recriaria o container e o arquivo junto: tudo o que foi cadastrado sumiria sem aviso.
-#
-# Em produção fica atrás de um Traefik (ex.: Coolify), que resolve domínio e TLS;
-# localmente é só `-p 3009:3009`.
+version: '3.8'
 services:
   app:
-    build:
-      context: ..
-      dockerfile: docker/dockerfile
-    env_file:
-      - path: ../server/.env
-        required: false
+    image: ${APP_IMAGE:?}
     environment:
-      DATABASE_FILE: /repo/server/data/app.db
-    ports:
-      - '3009:3009'
-    volumes:
-      - app-data:/repo/server/data
-
-volumes:
-  app-data:
+    - NODE_ENV=production
+    - API_PORT=3000
+    - APP_ENV
+    - TRUST_PROXY_HOPS=${TRUST_PROXY_HOPS:?}
+    - VALKEY_URL
+    - VALKEY_KEY_PREFIX
+    - VALKEY_TIMEOUT_MS
+    - ADMIN_CONSOLE_TIMEOUT_MS
+    - ADMIN_CONSOLE_CLIENT_SECRET
+    - ADMIN_CONSOLE_URL
+    - API_CORS_ORIGIN
+    - API_LOG_LEVEL
+    - DATABASE_FILE
+    read_only: true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp:size=64m,mode=1777
+    stop_grace_period: 60s
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - node -e "fetch('http://127.0.0.1:3000/api/health', {signal:AbortSignal.timeout(3000),redirect:'error'}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+    networks:
+    - private
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    deploy:
+      replicas: ${APP_REPLICAS:-1}
+      placement:
+        constraints:
+        - node.id == ${DEPLOY_NODE_ID:?}
+      resources:
+        limits:
+          cpus: ${APP_CPU_LIMIT:-1.0}
+          memory: ${APP_MEMORY_LIMIT:-512M}
+        reservations:
+          cpus: ${APP_CPU_RESERVATION:-0.10}
+          memory: ${APP_MEMORY_RESERVATION:-128M}
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        monitor: 45s
+        max_failure_ratio: 0
+      rollback_config:
+        parallelism: 1
+        order: start-first
+        monitor: 45s
+      labels:
+        azuos.app: template
+        azuos.environment: ${DEPLOY_ENV:?}
+        azuos.revision: ${APP_REVISION:?}
+    extra_hosts: &id001
+    - login.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
+    - shared-api.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
+    - gestao-rh.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
+  gateway:
+    image: azuos-gateway:2.11
+    user: 1000:1000
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?}
+      ADMIN_CONSOLE_URL: ${ADMIN_CONSOLE_URL:-http://admin-console:3000}
+    configs:
+    - source: gateway
+      target: /etc/caddy/caddyfile
+    read_only: true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp:size=16m,mode=1777
+    - /config:size=16m,uid=1000,gid=1000
+    - /data:size=16m,uid=1000,gid=1000
+    stop_grace_period: 60s
+    networks:
+    - private
+    - edge
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - -q
+      - -T
+      - '3'
+      - -O
+      - /dev/null
+      - http://127.0.0.1:8080/__ready
+      interval: 10s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+        - node.id == ${DEPLOY_NODE_ID:?}
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+        reservations:
+          cpus: '0.05'
+          memory: 16M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        monitor: 30s
+      rollback_config:
+        parallelism: 1
+        order: start-first
+        monitor: 30s
+    extra_hosts: *id001
+configs:
+  gateway:
+    name: ${APP_NAME:?}-${DEPLOY_ENV:?}-gateway-${APP_REVISION:?}
+    file: ./caddy/caddyfile
+networks:
+  private:
+    driver: overlay
+    driver_opts:
+      encrypted: ''
+  edge:
+    name: azuos-edge
+    external: true

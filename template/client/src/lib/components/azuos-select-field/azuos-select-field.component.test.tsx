@@ -86,3 +86,36 @@ describe('AzuosSelectField', () => {
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
   });
 });
+
+describe('AzuosSelectField with people', () => {
+  // feliz
+  it('shows the initials next to the name of the chosen person', () => {
+    render(
+      <AzuosSelectField
+        data={{
+          value: 'ana',
+          options: [{ value: 'ana', label: 'Ana Souza', personName: 'Ana Souza', avatarUrl: null }],
+        }}
+        ui={{ ariaLabel: 'Responsável' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', { name: 'Responsável' });
+    expect(trigger).toHaveTextContent('AS');
+    expect(trigger).toHaveTextContent('Ana Souza');
+  });
+
+  // triste
+  it('draws no avatar for an option that is not a person', () => {
+    render(
+      <AzuosSelectField
+        data={{ value: 'Ana', options: owners }}
+        ui={{ ariaLabel: 'Responsável' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+
+    expect(document.querySelector('[data-slot="avatar"]')).toBeNull();
+  });
+});

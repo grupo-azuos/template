@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,8 @@ import { AzuosErrorState } from '../azuos-error-state/azuos-error-state.componen
 export type AzuosConfirmDialogProps = {
   data: {
     title: string;
-    description: string;
+    /** Texto, ou texto com destaque (`<strong>` no nome do que vai ser apagado). */
+    description: ReactNode;
     confirmLabel: string;
     confirmingLabel?: string;
   };

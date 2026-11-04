@@ -145,6 +145,20 @@ describe('AzuosAppShell', () => {
     expect(await screen.findByRole('button', { name: 'Saindo…' })).toBeDisabled();
   });
 
+  /* A moldura e o painel cortam SEM rolar: com `overflow-hidden` uma âncora ou um foco lá embaixo
+     rolava a moldura, e sobrava uma faixa vazia no fim da tela. */
+  it('clips the frame and the panel without letting them scroll', async () => {
+    renderShell();
+    await screen.findByText('Conteúdo da rota');
+
+    for (const slot of ['sidebar-wrapper', 'sidebar-inset']) {
+      const frame = document.querySelector(`[data-slot="${slot}"]`);
+      expect(frame).toHaveClass('overflow-clip');
+      expect(frame).not.toHaveClass('overflow-hidden');
+    }
+  });
+
+  // triste
   it('tells when the sign out failed', async () => {
     renderShell({ state: { signOutError: 'Não consegui encerrar a sessão. Tente novamente.' } });
 

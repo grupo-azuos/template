@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useMediaQueryBelow, XL_BREAKPOINT } from './use-media-query';
@@ -75,5 +76,18 @@ describe('XL_BREAKPOINT', () => {
      lista troca de tabela para cartões, e os dois têm de continuar casados. */
   it('is the point where the table becomes cards', () => {
     expect(XL_BREAKPOINT).toBe(1280);
+  });
+
+  // triste
+  /* No servidor não há janela, e o padrão é "não é estreito": nascer compacta e crescer seria o
+     mesmo salto por outro caminho. */
+  it('assumes a wide window on the server', () => {
+    function Probe() {
+      const isBelow = useMediaQueryBelow(XL_BREAKPOINT);
+
+      return <output>{String(isBelow)}</output>;
+    }
+
+    expect(renderToString(<Probe />)).toContain('false');
   });
 });

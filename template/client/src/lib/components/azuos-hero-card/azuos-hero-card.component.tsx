@@ -1,9 +1,11 @@
 import type { LucideIcon } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
 
+import { type AzuosCardTone, cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
-export type AzuosHeroCardTone = 'brand' | 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+export type AzuosHeroCardTone =
+  'brand' | 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
 /**
  * CARTÃO DE DESTAQUE SÓLIDO (HERO CARD) DO GRUPO AZUOS.
@@ -33,74 +35,31 @@ export type AzuosHeroCardProps = {
   };
 };
 
-const TONE_STYLES: Record<
-  AzuosHeroCardTone,
-  {
-    container: string;
-    title: string;
-    description: string;
-    badgeBg: string;
-    badgeText: string;
-    iconColor: string;
-  }
-> = {
-  brand: {
-    container: 'bg-primary text-primary-foreground',
-    title: 'text-primary-foreground',
-    description: 'text-primary-soft',
-    badgeBg: 'bg-accent-hero',
-    badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-foreground',
-  },
-  accent: {
-    container: 'bg-accent-hero text-accent-hero-foreground',
-    title: 'text-accent-hero-foreground',
-    description: 'text-ink-700',
-    badgeBg: 'bg-ink-900',
-    badgeText: 'text-primary-foreground',
-    iconColor: 'text-accent-hero-foreground',
-  },
-  success: {
-    container: 'bg-success text-primary-foreground',
-    title: 'text-primary-foreground',
-    description: 'text-success-soft',
-    badgeBg: 'bg-accent-hero',
-    badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-foreground',
-  },
-  warning: {
-    container: 'bg-warning text-primary-foreground',
-    title: 'text-primary-foreground',
-    description: 'text-warning-soft',
-    badgeBg: 'bg-ink-900',
-    badgeText: 'text-primary-foreground',
-    iconColor: 'text-primary-foreground',
-  },
-  danger: {
-    container: 'bg-destructive text-destructive-foreground',
-    title: 'text-destructive-foreground',
-    description: 'text-destructive-soft',
-    badgeBg: 'bg-accent-hero',
-    badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-destructive-foreground',
-  },
-  info: {
-    container: 'bg-info text-primary-foreground',
-    title: 'text-primary-foreground',
-    description: 'text-info-soft',
-    badgeBg: 'bg-accent-hero',
-    badgeText: 'text-accent-hero-foreground',
-    iconColor: 'text-primary-foreground',
-  },
-  neutral: {
-    container: 'bg-card text-card-foreground border border-border',
-    title: 'text-card-foreground',
-    description: 'text-muted-foreground',
-    badgeBg: 'bg-muted',
-    badgeText: 'text-foreground',
-    iconColor: 'text-muted-foreground',
-  },
+/**
+ * O card fica na superfície da marca; o tom é sotaque (`lib/utils/card-tone.util.ts`): o ícone
+ * grande no canto e a pastilha. `accent` usa o âmbar. Sem fundo colorido, sem opacidade.
+ */
+const TONE_HUE: Record<AzuosHeroCardTone, AzuosCardTone> = {
+  brand: 'brand',
+  accent: 'amber',
+  success: 'success',
+  warning: 'warning',
+  danger: 'danger',
+  info: 'info',
+  neutral: 'neutral',
 };
+
+function stylesOf(tone: AzuosHeroCardTone) {
+  const classes = cardToneClasses(TONE_HUE[tone] ?? 'brand');
+
+  return {
+    container: 'bg-card text-card-foreground hover:shadow-xl',
+    title: '',
+    description: 'text-muted-foreground',
+    badge: classes.dot,
+    iconColor: classes.text,
+  };
+}
 
 function HeroCardInner({
   data,
@@ -108,7 +67,7 @@ function HeroCardInner({
   children,
 }: {
   data: AzuosHeroCardProps['data'];
-  styles: (typeof TONE_STYLES)[AzuosHeroCardTone];
+  styles: ReturnType<typeof stylesOf>;
   children?: ReactNode;
 }) {
   const Icon = data.icon;
@@ -118,7 +77,7 @@ function HeroCardInner({
       <div
         data-slot="hero-card-icon"
         className={cn(
-          'pointer-events-none absolute -bottom-5 -right-5 size-36 select-none overflow-hidden opacity-15 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-25',
+          'pointer-events-none absolute -right-5 -bottom-5 size-36 overflow-hidden transition-transform duration-300 select-none group-hover:scale-105',
           styles.iconColor,
         )}
         aria-hidden="true"
@@ -127,11 +86,11 @@ function HeroCardInner({
       </div>
 
       <div className="relative z-10 flex flex-col gap-1.5 pr-14 text-left">
-        <h3 className={cn('text-lg font-bold tracking-tight leading-snug', styles.title)}>
+        <h3 className={cn('text-lg leading-snug font-bold tracking-tight', styles.title)}>
           {data.title}
         </h3>
         {data.description ? (
-          <p className={cn('text-xs font-medium leading-relaxed', styles.description)}>
+          <p className={cn('text-xs leading-relaxed font-medium', styles.description)}>
             {data.description}
           </p>
         ) : null}
@@ -141,9 +100,8 @@ function HeroCardInner({
         {data.badge ? (
           <span
             className={cn(
-              'inline-flex items-center rounded-chip px-2.5 py-1 text-xs font-bold shadow-xs',
-              styles.badgeBg,
-              styles.badgeText,
+              'rounded-chip inline-flex items-center px-2.5 py-1 text-xs font-bold shadow-xs',
+              styles.badge,
             )}
           >
             {data.badge}
@@ -157,21 +115,28 @@ function HeroCardInner({
 
 export function AzuosHeroCard({ data, ui, actions }: AzuosHeroCardProps) {
   const tone = ui?.tone ?? 'brand';
-  const styles = TONE_STYLES[tone] ?? TONE_STYLES.brand;
+  const styles = stylesOf(tone);
 
   const containerClassName = cn(
-    'relative flex min-h-[148px] w-full flex-col justify-between overflow-hidden rounded-surface p-5 shadow-card transition-transform hover:-translate-y-0.5',
+    'rounded-surface shadow-card relative flex min-h-[148px] w-full flex-col justify-between overflow-hidden p-5 transition-all hover:-translate-y-0.5 hover:shadow-xl',
     styles.container,
     ui?.className,
   );
 
-  const inner = <HeroCardInner data={data} styles={styles}>{ui?.children}</HeroCardInner>;
+  const inner = (
+    <HeroCardInner data={data} styles={styles}>
+      {ui?.children}
+    </HeroCardInner>
+  );
 
   if (data.to) {
     return (
       <a
         href={data.to}
-        className={cn('group block no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-surface', containerClassName)}
+        className={cn(
+          'group focus-visible:ring-ring rounded-surface block no-underline focus-visible:ring-2 focus-visible:outline-none',
+          containerClassName,
+        )}
         data-slot="azuos-hero-card"
         onClick={actions?.onClick}
       >
@@ -185,7 +150,10 @@ export function AzuosHeroCard({ data, ui, actions }: AzuosHeroCardProps) {
       <button
         type="button"
         onClick={actions.onClick}
-        className={cn('group block text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-surface', containerClassName)}
+        className={cn(
+          'group focus-visible:ring-ring rounded-surface block cursor-pointer text-left focus-visible:ring-2 focus-visible:outline-none',
+          containerClassName,
+        )}
         data-slot="azuos-hero-card"
       >
         {inner}
@@ -194,11 +162,7 @@ export function AzuosHeroCard({ data, ui, actions }: AzuosHeroCardProps) {
   }
 
   return (
-    <div
-      role="article"
-      className={containerClassName}
-      data-slot="azuos-hero-card"
-    >
+    <div role="article" className={containerClassName} data-slot="azuos-hero-card">
       {inner}
     </div>
   );

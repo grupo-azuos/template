@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatMoney, formatMoneyRange } from './format-money.util';
+import {
+  formatMoney,
+  formatMoneyCents,
+  formatMoneyRange,
+  formatSignedMoneyCents,
+} from './format-money.util';
+
+const plain = (text: string) => text.replace(/\s/g, ' ');
 
 describe('formatMoney', () => {
   // feliz
@@ -40,5 +47,21 @@ describe('formatMoneyRange', () => {
   // triste
   it('still writes a range when both ends are the same', () => {
     expect(formatMoneyRange(500, 500)).toMatch(/500.+a.+500/);
+  });
+});
+
+describe('formatMoneyCents', () => {
+  // feliz
+  it('keeps the cents and writes the sign when asked', () => {
+    expect(plain(formatMoneyCents(123_456))).toBe('R$ 1.234,56');
+    expect(plain(formatSignedMoneyCents(500))).toBe('+R$ 5,00');
+    expect(plain(formatSignedMoneyCents(-500))).toBe('−R$ 5,00');
+    expect(plain(formatSignedMoneyCents(0))).toBe('R$ 0,00');
+  });
+
+  // triste
+  it('shows a dash for an absent or broken value', () => {
+    expect(formatMoneyCents(null)).toBe('—');
+    expect(formatSignedMoneyCents(Number.NaN)).toBe('—');
   });
 });

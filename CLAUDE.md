@@ -66,7 +66,7 @@ Siga a skill **`git-flow`** sempre que não estiver em Modo Admin com instruçõ
    o sistema e mostrar à pessoa **como conferir**.
 4. Perguntar: **"Está funcionando do jeito que você queria?"** e **esperar**.
 5. **Só com um OK explícito**: `git merge --no-ff -m "[merge](<escopo>): <o que passou a
-   existir>"` da branch na `develop` e enviar a develop.
+existir>"` da branch na `develop` e enviar a develop.
 6. **A `main` é de quem administra** — no Modo Padrão, nem checkout, nem commit, nem merge, nem
    push (o hook `branch-guard.sh` recusa). Release e hotfix também. Em Modo Admin, a `main` é
    totalmente liberada.
@@ -128,23 +128,23 @@ O padrão está em **`CONTRIBUTING.md`**, e ele manda. Os pontos que mais quebra
 
 Antes de começar uma tarefa, veja se há skill para ela em `.claude/skills/` e siga-a:
 
-| Pedido | Skill | Atalho pt-BR |
-|---|---|---|
-| Primeira vez no projeto, "como rodo isso?" | `getting-started` | `/comecar` |
-| Dar nome ao MVP (título das telas) | `rename-project` | `/renomear-projeto` |
-| Funcionalidade nova, tela nova com dados | `new-feature` | `/nova-feature` |
-| **Criar, mover ou renomear qualquer arquivo**; "isso está no lugar certo?" | `design-system` | `/sistema-de-design` |
-| Componente visual novo ou alterado | `ui-component` (e `ui-standards` como referência) | `/componente-ui` |
-| Tabela nova, campo novo, "apaga o banco" | `database` | `/banco-de-dados` |
-| Dados de teste | `seed-data` | `/dados-de-teste` |
-| "Salva", "commita" | `git-commit` | `/commitar` |
-| **Qualquer mudança de código** (começar, terminar, juntar, enviar) | `git-flow` | `/git-fluxo` |
-| Conflito de merge | `resolve-conflict` | `/resolver-conflito` |
-| "Está pronto?", antes de commit de feature | `verify` | `/verificar` |
-| Tirar a feature de Tarefas | `remove-example` | `/remover-exemplo` |
-| Erro de ambiente, porta ocupada, instalação | `troubleshoot` | `/socorro` |
-| Login, usuários, senha, dados em outro PC, servidor, internet | `mvp-limits` | `/limites-do-mvp` |
-| Erro estrutural grande, bloqueio de arquivo de estrutura | `support` | `/suporte` |
+| Pedido                                                                     | Skill                                             | Atalho pt-BR         |
+| -------------------------------------------------------------------------- | ------------------------------------------------- | -------------------- |
+| Primeira vez no projeto, "como rodo isso?"                                 | `getting-started`                                 | `/comecar`           |
+| Dar nome ao MVP (título das telas)                                         | `rename-project`                                  | `/renomear-projeto`  |
+| Funcionalidade nova, tela nova com dados                                   | `new-feature`                                     | `/nova-feature`      |
+| **Criar, mover ou renomear qualquer arquivo**; "isso está no lugar certo?" | `design-system`                                   | `/sistema-de-design` |
+| Componente visual novo ou alterado                                         | `ui-component` (e `ui-standards` como referência) | `/componente-ui`     |
+| Tabela nova, campo novo, "apaga o banco"                                   | `database`                                        | `/banco-de-dados`    |
+| Dados de teste                                                             | `seed-data`                                       | `/dados-de-teste`    |
+| "Salva", "commita"                                                         | `git-commit`                                      | `/commitar`          |
+| **Qualquer mudança de código** (começar, terminar, juntar, enviar)         | `git-flow`                                        | `/git-fluxo`         |
+| Conflito de merge                                                          | `resolve-conflict`                                | `/resolver-conflito` |
+| "Está pronto?", antes de commit de feature                                 | `verify`                                          | `/verificar`         |
+| Tirar a feature de Tarefas                                                 | `remove-example`                                  | `/remover-exemplo`   |
+| Erro de ambiente, porta ocupada, instalação                                | `troubleshoot`                                    | `/socorro`           |
+| Login, usuários, senha, dados em outro PC, servidor, internet              | `mvp-limits`                                      | `/limites-do-mvp`    |
+| Erro estrutural grande, bloqueio de arquivo de estrutura                   | `support`                                         | `/suporte`           |
 
 A pessoa pode chamar pelo nome em inglês (`/troubleshoot`) ou pelo atalho em português
 (`/socorro`); os dois fazem o mesmo. `/help` não serve de atalho: é comando nativo do Claude Code.
@@ -204,6 +204,7 @@ use o navegador em http://localhost:5009.
 ## O que NUNCA fazer
 
 ### No Modo Padrão (sem `azuos.admin` ativo):
+
 - Qualquer operação na `main`.
 - Commit direto na `develop`, ou merge nela sem o OK da pessoa.
 - `git commit --no-verify` ou qualquer forma de pular os hooks. Se o hook recusar, corrija.
@@ -213,6 +214,7 @@ use o navegador em http://localhost:5009.
   `--force`) em vez de acionar o suporte.
 
 ### Em qualquer modo (inclusive Modo Admin):
+
 - Criar tela de login, cadastro de usuário, senha, sessão, tabela de usuários, ou instalar
   biblioteca de autenticação. Mexer em `lib/auth`, `user.schema.ts` ou nos cabeçalhos
   `x-forwarded-user-*`. Isso é do auth-forward, e não é assunto deste repositório.
@@ -244,6 +246,7 @@ Antes de solicitar dados de métricas, siga `participant-identity` e
 não comprova apresentação. Não exigir aceite obrigatório, registrar consentimento presumido
 ou tratar ID como anonimização. Governança pendente também impede iniciar nova coleta por
 participante; continue ajudando com o código sem pedir novos dados para métricas.
+
 ## CASCA PADRÃO E "MEU PERFIL" — REGRA ABSOLUTA
 
 O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo Azuos** e
@@ -271,3 +274,7 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
   `AzuosAttachmentPicker`) deve obrigatoriamente aceitar colar arquivos via `Ctrl+V` (captura
   direta de imagens/prints e arquivos do clipboard).
 - Checado no hook e no CI (`check:design`). Exceção só pelo suporte (Central de Chamados).
+
+## Promoção para produção
+
+Ao sair do MVP ou preparar deploy, siga `.claude/skills/production-standard/SKILL.md`. SQLite fica no MVP; PostgreSQL e o Valkey isolado do ambiente são obrigatórios após promoção. Execute `node scripts/production-contract.mjs`.

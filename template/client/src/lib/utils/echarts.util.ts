@@ -1,6 +1,8 @@
 import { type EChartsOption } from 'echarts';
 import type * as EChartsCore from 'echarts/core';
 
+import { hasThemeColor, themeColor } from './theme-color.util';
+
 /**
  * O ECHARTS DO PROJETO — o carregamento, o tema e as cores, num lugar só.
  *
@@ -70,17 +72,19 @@ export type ChartTheme = {
   danger: string;
 };
 
+/* A reserva é o tema CLARO lido do próprio `tokens.css` (ver `theme-color.util`): sem navegador
+   (teste, servidor) é o que vale, e nenhuma cor fica escrita aqui para descolar de lá. */
 const FALLBACK_THEME: ChartTheme = {
-  foreground: '#111827',
-  muted: '#6b7280',
-  border: '#d1d5db',
-  surface: '#ffffff',
-  track: '#f3f4f6',
+  foreground: themeColor('--foreground'),
+  muted: themeColor('--muted-foreground'),
+  border: themeColor('--border'),
+  surface: themeColor('--popover'),
+  track: themeColor('--muted'),
   font: 'Inter, system-ui, sans-serif',
-  success: '#047857',
-  info: '#1d4ed8',
-  warning: '#b45309',
-  danger: '#dc2626',
+  success: themeColor('--success'),
+  info: themeColor('--info'),
+  warning: themeColor('--warning'),
+  danger: themeColor('--destructive'),
 };
 
 /** Lê o tema do documento agora. Sem documento (fora do navegador), o tema claro padrão. */
@@ -93,7 +97,9 @@ export function readChartTheme(): ChartTheme {
     border: resolveColor('var(--border)', FALLBACK_THEME.border),
     surface: resolveColor('var(--popover)', FALLBACK_THEME.surface),
     track: resolveColor('var(--muted)', FALLBACK_THEME.track),
-    font: getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || FALLBACK_THEME.font,
+    font:
+      getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() ||
+      FALLBACK_THEME.font,
     success: resolveColor('var(--success)', FALLBACK_THEME.success),
     info: resolveColor('var(--info)', FALLBACK_THEME.info),
     warning: resolveColor('var(--warning)', FALLBACK_THEME.warning),
@@ -107,8 +113,18 @@ export function readChartTheme(): ChartTheme {
  */
 export function resolveColor(value: string, fallback = FALLBACK_THEME.muted): string {
   if (!value.includes('var(')) return value;
-  if (typeof document === 'undefined') return fallback;
 
+  const resolved = typeof document === 'undefined' ? '' : probeColor(value);
+  if (resolved && !resolved.includes('var(')) return resolved;
+
+  /* Sem navegador (ou com um que não resolve `var()`, como o jsdom dos testes), o token é lido
+     do `tokens.css` — a mesma cor do tema claro que o navegador daria. */
+  const token = /var\((--[\w-]+)\)/.exec(value)?.[1];
+
+  return token && hasThemeColor(token) ? themeColor(token) : fallback;
+}
+
+function probeColor(value: string): string {
   const probe = document.createElement('span');
   probe.style.color = value;
   probe.style.display = 'none';
@@ -116,7 +132,7 @@ export function resolveColor(value: string, fallback = FALLBACK_THEME.muted): st
   const resolved = getComputedStyle(probe).color;
   probe.remove();
 
-  return resolved && resolved !== '' ? resolved : fallback;
+  return resolved ?? '';
 }
 
 /**
@@ -139,7 +155,8 @@ export function withChartTheme(option: ChartOption, theme: ChartTheme): ChartOpt
           borderWidth: 1,
           padding: [6, 10],
           textStyle: { color: theme.foreground, fontSize: 12, fontFamily: theme.font },
-          extraCssText: 'border-radius: 10px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);',
+          /* A sombra é a do card (`--elevation-card`): o balão mora no `body`, onde o token resolve. */
+          extraCssText: 'border-radius: 10px; box-shadow: var(--elevation-card);',
           confine: true,
           /* O balão mora no `body`, FORA do gráfico. Dentro dele, num quadro com rolagem própria, o
              balão aparecendo mudava a altura a rolar: a barra de rolagem surgia, a largura mudava,
@@ -157,7 +174,11 @@ export function withChartTheme(option: ChartOption, theme: ChartTheme): ChartOpt
  */
 export type ChartSelection = { name: string; kind?: string; row?: string; column?: string };
 
-export function selectionOf(params: { name?: unknown; data?: unknown; dataType?: unknown }): ChartSelection {
+export function selectionOf(params: {
+  name?: unknown;
+  data?: unknown;
+  dataType?: unknown;
+}): ChartSelection {
   const data = params.data as { row?: unknown; column?: unknown; id?: unknown } | undefined;
   const name = typeof data?.id === 'string' ? data.id : String(params.name ?? '');
 

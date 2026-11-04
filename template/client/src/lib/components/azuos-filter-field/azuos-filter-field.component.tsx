@@ -22,7 +22,7 @@ export type AzuosFilterFieldProps = {
 
 export function AzuosFilterField({ data, ui, children }: AzuosFilterFieldProps) {
   return (
-    <div className={cn('flex min-w-0 flex-col gap-1.5', ui?.className)}>
+    <div className={cn('flex min-w-40 flex-col gap-1.5', ui?.className)}>
       <span className="text-ink-700 text-sm font-medium">{data.label}</span>
       {children}
     </div>

@@ -249,4 +249,121 @@ describe('AzuosAttachmentPicker', () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();
   });
+
+  // feliz
+  /* O rótulo é o alvo do teclado: Enter ou espaço abrem o seletor do navegador, como num botão. */
+  it('opens the file chooser from the keyboard', () => {
+    render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange: vi.fn(), onError: vi.fn() }}
+      />,
+    );
+    const input = (document.querySelector('input[type="file"]') as HTMLInputElement);
+    const click = vi.spyOn(input, 'click').mockImplementation(() => undefined);
+    const label = screen.getByText('Escolher arquivos').closest('label')!;
+
+    fireEvent.keyDown(label, { key: 'Enter' });
+    fireEvent.keyDown(label, { key: ' ' });
+    fireEvent.keyDown(label, { key: 'a' });
+
+    expect(click).toHaveBeenCalledTimes(2);
+  });
+
+  it('highlights while a file hovers and lets go when it leaves', () => {
+    render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange: vi.fn(), onError: vi.fn() }}
+      />,
+    );
+    const label = screen.getByText('Escolher arquivos').closest('label')!;
+
+    fireEvent.dragOver(label);
+    expect(label.className).toContain('border-ring');
+
+    fireEvent.dragLeave(label);
+    expect(label.className).not.toContain('border-ring');
+  });
+
+  /* Um print colado chega como ITEM da área de transferência, não como arquivo: os dois caminhos
+     precisam dar no mesmo lugar. */
+  it('reads a pasted screenshot from the clipboard items', () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange, onError: vi.fn() }}
+      />,
+    );
+    const print = fileOf('print.png', 300);
+
+    fireEvent.paste(container.firstChild as HTMLElement, {
+      clipboardData: {
+        files: [],
+        items: [
+          { kind: 'string', getAsFile: () => null },
+          { kind: 'file', getAsFile: () => null },
+          { kind: 'file', getAsFile: () => print },
+        ],
+      },
+    });
+
+    expect(onChange).toHaveBeenCalledWith([print]);
+  });
+
+  // triste
+  it('ignores a paste that carries no file', () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange, onError: vi.fn() }}
+      />,
+    );
+
+    fireEvent.paste(container.firstChild as HTMLElement, { clipboardData: { files: [] } });
+    fireEvent.paste(container.firstChild as HTMLElement, { clipboardData: null });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('ignores a drop that carries no file and a cancelled chooser', () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        actions={{ onChange, onError }}
+      />,
+    );
+    const label = screen.getByText('Escolher arquivos').closest('label')!;
+
+    fireEvent.drop(label, { dataTransfer: { files: [] } });
+    fireEvent.change((document.querySelector('input[type="file"]') as HTMLInputElement), {
+      target: { files: [] },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('does not accept a drag while disabled', () => {
+    const onChange = vi.fn();
+    render(
+      <AzuosAttachmentPicker
+        data={{ files: [], limits: LIMITS }}
+        state={{ isDisabled: true }}
+        actions={{ onChange, onError: vi.fn() }}
+      />,
+    );
+    const label = screen.getByText('Escolher arquivos').closest('label')!;
+
+    fireEvent.dragOver(label);
+    expect(label.className).not.toContain('border-ring');
+    fireEvent.drop(label, { dataTransfer: { files: [fileOf('nota.pdf', 10)] } });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(label).toHaveAttribute('tabindex', '-1');
+  });
 });

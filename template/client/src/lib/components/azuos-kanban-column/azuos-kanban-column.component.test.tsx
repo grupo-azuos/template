@@ -61,4 +61,38 @@ describe('AzuosKanbanColumn', () => {
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  /* O destaque enquanto um cartão passa por cima só existe onde soltar faz sentido: numa coluna
+     sem `onDropItem`, o navegador nem recebe o `preventDefault` — e por isso não aceita o solto. */
+  it('highlights while a card hovers over a column that accepts drops', () => {
+    render(
+      <AzuosKanbanColumn data={{ title: 'Deploy', count: 0 }} actions={{ onDropItem: vi.fn() }} />,
+    );
+    const column = screen.getByRole('region', { name: 'Deploy' });
+
+    const dragOver = fireEvent.dragOver(column);
+    expect(dragOver).toBe(false);
+    expect(column.className).toContain('bg-accent');
+
+    fireEvent.dragLeave(column);
+    expect(column.className).not.toContain('bg-accent');
+  });
+
+  it('does not accept a drag over a column that cannot receive cards', () => {
+    render(<AzuosKanbanColumn data={{ title: 'Concluído', count: 0 }} />);
+    const column = screen.getByRole('region', { name: 'Concluído' });
+
+    const dragOver = fireEvent.dragOver(column);
+
+    expect(dragOver).toBe(true);
+    expect(column.className).not.toContain('bg-accent');
+  });
+
+  it('paints the header with the tone of the stage', () => {
+    render(<AzuosKanbanColumn data={{ title: 'Erro', count: 1 }} ui={{ tone: 'danger' }} />);
+
+    expect(screen.getByRole('heading', { name: 'Erro' }).parentElement?.className).toContain(
+      'bg-hue-red',
+    );
+  });
 });

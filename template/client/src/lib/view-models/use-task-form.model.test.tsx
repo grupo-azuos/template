@@ -123,4 +123,18 @@ describe('useTaskFormModel', () => {
     expect(onSaved).not.toHaveBeenCalled();
     expect(result.current.data.fields.title.value).toBe('Nova');
   });
+
+  // triste
+  /* Sair de um campo vazio ANTES de tentar enviar não acusa ninguém: o erro só aparece depois da
+     primeira tentativa, senão o formulário recém-aberto já nasceria vermelho. */
+  it('does not accuse a field left empty before the first attempt to submit', () => {
+    const { result } = renderHook(() => useTaskFormModel({ task: null, onSaved: vi.fn() }), {
+      wrapper,
+    });
+
+    act(() => result.current.actions.onBlur('title'));
+
+    expect(result.current.data.fields.title.error).toBeNull();
+    expect(result.current.data.fields.description.error).toBeNull();
+  });
 });

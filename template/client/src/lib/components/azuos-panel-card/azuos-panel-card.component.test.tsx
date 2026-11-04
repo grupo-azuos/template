@@ -59,3 +59,12 @@ describe('AzuosPanelCard', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });
+
+describe('AzuosPanelCard landmark', () => {
+  // feliz
+  it('is a region named by its title', () => {
+    render(<AzuosPanelCard data={{ title: 'Receitas por mês' }}>gráfico</AzuosPanelCard>);
+
+    expect(screen.getByRole('region', { name: 'Receitas por mês' })).toHaveTextContent('gráfico');
+  });
+});

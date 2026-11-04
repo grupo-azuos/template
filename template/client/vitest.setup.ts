@@ -68,6 +68,26 @@ if (!window.ResizeObserver) {
 }
 
 /**
+ * Nem `IntersectionObserver`. O Embla (por trás do `AzuosCarousel`) o usa para saber quais itens
+ * estão à vista — sem o stub, toda tela com faixa deslizante quebra na montagem. Calado basta:
+ * nenhum teste depende de "o que está à vista", e no jsdom nada está.
+ */
+if (!window.IntersectionObserver) {
+  window.IntersectionObserver = class {
+    readonly root = null;
+    readonly rootMargin = '';
+    readonly thresholds: number[] = [];
+
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+  } as unknown as typeof IntersectionObserver;
+}
+
+/**
  * O jsdom também não implementa `matchMedia`. O `Sidebar` do shadcn o consulta na montagem,
  * por `useIsMobile`, para decidir entre a barra e a gaveta — sem o stub toda tela que tem
  * menu quebra antes de renderizar qualquer coisa.
@@ -88,3 +108,31 @@ if (!window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+/**
+ * O `getComputedStyle` do jsdom devolve o `transform` como foi escrito (`scale(0.2)`), e o
+ * navegador sempre devolve `matrix(...)` ou `none`. O GSAP lê esse valor como matriz ao animar
+ * escala e posição — com o texto cru, estoura "Cannot read properties of null" fora do teste,
+ * e a suíte falha mesmo com todos os testes verdes. Sem layout no jsdom, `none` é o valor fiel.
+ */
+const readComputedStyle = window.getComputedStyle.bind(window);
+const isMatrix = (value: string) => value === 'none' || value.startsWith('matrix');
+
+window.getComputedStyle = (element, pseudoElement) => {
+  const style = readComputedStyle(element, pseudoElement);
+
+  return new Proxy(style, {
+    get(target, property) {
+      if (property === 'transform' && !isMatrix(target.transform)) return 'none';
+      if (property === 'getPropertyValue') {
+        return (name: string) => {
+          const value = target.getPropertyValue(name);
+          return name === 'transform' && !isMatrix(value) ? 'none' : value;
+        };
+      }
+
+      const value: unknown = Reflect.get(target, property, target);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
+};

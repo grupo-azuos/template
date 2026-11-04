@@ -261,7 +261,7 @@ function PickerFooter({
       <button
         type="button"
         onClick={() => actions.onPick(monthOfIso(todayIso()))}
-        className="text-brand-blue-800 text-xs font-semibold hover:underline"
+        className="text-brand-blue-800 dark:text-foreground text-xs font-semibold hover:underline"
       >
         Este mês
       </button>

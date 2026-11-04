@@ -48,7 +48,7 @@ export function readForwardedIdentity(headers: HeaderBag): SessionUser | null {
     id: readHeader(headers, FORWARDED_IDENTITY_HEADERS.id),
     email: readHeader(headers, FORWARDED_IDENTITY_HEADERS.email),
     name: readHeader(headers, FORWARDED_IDENTITY_HEADERS.name),
-    role: readHeader(headers, FORWARDED_IDENTITY_HEADERS.role),
+    role: mapSystemRole(readHeader(headers, FORWARDED_IDENTITY_HEADERS.role)),
   };
 
   const isEmpty = Object.values(raw).every((value) => value === null);
@@ -77,4 +77,10 @@ function readHeader(headers: HeaderBag, name: string): string | null {
   const trimmed = single.trim();
 
   return trimmed === '' ? null : trimmed;
+}
+
+function mapSystemRole(role: string | null): string | null {
+  if (role === 'manager') return 'editor';
+  if (role === 'user') return 'viewer';
+  return role;
 }

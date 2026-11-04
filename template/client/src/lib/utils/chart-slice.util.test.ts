@@ -1,21 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
 import { colorOfSlice, countBy, FALLBACK_COLORS } from './chart-slice.util';
+import { themeColor } from './theme-color.util';
 
 describe('colorOfSlice', () => {
   // feliz
   it('uses the fixed color of a known category', () => {
-    expect(colorOfSlice('Concluída', 5)).toBe('#10b981');
+    expect(colorOfSlice('Concluída', 5)).toBe(themeColor('--success'));
   });
 
   it('walks the fallback list in order for unknown categories', () => {
-    expect(colorOfSlice('Qualquer', 0)).toBe(FALLBACK_COLORS[0]);
-    expect(colorOfSlice('Outra', 1)).toBe(FALLBACK_COLORS[1]);
+    expect(colorOfSlice('Qualquer', 0)).toBe(themeColor(FALLBACK_COLORS[0]!));
+    expect(colorOfSlice('Outra', 1)).toBe(themeColor(FALLBACK_COLORS[1]!));
   });
 
   // triste
   it('wraps around instead of running out of colors', () => {
-    expect(colorOfSlice('Nona', FALLBACK_COLORS.length)).toBe(FALLBACK_COLORS[0]);
+    expect(colorOfSlice('Nona', FALLBACK_COLORS.length)).toBe(themeColor(FALLBACK_COLORS[0]!));
   });
 });
 

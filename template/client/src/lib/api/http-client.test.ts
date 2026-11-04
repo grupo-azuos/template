@@ -29,7 +29,7 @@ describe('apiRequest', () => {
 
     await apiRequest('/tasks', { query: { search: '', status: 'done', page: 1, owner: null } });
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/tasks?status=done&page=1');
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/tasks?status=done&page=1');
   });
 
   it('answers undefined for 204, instead of failing to parse an empty body', async () => {
@@ -63,6 +63,36 @@ describe('apiRequest', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<html>', { status: 502 })));
 
     await expect(apiRequest('/tasks')).rejects.toThrow(/502/);
+  });
+
+  it.each([
+    ['a JSON null', null],
+    ['a JSON string', 'erro'],
+    ['an object without a message', { statusCode: 500 }],
+  ])('turns %s into a message with the status', async (_label, body) => {
+    vi.stubGlobal('fetch', respond(500, body));
+
+    await expect(apiRequest('/tasks')).rejects.toThrow(/500/);
+  });
+
+  it('keeps the API message even without field details', async () => {
+    vi.stubGlobal('fetch', respond(409, { statusCode: 409, message: 'Já existe.' }));
+
+    const error = (await apiRequest('/tasks', { method: 'POST', body: {} }).catch(
+      (caught: unknown) => caught,
+    )) as ApiError;
+
+    expect(error.message).toBe('Já existe.');
+    expect(error.details).toEqual([]);
+  });
+
+  it('adds no question mark when every filter is empty', async () => {
+    const fetchMock = respond(200, []);
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiRequest('/tasks', { query: { search: '', owner: null, page: undefined } });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/tasks');
   });
 });
 

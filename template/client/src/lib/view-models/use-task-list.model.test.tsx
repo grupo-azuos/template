@@ -153,4 +153,56 @@ describe('useTaskListModel', () => {
 
     expect(result.current.state.isTruncated).toBe(true);
   });
+
+  // feliz
+  it('clears the filters at once and refetches on retry', async () => {
+    const { result } = await renderModel();
+
+    act(() => result.current.actions.onSearchChange('cliente'));
+    act(() => result.current.actions.onStatusChange('done'));
+    await waitFor(() =>
+      expect(vi.mocked(tasksApi.list).mock.calls.at(-1)?.[0]).toMatchObject({ search: 'cliente' }),
+    );
+
+    act(() => result.current.actions.onClearFilters());
+    await waitFor(() =>
+      expect(vi.mocked(tasksApi.list).mock.calls.at(-1)?.[0]).not.toMatchObject({ search: 'cliente' }),
+    );
+
+    const callsBefore = vi.mocked(tasksApi.list).mock.calls.length;
+    act(() => result.current.actions.onRetry());
+    await waitFor(() => expect(vi.mocked(tasksApi.list).mock.calls.length).toBe(callsBefore + 1));
+  });
+
+  it('closes the delete dialog on cancel', async () => {
+    const { result } = await renderModel();
+
+    act(() => result.current.actions.onAskDelete(task()));
+    act(() => result.current.actions.onCancelDelete());
+
+    expect(result.current.data.pendingDelete).toBeNull();
+  });
+
+  // triste
+  /* Cancelar durante a exclusão não desfaz a requisição que já saiu — então não fecha. */
+  it('does not close the delete dialog while the deletion is in flight', async () => {
+    vi.mocked(tasksApi.remove).mockReturnValue(new Promise(() => {}));
+    const { result } = await renderModel();
+
+    act(() => result.current.actions.onAskDelete(task()));
+    act(() => result.current.actions.onConfirmDelete());
+    await waitFor(() => expect(result.current.state.isDeleting).toBe(true));
+
+    act(() => result.current.actions.onCancelDelete());
+
+    expect(result.current.data.pendingDelete).not.toBeNull();
+  });
+
+  it('confirms nothing when no task was asked to be deleted', async () => {
+    const { result } = await renderModel();
+
+    act(() => result.current.actions.onConfirmDelete());
+
+    expect(tasksApi.remove).not.toHaveBeenCalled();
+  });
 });

@@ -1,7 +1,40 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AzuosColumnChart, barOption, columnOption } from './azuos-column-chart.component';
+import type * as EchartsUtil from '../../utils/echarts.util';
+import { themeColor } from '../../utils/theme-color.util';
+import {
+  AzuosColumnChart,
+  barOption,
+  columnOption,
+} from './azuos-column-chart.component';
+
+
+/* Um ECharts de mentira, como no teste do `AzuosEchart`: o desenho em si é do ECharts; o que este
+   componente decide é QUAL clique vira seleção e com que nome. */
+const fakeChart = vi.hoisted(() => ({
+  on: vi.fn(),
+  setOption: vi.fn(),
+  resize: vi.fn(),
+  dispose: vi.fn(),
+}));
+
+vi.mock('../../utils/echarts.util', async (importOriginal) => ({
+  ...(await importOriginal<typeof EchartsUtil>()),
+  loadECharts: () => Promise.resolve({ init: () => fakeChart }),
+}));
+
+/** O que o ECharts chamaria num clique no desenho. */
+async function chartClick(): Promise<(params: unknown) => void> {
+  await waitFor(() => expect(fakeChart.on).toHaveBeenCalledWith('click', expect.any(Function)));
+  const call = [...fakeChart.on.mock.calls].reverse().find((entry: unknown[]) => entry[0] === 'click');
+
+  return call?.[1] as (params: unknown) => void;
+}
+
+afterEach(() => {
+  fakeChart.on.mockClear();
+});
 
 const SLICES = [
   { label: 'Mariana Ribeiro', value: 8 },
@@ -96,5 +129,66 @@ describe('AzuosColumnChart', () => {
     );
 
     expect(container.querySelector('.cursor-pointer')).toBeInTheDocument();
+  });
+});
+
+type Formatter = (params: unknown) => string;
+type AxisOption = { axisLabel: { formatter: (label: string) => string } };
+type BarSeries = {
+  data: { itemStyle: { color: string } }[];
+  label: { formatter: (params: { value: unknown }) => string };
+};
+
+describe('columnOption and barOption', () => {
+  // feliz
+  it('writes the name and the count in the balloon and on the bar', () => {
+    const standing = columnOption(SLICES, 'Tarefas') as {
+      tooltip: { formatter: Formatter };
+      series: [BarSeries];
+    };
+    const lying = barOption(SLICES, 'Tarefas') as { tooltip: { formatter: Formatter }; series: [BarSeries] };
+
+    expect(standing.tooltip.formatter({ name: 'Caio Prado', value: 5 })).toBe(
+      '<b>Caio Prado</b><br/>Tarefas: 5',
+    );
+    expect(lying.tooltip.formatter({ name: 'Ana Luz', value: 2 })).toBe('<b>Ana Luz</b><br/>Tarefas: 2');
+    expect(standing.series[0].label.formatter({ value: 1234 })).toBe('1.234');
+    expect(lying.series[0].label.formatter({ value: '8' })).toBe('8');
+  });
+
+  /* O nome inteiro continua no balão; o eixo só corta o que não cabe. */
+  it('shortens long names on both axes', () => {
+    const long = 'Departamento Administrativo Financeiro';
+    const standing = columnOption(SLICES, 'Tarefas') as { xAxis: AxisOption };
+    const lying = barOption(SLICES, 'Tarefas') as { yAxis: AxisOption };
+
+    expect(standing.xAxis.axisLabel.formatter(long).length).toBeLessThan(long.length);
+    expect(lying.yAxis.axisLabel.formatter(long).length).toBeLessThan(long.length);
+    expect(lying.yAxis.axisLabel.formatter('Ana')).toBe('Ana');
+  });
+
+  // triste
+  /* Cor por coluna inventaria categorias que não existem numa série no tempo. */
+  it('paints every bar alike when one colour is asked, and by category otherwise', () => {
+    const one = barOption(SLICES, 'Tarefas', themeColor('--primary')) as { series: [BarSeries] };
+    const many = barOption(SLICES, 'Tarefas') as { series: [BarSeries] };
+
+    const oneColours = new Set(one.series[0].data.map((item) => item.itemStyle.color));
+    const manyColours = new Set(many.series[0].data.map((item) => item.itemStyle.color));
+    expect(oneColours.size).toBe(1);
+    expect(manyColours.size).toBe(SLICES.length);
+  });
+});
+
+describe('AzuosColumnChart selection', () => {
+  // feliz
+  it('opens the breakdown of the clicked column by its name', async () => {
+    const onSelect = vi.fn();
+    render(<AzuosColumnChart data={{ slices: SLICES, seriesLabel: 'Tarefas' }} actions={{ onSelect }} />);
+    const click = await chartClick();
+
+    act(() => click({ name: 'Caio Prado' }));
+
+    expect(onSelect).toHaveBeenCalledWith('Caio Prado');
   });
 });

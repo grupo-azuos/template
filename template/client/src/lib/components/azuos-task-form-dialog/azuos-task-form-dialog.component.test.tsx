@@ -79,4 +79,42 @@ describe('AzuosTaskFormDialog', () => {
 
     expect(screen.getByRole('button', { name: 'Salvando…' })).toBeDisabled();
   });
+
+  it('reports the description and its blur, naming the field', async () => {
+    const actions = renderForm();
+
+    await userEvent.type(screen.getByLabelText('Descrição'), 'd');
+    await userEvent.tab();
+
+    expect(actions.onChange).toHaveBeenCalledWith('description', 'd');
+    expect(actions.onBlur).toHaveBeenCalledWith('description');
+  });
+
+  it('reports the chosen situation, naming the field', async () => {
+    const actions = renderForm();
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Situação' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Concluída' }));
+
+    expect(actions.onChange).toHaveBeenCalledWith('status', 'done');
+  });
+
+  /* Fechar pelo Esc ou pelo fundo passa pelo mesmo `onClose` do botão Cancelar: a tela só tem um
+     jeito de saber que o modal fechou. */
+  it('closes through the same action when dismissed with Escape', async () => {
+    const actions = renderForm();
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(actions.onClose).toHaveBeenCalledOnce();
+  });
+
+  it('closes through the cancel button', async () => {
+    const actions = renderForm();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+    expect(actions.onClose).toHaveBeenCalledOnce();
+    expect(actions.onSubmit).not.toHaveBeenCalled();
+  });
 });

@@ -10,6 +10,22 @@ import { z } from 'zod';
  * sem `.default()` — e aí o processo recusa subir sem ela, dizendo o nome.
  */
 export const envSchema = z.object({
+  APP_ENV: z.enum(['development', 'test', 'production', 'staging']).default('development'),
+  VALKEY_URL: z
+    .string()
+    .url()
+    .refine((value) => /^rediss?:\/\//.test(value))
+    .optional(),
+  VALKEY_KEY_PREFIX: z
+    .string()
+    .regex(/^[a-z0-9:-]+:$/)
+    .max(128)
+    .default('template:development:'),
+  VALKEY_TIMEOUT_MS: z.coerce.number().int().min(100).max(5000).default(1000),
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+  ADMIN_CONSOLE_TIMEOUT_MS: z.coerce.number().int().min(500).max(30000).default(4000),
+  ADMIN_CONSOLE_CLIENT_SECRET: z.string().min(1).optional(),
+  ADMIN_CONSOLE_URL: z.string().url().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
   API_PORT: z.coerce.number().int().min(1).max(65535).default(3009),
@@ -35,7 +51,13 @@ export type Env = z.infer<typeof envSchema>;
 
 export function parseEnv(source: NodeJS.ProcessEnv): Env {
   const result = envSchema.safeParse(source);
-  if (result.success) return result.data;
+  if (result.success) {
+    if (result.data.NODE_ENV === 'production')
+      throw new Error(
+        'The MVP SQLite provider cannot run in production. Follow the production-standard skill to promote to PostgreSQL.',
+      );
+    return result.data;
+  }
 
   const details = result.error.issues
     .map((issue) => `  ${issue.path.join('.') || '(root)'}: ${issue.message}`)
