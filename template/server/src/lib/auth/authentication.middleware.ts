@@ -20,6 +20,9 @@ import { type RequestUser } from './request-user.type';
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
   use(request: Request, _response: Response, next: NextFunction): void {
+    const path = request.originalUrl?.split('?')[0];
+    if (request.method === 'GET' && ['/api/health', '/api/health/ready'].includes(path ?? ''))
+      return next();
     const identity = readForwardedIdentity(request.headers);
 
     if (identity) {
@@ -35,6 +38,10 @@ export class AuthenticationMiddleware implements NestMiddleware {
       throw new UnauthorizedException(
         'A identidade encaminhada está incompleta ou inválida. Fale com quem administra o acesso.',
       );
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Entre pelo Admin Console para continuar.');
     }
 
     attach(request, MOCK_IDENTITY);
