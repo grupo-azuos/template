@@ -37,7 +37,7 @@ describe('tasksApi', () => {
       tasksApi.list({ page: 2, pageSize: 20, search: '', status: 'done' }),
     ).resolves.toEqual({ items: [], total: 0 });
 
-    expect(lastRequest().url).toBe('/api/tasks?page=2&pageSize=20&status=done');
+    expect(lastRequest().url).toBe('/api/v1/tasks?page=2&pageSize=20&status=done');
   });
 
   it('reads one task by id', async () => {
@@ -45,7 +45,7 @@ describe('tasksApi', () => {
 
     await expect(tasksApi.findById(7)).resolves.toMatchObject({ id: 7 });
 
-    expect(lastRequest().url).toBe('/api/tasks/7');
+    expect(lastRequest().url).toBe('/api/v1/tasks/7');
   });
 
   it('creates with POST and the body as JSON', async () => {
@@ -54,7 +54,7 @@ describe('tasksApi', () => {
     await tasksApi.create({ title: 'Nova', description: null, status: 'todo' });
 
     const { url, init } = lastRequest();
-    expect(url).toBe('/api/tasks');
+    expect(url).toBe('/api/v1/tasks');
     expect(init.method).toBe('POST');
     expect(JSON.parse(String(init.body))).toMatchObject({ title: 'Nova' });
   });
@@ -65,7 +65,7 @@ describe('tasksApi', () => {
     await tasksApi.update(3, { status: 'done' });
 
     const { url, init } = lastRequest();
-    expect(url).toBe('/api/tasks/3');
+    expect(url).toBe('/api/v1/tasks/3');
     expect(init.method).toBe('PATCH');
   });
 
@@ -75,7 +75,7 @@ describe('tasksApi', () => {
     await expect(tasksApi.remove(9)).resolves.toBeUndefined();
 
     const { url, init } = lastRequest();
-    expect(url).toBe('/api/tasks/9');
+    expect(url).toBe('/api/v1/tasks/9');
     expect(init.method).toBe('DELETE');
   });
 

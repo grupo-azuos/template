@@ -92,7 +92,7 @@ describe('apiRequest', () => {
 
     await apiRequest('/tasks', { query: { search: '', owner: null, page: undefined } });
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/tasks');
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/tasks');
   });
 });
 
