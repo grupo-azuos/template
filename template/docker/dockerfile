@@ -1,51 +1,39 @@
 # syntax=docker/dockerfile:1
-#
-# Uma imagem só. O Nest serve `/api` e o build estático do client na mesma porta
-# (`ServeStaticModule` em `server/src/app.module.ts`) — nada de Nginx aqui: em produção
-# fica atrás de um Traefik, que já resolve o roteamento por domínio. Um segundo processo
-# só pra servir arquivo estático seria uma peça a mais sem função.
-#
-# Não é a imagem mais enxuta possível: a etapa final carrega o `node_modules` inteiro do
-# monorepo, em vez de reinstalar só as dependências de produção do server. Prioridade 0
-# do CONTRIBUTING — funcionar primeiro — vale aqui: enxugar é otimização para depois.
-#
-# `bookworm-slim` e não `alpine`: o `better-sqlite3` traz o binário pronto para glibc. No
-# alpine (musl) ele tentaria compilar, e a imagem precisaria de python, make e g++ só para
-# isso.
-
-FROM node:24-bookworm-slim AS deps
+FROM node:24.21.0-bookworm-slim AS deps
 WORKDIR /repo
 COPY package.json package-lock.json ./
 COPY shared/package.json shared/package.json
 COPY server/package.json server/package.json
 COPY client/package.json client/package.json
-# `--ignore-scripts`: o `prepare` da raiz configura git e hooks, que não existem (nem fazem
-# sentido) dentro da imagem — e roda antes de os scripts serem copiados. Nenhuma dependência
-# de runtime precisa de script de instalação: o `better-sqlite3` já traz o binário pronto, e
-# um `npm rebuild` aqui o faria tentar COMPILAR, exigindo python e g++ na imagem.
-RUN --mount=type=cache,id=template-npm,target=/root/.npm,sharing=locked npm ci --prefer-offline --ignore-scripts
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --no-audit --no-fund
+
+# SQLite existe somente no MVP. Compilar o módulo nativo sem levar toolchain ao runtime.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
+  && npm rebuild better-sqlite3 \
+  && rm -rf /var/lib/apt/lists/*
 
 FROM deps AS build
 COPY . .
-RUN npm run build -w @template/shared \
-  && npm run build -w server \
-  && npm run build -w client
+ARG VITE_API_URL=/api/v1
+ENV VITE_API_URL=$VITE_API_URL
+RUN npm run build -w @template/shared && npm run build -w server --ignore-scripts && npm run build -w client
 
-FROM node:24-bookworm-slim AS app
+FROM deps AS production-deps
+RUN mkdir -p server/node_modules && npm prune --omit=dev --ignore-scripts --workspace server --workspace @template/shared
+
+FROM node:24.21.0-bookworm-slim AS app
 WORKDIR /repo
-ENV NODE_ENV=production
-COPY --from=build /repo/node_modules node_modules
-COPY --from=build /repo/shared/package.json shared/package.json
-COPY --from=build /repo/shared/dist shared/dist
-COPY --from=build /repo/server/package.json server/package.json
-COPY --from=build /repo/server/dist server/dist
-# As migrations vão junto: o server as aplica sozinho ao subir.
-COPY --from=build /repo/server/drizzle server/drizzle
-COPY --from=build /repo/client/dist client/dist
-RUN mkdir -p server/data
-EXPOSE 3009
-# Consulta HTTP interna; falhas e timeouts ficam no histórico de saúde do Docker.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD node -e "Promise.all(['http://127.0.0.1:' + (process.env.API_PORT || 3009) + '/'].map(async (url) => { const response = await fetch(url, { signal: AbortSignal.timeout(3000), redirect: 'error' }); if (!response.ok) throw new Error(url + ': HTTP ' + response.status); })).then(() => process.exit(0)).catch((error) => { console.error(error.message); process.exit(1); })"
-
+ENV NODE_ENV=production API_PORT=3000
+COPY --from=production-deps --chown=node:node /repo/node_modules node_modules
+COPY --from=production-deps --chown=node:node /repo/server/node_modules server/node_modules
+COPY --from=build --chown=node:node /repo/shared/package.json shared/package.json
+COPY --from=build --chown=node:node /repo/shared/dist shared/dist
+COPY --from=build --chown=node:node /repo/server/package.json server/package.json
+COPY --from=build --chown=node:node /repo/server/dist server/dist
+COPY --from=build --chown=node:node /repo/server/drizzle server/drizzle
+COPY --from=build --chown=node:node /repo/client/dist client/dist
+RUN mkdir -p /repo/server/data && chown node:node /repo/server/data
+USER node
+EXPOSE 3000
+HEALTHCHECK --interval=10s --timeout=5s --start-period=45s --retries=3 CMD node -e "fetch('http://127.0.0.1:3000/api/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "server/dist/main.js"]
