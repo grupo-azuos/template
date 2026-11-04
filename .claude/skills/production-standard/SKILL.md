@@ -1,6 +1,6 @@
 ---
 name: production-standard
-description: Promove um app do template de MVP para Staging/Prod e mantém o padrão de API, OAuth2, banco e containers do Grupo Azuos. Use para publicar o MVP, preparar Komodo ou alterar contratos de API. Não concede autorização para deploy, merge ou push.
+description: Promove um app do template de MVP para Homo/Prod e mantém o padrão de API, OAuth2, banco e containers do Grupo Azuos. Use para publicar o MVP, preparar Komodo ou alterar contratos de API. Não concede autorização para deploy, merge ou push.
 ---
 
 # Padrão de produção
@@ -23,7 +23,7 @@ O admin-console é a referência de autenticação e contratos. Não criar login
 
 ## Saída do MVP
 
-SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Staging/Prod:
+SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Homo/Prod:
 
 1. Migrar schema e repositories para `pg` + `drizzle-orm/node-postgres`; gerar migrations PostgreSQL em diretório separado, sem reescrever as SQLite já commitadas.
 2. Usar `DATABASE_URL` para runtime e `DATABASE_MIGRATION_URL` direta para o job de migration. Pool inicial 5 por réplica, com timeouts e fechamento no SIGTERM. Conferir orçamento total contando blue e green de todos os apps.
@@ -38,7 +38,7 @@ SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Staging/Prod:
 - Usar `docker/dockerfile` e `docker/compose.yml`; cada contexto adicional tem seu próprio diretório e arquivo `dockerfile` sem sufixo. `.komodo/komodo.toml` fica na raiz do repositório, fora de `docker/` e do pacote interno. Corrigir também paths de build, workflows, scripts e documentação ao mover arquivos.
 - Containers sem portas públicas próprias, com limites/reservas, readiness, usuário sem privilégios e desligamento gracioso. Backend só na rede privada da stack; somente gateway na overlay de borda.
 - O Komodo executa Infisical no TOML antes de migration/deploy. Nunca adicionar CLI/SDK do cofre no app nem buscar segredos no dockerfile/entrypoint.
-- Prod/main usa core; Staging/develop usa homo. PostgreSQL, Valkey, cookies, credenciais e URLs são próprios de cada ambiente. Namespace do cache: `<app>:<environment>:`.
+- Prod/main usa core; Homo/develop usa homo. PostgreSQL, Valkey, cookies, credenciais e URLs são próprios de cada ambiente. Namespace do cache: `<app>:<environment>:`.
 - Atualização nativa start-first exige migration compatível com a versão anterior. Remoção de coluna fica para release posterior. Bots e schedulers são singletons stop-first.
 - Atualizar todos os `.env.example` com o contrato real, sem valores secretos. `VITE_`/`PUBLIC_` só contêm configuração pública.
 

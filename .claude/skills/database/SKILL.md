@@ -5,7 +5,7 @@ description: Cria ou muda tabelas do SQLite com Drizzle — arquivo de schema, r
 
 # Banco de dados (SQLite no MVP; PostgreSQL após promoção)
 
-Se o app vai para Staging/Prod, carregue `../production-standard/SKILL.md` antes de alterar o provider. As instruções SQLite abaixo só valem enquanto `production.json.stage` for `mvp`.
+Se o app vai para Homo/Prod, carregue `../production-standard/SKILL.md` antes de alterar o provider. As instruções SQLite abaixo só valem enquanto `production.json.stage` for `mvp`.
 
 Caminhos relativos a `template/`.
 

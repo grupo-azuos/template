@@ -14,10 +14,11 @@ function fixture() {
   };
   write('production.json', JSON.stringify({ stage: 'mvp', database: 'sqlite', production_deploy_enabled: false }));
   write('template/server/src/lib/http/api-version.ts', 'VersioningType.URI; API-Version');
-  write('template/server/src/main.ts', 'packageVersion(); docs/v1-json');
+  write('template/server/src/main.ts', 'packageVersion(); setupOpenApiDocs(app, document);');
+  write('template/server/src/lib/http/openapi-document.ts', 'PUBLISHED_MAJORS; docs/v${major}-json; filter: true');
   write('template/docker/caddy/caddyfile', ':8080 {\n respond 200\n}\n');
   write('template/docker/compose.yml', 'healthcheck:\nresources:\nlimits:\nmemory:\ncpus:\nstop_grace_period:\nazuos-edge\n./caddy/caddyfile\n');
-  write('.komodo/komodo.toml', 'infisical --silent run --expand=false --env=staging -- sh docker/deploy.sh');
+  write('.komodo/komodo.toml', 'infisical --silent run --expand=false --env=homo -- sh docker/deploy.sh');
   write('template/docker/deploy.sh', 'docker stack deploy --detach=false --resolve-image never');
   return { root, write, dispose: () => rmSync(root, { recursive: true }) };
 }

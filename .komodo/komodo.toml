@@ -29,12 +29,12 @@ docker run --rm --security-opt label=disable --network host \
   -v "$PWD:$PWD:ro,z" -w "$PWD/template" azuos-deploy-tools:1 \
   infisical --silent run --expand=false --secret-overriding=false \
   --projectId='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
-  --env='[[INFISICAL_PROD_ENV_SLUG]]' --path=/ \
-  -- sh docker/deploy.sh production prod
+  --env=prod --path=/ \
+  -- sh docker/deploy.sh prod prod
 '''
 
 [[repo]]
-name = "template-staging"
+name = "template-homo"
 tags = ["context:apps", "env:homo", "server:homo"]
 [repo.config]
 server = "homo"
@@ -45,7 +45,7 @@ branch = "develop"
 webhook_enabled = false
 env_file_path = ".komodo/bootstrap.env"
 environment = """
-INFISICAL_TOKEN=[[INFISICAL_STAGING_TOKEN]]
+INFISICAL_TOKEN=[[INFISICAL_HOMO_TOKEN]]
 INFISICAL_DOMAIN=[[INFISICAL_API_URL]]
 """
 [repo.config.on_pull]
@@ -62,6 +62,6 @@ docker run --rm --security-opt label=disable --network host \
   -v "$PWD:$PWD:ro,z" -w "$PWD/template" azuos-deploy-tools:1 \
   infisical --silent run --expand=false --secret-overriding=false \
   --projectId='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
-  --env='[[INFISICAL_STAGING_ENV_SLUG]]' --path=/ \
-  -- sh docker/deploy.sh staging staging
+  --env=homo --path=/ \
+  -- sh docker/deploy.sh homo homo
 '''
