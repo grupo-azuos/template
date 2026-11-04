@@ -1,0 +1,5 @@
+{
+  "stage": "mvp",
+  "database": "sqlite",
+  "production_deploy_enabled": false
+}
