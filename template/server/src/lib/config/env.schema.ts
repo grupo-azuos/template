@@ -10,7 +10,7 @@ import { z } from 'zod';
  * sem `.default()` — e aí o processo recusa subir sem ela, dizendo o nome.
  */
 export const envSchema = z.object({
-  APP_ENV: z.enum(['development', 'test', 'production', 'staging']).default('development'),
+  APP_ENV: z.enum(['dev', 'homo', 'prod']).default('dev'),
   VALKEY_URL: z
     .string()
     .url()
