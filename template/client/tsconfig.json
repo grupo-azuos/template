@@ -20,7 +20,7 @@
     "noEmit": true,
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
-    "types": ["vite/client"],
+    "types": ["@rsbuild/core/types"],
     "paths": {
       "@template/shared/*": ["../shared/src/*"],
       "@/*": ["./src/*"]
