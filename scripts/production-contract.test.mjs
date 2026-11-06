@@ -18,8 +18,9 @@ function fixture() {
   write('template/server/src/lib/http/openapi-document.ts', 'PUBLISHED_MAJORS; docs/v${major}-json; filter: true');
   write('template/docker/caddy/caddyfile', ':8080 {\n respond 200\n}\n');
   write('template/docker/compose.yml', 'healthcheck:\nresources:\nlimits:\nmemory:\ncpus:\nstop_grace_period:\nazuos-edge\n./caddy/caddyfile\n');
-  write('.komodo/komodo.toml', 'infisical --silent run --expand=false --env=homo -- sh docker/deploy.sh');
-  write('template/docker/deploy.sh', 'docker stack deploy --detach=false --resolve-image never');
+  write('.komodo/komodo.toml', '[[build]]\n[[stack]]\nextra_args = ["--resolve-image", "never", "--detach=false"]\n[[procedure]]\nsh docker/komodo.sh\n');
+  write('template/server/package.json', JSON.stringify({ dependencies: {} }));
+  write('template/docker/komodo.sh', 'infisical run --expand=false; docker stack config --skip-interpolation');
   return { root, write, dispose: () => rmSync(root, { recursive: true }) };
 }
 
@@ -57,5 +58,21 @@ test('rejects an extra caddy config outside the caddy directory', () => {
   try {
     project.write('template/docker/extra.caddyfile', ':8080 {}');
     assert.ok(violations(project.root).some((error) => error.includes('All Caddy configs belong')));
+  } finally { project.dispose(); }
+});
+
+test('rejects the postgres.js package, even in the MVP', () => {
+  const project = fixture();
+  try {
+    project.write('template/server/package.json', JSON.stringify({ dependencies: { postgres: '^3.4.9' } }));
+    assert.ok(violations(project.root).some((error) => error.includes('always pg')));
+  } finally { project.dispose(); }
+});
+
+test('rejects importing postgres.js or the postgres-js Drizzle driver', () => {
+  const project = fixture();
+  try {
+    project.write('template/server/src/lib/db/db.module.ts', "import { drizzle } from 'drizzle-orm/postgres-js';");
+    assert.ok(violations(project.root).some((error) => error.includes('never postgres.js')));
   } finally { project.dispose(); }
 });
