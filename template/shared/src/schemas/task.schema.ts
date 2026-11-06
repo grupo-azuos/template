@@ -5,7 +5,7 @@ import { paginationQuerySchema } from './pagination.schema';
 
 /**
  * O CONTRATO da feature de exemplo. Um schema, duas pontas: a API o usa como DTO e Swagger
- * (via `nestjs-zod`) e a web o usa para validar o formulário. É o que garante que a mensagem
+ * (via `createZodDto`) e a web o usa para validar o formulário. É o que garante que a mensagem
  * embaixo do campo seja a mesma que a API devolveria.
  *
  * As mensagens são TEXTO DE TELA — por isso em português (CONTRIBUTING §1).
@@ -20,9 +20,9 @@ export const taskSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
   status: taskStatusSchema,
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
   createdBy: z.string(),
-  updatedAt: z.string().datetime().nullable(),
+  updatedAt: z.iso.datetime().nullable(),
   updatedBy: z.string().nullable(),
 });
 
@@ -33,7 +33,7 @@ export type Task = z.infer<typeof taskSchema>;
  * preenchido e a lista ganharia uma linha em branco que ninguém consegue identificar.
  */
 const titleSchema = z
-  .string({ required_error: 'Informe o título' })
+  .string({ error: 'Informe o título' })
   .trim()
   .min(1, 'Informe o título')
   .max(TITLE_MAX_LENGTH, `O título pode ter até ${TITLE_MAX_LENGTH} caracteres`);
