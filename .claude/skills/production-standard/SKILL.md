@@ -25,7 +25,7 @@ O admin-console é a referência de autenticação e contratos. Não criar login
 
 SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Homo/Prod:
 
-1. Migrar schema e repositories para `pg` + `drizzle-orm/node-postgres`; gerar migrations PostgreSQL em diretório separado, sem reescrever as SQLite já commitadas.
+1. Migrar schema e repositories para `pg` + `drizzle-orm/node-postgres`. O driver é **sempre `pg`**: nunca instalar `postgres` (postgres.js) nem importar `drizzle-orm/postgres-js`, nem em script, seed ou teste; gerar migrations PostgreSQL em diretório separado, sem reescrever as SQLite já commitadas.
 2. Usar `DATABASE_URL` para runtime e `DATABASE_MIGRATION_URL` direta para o job de migration. Pool inicial 5 por réplica, com timeouts e fechamento no SIGTERM. Conferir orçamento total contando blue e green de todos os apps.
 3. Gerar e testar export/import dos dados existentes; não apontar SQLite para uma URL PostgreSQL.
 4. Instalar `pg`, tipos `@types/pg` em desenvolvimento, `jose` quando houver validação JWT e o cliente `iovalkey` 0.4.0. Banco e Valkey são os serviços compartilhados do ambiente, sem containers locais por app.

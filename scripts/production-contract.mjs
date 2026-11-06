@@ -58,6 +58,19 @@ function sourceRules(project) {
     .flatMap((path) => rule(!/infisical\s+(run|export|login)\b/.test(readFileSync(path, 'utf8')), 'Do not fetch Infisical secrets in application code'));
 }
 
+function driverRules(project) {
+  const pkg = JSON.parse(read(project, 'template/server/package.json'));
+  const declared = { ...pkg.dependencies, ...pkg.devDependencies };
+  const imports = files(join(project, 'template/server'))
+    .filter((path) => /\.(ts|mts|cts|js|mjs|cjs)$/.test(path))
+    .filter((path) => /from ['"](?:postgres|drizzle-orm\/postgres-js(?:\/[^'"]*)?)['"]/.test(readFileSync(path, 'utf8')))
+    .map((path) => `Use pg with drizzle-orm/node-postgres, never postgres.js: ${path}`);
+  return [
+    ...rule(!declared.postgres, 'PostgreSQL driver is always pg: remove the postgres (postgres.js) package'),
+    ...imports,
+  ];
+}
+
 function databaseRules(project) {
   const policy = JSON.parse(read(project, 'production.json'));
   if (policy.stage === 'mvp') return [];
@@ -78,7 +91,7 @@ function databaseRules(project) {
 
 export function violations(project) {
   const compose = read(project, 'template/docker/compose.yml');
-  return [...new Set([...apiRules(project), ...containerRules(project, compose), ...caddyRules(project, compose), ...sourceRules(project), ...databaseRules(project)])];
+  return [...new Set([...apiRules(project), ...containerRules(project, compose), ...caddyRules(project, compose), ...sourceRules(project), ...driverRules(project), ...databaseRules(project)])];
 }
 
 function main() {
