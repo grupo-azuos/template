@@ -102,6 +102,9 @@ export default defineConfig({
   ],
   externalsType: 'commonjs',
   module: {
+    /* Os pacotes ESM do Nest 12 (Swagger, serve-static) carregam outros por
+       `createRequire(import.meta.url)`: assim eles entram no pacote, em vez de procurar
+       `node_modules` em runtime — que não existe na imagem. */
     parser: { javascript: { createRequire: true } },
     rules: [
       {
