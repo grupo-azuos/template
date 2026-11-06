@@ -16,20 +16,22 @@ import { rspack } from '@rspack/core';
    promoção o banco é PostgreSQL pelo `pg`, que é JavaScript puro e entra no pacote. */
 const NATIVE_MODULES = ['better-sqlite3'];
 
-/* Pacotes que o Nest e o `pg` tentam carregar só se estiverem instalados. Sem eles no projeto, o
-   `require` precisa falhar em runtime como antes, e não quebrar o build. */
-const OPTIONAL_MODULES = [
+/* Pacotes que o Nest e o `pg` tentam carregar só se estiverem instalados (com ou sem subcaminho,
+   com ou sem `.js`). Sem eles no projeto, o carregamento precisa falhar em runtime como antes, e não
+   quebrar o build. */
+const OPTIONAL_PACKAGES = [
   '@nestjs/microservices',
-  '@nestjs/microservices/microservices-module',
-  '@nestjs/websockets/socket-module',
+  '@nestjs/websockets',
+  '@nestjs/platform-node',
   '@fastify/static',
   'class-transformer',
-  'class-transformer/storage',
   'class-validator',
   'pg-native',
   /* ESM puro, carregado pelo Nest só no `FileTypeValidator`, que o projeto não usa. */
   'file-type',
 ];
+const isOptional = (resource: string): boolean =>
+  OPTIONAL_PACKAGES.some((name) => resource === name || resource.startsWith(`${name}/`));
 
 const MIGRATE_CLI = './src/lib/db/migrate.cli.ts';
 
@@ -98,7 +100,7 @@ export default defineConfig({
         ]
       : []),
     new rspack.IgnorePlugin({
-      checkResource: (resource) => OPTIONAL_MODULES.includes(resource),
+      checkResource: isOptional,
     }),
   ],
   optimization: {
