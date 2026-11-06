@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
 import { createZodDto } from './zod-dto';
-import { ZodValidationPipe } from './zod-validation.pipe';
+import { ZodValidationException, ZodValidationPipe } from './zod-validation.pipe';
 
 class CreateDto extends createZodDto(
   z.object({
@@ -37,6 +37,8 @@ describe('ZodValidationPipe', () => {
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(BadRequestException);
+      expect(error).toBeInstanceOf(ZodValidationException);
+      expect((error as ZodValidationException).getZodError().issues).toHaveLength(1);
       const response = (error as BadRequestException).getResponse() as {
         message: string;
         errors: { path: string[]; message: string }[];
