@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { defineConfig } from '@rspack/cli';
@@ -30,11 +31,18 @@ const OPTIONAL_MODULES = [
   'file-type',
 ];
 
+const MIGRATE_CLI = './src/lib/db/migrate.cli.ts';
+
 export default defineConfig({
   context: __dirname,
   target: 'node24',
   mode: 'production',
-  entry: { main: './src/main.ts' },
+  /* `main` sobe a API. O job de migration do deploy (`docker/migration/compose.yml`) roda
+     `dist/lib/db/migrate.cli.js`, que só existe depois da promoção para PostgreSQL. */
+  entry: {
+    main: './src/main.ts',
+    ...(existsSync(resolve(__dirname, MIGRATE_CLI)) && { 'lib/db/migrate.cli': MIGRATE_CLI }),
+  },
   output: {
     path: resolve(__dirname, 'dist'),
     filename: '[name].js',
