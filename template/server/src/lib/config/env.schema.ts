@@ -16,11 +16,13 @@ export const envSchema = z.object({
     .url()
     .refine((value) => /^rediss?:\/\//.test(value))
     .optional(),
+  /* Namespace do cache: `<app>:<ambiente>` (ex.: `admin-console:homo`). O `:` que separa a chave
+     entra no `ValkeyCache`, não no valor. */
   VALKEY_KEY_PREFIX: z
     .string()
-    .regex(/^[a-z0-9:-]+:$/)
+    .regex(/^[a-z0-9-]+:[a-z0-9-]+$/)
     .max(128)
-    .default('template:development:'),
+    .default('template:development'),
   VALKEY_TIMEOUT_MS: z.coerce.number().int().min(100).max(5000).default(1000),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   ADMIN_CONSOLE_TIMEOUT_MS: z.coerce.number().int().min(500).max(30000).default(4000),
