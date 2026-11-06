@@ -22,6 +22,8 @@ const NATIVE_MODULES = ['better-sqlite3'];
 const OPTIONAL_PACKAGES = [
   '@nestjs/microservices',
   '@nestjs/websockets',
+  /* O adaptador padrão do WebSocket; quem usa WebSocket aqui escolhe o `@nestjs/platform-ws`. */
+  '@nestjs/platform-socket.io',
   '@nestjs/platform-node',
   '@fastify/static',
   'class-transformer',
