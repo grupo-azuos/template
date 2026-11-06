@@ -1,68 +1,88 @@
 ---
 name: komodo-deploy
-description: Gera ou corrige a configuração de deploy no Komodo de um app do Grupo Azuos — `.komodo/komodo.toml` com Build, Stack e Procedure por ambiente, e os scripts `docker/komodo.sh`, `check-env.sh`, `route.sh` e `migrate.sh`. Use ao promover um app para Homo/Prod, ao criar um app novo a partir do template ou quando o deploy no Komodo de um app divergir do template. Não concede autorização para deploy, merge ou push.
+description: Gera ou corrige o deploy no Komodo de um app do Grupo Azuos — `.komodo/komodo.toml` com Repo, Build, Stack, Procedure e Action por ambiente no padrão `<ambiente>_<app>`, e os scripts `docker/komodo.sh`, `check-env.sh`, `route.sh`, `migrate.sh` e `rollback.sh`. Use ao promover um app para Homo/Prod, ao criar um app novo a partir do template, ao configurar webhooks do GitHub ou quando o deploy de um app divergir do template. Não concede autorização para deploy, merge ou push.
 ---
 
 # Deploy no Komodo (padrão do template)
 
-O deploy é **igual em todos os apps**. A base é este template: copie, troque só o que é do app e
-não invente variações. Se um app precisa de algo diferente, mude o template primeiro.
+As regras estão em `.claude/rules/infra.md` e o `scripts/production-contract.mjs` reprova o que
+foge delas. Esta skill é o passo a passo.
+
+O deploy é **igual em todos os apps**: copie o `.komodo/komodo.toml` e o `docker/` do template e
+troque só o que é do app. Se um app precisa de algo diferente, mude o template primeiro.
 
 ## O que muda de um app para outro
 
-| Valor | Exemplo | Onde |
-|---|---|---|
-| Nome do app, em kebab-case | `contabil` | TOML (nomes, `image_name`, `project_name`) e argumentos de `komodo.sh` |
-| Pasta do app no repositório | `template` | `build_path` e `run_directory` |
-| Repositório no GitHub | `grupo-azuos/contabil` | `repo` |
-| Variável do projeto no Infisical | `CONTABIL_INFISICAL_PROJECT_ID` | `INFISICAL_PROJECT_ID` dos três comandos do Stack |
-| Conferências do ambiente | `test "$PUBLIC_DOMAIN" = "contabil.$DEPLOY_DOMAIN"` | `docker/check-env.sh` |
-| Rota no Caddy | `reverse_proxy ${STACK_NAME}_gateway:8080` | `docker/route.sh` |
+| Valor                            | Exemplo                           | Onde                                                                             |
+| -------------------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| Nome do app (kebab-case)         | `contabil`                        | nomes `<ambiente>_<app>`, `image_name`, labels, links, argumentos de `komodo.sh` |
+| Pasta do app no repositório      | `template`                        | `build_path` e `run_directory`                                                   |
+| Repositório no GitHub            | `grupo-azuos/contabil`            | `repo` e links do Repo                                                           |
+| Variável do projeto no Infisical | `CONTABIL_INFISICAL_PROJECT_ID`   | os três comandos do Stack                                                        |
+| Domínio                          | `contabil.homo.grupoazuos.com.br` | `links` do Build e do Stack, `check-env.sh`                                      |
+| Serviços extras (bot, worker)    | `chamados` tem o bot              | Build `<ambiente>_<app>_<serviço>` e estágio Build da Procedure                  |
 
-Todo o resto — `docker/komodo.sh`, a estrutura do TOML, as flags — é cópia exata do template.
+## Recursos por ambiente
 
-## `.komodo/komodo.toml`
+|                    | homo                                      | prod                                      |
+| ------------------ | ----------------------------------------- | ----------------------------------------- |
+| Branch             | `develop`                                 | `main`                                    |
+| Servidor do Repo   | `homo`                                    | `core`                                    |
+| Builder            | `homo`                                    | `prod`                                    |
+| Swarm              | `homo`                                    | `core-prod`                               |
+| Token do Infisical | `INFISICAL_HOMO_TOKEN`                    | `INFISICAL_PROD_TOKEN`                    |
+| Tags               | `context:apps`, `env:homo`, `server:homo` | `context:apps`, `env:prod`, `server:core` |
 
-Para cada ambiente, três recursos com o **mesmo nome** `<app>-<ambiente>`:
+Para cada ambiente, nesta ordem no arquivo:
 
-| Ambiente | Branch | Builder | Swarm | Token |
-|---|---|---|---|---|
-| `prod` | `main` | `core` | `core-prod` | `INFISICAL_PROD_TOKEN` |
-| `homo` | `develop` | `homo` | `homo` | `INFISICAL_HOMO_TOKEN` |
+1. `[[repo]] <ambiente>_<app>` — `server`, `repo`, `branch`, `links` para a árvore no GitHub.
+2. `[[build]] <ambiente>_<app>` — `builder`, `linked_repo = "<ambiente>_<app>"`, `build_path`,
+   `dockerfile_path = "docker/dockerfile"`, `image_name = "azuos/<app>"`, `image_tag = "<ambiente>"`,
+   só `include_commit_tag = true`, `labels` (`org.opencontainers.image.source`, `azuos.app`,
+   `azuos.environment`) e `links` para o domínio.
+3. `[[stack]] <ambiente>_<app>` — `swarm`, `project_name = "<ambiente>_<app>"`, `linked_repo`,
+   `run_directory`, `file_paths = ["docker/compose.yml"]`,
+   `extra_args = ["--resolve-image", "never", "--detach=false"]`,
+   `compose_cmd_wrapper_include = ["config", "deploy"]` e os três comandos chamando
+   `sh docker/komodo.sh <etapa> <app> <ambiente>`.
+4. `[[procedure]] <ambiente>_<app>` — `webhook_enabled = true`, estágios `Pull` (PullRepo),
+   `Build` (RunBuild) e `Deploy` (DeployStack).
+5. `[[action]] <ambiente>_<app>_rollback` — `execute_server_terminal` no servidor do ambiente com o
+   rollback dos serviços do stack (cópia do template).
 
-- **Build:** `docker/dockerfile`, imagem local `azuos/<app>` sem registry. `image_tag` é o ambiente;
-  só `include_commit_tag = true` (latest e versão desligados). A tag final é `<hash>-<ambiente>`,
-  a mesma que `docker/komodo.sh` calcula com `git rev-parse --short HEAD`.
-- **Stack:** `swarm`, `project_name = "<app>-<ambiente>"`, `run_directory` = pasta do app,
-  `file_paths = ["docker/compose.yml"]`, `extra_args = ["--resolve-image", "never", "--detach=false"]`,
-  `compose_cmd_wrapper_include = ["config", "deploy"]` e os três comandos (`pre_deploy`,
-  `compose_cmd_wrapper`, `post_deploy`) chamando `sh docker/komodo.sh <etapa> <app> <ambiente>`.
-- **Procedure:** estágio `Build` (`RunBuild`) e depois `Deploy` (`DeployStack`). Só ela tem
-  `webhook_enabled = true`; Build e Stack ficam com `webhook_enabled = false`.
-
-O webhook do GitHub aponta para `/listener/github/procedure/<app>-<ambiente>/<branch>`.
+Todo recurso tem `description` (o que ele faz, em português) e as três tags. Só a Procedure tem
+webhook ligado.
 
 Comandos longos no TOML usam string literal (`'''`) e quebram linha com ` \` (espaço antes da
-barra): o Komodo junta as linhas. Segredos e variáveis do Komodo entram como `'[[NOME]]'`.
+barra). Segredos e variáveis do Komodo entram como `'[[NOME]]'`.
+
+## Webhooks no GitHub (por ambiente)
+
+| Webhook                       | URL                                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
+| Sync (aplica o `komodo.toml`) | `https://komodo.grupoazuos.com.br/listener/github/sync/<id ou nome do sync>/sync`      |
+| Procedure (publica o app)     | `https://komodo.grupoazuos.com.br/listener/github/procedure/<ambiente>_<app>/<branch>` |
+
+Content type `application/json`, evento **push**, Secret = `komodo_webhook_secret` do server.
+Build e Stack não têm webhook: quem chama os dois, em ordem, é a Procedure.
 
 ## Scripts em `docker/`
 
-- `komodo.sh` — cópia exata do template. Calcula `APP_IMAGE`, `STACK_NAME`, `APP_REVISION` e
-  `DEPLOY_NODE_ID`, constrói `azuos-deploy-tools` e `azuos-gateway` uma vez por host e roda as
-  etapas dentro de `infisical run`. A leitura `docker stack config` do Komodo roda com
-  `--skip-interpolation`, para os segredos nunca ficarem gravados no Komodo.
-- `check-env.sh` — só conferências (`test`, `: "${VAR:?}"`), usando `$DEPLOY_ENV`.
-- `migrate.sh` — job de migration; opcional (app sem banco não tem).
-- `route.sh` — grava `/etc/caddy/conf.d/${STACK_NAME}.caddy`, valida e recarrega o Caddy; opcional
-  (worker/bot sem rota não tem).
-- `rollback.sh` — `docker service rollback` dos serviços `<app>-<ambiente>_<serviço>`.
+- `komodo.sh` — cópia exata do template. `STACK_NAME="${DEPLOY_ENV}_${APP_NAME}"`, imagem
+  `azuos/<app>:<hash>-<ambiente>`, constrói `azuos-deploy-tools` e `azuos-gateway` uma vez por
+  host, roda as etapas dentro de `infisical run` e, no post-deploy, remove rotas e stacks com os
+  nomes antigos (`<app>-<ambiente>`, `<app_snake>_<ambiente>`).
+- `check-env.sh` — só conferências (`test`, `: "${VAR:?}"`).
+- `migrate.sh` — job de migration (`<stack>_migration`); só em app com banco.
+- `route.sh` — grava `conf.d/${STACK_NAME}.caddy` no Caddy de borda; só em app com rota.
+- `rollback.sh` — mesmo comando da Action de rollback, para uso manual.
 
-Nada de `deploy.sh`, `build.sh`, `on_pull` ou `[[repo]]`: o Build e o Stack do Komodo fazem esse papel.
+Nada de `deploy.sh`, `build.sh` ou `on_pull`: Repo, Build, Stack e Procedure fazem esse papel.
 
-## Regras
+## Conferir antes do commit
 
-- Nomes de recursos, stacks e imagens em **kebab-case**. Banco continua em snake_case.
-- O app nunca busca segredos: só `docker/komodo.sh` chama o Infisical.
-- Sem registry, GHCR, `docker push` ou deploy no GitHub Actions.
-- Formatar `.sh` com `shfmt -i 2 -ci -bn` e passar no `shellcheck -s sh`.
-- Conferir com `node scripts/production-contract.mjs` antes do commit.
+```sh
+node scripts/production-contract.mjs
+node --test scripts/production-contract.test.mjs
+shellcheck -s sh template/docker/*.sh && shfmt -i 2 -ci -bn -d template/docker/*.sh
+```
