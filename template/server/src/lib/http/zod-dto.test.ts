@@ -28,8 +28,28 @@ describe('createZodDto', () => {
     )._OPENAPI_METADATA_FACTORY();
 
     expect(properties.title).toMatchObject({ type: 'string', required: true });
-    /* Pela saída do schema, como o contrato sempre foi publicado: com `default`, o campo existe. */
-    expect(properties.page).toMatchObject({ required: true });
+    expect(properties.page).toMatchObject({ required: false });
+  });
+
+  // feliz
+  it('publishes preprocess and transform fields like nestjs-zod did: required, with the real type', () => {
+    const jsonSchema = openApiSchemaOf(
+      z.object({
+        days: z.preprocess((value) => (value === '' ? undefined : value), z.number().optional()),
+        owner: z
+          .string()
+          .trim()
+          .transform((value) => value || 'none'),
+        isPartial: z.boolean().default(false),
+      }),
+    );
+
+    expect(jsonSchema.required).toEqual(['days', 'owner']);
+    expect(jsonSchema.properties).toMatchObject({
+      days: { type: 'number' },
+      owner: { type: 'string' },
+      isPartial: { type: 'boolean', default: false },
+    });
   });
 
   // feliz

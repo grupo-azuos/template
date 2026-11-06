@@ -21,17 +21,43 @@ const schemasByName = new Map<string, z.ZodType>();
 
 /**
  * JSON Schema no dialeto do OpenAPI 3.0; o que não tem equivalente (Date, por exemplo) vira livre.
- * Pela SAÍDA do schema, como o contrato sempre foi publicado: campo com `default` aparece como
- * obrigatório, e o cliente gerado pelo `openapi-typescript` não muda.
+ * O contrato é o mesmo que o nestjs-zod publicava, para o cliente gerado pelo `openapi-typescript`
+ * não mudar: o campo só é opcional quando o envoltório de fora é `.optional()` ou `.default()`, e o
+ * `z.preprocess` mostra o schema de dentro (o que chega no controller), não a função.
  */
 export function openApiSchemaOf(schema: z.ZodType): Record<string, unknown> {
   const { $schema: _dialect, ...jsonSchema } = z.toJSONSchema(schema, {
     target: 'openapi-3.0',
-    io: 'output',
+    io: 'input',
     unrepresentable: 'any',
+    override: ({ zodSchema, jsonSchema: converted }) => {
+      const def = zodSchema._zod.def;
+      if (def.type === 'pipe' && def.in._zod.def.type === 'transform') {
+        replaceWith(converted, openApiSchemaOf(def.out as z.ZodType));
+      }
+      if (def.type === 'object') requireAllButOptional(converted, def.shape);
+    },
   }) as Record<string, unknown>;
 
   return jsonSchema;
+}
+
+const OPTIONAL_WRAPPERS = new Set(['optional', 'default']);
+
+function requireAllButOptional(
+  converted: Record<string, unknown>,
+  shape: Record<string, z.core.$ZodType>,
+): void {
+  const required = Object.entries(shape)
+    .filter(([, field]) => !OPTIONAL_WRAPPERS.has(field._zod.def.type))
+    .map(([key]) => key);
+  if (required.length > 0) converted.required = required;
+  else delete converted.required;
+}
+
+function replaceWith(target: Record<string, unknown>, source: Record<string, unknown>): void {
+  for (const key of Object.keys(target)) delete target[key];
+  Object.assign(target, source);
 }
 
 export function createZodDto<TSchema extends z.ZodType>(schema: TSchema): ZodDtoClass<TSchema> {
