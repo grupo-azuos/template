@@ -285,7 +285,23 @@ Supertest contra SQLite em memória), E2E da web (Playwright), mutação (Stryke
   Controller não fala com repository, repository não tem regra.
   **Lint:** `no-restricted-imports` bloqueia `*.repository` em `*.controller.ts`.
 - **Contrato antes do código.** O schema Zod vive em `shared/` (pacote `@template/shared`) e
-  é importado pela API (DTO + Swagger via `nestjs-zod`) e pela web. Um schema, duas pontas.
+  é importado pela API (DTO + Swagger via `createZodDto`, em `server/src/lib/http/zod-dto.ts`) e
+  pela web. Um schema, duas pontas.
+- **Schema de edição é `partialUpdate(schemaDeCriação)`, nunca `.partial()`.** No Zod 4 o
+  `.default()` vale dentro do `.optional()`, e a edição gravaria os valores padrão por cima do que
+  está salvo. O contrato de infra (`scripts/infra-contract.mjs`) reprova o `.partial()`.
+- **As armadilhas do Zod 4**, todas já vistas nos sistemas da casa:
+  - objeto com `.default({})` não preenche mais os padrões de dentro — use `.prefault({})`;
+  - `z.uuid()` só aceita UUID da RFC; identificador "parecido com UUID" (de teste, de outro
+    sistema) é `z.guid()`, que era o `.uuid()` do Zod 3;
+  - o objeto passado ao `.refine()` é reescrito no lugar: mensagem usada em mais de um
+    `.refine()`/`addIssue` sai de uma função (`const endAfterStart = () => ({ message, path })`),
+    nunca de uma constante objeto;
+  - `z.coerce.number()` aceita qualquer coisa na entrada; quando o formulário tipa o campo, use
+    `z.coerce.number<number>()`.
+- **Parâmetro de rota com tipo que não é classe leva `@ApiParam`.** O build (SWC) não guarda
+  o tipo de `@Param('area') area: TicketArea` quando `TicketArea` é um `type`, e o Swagger tira
+  o parâmetro do contrato: `@ApiParam({ name: 'area', type: String })` devolve.
 - **Swagger é obrigatório.** Endpoint sem `@ApiOperation` e sem tipo de resposta não entra.
 - **Quem editou vem da identidade**, nunca do corpo da requisição. `createdBy` e `updatedBy`
   são carimbados no mapper, a partir do que o middleware resolveu. Aceitar autoria do corpo é
@@ -549,7 +565,7 @@ aqui** — travar sem registrar é como o projeto esquece por que não atualiza.
 |---|---|---|
 | **ESLint 9** | `eslint-plugin-react-hooks` e o resto do ecossistema de plugins só declaram peer até o 9. | Os plugins declararem `eslint@^10` |
 | **TypeScript 5** | `openapi-typescript` exige `typescript@^5.x`. | `openapi-typescript` aceitar o 7 |
-| **NestJS 11** | `nestjs-zod@5` só declara peer até `@nestjs/common@^11`. | `nestjs-zod` aceitar o 12 |
+| **Nest CLI 11** (o runtime é o Nest 12) | O `@nestjs/schematics@12`, usado pelo CLI 12, exige TypeScript 6, travado no 5 pelo `openapi-typescript`. | `openapi-typescript` aceitar o TypeScript 6 |
 
 Uma trava dessas **não** é desculpa para `--force` nem para `legacy-peer-deps`: os dois
 desligam a verificação do projeto inteiro e escondem o próximo conflito.

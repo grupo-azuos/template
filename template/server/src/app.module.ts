@@ -5,12 +5,12 @@ import { join } from 'node:path';
 import { Module } from '@nestjs/common';
 import { APP_PIPE } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ZodValidationPipe } from 'nestjs-zod';
 
 import { AuthModule } from './lib/auth/auth.module';
 import { AppConfigModule } from './lib/config/app-config.module';
 import { DbModule } from './lib/db/db.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { ZodValidationPipe } from './lib/http/zod-validation.pipe';
 
 /**
  * Serve o build do client — sem Nginx, sem container à parte. Atrás do Traefik, esta

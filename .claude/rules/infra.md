@@ -1,8 +1,8 @@
 # Regras de Infraestrutura (Grupo Azuos)
 
 Valem para todos os apps com `.komodo/komodo.toml`. A base é o `template`: mudou aqui, muda em
-todos. O `scripts/production-contract.mjs` confere estas regras no hook do Claude (a cada edição)
-e no CI; violação não se contorna, corrige-se.
+todos. O `scripts/infra-contract.mjs` confere estas regras no hook do Claude (a cada edição) e no
+CI; violação não se contorna, corrige-se.
 
 ## 1. Nomes
 
@@ -43,7 +43,8 @@ Webhook do GitHub só na Procedure (`webhook_enabled = true`); Repo, Build, Stac
 ## 3. Build e imagem
 
 - Server empacotado pelo **Rspack** (`rspack build`), client pelo **Rsbuild** (`rsbuild build`).
-  Testes continuam no Vitest.
+  Testes continuam no Vitest. Exceção: client em **SvelteKit** continua no Vite, porque o SvelteKit
+  só existe sobre o Vite.
 - A imagem final **não copia `node_modules`**: leva o pacote do server, as migrations e o client.
   Módulo nativo (`.node`) que não entra no pacote é copiado um por um, com comentário.
 - Sem registry, GHCR, `docker push` ou build/deploy no GitHub Actions. O Komodo constrói no

@@ -40,7 +40,7 @@ export function userRoleLabel(role: UserRole): string {
  */
 export const sessionUserSchema = z.object({
   id: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().min(1),
   role: userRoleSchema,
 });

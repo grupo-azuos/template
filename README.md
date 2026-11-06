@@ -160,7 +160,7 @@ template/                              # raiz do repositório git
 
 | Camada                          | Escolha                                                     |
 | ------------------------------- | ----------------------------------------------------------- |
-| **Backend**                     | NestJS 11 + Swagger (`nestjs-zod`), empacotado pelo Rspack  |
+| **Backend**                     | NestJS 12 + Swagger (Zod 4), empacotado pelo Rspack         |
 | **Banco**                       | **SQLite** via **Drizzle ORM** (`better-sqlite3`)           |
 | **Frontend**                    | React 19 + Rsbuild + TypeScript                             |
 | **Rotas / Dados / Formulários** | TanStack Router · Query · Form                              |
@@ -254,7 +254,7 @@ algo.
 ## Versões
 
 Node na linha **LTS, com a faixa fechada** — `>=24.0.0 <25.0.0`. As demais versões são as
-mesmas do Paralegal. As travas (ESLint 9, TypeScript 5, NestJS 11) e o motivo de cada uma
+mesmas do Paralegal. As travas (ESLint 9, TypeScript 5, Nest CLI 11) e o motivo de cada uma
 estão na [seção 13 do CONTRIBUTING](CONTRIBUTING.md#13-versões--só-o-que-ainda-tem-suporte).
 
 ---

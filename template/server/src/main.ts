@@ -1,10 +1,10 @@
 import { docsAccess } from './lib/http/docs-access.middleware';
 import { setupOpenApiDocs } from './lib/http/openapi-document';
+import { withZodSchemas } from './lib/http/zod-dto';
 import { packageVersion } from './lib/http/api-version';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
 
 import { AppModule } from './app.module';
 import { setupApp } from './app.setup';
@@ -22,9 +22,9 @@ async function bootstrap(): Promise<void> {
 
   setupApp(app, env);
 
-  /* `cleanupOpenApiDoc` limpa o ruído interno dos schemas Zod do documento gerado. Sem isto
-     o contrato publicado sai ilegível — e endpoint sem contrato legível reprova o CI. */
-  const document = cleanupOpenApiDoc(
+  /* `withZodSchemas` põe no documento o JSON Schema completo de cada DTO Zod. Sem isto o contrato
+     publicado sai sem formatos e limites — e endpoint sem contrato legível reprova o CI. */
+  const document = withZodSchemas(
     SwaggerModule.createDocument(
       app,
       new DocumentBuilder()
