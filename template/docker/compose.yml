@@ -8,7 +8,8 @@ services:
     - APP_ENV
     - TRUST_PROXY_HOPS=${TRUST_PROXY_HOPS:?}
     - VALKEY_URL
-    - VALKEY_KEY_PREFIX
+    # Namespace do cache: <app>:<ambiente>, montado aqui para não depender de valor no Infisical.
+    - VALKEY_KEY_PREFIX=${APP_NAME:?}:${DEPLOY_ENV:?}
     - VALKEY_TIMEOUT_MS
     - ADMIN_CONSOLE_TIMEOUT_MS
     - ADMIN_CONSOLE_CLIENT_SECRET
@@ -139,7 +140,7 @@ services:
     extra_hosts: *id001
 configs:
   gateway:
-    name: ${APP_NAME:?}-${DEPLOY_ENV:?}-gateway-${APP_REVISION:?}
+    name: ${DEPLOY_ENV:?}_${APP_NAME:?}_gateway_${APP_REVISION:?}
     file: ./caddy/caddyfile
 networks:
   private:
