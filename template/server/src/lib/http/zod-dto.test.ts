@@ -31,6 +31,26 @@ describe('createZodDto', () => {
     expect(properties.page).toMatchObject({ required: false });
   });
 
+  // feliz
+  it('gives a union field the common type of its options, which Swagger requires', () => {
+    class UnionDto extends createZodDto(
+      z.object({
+        email: z
+          .email()
+          .nullable()
+          .or(z.literal('').transform(() => null)),
+        mixed: z.union([z.string(), z.number()]),
+      }),
+    ) {}
+
+    const properties = (
+      UnionDto as unknown as { _OPENAPI_METADATA_FACTORY: () => Record<string, { type: unknown }> }
+    )._OPENAPI_METADATA_FACTORY();
+
+    expect(properties.email?.type).toBe('string');
+    expect(properties.mixed?.type).toBe('object');
+  });
+
   // triste
   it('does not treat an ordinary class as a Zod DTO', () => {
     class Plain {}

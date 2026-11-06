@@ -79,7 +79,20 @@ function propertiesOf(jsonSchema: Record<string, unknown>): Record<string, unkno
   return Object.fromEntries(
     Object.entries(properties).map(([key, property]) => [
       key,
-      { ...property, required: required.has(key) },
+      { ...property, type: typeOf(property), required: required.has(key) },
     ]),
   );
+}
+
+/* Sem `type` (uma união vira `anyOf`), o Swagger tenta deduzir o tipo pela classe e recusa o DTO.
+   Vale o tipo comum das opções; se elas forem de tipos diferentes, `object`. */
+function typeOf(property: Record<string, unknown>): unknown {
+  if (property.type) return property.type;
+
+  const options = (property.anyOf ?? property.oneOf ?? property.allOf ?? []) as {
+    type?: unknown;
+  }[];
+  const types = new Set(options.map((option) => option.type).filter(Boolean));
+
+  return types.size === 1 ? [...types][0] : 'object';
 }
