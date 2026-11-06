@@ -28,13 +28,14 @@ function apiRules(project) {
 
 function containerRules(project, compose) {
   const required = ['healthcheck:', 'resources:', 'limits:', 'memory:', 'cpus:', 'stop_grace_period:', 'azuos-edge'];
-  const deploy = read(project, 'template/docker/deploy.sh');
+  const komodo = read(project, 'template/docker/komodo.sh');
   const toml = read(project, '.komodo/komodo.toml');
   return [
     ...required.filter((token) => !compose.includes(token)).map((token) => `Container contract missing ${token}`),
-    ...rule(toml.includes('infisical --silent') && toml.includes('run --expand=false') && toml.includes('--env=') && toml.includes('sh docker/deploy.sh'), 'Inject Infisical in the Komodo TOML before local native Swarm deployment'),
-    ...rule(deploy.includes('docker stack deploy --detach=false --resolve-image never'), 'Deploy through native Swarm updates'),
-    ...rule(!/python|ghcr\.io|docker push/.test(toml + compose + deploy), 'Do not use Python controllers, GHCR or image publishing'),
+    ...rule(['[[build]]', '[[stack]]', '[[procedure]]', 'sh docker/komodo.sh'].every((token) => toml.includes(token)), 'Declare Build, Stack and Procedure in the Komodo TOML, with the steps in docker/komodo.sh'),
+    ...rule(toml.includes('"--resolve-image", "never"') && toml.includes('"--detach=false"'), 'Deploy through native Swarm updates'),
+    ...rule(komodo.includes('infisical run') && komodo.includes('--expand=false') && komodo.includes('--skip-interpolation'), 'Inject Infisical only in the docker/komodo.sh steps, never in the stored stack config'),
+    ...rule(!/python|ghcr\.io|docker push/.test(toml + compose + komodo), 'Do not use Python controllers, GHCR or image publishing'),
   ];
 }
 

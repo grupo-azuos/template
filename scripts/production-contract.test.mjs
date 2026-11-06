@@ -18,9 +18,9 @@ function fixture() {
   write('template/server/src/lib/http/openapi-document.ts', 'PUBLISHED_MAJORS; docs/v${major}-json; filter: true');
   write('template/docker/caddy/caddyfile', ':8080 {\n respond 200\n}\n');
   write('template/docker/compose.yml', 'healthcheck:\nresources:\nlimits:\nmemory:\ncpus:\nstop_grace_period:\nazuos-edge\n./caddy/caddyfile\n');
-  write('.komodo/komodo.toml', 'infisical --silent run --expand=false --env=homo -- sh docker/deploy.sh');
+  write('.komodo/komodo.toml', '[[build]]\n[[stack]]\nextra_args = ["--resolve-image", "never", "--detach=false"]\n[[procedure]]\nsh docker/komodo.sh\n');
   write('template/server/package.json', JSON.stringify({ dependencies: {} }));
-  write('template/docker/deploy.sh', 'docker stack deploy --detach=false --resolve-image never');
+  write('template/docker/komodo.sh', 'infisical run --expand=false; docker stack config --skip-interpolation');
   return { root, write, dispose: () => rmSync(root, { recursive: true }) };
 }
 

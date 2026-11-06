@@ -37,7 +37,7 @@ SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Homo/Prod:
 - Configurações de Caddy ficam em `docker/caddy/`, dentro de `docker/`, com nomes totalmente minúsculos. O arquivo principal é `caddyfile`; configs adicionais, como `site.caddyfile`, também são minúsculas. Compose, dockerfile e comandos usam `/etc/caddy/caddyfile` com adapter explícito.
 - Usar `docker/dockerfile` e `docker/compose.yml`; cada contexto adicional tem seu próprio diretório e arquivo `dockerfile` sem sufixo. `.komodo/komodo.toml` fica na raiz do repositório, fora de `docker/` e do pacote interno. Corrigir também paths de build, workflows, scripts e documentação ao mover arquivos.
 - Containers sem portas públicas próprias, com limites/reservas, readiness, usuário sem privilégios e desligamento gracioso. Backend só na rede privada da stack; somente gateway na overlay de borda.
-- O Komodo executa Infisical no TOML antes de migration/deploy. Nunca adicionar CLI/SDK do cofre no app nem buscar segredos no dockerfile/entrypoint.
+- O deploy no Komodo segue `.claude/skills/komodo-deploy/SKILL.md`: Build, Stack e Procedure por ambiente, com o Infisical só nas etapas de `docker/komodo.sh`. Nunca adicionar CLI/SDK do cofre no app nem buscar segredos no dockerfile/entrypoint.
 - Prod/main usa core; Homo/develop usa homo. PostgreSQL, Valkey, cookies, credenciais e URLs são próprios de cada ambiente. Namespace do cache: `<app>:<environment>:`.
 - Atualização nativa start-first exige migration compatível com a versão anterior. Remoção de coluna fica para release posterior. Bots e schedulers são singletons stop-first.
 - Atualizar todos os `.env.example` com o contrato real, sem valores secretos. `VITE_`/`PUBLIC_` só contêm configuração pública.
