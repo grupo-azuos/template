@@ -139,7 +139,7 @@ services:
     extra_hosts: *id001
 configs:
   gateway:
-    name: ${APP_NAME:?}_${DEPLOY_ENV:?}_gateway_${APP_REVISION:?}
+    name: ${APP_NAME:?}-${DEPLOY_ENV:?}-gateway-${APP_REVISION:?}
     file: ./caddy/caddyfile
 networks:
   private:

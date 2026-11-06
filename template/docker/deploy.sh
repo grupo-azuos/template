@@ -10,7 +10,9 @@ test "$VALKEY_KEY_PREFIX" = "template:$APP_ENV:"
 jq -e ' .stage != "mvp" and .database == "postgresql" and .production_deploy_enabled == true ' ../production.json >/dev/null
 
 export APP_NAME=template DEPLOY_ENV="$2"
-STACK_NAME="${APP_NAME}_${DEPLOY_ENV}"
+STACK_NAME="${APP_NAME}-${DEPLOY_ENV}"
+# Nome antigo em snake_case: a rota sai antes da nova e o stack depois do deploy novo
+LEGACY_STACK_NAME="$(printf '%s' "$STACK_NAME" | tr - _)"
 DEPLOY_NODE_ID="$(docker node inspect self --format '{{.ID}}')"
 APP_REVISION="$(git rev-parse --short=12 HEAD)"
 export DEPLOY_NODE_ID APP_REVISION STACK_NAME
@@ -23,6 +25,7 @@ sh docker/migrate.sh
 docker stack deploy --detach=false --resolve-image never -c docker/compose.yml "$STACK_NAME"
 
 # Publicar rota do app no Caddy de borda
+[ "$LEGACY_STACK_NAME" = "$STACK_NAME" ] || docker exec caddy rm -f "/etc/caddy/conf.d/${LEGACY_STACK_NAME}.caddy"
 docker exec -i caddy sh -c "cat > /etc/caddy/conf.d/${STACK_NAME}.caddy" <<EOF
 ${PUBLIC_DOMAIN} {
 	reverse_proxy ${STACK_NAME}_gateway:8080
@@ -30,3 +33,4 @@ ${PUBLIC_DOMAIN} {
 EOF
 docker exec caddy caddy validate --config /etc/caddy/caddyfile --adapter caddyfile >/dev/null
 docker exec caddy caddy reload --config /etc/caddy/caddyfile --adapter caddyfile
+[ "$LEGACY_STACK_NAME" = "$STACK_NAME" ] || docker stack rm "$LEGACY_STACK_NAME" >/dev/null 2>&1 || true
