@@ -30,8 +30,16 @@ const OPTIONAL_PACKAGES = [
   /* ESM puro, carregado pelo Nest só no `FileTypeValidator`, que o projeto não usa. */
   'file-type',
 ];
+/* O que o projeto declara em `dependencies` nunca é opcional: um app com WebSocket usa o
+   `@nestjs/websockets`, e ignorá-lo tiraria os gateways do pacote sem erro nenhum no build. */
+const DEPENDENCIES = Object.keys(
+  JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8')).dependencies ?? {},
+);
 const isOptional = (resource: string): boolean =>
-  OPTIONAL_PACKAGES.some((name) => resource === name || resource.startsWith(`${name}/`));
+  OPTIONAL_PACKAGES.some(
+    (name) =>
+      !DEPENDENCIES.includes(name) && (resource === name || resource.startsWith(`${name}/`)),
+  );
 
 const MIGRATE_CLI = './src/lib/db/migrate.cli.ts';
 
