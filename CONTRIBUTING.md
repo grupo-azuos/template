@@ -287,6 +287,9 @@ Supertest contra SQLite em memória), E2E da web (Playwright), mutação (Stryke
 - **Contrato antes do código.** O schema Zod vive em `shared/` (pacote `@template/shared`) e
   é importado pela API (DTO + Swagger via `createZodDto`, em `server/src/lib/http/zod-dto.ts`) e
   pela web. Um schema, duas pontas.
+- **Schema de edição é `partialUpdate(schemaDeCriação)`, nunca `.partial()`.** No Zod 4 o
+  `.default()` vale dentro do `.optional()`, e a edição gravaria os valores padrão por cima do que
+  está salvo. O contrato de infra (`scripts/infra-contract.mjs`) reprova o `.partial()`.
 - **Swagger é obrigatório.** Endpoint sem `@ApiOperation` e sem tipo de resposta não entra.
 - **Quem editou vem da identidade**, nunca do corpo da requisição. `createdBy` e `updatedBy`
   são carimbados no mapper, a partir do que o middleware resolveu. Aceitar autoria do corpo é
