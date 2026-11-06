@@ -11,7 +11,9 @@ import { z } from 'zod';
  */
 export type ZodDtoClass<TSchema extends z.ZodType = z.ZodType> = {
   new (): z.output<TSchema>;
-  readonly zodSchema: TSchema;
+  /* `schema`, como nos DTOs de antes: `z.infer<typeof AlgumDto.schema>` continua valendo. */
+  readonly schema: TSchema;
+  readonly isZodDto: true;
 };
 
 /** Schema de cada DTO pelo nome da classe, que é o nome do componente no documento OpenAPI. */
@@ -30,7 +32,8 @@ export function openApiSchemaOf(schema: z.ZodType): Record<string, unknown> {
 
 export function createZodDto<TSchema extends z.ZodType>(schema: TSchema): ZodDtoClass<TSchema> {
   class ZodDto {
-    static readonly zodSchema = schema;
+    static readonly schema = schema;
+    static readonly isZodDto = true;
 
     /* O Swagger chama isto com `this` sendo a classe filha (`CreateTaskDto`): o nome dela é o
        nome do componente que `withZodSchemas` completa depois. */
@@ -46,9 +49,9 @@ export function createZodDto<TSchema extends z.ZodType>(schema: TSchema): ZodDto
 
 /** O schema Zod de um tipo de parâmetro, quando ele é um DTO de `createZodDto`. */
 export function zodSchemaOf(type: unknown): z.ZodType | undefined {
-  if (typeof type !== 'function' || !('zodSchema' in type)) return undefined;
+  if (typeof type !== 'function' || !('isZodDto' in type)) return undefined;
 
-  return (type as ZodDtoClass).zodSchema;
+  return (type as ZodDtoClass).schema;
 }
 
 /**

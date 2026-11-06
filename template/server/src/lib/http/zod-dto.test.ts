@@ -14,8 +14,9 @@ class SampleDto extends createZodDto(schema) {}
 
 describe('createZodDto', () => {
   // feliz
-  it('keeps the Zod schema on the class, for the validation pipe', () => {
+  it('keeps the Zod schema on the class, for the validation pipe and z.infer', () => {
     expect(zodSchemaOf(SampleDto)).toBe(schema);
+    expect(SampleDto.schema).toBe(schema);
   });
 
   // feliz
@@ -33,8 +34,12 @@ describe('createZodDto', () => {
   // triste
   it('does not treat an ordinary class as a Zod DTO', () => {
     class Plain {}
+    class WithSchema {
+      static readonly schema = schema;
+    }
 
     expect(zodSchemaOf(Plain)).toBeUndefined();
+    expect(zodSchemaOf(WithSchema)).toBeUndefined();
     expect(zodSchemaOf(undefined)).toBeUndefined();
   });
 });
