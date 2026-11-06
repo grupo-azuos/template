@@ -80,7 +80,13 @@ function buildRules(appDir) {
   const clientManifest = manifest('client');
   const sveltekit = Boolean(clientManifest?.devDependencies?.['@sveltejs/kit'] ?? clientManifest?.dependencies?.['@sveltejs/kit']);
   const client = sveltekit ? undefined : clientManifest?.scripts?.build;
+  const serverManifest = single ? root : manifest('server');
+  const dependencies = { ...serverManifest?.dependencies, ...serverManifest?.devDependencies };
+  const major = (name) => Number(/\d+/.exec(dependencies[name] ?? '')?.[0] ?? NaN);
   return [
+    ...rule(!dependencies['nestjs-zod'], 'Validate with Zod directly (createZodDto in lib/http/zod-dto.ts), never nestjs-zod'),
+    ...rule(!dependencies.zod || major('zod') >= 4, 'Use Zod 4 or newer'),
+    ...rule(!dependencies['@nestjs/core'] || major('@nestjs/core') >= 12, 'Use NestJS 12 or newer'),
     ...rule(server === undefined || /rspack build/.test(server), 'Build the server with Rspack (rspack build)'),
     ...rule(client === undefined || /rsbuild build/.test(client), 'Build the client with Rsbuild (rsbuild build)'),
   ];
