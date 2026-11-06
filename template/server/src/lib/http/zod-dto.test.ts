@@ -41,6 +41,7 @@ describe('createZodDto', () => {
           .trim()
           .transform((value) => value || 'none'),
         isPartial: z.boolean().default(false),
+        address: z.object({ street: z.string().default('') }).prefault({}),
       }),
     );
 

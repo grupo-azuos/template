@@ -22,8 +22,9 @@ const schemasByName = new Map<string, z.ZodType>();
 /**
  * JSON Schema no dialeto do OpenAPI 3.0; o que não tem equivalente (Date, por exemplo) vira livre.
  * O contrato é o mesmo que o nestjs-zod publicava, para o cliente gerado pelo `openapi-typescript`
- * não mudar: o campo só é opcional quando o envoltório de fora é `.optional()` ou `.default()`, e o
- * `z.preprocess` mostra o schema de dentro (o que chega no controller), não a função.
+ * não mudar: o campo só é opcional quando o envoltório de fora é `.optional()`, `.default()` ou
+ * `.prefault()` (o `.default()` do Zod 3), e o `z.preprocess` mostra o schema de dentro (o que chega
+ * no controller), não a função.
  */
 export function openApiSchemaOf(schema: z.ZodType): Record<string, unknown> {
   const { $schema: _dialect, ...jsonSchema } = z.toJSONSchema(schema, {
@@ -42,7 +43,7 @@ export function openApiSchemaOf(schema: z.ZodType): Record<string, unknown> {
   return jsonSchema;
 }
 
-const OPTIONAL_WRAPPERS = new Set(['optional', 'default']);
+const OPTIONAL_WRAPPERS = new Set(['optional', 'default', 'prefault']);
 
 function requireAllButOptional(
   converted: Record<string, unknown>,
