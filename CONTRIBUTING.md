@@ -290,6 +290,18 @@ Supertest contra SQLite em memória), E2E da web (Playwright), mutação (Stryke
 - **Schema de edição é `partialUpdate(schemaDeCriação)`, nunca `.partial()`.** No Zod 4 o
   `.default()` vale dentro do `.optional()`, e a edição gravaria os valores padrão por cima do que
   está salvo. O contrato de infra (`scripts/infra-contract.mjs`) reprova o `.partial()`.
+- **As armadilhas do Zod 4**, todas já vistas nos sistemas da casa:
+  - objeto com `.default({})` não preenche mais os padrões de dentro — use `.prefault({})`;
+  - `z.uuid()` só aceita UUID da RFC; identificador "parecido com UUID" (de teste, de outro
+    sistema) é `z.guid()`, que era o `.uuid()` do Zod 3;
+  - o objeto passado ao `.refine()` é reescrito no lugar: mensagem usada em mais de um
+    `.refine()`/`addIssue` sai de uma função (`const endAfterStart = () => ({ message, path })`),
+    nunca de uma constante objeto;
+  - `z.coerce.number()` aceita qualquer coisa na entrada; quando o formulário tipa o campo, use
+    `z.coerce.number<number>()`.
+- **Parâmetro de rota com tipo que não é classe leva `@ApiParam`.** O build (SWC) não guarda
+  o tipo de `@Param('area') area: TicketArea` quando `TicketArea` é um `type`, e o Swagger tira
+  o parâmetro do contrato: `@ApiParam({ name: 'area', type: String })` devolve.
 - **Swagger é obrigatório.** Endpoint sem `@ApiOperation` e sem tipo de resposta não entra.
 - **Quem editou vem da identidade**, nunca do corpo da requisição. `createdBy` e `updatedBy`
   são carimbados no mapper, a partir do que o middleware resolveu. Aceitar autoria do corpo é
