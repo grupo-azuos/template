@@ -30,9 +30,9 @@ describe.runIf(Boolean(process.env.TEST_VALKEY_URL))(
       expect(await prod.ready()).toBe(true);
       expect(await replica.ready()).toBe(true);
       expect(await homo.ready()).toBe(true);
-      expect(
-        await prod.remember('same-key', 2, async () => ({ source: 'prod' })),
-      ).toEqual({ source: 'prod' });
+      expect(await prod.remember('same-key', 2, async () => ({ source: 'prod' }))).toEqual({
+        source: 'prod',
+      });
       expect(await replica.remember('same-key', 2, async () => ({ source: 'wrong' }))).toEqual({
         source: 'prod',
       });

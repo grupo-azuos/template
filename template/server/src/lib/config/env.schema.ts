@@ -12,7 +12,6 @@ import { z } from 'zod';
 export const envSchema = z.object({
   APP_ENV: z.enum(['dev', 'homo', 'prod']).default('dev'),
   VALKEY_URL: z
-    .string()
     .url()
     .refine((value) => /^rediss?:\/\//.test(value))
     .optional(),
@@ -27,7 +26,7 @@ export const envSchema = z.object({
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   ADMIN_CONSOLE_TIMEOUT_MS: z.coerce.number().int().min(500).max(30000).default(4000),
   ADMIN_CONSOLE_CLIENT_SECRET: z.string().min(1).optional(),
-  ADMIN_CONSOLE_URL: z.string().url().optional(),
+  ADMIN_CONSOLE_URL: z.url().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
   API_PORT: z.coerce.number().int().min(1).max(65535).default(3009),
