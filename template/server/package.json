@@ -5,7 +5,7 @@
   "description": "API NestJS do template — um caminho de escrita por dado, SQLite por baixo.",
   "scripts": {
     "dev": "nest start --watch",
-    "build": "nest build",
+    "build": "rspack build -c rspack.config.ts",
     "start": "node dist/main.js",
     "docs": "cross-env OPEN_DOCS=1 nest start",
     "test": "vitest run",
@@ -51,6 +51,8 @@
     "@nestjs/cli": "^11.0.24",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.2.5",
+    "@rspack/cli": "^2.3.1",
+    "@rspack/core": "^2.3.1",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/vitest-runner": "^10.0.0",
     "@swc/core": "^1.7.35",

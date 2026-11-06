@@ -5,22 +5,15 @@ import BetterSqlite3 from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 
+import { SERVER_ROOT } from '../config/server-root';
+
 import { type Database } from './db.type';
 import { drizzleSchema } from './drizzle-schema';
 
-/**
- * A pasta `server/`, calculada a partir DESTE arquivo — e não do diretório em que o processo
- * foi iniciado.
- *
- * O mesmo server sobe de lugares diferentes: `npm run dev` roda dentro de `server/`, o Docker
- * roda `node server/dist/main.js` da raiz, e os seeds rodam da raiz do workspace. Resolver
- * `./data/app.db` pelo diretório atual abriria TRÊS bancos diferentes, e cada um pareceria
- * vazio para os outros dois.
- *
- * `src/lib/db` e `dist/lib/db` ficam à mesma distância de `server/`, então a conta vale para
- * o código-fonte e para o build.
- */
-export const SERVER_ROOT = resolve(__dirname, '..', '..', '..');
+/* A pasta `server/` vem de `server-root`: o mesmo server sobe de lugares diferentes (`npm run dev`
+   dentro de `server/`, o Docker da raiz, os seeds do workspace), e `./data/app.db` pelo diretório
+   atual abriria um banco diferente em cada um. */
+export { SERVER_ROOT };
 
 /** As migrations versionadas, geradas por `npm run db:generate`. */
 export const MIGRATIONS_FOLDER = join(SERVER_ROOT, 'drizzle');
