@@ -39,17 +39,17 @@ services:
         max-size: 10m
         max-file: '3'
     deploy:
-      replicas: ${APP_REPLICAS:-1}
+      replicas: 1
       placement:
         constraints:
         - node.id == ${DEPLOY_NODE_ID:?}
       resources:
         limits:
-          cpus: ${APP_CPU_LIMIT:-1.0}
-          memory: ${APP_MEMORY_LIMIT:-512M}
+          cpus: '1.0'
+          memory: 512M
         reservations:
-          cpus: ${APP_CPU_RESERVATION:-0.10}
-          memory: ${APP_MEMORY_RESERVATION:-128M}
+          cpus: '0.10'
+          memory: 128M
       restart_policy:
         condition: on-failure
         delay: 5s
