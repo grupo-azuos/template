@@ -6,7 +6,7 @@ describe('parseEnv', () => {
   /* A máquina recém-clonada não tem `.env`, e o template precisa subir mesmo assim. */
   it('starts with no variable at all, using the defaults', () => {
     expect(parseEnv({})).toEqual({
-      APP_ENV: 'development',
+      APP_ENV: 'dev',
       VALKEY_KEY_PREFIX: 'template:development:',
       VALKEY_TIMEOUT_MS: 1000,
       ADMIN_CONSOLE_TIMEOUT_MS: 4000,

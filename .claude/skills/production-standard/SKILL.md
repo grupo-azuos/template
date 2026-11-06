@@ -1,6 +1,6 @@
 ---
 name: production-standard
-description: Promove um app do template de MVP para Staging/Prod e mantém o padrão de API, OAuth2, banco e containers do Grupo Azuos. Use para publicar o MVP, preparar Komodo ou alterar contratos de API. Não concede autorização para deploy, merge ou push.
+description: Promove um app do template de MVP para Homo/Prod e mantém o padrão de API, OAuth2, banco e containers do Grupo Azuos. Use para publicar o MVP, preparar Komodo ou alterar contratos de API. Não concede autorização para deploy, merge ou push.
 ---
 
 # Padrão de produção
@@ -23,9 +23,9 @@ O admin-console é a referência de autenticação e contratos. Não criar login
 
 ## Saída do MVP
 
-SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Staging/Prod:
+SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Homo/Prod:
 
-1. Migrar schema e repositories para `pg` + `drizzle-orm/node-postgres`; gerar migrations PostgreSQL em diretório separado, sem reescrever as SQLite já commitadas.
+1. Migrar schema e repositories para `pg` + `drizzle-orm/node-postgres`. O driver é **sempre `pg`**: nunca instalar `postgres` (postgres.js) nem importar `drizzle-orm/postgres-js`, nem em script, seed ou teste; gerar migrations PostgreSQL em diretório separado, sem reescrever as SQLite já commitadas.
 2. Usar `DATABASE_URL` para runtime e `DATABASE_MIGRATION_URL` direta para o job de migration. Pool inicial 5 por réplica, com timeouts e fechamento no SIGTERM. Conferir orçamento total contando blue e green de todos os apps.
 3. Gerar e testar export/import dos dados existentes; não apontar SQLite para uma URL PostgreSQL.
 4. Instalar `pg`, tipos `@types/pg` em desenvolvimento, `jose` quando houver validação JWT e o cliente `iovalkey` 0.4.0. Banco e Valkey são os serviços compartilhados do ambiente, sem containers locais por app.
@@ -37,8 +37,8 @@ SQLite + better-sqlite3 são exclusivos do MVP local. Antes de Staging/Prod:
 - Configurações de Caddy ficam em `docker/caddy/`, dentro de `docker/`, com nomes totalmente minúsculos. O arquivo principal é `caddyfile`; configs adicionais, como `site.caddyfile`, também são minúsculas. Compose, dockerfile e comandos usam `/etc/caddy/caddyfile` com adapter explícito.
 - Usar `docker/dockerfile` e `docker/compose.yml`; cada contexto adicional tem seu próprio diretório e arquivo `dockerfile` sem sufixo. `.komodo/komodo.toml` fica na raiz do repositório, fora de `docker/` e do pacote interno. Corrigir também paths de build, workflows, scripts e documentação ao mover arquivos.
 - Containers sem portas públicas próprias, com limites/reservas, readiness, usuário sem privilégios e desligamento gracioso. Backend só na rede privada da stack; somente gateway na overlay de borda.
-- O Komodo executa Infisical no TOML antes de migration/deploy. Nunca adicionar CLI/SDK do cofre no app nem buscar segredos no dockerfile/entrypoint.
-- Prod/main usa core; Staging/develop usa homo. PostgreSQL, Valkey, cookies, credenciais e URLs são próprios de cada ambiente. Namespace do cache: `<app>:<environment>:`.
+- O deploy no Komodo segue `.claude/skills/komodo-deploy/SKILL.md`: Build, Stack e Procedure por ambiente, com o Infisical só nas etapas de `docker/komodo.sh`. Nunca adicionar CLI/SDK do cofre no app nem buscar segredos no dockerfile/entrypoint.
+- Prod/main usa core; Homo/develop usa homo. PostgreSQL, Valkey, cookies, credenciais e URLs são próprios de cada ambiente. Namespace do cache: `<app>:<environment>:`.
 - Atualização nativa start-first exige migration compatível com a versão anterior. Remoção de coluna fica para release posterior. Bots e schedulers são singletons stop-first.
 - Atualizar todos os `.env.example` com o contrato real, sem valores secretos. `VITE_`/`PUBLIC_` só contêm configuração pública.
 

@@ -69,7 +69,7 @@ services:
         azuos.environment: ${DEPLOY_ENV:?}
         azuos.revision: ${APP_REVISION:?}
     extra_hosts: &id001
-    - login.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
+    - admin-console.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
     - shared-api.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
     - gestao-rh.${DEPLOY_DOMAIN:?}:${APP_EDGE_VPN_IP:?}
   gateway:

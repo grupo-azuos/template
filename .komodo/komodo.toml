@@ -1,67 +1,147 @@
-# Build local e atualização nativa do Swarm. Sem registry ou deploy no GitHub.
+# Deploy no Swarm pelo Komodo. Igual em todos os apps; a base é o template.
+#
+#   Procedure <app>-<ambiente>: Build → Deploy Stack, disparada pelo webhook do GitHub
+#     (/listener/github/procedure/<app>-<ambiente>/<branch>).
+#   Build: docker/dockerfile no builder do servidor, imagem local `azuos/<app>:<hash>-<ambiente>`.
+#   Stack: docker/compose.yml no Swarm. Os segredos do Infisical entram só nas etapas de
+#     docker/komodo.sh (pre-deploy, deploy e post-deploy).
 
-[[repo]]
+[[build]]
 name = "template-prod"
-tags = ["template", "core", "prod"]
-[repo.config]
-server = "core"
+tags = ["context:apps", "env:core", "server:core"]
+[build.config]
+builder = "core"
 git_provider = "github.com"
 git_account = "grupo-azuos"
 repo = "grupo-azuos/template"
 branch = "main"
 webhook_enabled = false
-env_file_path = ".komodo/bootstrap.env"
-environment = """
-INFISICAL_TOKEN=[[INFISICAL_PROD_TOKEN]]
-INFISICAL_DOMAIN=[[INFISICAL_API_URL]]
-"""
-[repo.config.on_pull]
-path = "."
-shell_mode = true
-command = '''
-set -eu
-chmod 600 .komodo/bootstrap.env
-docker run --rm --security-opt label=disable --network host \
-  --env-file .komodo/bootstrap.env \
-  -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0="$PWD" \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /etc/komodo/buildx:/etc/komodo/buildx:z \
-  -v "$PWD:$PWD:ro,z" -w "$PWD/template" azuos-deploy-tools:1 \
-  infisical --silent run --expand=false --secret-overriding=false \
-  --projectId='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
-  --env='[[INFISICAL_PROD_ENV_SLUG]]' --path=/ \
-  -- sh docker/deploy.sh production prod
+build_path = "template"
+dockerfile_path = "docker/dockerfile"
+image_name = "azuos/template"
+image_tag = "prod"
+include_latest_tag = false
+include_version_tags = false
+include_commit_tag = true
+
+[[stack]]
+name = "template-prod"
+tags = ["context:apps", "env:core", "server:core"]
+[stack.config]
+swarm = "core-prod"
+project_name = "template-prod"
+git_provider = "github.com"
+git_account = "grupo-azuos"
+repo = "grupo-azuos/template"
+branch = "main"
+webhook_enabled = false
+run_directory = "template"
+file_paths = ["docker/compose.yml"]
+extra_args = ["--resolve-image", "never", "--detach=false"]
+pre_deploy.command = '''
+INFISICAL_TOKEN='[[INFISICAL_PROD_TOKEN]]' \
+INFISICAL_DOMAIN='[[INFISICAL_API_URL]]' \
+INFISICAL_PROJECT_ID='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
+sh docker/komodo.sh pre-deploy template prod
+'''
+compose_cmd_wrapper_include = ["config", "deploy"]
+compose_cmd_wrapper = '''
+INFISICAL_TOKEN='[[INFISICAL_PROD_TOKEN]]' \
+INFISICAL_DOMAIN='[[INFISICAL_API_URL]]' \
+INFISICAL_PROJECT_ID='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
+sh docker/komodo.sh deploy template prod [[COMPOSE_COMMAND]]
+'''
+post_deploy.command = '''
+INFISICAL_TOKEN='[[INFISICAL_PROD_TOKEN]]' \
+INFISICAL_DOMAIN='[[INFISICAL_API_URL]]' \
+INFISICAL_PROJECT_ID='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
+sh docker/komodo.sh post-deploy template prod
 '''
 
-[[repo]]
-name = "template-staging"
-tags = ["template", "homo", "staging"]
-[repo.config]
-server = "homo"
+[[procedure]]
+name = "template-prod"
+tags = ["context:apps", "env:core", "server:core"]
+[procedure.config]
+webhook_enabled = true
+
+[[procedure.config.stage]]
+name = "Build"
+executions = [
+  { execution.type = "RunBuild", execution.params.build = "template-prod" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy"
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "template-prod" },
+]
+
+[[build]]
+name = "template-homo"
+tags = ["context:apps", "env:homo", "server:homo"]
+[build.config]
+builder = "homo"
 git_provider = "github.com"
 git_account = "grupo-azuos"
 repo = "grupo-azuos/template"
 branch = "develop"
 webhook_enabled = false
-env_file_path = ".komodo/bootstrap.env"
-environment = """
-INFISICAL_TOKEN=[[INFISICAL_STAGING_TOKEN]]
-INFISICAL_DOMAIN=[[INFISICAL_API_URL]]
-"""
-[repo.config.on_pull]
-path = "."
-shell_mode = true
-command = '''
-set -eu
-chmod 600 .komodo/bootstrap.env
-docker run --rm --security-opt label=disable --network host \
-  --env-file .komodo/bootstrap.env \
-  -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0="$PWD" \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /etc/komodo/buildx:/etc/komodo/buildx:z \
-  -v "$PWD:$PWD:ro,z" -w "$PWD/template" azuos-deploy-tools:1 \
-  infisical --silent run --expand=false --secret-overriding=false \
-  --projectId='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
-  --env='[[INFISICAL_STAGING_ENV_SLUG]]' --path=/ \
-  -- sh docker/deploy.sh staging staging
+build_path = "template"
+dockerfile_path = "docker/dockerfile"
+image_name = "azuos/template"
+image_tag = "homo"
+include_latest_tag = false
+include_version_tags = false
+include_commit_tag = true
+
+[[stack]]
+name = "template-homo"
+tags = ["context:apps", "env:homo", "server:homo"]
+[stack.config]
+swarm = "homo"
+project_name = "template-homo"
+git_provider = "github.com"
+git_account = "grupo-azuos"
+repo = "grupo-azuos/template"
+branch = "develop"
+webhook_enabled = false
+run_directory = "template"
+file_paths = ["docker/compose.yml"]
+extra_args = ["--resolve-image", "never", "--detach=false"]
+pre_deploy.command = '''
+INFISICAL_TOKEN='[[INFISICAL_HOMO_TOKEN]]' \
+INFISICAL_DOMAIN='[[INFISICAL_API_URL]]' \
+INFISICAL_PROJECT_ID='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
+sh docker/komodo.sh pre-deploy template homo
 '''
+compose_cmd_wrapper_include = ["config", "deploy"]
+compose_cmd_wrapper = '''
+INFISICAL_TOKEN='[[INFISICAL_HOMO_TOKEN]]' \
+INFISICAL_DOMAIN='[[INFISICAL_API_URL]]' \
+INFISICAL_PROJECT_ID='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
+sh docker/komodo.sh deploy template homo [[COMPOSE_COMMAND]]
+'''
+post_deploy.command = '''
+INFISICAL_TOKEN='[[INFISICAL_HOMO_TOKEN]]' \
+INFISICAL_DOMAIN='[[INFISICAL_API_URL]]' \
+INFISICAL_PROJECT_ID='[[TEMPLATE_INFISICAL_PROJECT_ID]]' \
+sh docker/komodo.sh post-deploy template homo
+'''
+
+[[procedure]]
+name = "template-homo"
+tags = ["context:apps", "env:homo", "server:homo"]
+[procedure.config]
+webhook_enabled = true
+
+[[procedure.config.stage]]
+name = "Build"
+executions = [
+  { execution.type = "RunBuild", execution.params.build = "template-homo" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy"
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "template-homo" },
+]
