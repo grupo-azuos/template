@@ -39,6 +39,77 @@ function containerRules(project, compose) {
   ];
 }
 
+const ENVIRONMENTS = {
+  homo: { branch: 'develop', builder: 'homo', swarm: 'homo', server: 'homo' },
+  prod: { branch: 'main', builder: 'prod', swarm: 'core-prod', server: 'core' },
+};
+const RESOURCE = /^\[\[(repo|build|stack|procedure|action)\]\]$/;
+
+/* Lê os recursos do komodo.toml sem dependência: cada bloco [[tipo]] até o próximo. */
+function komodoResources(toml) {
+  const resources = [];
+  for (const line of toml.split('\n')) {
+    const kind = RESOURCE.exec(line.trim());
+    if (kind) resources.push({ kind: kind[1], text: '' });
+    else if (resources.length > 0) resources.at(-1).text += `${line}\n`;
+  }
+  return resources.map((resource) => ({ ...resource, field: (name) => new RegExp(`^${name.replace('.', '\\.')}\\s*=\\s*(.+)$`, 'm').exec(resource.text)?.[1].trim() }));
+}
+
+const quoted = (value) => value?.replace(/^"|"$/g, '');
+
+function resourceRules(resource, app) {
+  const name = quoted(resource.field('name')) ?? '';
+  const env = name.split('_')[0];
+  const target = ENVIRONMENTS[env];
+  const label = `${resource.kind} ${name}`;
+  if (!target || !name.startsWith(`${env}_${app}`)) return [`Komodo ${label}: name must be <ambiente>_<app> (homo_${app} or prod_${app})`];
+  const own = name === `${env}_${app}`;
+  return [
+    ...rule(Boolean(quoted(resource.field('description'))), `Komodo ${label}: describe what the resource does`),
+    ...rule(resource.field('tags') === `["context:apps", "env:${env}", "server:${target.server}"]`, `Komodo ${label}: tags must be ["context:apps", "env:${env}", "server:${target.server}"]`),
+    ...rule(resource.kind === 'procedure' || resource.field('webhook_enabled') === 'false', `Komodo ${label}: only the Procedure receives the GitHub webhook`),
+    ...rule(resource.kind !== 'procedure' || resource.field('webhook_enabled') === 'true', `Komodo ${label}: the Procedure receives the GitHub webhook`),
+    ...rule(resource.kind !== 'repo' || quoted(resource.field('branch')) === target.branch && quoted(resource.field('server')) === target.server, `Komodo ${label}: repo clones ${target.branch} on ${target.server}`),
+    ...rule(!['build', 'stack'].includes(resource.kind) || !own || quoted(resource.field('linked_repo')) === name, `Komodo ${label}: read the files from the Repo ${name} (linked_repo)`),
+    ...rule(resource.kind !== 'build' || quoted(resource.field('builder')) === target.builder && quoted(resource.field('image_tag')) === env, `Komodo ${label}: build on the ${target.builder} builder with image_tag ${env}`),
+    ...rule(resource.kind !== 'build' || resource.text.includes(`azuos.app=${app}`) && resource.text.includes(`azuos.environment=${env}`), `Komodo ${label}: label the image with azuos.app and azuos.environment`),
+    ...rule(resource.kind !== 'stack' || quoted(resource.field('swarm')) === target.swarm && quoted(resource.field('project_name')) === name, `Komodo ${label}: deploy ${name} on the ${target.swarm} swarm`),
+    ...rule(resource.kind !== 'procedure' || !own || /name = "Pull"[\s\S]*name = "Build"[\s\S]*name = "Deploy"/.test(resource.text), `Komodo ${label}: stages Pull, Build and Deploy, in this order`),
+  ];
+}
+
+function komodoRules(project, compose) {
+  const toml = read(project, '.komodo/komodo.toml');
+  const resources = komodoResources(toml);
+  const app = /image_name = "azuos\/([a-z0-9-]+)"/.exec(toml)?.[1] ?? '';
+  const names = new Set(resources.map((resource) => `${resource.kind} ${quoted(resource.field('name'))}`));
+  const required = Object.keys(ENVIRONMENTS).flatMap((env) => [
+    ...['repo', 'build', 'stack', 'procedure'].map((kind) => `${kind} ${env}_${app}`),
+    `action ${env}_${app}_rollback`,
+  ]);
+  const komodo = read(project, 'template/docker/komodo.sh');
+  return [
+    ...rule(Boolean(app), 'Komodo Build image_name must be azuos/<app>'),
+    ...required.filter((name) => !names.has(name)).map((name) => `Komodo is missing ${name}`),
+    ...resources.flatMap((resource) => resourceRules(resource, app)),
+    ...rule(komodo.includes('STACK_NAME="${DEPLOY_ENV}_${APP_NAME}"'), 'docker/komodo.sh must name the stack <ambiente>_<app>'),
+    ...rule(compose.includes('VALKEY_KEY_PREFIX=${APP_NAME:?}:${DEPLOY_ENV:?}'), 'Valkey namespace is <app>:<ambiente>, set in docker/compose.yml'),
+  ];
+}
+
+function imageRules(project) {
+  const dockerfile = read(project, 'template/docker/dockerfile');
+  const runtime = dockerfile.slice(dockerfile.lastIndexOf('\nFROM '));
+  const server = JSON.parse(read(project, 'template/server/package.json'));
+  const client = JSON.parse(read(project, 'template/client/package.json'));
+  return [
+    ...rule(!/\/node_modules\s+(?:\S+\/)?node_modules\s*$/m.test(runtime), 'The runtime image carries the Rspack bundle, not node_modules (only native modules, one by one)'),
+    ...rule(/rspack build/.test(server.scripts?.build ?? ''), 'Build the server with Rspack (rspack build)'),
+    ...rule(/rsbuild build/.test(client.scripts?.build ?? ''), 'Build the client with Rsbuild (rsbuild build)'),
+  ];
+}
+
 function caddyRules(project, compose) {
   const directory = join(project, 'template/docker/caddy');
   const paths = files(join(project, 'template')).filter((path) => /caddyfile/i.test(basename(path)));
@@ -92,14 +163,15 @@ function databaseRules(project) {
 
 export function violations(project) {
   const compose = read(project, 'template/docker/compose.yml');
-  return [...new Set([...apiRules(project), ...containerRules(project, compose), ...caddyRules(project, compose), ...sourceRules(project), ...driverRules(project), ...databaseRules(project)])];
+  return [...new Set([...apiRules(project), ...containerRules(project, compose), ...komodoRules(project, compose), ...imageRules(project), ...caddyRules(project, compose), ...sourceRules(project), ...driverRules(project), ...databaseRules(project)])];
 }
 
 function main() {
   const errors = violations(root);
   if (errors.length === 0) return;
   console.error(errors.join('\n'));
-  process.exitCode = 1;
+  /* No hook do Claude Code, só a saída 2 volta para o agente corrigir; no terminal e no CI, 1. */
+  process.exitCode = process.argv.includes('--hook') ? 2 : 1;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
