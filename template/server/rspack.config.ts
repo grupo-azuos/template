@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, resolve } from 'node:path';
 
 import { defineConfig } from '@rspack/cli';
 import { rspack } from '@rspack/core';
@@ -51,6 +52,23 @@ const NEST_ASSETS: { include: string }[] =
   JSON.parse(readFileSync(resolve(__dirname, 'nest-cli.json'), 'utf8')).compilerOptions?.assets ??
   [];
 
+/* O Swagger 12 serve a interface (CSS, JS, ícones) da pasta que o `swagger-ui-dist/absolute-path.js`
+   devolve. Sem `node_modules` na imagem, os arquivos vão para `dist/swagger-ui` e esse arquivo é
+   carregado de lá em runtime: devolve a própria pasta, e só ela é servida em `/docs` (se ele
+   entrasse no pacote, devolveria `dist/` e o Swagger serviria o código do server). */
+const SWAGGER_UI_DIR = 'swagger-ui';
+const SWAGGER_UI_FILES = [
+  'absolute-path.js',
+  'swagger-ui.css',
+  'swagger-ui-bundle.js',
+  'swagger-ui-standalone-preset.js',
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'LICENSE',
+  'NOTICE',
+];
+const SWAGGER_UI_DIST = dirname(createRequire(__filename).resolve('swagger-ui-dist/package.json'));
+
 export default defineConfig({
   context: __dirname,
   target: 'node24',
@@ -78,9 +96,13 @@ export default defineConfig({
     },
     extensionAlias: { '.js': ['.ts', '.js'] },
   },
-  externals: NATIVE_MODULES,
+  externals: [
+    ...NATIVE_MODULES,
+    { 'swagger-ui-dist/absolute-path.js': `./${SWAGGER_UI_DIR}/absolute-path.js` },
+  ],
   externalsType: 'commonjs',
   module: {
+    parser: { javascript: { createRequire: true } },
     rules: [
       {
         test: /\.ts$/,
@@ -99,6 +121,12 @@ export default defineConfig({
     ],
   },
   plugins: [
+    new rspack.CopyRspackPlugin({
+      patterns: SWAGGER_UI_FILES.map((file) => ({
+        from: resolve(SWAGGER_UI_DIST, file),
+        to: `${SWAGGER_UI_DIR}/${file}`,
+      })),
+    }),
     ...(NEST_ASSETS.length > 0
       ? [
           new rspack.CopyRspackPlugin({
