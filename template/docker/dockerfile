@@ -12,26 +12,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
   && npm rebuild better-sqlite3 \
   && rm -rf /var/lib/apt/lists/*
 
+# Rspack empacota o server num arquivo só (shared e bibliotecas dentro) e o Rsbuild gera o client.
 FROM deps AS build
 COPY . .
 ARG VITE_API_URL=/api/v1
 ENV VITE_API_URL=$VITE_API_URL
-RUN npm run build -w @template/shared && npm run build -w server --ignore-scripts && npm run build -w client
+RUN npm run build
 
-FROM deps AS production-deps
-RUN mkdir -p server/node_modules && npm prune --omit=dev --ignore-scripts --workspace server --workspace @template/shared
-
+# Runtime sem node_modules: só o pacote do server, as migrations e o client.
 FROM node:24.21.0-bookworm-slim AS app
 WORKDIR /repo
 ENV NODE_ENV=production API_PORT=3000
-COPY --from=production-deps --chown=node:node /repo/node_modules node_modules
-COPY --from=production-deps --chown=node:node /repo/server/node_modules server/node_modules
-COPY --from=build --chown=node:node /repo/shared/package.json shared/package.json
-COPY --from=build --chown=node:node /repo/shared/dist shared/dist
 COPY --from=build --chown=node:node /repo/server/package.json server/package.json
 COPY --from=build --chown=node:node /repo/server/dist server/dist
 COPY --from=build --chown=node:node /repo/server/drizzle server/drizzle
 COPY --from=build --chown=node:node /repo/client/dist client/dist
+# Módulo nativo do SQLite do MVP: fica fora do pacote do Rspack. Sai junto com o SQLite na promoção.
+COPY --from=deps --chown=node:node /repo/node_modules/better-sqlite3 node_modules/better-sqlite3
+COPY --from=deps --chown=node:node /repo/node_modules/bindings node_modules/bindings
+COPY --from=deps --chown=node:node /repo/node_modules/file-uri-to-path node_modules/file-uri-to-path
 RUN mkdir -p /repo/server/data && chown node:node /repo/server/data
 USER node
 EXPOSE 3000

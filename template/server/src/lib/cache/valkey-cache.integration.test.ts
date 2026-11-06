@@ -23,10 +23,10 @@ describe.runIf(Boolean(process.env.TEST_VALKEY_URL))(
   'Valkey integration with isolated namespaces',
   () => {
     it('shares cache within an environment and separates prod from homo', async () => {
-      const namespace = `hotfix:${randomUUID()}:`;
-      const prod = create(`${namespace}prod:`);
-      const replica = create(`${namespace}prod:`);
-      const homo = create(`${namespace}homo:`);
+      const namespace = `hotfix-${randomUUID()}`;
+      const prod = create(`${namespace}:prod`);
+      const replica = create(`${namespace}:prod`);
+      const homo = create(`${namespace}:homo`);
       expect(await prod.ready()).toBe(true);
       expect(await replica.ready()).toBe(true);
       expect(await homo.ready()).toBe(true);
@@ -42,7 +42,7 @@ describe.runIf(Boolean(process.env.TEST_VALKEY_URL))(
     });
 
     it('does not cache source errors and expires short lived entries', async () => {
-      const cache = create(`hotfix:${randomUUID()}:`);
+      const cache = create(`hotfix-${randomUUID()}:test`);
       expect(await cache.ready()).toBe(true);
       await expect(
         cache.remember('error', 1, async () => {

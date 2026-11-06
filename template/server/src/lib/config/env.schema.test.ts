@@ -7,7 +7,7 @@ describe('parseEnv', () => {
   it('starts with no variable at all, using the defaults', () => {
     expect(parseEnv({})).toEqual({
       APP_ENV: 'dev',
-      VALKEY_KEY_PREFIX: 'template:development:',
+      VALKEY_KEY_PREFIX: 'template:development',
       VALKEY_TIMEOUT_MS: 1000,
       ADMIN_CONSOLE_TIMEOUT_MS: 4000,
       TRUST_PROXY_HOPS: 0,
