@@ -28,7 +28,8 @@ describe('createZodDto', () => {
     )._OPENAPI_METADATA_FACTORY();
 
     expect(properties.title).toMatchObject({ type: 'string', required: true });
-    expect(properties.page).toMatchObject({ required: false });
+    /* Pela saída do schema, como o contrato sempre foi publicado: com `default`, o campo existe. */
+    expect(properties.page).toMatchObject({ required: true });
   });
 
   // feliz

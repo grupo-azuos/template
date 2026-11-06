@@ -19,11 +19,15 @@ export type ZodDtoClass<TSchema extends z.ZodType = z.ZodType> = {
 /** Schema de cada DTO pelo nome da classe, que é o nome do componente no documento OpenAPI. */
 const schemasByName = new Map<string, z.ZodType>();
 
-/** JSON Schema no dialeto do OpenAPI 3.0; o que não tem equivalente (Date, por exemplo) vira livre. */
+/**
+ * JSON Schema no dialeto do OpenAPI 3.0; o que não tem equivalente (Date, por exemplo) vira livre.
+ * Pela SAÍDA do schema, como o contrato sempre foi publicado: campo com `default` aparece como
+ * obrigatório, e o cliente gerado pelo `openapi-typescript` não muda.
+ */
 export function openApiSchemaOf(schema: z.ZodType): Record<string, unknown> {
   const { $schema: _dialect, ...jsonSchema } = z.toJSONSchema(schema, {
     target: 'openapi-3.0',
-    io: 'input',
+    io: 'output',
     unrepresentable: 'any',
   }) as Record<string, unknown>;
 
