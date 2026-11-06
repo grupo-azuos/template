@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { defineConfig } from '@rspack/cli';
@@ -32,6 +32,12 @@ const OPTIONAL_MODULES = [
 ];
 
 const MIGRATE_CLI = './src/lib/db/migrate.cli.ts';
+
+/* Arquivos que o código lê do disco (fontes, logos): os mesmos `assets` do `nest-cli.json` vão para
+   `dist/<caminho>`, onde `serverAsset()` (`lib/config/server-root.ts`) os acha no container. */
+const NEST_ASSETS: { include: string }[] =
+  JSON.parse(readFileSync(resolve(__dirname, 'nest-cli.json'), 'utf8')).compilerOptions?.assets ??
+  [];
 
 export default defineConfig({
   context: __dirname,
@@ -81,6 +87,16 @@ export default defineConfig({
     ],
   },
   plugins: [
+    ...(NEST_ASSETS.length > 0
+      ? [
+          new rspack.CopyRspackPlugin({
+            patterns: NEST_ASSETS.map(({ include }) => ({
+              from: include,
+              context: resolve(__dirname, 'src'),
+            })),
+          }),
+        ]
+      : []),
     new rspack.IgnorePlugin({
       checkResource: (resource) => OPTIONAL_MODULES.includes(resource),
     }),
