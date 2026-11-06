@@ -160,9 +160,9 @@ template/                              # raiz do repositório git
 
 | Camada                          | Escolha                                                     |
 | ------------------------------- | ----------------------------------------------------------- |
-| **Backend**                     | NestJS 11 + Swagger (`nestjs-zod`)                          |
+| **Backend**                     | NestJS 11 + Swagger (`nestjs-zod`), empacotado pelo Rspack  |
 | **Banco**                       | **SQLite** via **Drizzle ORM** (`better-sqlite3`)           |
-| **Frontend**                    | React 19 + Vite + TypeScript                                |
+| **Frontend**                    | React 19 + Rsbuild + TypeScript                             |
 | **Rotas / Dados / Formulários** | TanStack Router · Query · Form                              |
 | **Validação**                   | Zod — o mesmo schema na API e na tela                       |
 | **UI**                          | shadcn/ui + Tailwind v4 · ícones Lucide · animação GSAP     |

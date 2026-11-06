@@ -277,4 +277,4 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
 
 ## Promoção para produção
 
-Ao sair do MVP ou preparar deploy, siga `.claude/skills/production-standard/SKILL.md`. SQLite fica no MVP; PostgreSQL e o Valkey isolado do ambiente são obrigatórios após promoção. O driver do PostgreSQL é sempre `pg` (`drizzle-orm/node-postgres`), nunca `postgres` (postgres.js) — o `production-contract` reprova. Execute `node scripts/production-contract.mjs`.
+Ao sair do MVP ou preparar deploy, siga `.claude/skills/production-standard/SKILL.md`; nomes, Komodo, imagem e Valkey seguem `.claude/rules/infra.md`. SQLite fica no MVP; PostgreSQL e o Valkey isolado do ambiente são obrigatórios após promoção. O driver do PostgreSQL é sempre `pg` (`drizzle-orm/node-postgres`), nunca `postgres` (postgres.js) — o `production-contract` reprova. Execute `node scripts/production-contract.mjs`.
