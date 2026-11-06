@@ -125,6 +125,16 @@ test('rejects nestjs-zod, Zod 3 and NestJS 11 in the server', (context) => {
   }
 });
 
+test('rejects schema.partial() for update schemas', () => {
+  const project = fixture();
+  try {
+    project.write(`${APP_DIR}/docker/update.schema.ts`, 'export const updateThingSchema = createThingSchema.partial();\n');
+    assert.ok(failsWith(project, 'partialUpdate(schema)'));
+  } finally {
+    project.dispose();
+  }
+});
+
 test('rejects a runtime image that copies node_modules', () => {
   const project = fixture();
   try {
