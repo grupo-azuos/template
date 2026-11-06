@@ -32,6 +32,10 @@ jobs:
       - run: npm run lint
       - run: npm run check:design:test
       - run: npm run check:design
+      # Contrato de produção e de infra (Komodo, nomes, Valkey, imagem sem node_modules).
+      - run: node --test ../scripts/production-contract.test.mjs
+      - run: node ../scripts/production-contract.mjs
+      - run: shellcheck -s sh docker/*.sh
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:e2e -w server
