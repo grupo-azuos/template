@@ -37,6 +37,19 @@ header Content-Type image/svg+xml*
         request_header -X-Forwarded-User-Role
         request_header -X-Forwarded-Host
         request_header -X-Forwarded-Proto
+        # A entrega de avisos da shared-api: uma MÁQUINA, sem sessão de pessoa. Não passa pelo
+        # forward_auth (que só conhece gente) — quem a confere é o próprio app, pelo token de
+        # máquina (skill production-standard). Só este método e este caminho exatos; os cabeçalhos
+        # de identidade já foram apagados acima, então ninguém entra aqui fingindo ser pessoa.
+        @shared_events {
+            method POST
+            path /api/v1/shared-events
+        }
+        handle @shared_events {
+            reverse_proxy app:3000 {
+                header_up X-Forwarded-Proto https
+            }
+        }
         handle {
             forward_auth {$ADMIN_CONSOLE_URL} {
                 uri /api/auth/verify

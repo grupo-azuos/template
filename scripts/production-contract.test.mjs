@@ -83,3 +83,56 @@ test('rejects importing postgres.js or the postgres-js Drizzle driver', () => {
     assert.ok(violations(project.root).some((error) => error.includes('never postgres.js')));
   } finally { project.dispose(); }
 });
+
+const GUARDED_CONTROLLER = "@Controller('shared-events')\nclass C {\n  @Post()\n  @UseGuards(SharedEventTokenGuard)\n  receive() {}\n}";
+const VERIFIER = "export const SYSTEM_AUDIENCE = 'system:paralegal';\nconst c = 'app:shared-api';\njwtVerify(t, k, { algorithms: ['EdDSA'], maxTokenAge: '5m' });";
+const REPOSITORY = 'sharedEvents.insert().onConflictDoNothing();';
+
+function withReceiver(project, overrides = {}) {
+  const parts = { controller: GUARDED_CONTROLLER, verifier: VERIFIER, repository: REPOSITORY, dependencies: { jose: '^6.0.0' }, ...overrides };
+  project.write('template/server/package.json', JSON.stringify({ dependencies: parts.dependencies }));
+  project.write('template/server/src/modules/shared-events/controller/shared-events.controller.ts', parts.controller);
+  project.write('template/server/src/lib/shared-api/shared-event-token.verifier.ts', parts.verifier);
+  project.write('template/server/src/modules/shared-events/repository/shared-events.repository.ts', parts.repository);
+}
+
+test('accepts the MVP without a shared events receiver', () => {
+  const project = fixture();
+  try { assert.ok(!violations(project.root).some((error) => error.includes('shared events'))); } finally { project.dispose(); }
+});
+
+test('accepts a receiver that follows the whole standard', () => {
+  const project = fixture();
+  try {
+    withReceiver(project);
+    assert.deepEqual(violations(project.root), []);
+  } finally { project.dispose(); }
+});
+
+test('rejects a shared events delivery route without the machine token guard', () => {
+  const project = fixture();
+  try {
+    withReceiver(project, { controller: "@Controller('shared-events')\nclass C {\n  @Post()\n  receive() {}\n}" });
+    assert.ok(violations(project.root).some((error) => error.includes('SharedEventTokenGuard')));
+  } finally { project.dispose(); }
+});
+
+test('rejects a verifier that keeps the template audience or accepts other algorithms', () => {
+  const project = fixture();
+  try {
+    withReceiver(project, { verifier: "export const SYSTEM_AUDIENCE = 'system:template';\njwtVerify(t, k, {});" });
+    const errors = violations(project.root);
+    assert.ok(errors.some((error) => error.includes('this app slug')));
+    assert.ok(errors.some((error) => error.includes('EdDSA')));
+  } finally { project.dispose(); }
+});
+
+test('rejects a receiver without jose or without the idempotent store', () => {
+  const project = fixture();
+  try {
+    withReceiver(project, { dependencies: {}, repository: 'sharedEvents.insert();' });
+    const errors = violations(project.root);
+    assert.ok(errors.some((error) => error.includes('jose')));
+    assert.ok(errors.some((error) => error.includes('idempotently')));
+  } finally { project.dispose(); }
+});
