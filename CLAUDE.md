@@ -218,6 +218,12 @@ use o navegador em http://localhost:5009.
 - Criar tela de login, cadastro de usuário, senha, sessão, tabela de usuários, ou instalar
   biblioteca de autenticação. Mexer em `lib/auth`, `user.schema.ts` ou nos cabeçalhos
   `x-forwarded-user-*`. Isso é do auth-forward, e não é assunto deste repositório.
+  **Única exceção, decidida por quem administra:** o recebimento de avisos da shared-api
+  (`POST /api/v1/shared-events`). É uma rota de MÁQUINA, sem pessoa: o middleware de
+  `lib/auth` a dispensa da identidade encaminhada (como `/api/health`), e o gateway a leva
+  direto ao app. No MVP nenhuma rota atende esse caminho (responde 404). Ela só é implementada
+  na promoção para produção (skill `production-standard`), com o token de máquina conferido por
+  `jose`. Nenhuma outra rota pode usar essa dispensa, e `jose` não serve para login de pessoa.
 - `npm install --force` ou `--legacy-peer-deps`.
 - Editar arquivo em `lib/components/ui/` ou `lib/hooks/ui/` (envolva num `azuos-*`),
   `routeTree.gen.ts` ou `server/drizzle/meta/`.

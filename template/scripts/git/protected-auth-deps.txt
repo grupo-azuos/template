@@ -5,6 +5,8 @@
 ^bcrypt
 ^argon2
 ^jsonwebtoken$
+# `jose` fica bloqueado no MVP. Na promoção, quem administra o libera SÓ para conferir token de
+# MÁQUINA (avisos da shared-api, skill production-standard) e tira esta linha no app promovido.
 ^jose$
 ^express-session$
 ^cookie-session$

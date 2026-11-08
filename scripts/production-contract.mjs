@@ -92,9 +92,33 @@ function databaseRules(project) {
   ];
 }
 
+/* A entrega de avisos da shared-api: a rota é dispensada da identidade de pessoa, então a única
+   porta dela é o token de máquina. Quem a implementa segue o padrão inteiro — guard, conferência
+   do token e gravação idempotente — ou não implementa (no MVP, o caminho responde 404). */
+function sharedEventsRules(project) {
+  const sources = files(join(project, 'template/server/src'))
+    .filter((path) => path.endsWith('.ts') && !/\.(test|spec)\.ts$/.test(path))
+    .map((path) => ({ path, text: readFileSync(path, 'utf8') }));
+  const controllers = sources.filter(({ text }) => /@Controller\(\s*['"]shared-events['"]/.test(text));
+  if (controllers.length === 0) return [];
+  const pkg = JSON.parse(read(project, 'template/server/package.json'));
+  const verifier = sources.find(({ text }) => text.includes('SYSTEM_AUDIENCE') && text.includes('jwtVerify'));
+  const unguarded = controllers
+    .filter(({ text }) => !/@Post\(\)[\s\S]{0,200}@UseGuards\(SharedEventTokenGuard\)|@UseGuards\(SharedEventTokenGuard\)[\s\S]{0,200}@Post\(\)/.test(text))
+    .map(({ path }) => `Guard the shared events delivery with SharedEventTokenGuard: ${path}`);
+  return [
+    ...unguarded,
+    ...rule(Boolean(pkg.dependencies?.jose), 'The shared events delivery verifies the machine token with jose'),
+    ...rule(Boolean(verifier), 'Verify the shared events token against SYSTEM_AUDIENCE with jwtVerify'),
+    ...rule(!verifier || /SYSTEM_AUDIENCE = 'system:(?!template')[a-z0-9-]+'/.test(verifier.text), "SYSTEM_AUDIENCE must be 'system:<this app slug>'"),
+    ...rule(!verifier || ["algorithms: ['EdDSA']", 'maxTokenAge', "'app:shared-api'"].every((token) => verifier.text.includes(token)), 'The shared events token must be EdDSA, at most 5 minutes old and issued to app:shared-api'),
+    ...rule(sources.some(({ text }) => text.includes('onConflictDoNothing') && /shared.?events?/i.test(text)), 'Store shared events idempotently, by event id (onConflictDoNothing)'),
+  ];
+}
+
 export function violations(project) {
   const compose = read(project, 'template/docker/compose.yml');
-  return [...new Set([...apiRules(project), ...containerRules(project, compose), ...infraViolations(project), ...caddyRules(project, compose), ...sourceRules(project), ...driverRules(project), ...databaseRules(project)])];
+  return [...new Set([...apiRules(project), ...containerRules(project, compose), ...infraViolations(project), ...caddyRules(project, compose), ...sourceRules(project), ...driverRules(project), ...databaseRules(project), ...sharedEventsRules(project)])];
 }
 
 function main() {

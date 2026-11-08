@@ -25,6 +25,7 @@ function renderShell(overrides: Partial<Omit<AzuosAppShellProps, 'children'>> = 
       profile: { to: '/profile' },
       ...overrides.data,
     },
+    ui: overrides.ui,
     state: overrides.state,
     actions: { onSelectArea: vi.fn(), onSignOut: vi.fn(), ...overrides.actions },
   };
@@ -163,6 +164,35 @@ describe('AzuosAppShell', () => {
     renderShell({ state: { signOutError: 'Não consegui encerrar a sessão. Tente novamente.' } });
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Não consegui encerrar a sessão');
+  });
+
+  // feliz
+  it('puts the notifications right above the profile, in the rail', async () => {
+    const notifications = vi.fn((placement: string) => (
+      <button type="button">sino-{placement}</button>
+    ));
+    renderShell({ data: { ...baseData(), areas }, ui: { notifications } });
+
+    const bell = await screen.findByRole('button', { name: 'sino-rail' });
+    const profile = screen.getAllByRole('link', { name: 'Abrir meu perfil' })[0]!;
+    expect(bell.compareDocumentPosition(profile) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  // feliz
+  it('puts the notifications above the profile in the one-column bar too', async () => {
+    renderShell({
+      ui: { notifications: (placement) => <button type="button">sino-{placement}</button> },
+    });
+
+    expect(await screen.findByRole('button', { name: 'sino-sidebar' })).toBeInTheDocument();
+  });
+
+  // triste
+  it('draws no bell when the system has no notifications', async () => {
+    renderShell();
+
+    await screen.findAllByRole('link', { name: 'Abrir meu perfil' });
+    expect(screen.queryByRole('button', { name: /sino/ })).not.toBeInTheDocument();
   });
 });
 

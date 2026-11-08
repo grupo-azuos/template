@@ -74,6 +74,14 @@ export type AzuosAppShellProps = {
     /** Contador ao lado do item, pela `key`. Zero não desenha selo. */
     badges?: Partial<Record<string, number>>;
   };
+  ui?: {
+    /**
+     * O sininho das notificações. No computador fica no rodapé da barra, SEMPRE logo acima da
+     * foto do perfil; no celular, no topo do conteúdo. Recebe onde vai morar para ajustar o
+     * botão e o lado em que a lista abre.
+     */
+    notifications?: (placement: AppShellNotificationPlacement) => ReactNode;
+  };
   state?: {
     activeKey?: string;
     activeArea?: string;
@@ -92,12 +100,14 @@ export type AzuosAppShellProps = {
 
 type ShellParts = Omit<AzuosAppShellProps, 'children'>;
 
+export type AppShellNotificationPlacement = 'rail' | 'sidebar' | 'header';
+
 /* Duas colunas: o trilho tem a largura da barra recolhida, e o painel, a de sempre. */
 /* Trilho (ícone + a folga do `inset`, que ele ocupa por inteiro) + painel de 16rem. */
 const TWO_COLUMN_WIDTH = { '--sidebar-width': 'calc(var(--sidebar-width-icon) + 1rem + 2px + 16rem)' } as CSSProperties;
 const RAIL_WIDTH = 'w-[calc(var(--sidebar-width-icon)+1rem+2px)]!';
 
-export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellProps) {
+export function AzuosAppShell({ children, data, ui, state, actions }: AzuosAppShellProps) {
   const twoColumn = isTwoColumn(data.areas);
 
   return (
@@ -110,7 +120,7 @@ export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellP
       className="h-svh overflow-clip"
       style={twoColumn ? TWO_COLUMN_WIDTH : undefined}
     >
-      <ShellFrame data={data} state={state} actions={actions} twoColumn={twoColumn}>
+      <ShellFrame data={data} ui={ui} state={state} actions={actions} twoColumn={twoColumn}>
         {children}
       </ShellFrame>
     </SidebarProvider>
@@ -121,6 +131,7 @@ export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellP
 function ShellFrame({
   children,
   data,
+  ui,
   state,
   actions,
   twoColumn,
@@ -130,17 +141,24 @@ function ShellFrame({
   return (
     <>
       {isMobile ? null : twoColumn ? (
-        <TwoColumnSidebar data={data} state={state} actions={actions} />
+        <TwoColumnSidebar data={data} ui={ui} state={state} actions={actions} />
       ) : (
-        <OneColumnSidebar data={data} state={state} actions={actions} />
+        <OneColumnSidebar data={data} ui={ui} state={state} actions={actions} />
       )}
 
       {/* O painel também corta sem rolar: ver o comentário da moldura, em `AzuosAppShell`. */}
       <SidebarInset className="border-sidebar-border bg-background min-w-0 overflow-clip md:border">
         {/* O gatilho vive no conteúdo: dentro da barra ele sumiria junto com o que colapsa.
             No celular não há barra lateral — o menu é a barra de baixo. */}
-        <header className="hidden h-12 shrink-0 items-center gap-2 px-4 md:flex">
-          <SidebarTrigger aria-label="Recolher ou expandir o menu" className="size-9" />
+        <header className="flex h-12 shrink-0 items-center gap-2 px-4">
+          <SidebarTrigger
+            aria-label="Recolher ou expandir o menu"
+            className="hidden size-9 md:inline-flex"
+          />
+          {/* No celular não há barra lateral: o sininho sobe para o topo do conteúdo. */}
+          {isMobile && ui?.notifications ? (
+            <div className="ml-auto flex items-center">{ui.notifications('header')}</div>
+          ) : null}
         </header>
 
         <PageTransition pageKey={state?.pageKey}>{children}</PageTransition>
@@ -151,7 +169,7 @@ function ShellFrame({
   );
 }
 
-function OneColumnSidebar({ data, state, actions }: ShellParts) {
+function OneColumnSidebar({ data, ui, state, actions }: ShellParts) {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
@@ -177,6 +195,10 @@ function OneColumnSidebar({ data, state, actions }: ShellParts) {
         {/* O AzuosZuzu debruçado na beirada, e embaixo dela quem está usando e o Sair. */}
         <ZuzuLedge />
         <SidebarMenu className="gap-1">
+          {/* O sininho é sempre o item logo acima do perfil. */}
+          {ui?.notifications ? (
+            <SidebarMenuItem>{ui.notifications('sidebar')}</SidebarMenuItem>
+          ) : null}
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip={data.user.name} className={ICON_SAFE}>
               <AzuosAppShellTargetLink data={{ target: data.profile }} aria-label="Abrir meu perfil">
@@ -212,7 +234,7 @@ function OneColumnSidebar({ data, state, actions }: ShellParts) {
   );
 }
 
-function TwoColumnSidebar({ data, state, actions }: ShellParts) {
+function TwoColumnSidebar({ data, ui, state, actions }: ShellParts) {
   const activeArea = data.areas.find((area) => area.key === state?.activeArea) ?? data.areas[0];
 
   return (
@@ -275,6 +297,9 @@ function TwoColumnSidebar({ data, state, actions }: ShellParts) {
               </AzuosAppShellTargetLink>
             </RailHint>
           ))}
+
+          {/* O sininho é sempre o item logo acima do perfil. */}
+          {ui?.notifications ? ui.notifications('rail') : null}
 
           <RailHint label={data.user.name}>
             <AzuosAppShellTargetLink
@@ -377,7 +402,8 @@ function ShortcutsGroup({ data }: { data: { actions: ShellParts['data']['actions
 const ICON_SAFE =
   'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span:last-child]:hidden';
 
-const RAIL_BUTTON =
+/** O botão do trilho — exportado para o sininho ter a mesma cara dos outros itens. */
+export const RAIL_BUTTON =
   'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-sidebar-ring data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground rounded-box flex size-9 shrink-0 items-center justify-center outline-hidden transition-colors focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-5';
 
 /* A parte escolhida é a única em amarelo, com o ícone no azul mais escuro — branco sobre o

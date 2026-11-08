@@ -29,6 +29,14 @@ export function userRoleLabel(role: UserRole): string {
 }
 
 /**
+ * A aba "O que notificar" do perfil é do administrador: a escolha vale para a equipe inteira.
+ * Sistema que tem gestor acrescenta o papel dele aqui.
+ */
+export function canManageNotifications(role: UserRole): boolean {
+  return role === 'admin';
+}
+
+/**
  * Quem está usando o sistema agora.
  *
  * O `id` é o identificador que o provedor de identidade mandar — não uma chave nossa. Sem
