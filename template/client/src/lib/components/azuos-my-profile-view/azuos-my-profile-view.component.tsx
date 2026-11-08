@@ -31,7 +31,7 @@ import { initialsOf } from '../azuos-app-shell-avatar/azuos-app-shell-avatar.com
  * Travada pelo hook `protect-app-shell.mjs`, junto com a casca: cada sistema só entrega os
  * DADOS (o `use-profile.model.ts` dele). Pedido de mudança vai para o suporte.
  *
- * Compacta e centralizada (`max-w-5xl`), com folga no fim da página: a ficha não se estica na
+ * Na largura da moldura das telas (`page-frame`), com folga no fim da página: a ficha não se estica na
  * tela larga, e a última seção não encosta na borda de baixo.
  */
 export type MyProfileSystem = { name: string; url: string; roleLabel: string };
@@ -95,7 +95,7 @@ export function AzuosMyProfileView({ data, state, actions, slots }: AzuosMyProfi
   }
 
   return (
-    <section aria-label="Meu perfil" className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-10 sm:px-6">
+    <section aria-label="Meu perfil" className="flex w-full flex-col gap-6 px-4 pb-10 sm:px-6">
       <Banner data={{ person: data.person, accountUrl: data.accountUrl }} aside={slots?.bannerAside} />
       {state?.error ? (
         <ErrorNotice data={{ message: state.error }} actions={{ onRetry: actions.onRetry }} />
@@ -456,7 +456,7 @@ function ErrorNotice({
 /** O esqueleto com a forma da página: um "carregando…" solto fazia a tela pular. */
 function ProfileSkeleton() {
   return (
-    <div role="status" aria-busy="true" className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-10 sm:px-6">
+    <div role="status" aria-busy="true" className="flex w-full flex-col gap-6 px-4 pb-10 sm:px-6">
       <span className="sr-only">Carregando seu perfil…</span>
       <div className="bg-card border-border rounded-surface overflow-hidden border shadow-xs">
         <div className="bg-muted h-20 animate-pulse" />
