@@ -67,6 +67,8 @@ describe('AzuosAppShellNavEntry', () => {
   it('is not the current page when inactive', async () => {
     renderEntry({ data: { item } });
 
-    expect(await screen.findByRole('link', { name: 'Tarefas' })).not.toHaveAttribute('aria-current');
+    expect(await screen.findByRole('link', { name: 'Tarefas' })).not.toHaveAttribute(
+      'aria-current',
+    );
   });
 });
