@@ -22,12 +22,12 @@ const NOTIFICATION = {
 
 describe('notificationSchema', () => {
   // feliz
-  it('aceita a notificação com a ação que leva à tela do assunto', () => {
+  it('accepts the notification with the action leading to the subject screen', () => {
     expect(notificationSchema.parse(NOTIFICATION).action?.to).toBe('/tasks');
   });
 
   // triste
-  it('recusa ação que sai do sistema e assunto que não existe', () => {
+  it('refuses an action leaving the system and an unknown subject', () => {
     expect(
       notificationSchema.safeParse({
         ...NOTIFICATION,
@@ -40,19 +40,19 @@ describe('notificationSchema', () => {
 
 describe('notificationQuerySchema', () => {
   // feliz
-  it('traz tudo, paginado, quando ninguém filtra', () => {
+  it('brings everything, paged, when nobody filters', () => {
     expect(notificationQuerySchema.parse({})).toMatchObject({ status: 'all', page: 1 });
   });
 
   // triste
-  it('recusa data que não é data', () => {
+  it('refuses a date that is not a date', () => {
     expect(notificationQuerySchema.safeParse({ from: '07/11/2026' }).success).toBe(false);
   });
 });
 
 describe('NOTIFICATION_TOPICS', () => {
   // feliz
-  it('todo assunto tem rótulo, explicação e nível padrão', () => {
+  it('gives every subject a label, explanation and default level', () => {
     for (const key of NOTIFICATION_TOPIC_KEYS) {
       expect(NOTIFICATION_TOPICS[key].label.length).toBeGreaterThan(0);
       expect(['urgent', 'important', 'normal', 'info']).toContain(
@@ -64,7 +64,7 @@ describe('NOTIFICATION_TOPICS', () => {
 
 describe('updateNotificationSettingsSchema', () => {
   // feliz
-  it('aceita a escolha do administrador por assunto', () => {
+  it('accepts the administrator choice per subject', () => {
     expect(
       updateNotificationSettingsSchema.parse({
         settings: [{ topic: 'system.release', isEnabled: false, severity: 'normal' }],
@@ -73,7 +73,7 @@ describe('updateNotificationSettingsSchema', () => {
   });
 
   // triste
-  it('recusa o mesmo assunto duas vezes', () => {
+  it('refuses the same subject twice', () => {
     const setting = { topic: 'system.release', isEnabled: true, severity: 'normal' };
 
     expect(
@@ -84,12 +84,12 @@ describe('updateNotificationSettingsSchema', () => {
 
 describe('markNotificationsReadSchema', () => {
   // feliz
-  it('aceita a lista de ids', () => {
+  it('accepts the id list', () => {
     expect(markNotificationsReadSchema.parse({ ids: [NOTIFICATION.id] }).ids).toHaveLength(1);
   });
 
   // triste
-  it('recusa lista vazia e id que não é uuid', () => {
+  it('refuses an empty list and a non-uuid id', () => {
     expect(markNotificationsReadSchema.safeParse({ ids: [] }).success).toBe(false);
     expect(markNotificationsReadSchema.safeParse({ ids: ['x'] }).success).toBe(false);
   });

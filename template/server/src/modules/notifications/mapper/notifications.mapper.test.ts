@@ -4,7 +4,7 @@ import { toNotification, toSettings } from './notifications.mapper';
 
 describe('toNotification', () => {
   // feliz
-  it('publica a ação só quando há rótulo e destino', () => {
+  it('publishes the action only with a label and a target', () => {
     const base = {
       id: '0196f3e8-0000-7000-8000-00000000a001',
       recipientId: 'r',
@@ -28,7 +28,7 @@ describe('toNotification', () => {
 
 describe('toSettings', () => {
   // triste
-  it('ignora assunto gravado que saiu do contrato, e usa o padrão no que ninguém mexeu', () => {
+  it('ignores a stored subject that left the contract, using defaults where untouched', () => {
     const settings = toSettings([
       {
         topic: 'assunto.antigo',

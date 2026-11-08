@@ -39,7 +39,7 @@ beforeEach(() => {
 
 describe('useNotificationCenterModel', () => {
   // feliz
-  it('ao entrar com não lidas, abre o diálogo com a urgente primeiro', async () => {
+  it('opens the dialog with the urgent first when entering with unread ones', async () => {
     answering();
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
 
@@ -53,7 +53,7 @@ describe('useNotificationCenterModel', () => {
   });
 
   // feliz
-  it('abrir uma notificação marca lida, fecha o diálogo e leva ao assunto', async () => {
+  it('marks read, closes the dialog and goes to the subject when opening one', async () => {
     answering();
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
     await waitFor(() => expect(result.current.state.isDialogOpen).toBe(true));
@@ -70,7 +70,7 @@ describe('useNotificationCenterModel', () => {
   });
 
   // feliz
-  it('com o sistema aberto, a novidade que chega vira toast, e a urgente abre o diálogo', async () => {
+  it('toasts incoming news with the system open, and opens the dialog for urgent ones', async () => {
     answering([]);
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
     await waitFor(() => expect(result.current.state.isLoading).toBe(false));
@@ -87,7 +87,7 @@ describe('useNotificationCenterModel', () => {
   });
 
   // feliz
-  it('o diálogo grava as lidas no servidor numa chamada só, e lista vazia não chama', async () => {
+  it('saves the read ones in a single call, and does not call for an empty list', async () => {
     answering();
     vi.mocked(notificationsApi.markManyRead).mockResolvedValue({ updated: 2 });
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
@@ -101,7 +101,7 @@ describe('useNotificationCenterModel', () => {
   });
 
   // triste
-  it('sem não lidas, o diálogo não abre', async () => {
+  it('does not open the dialog without unread ones', async () => {
     answering([]);
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
 
@@ -114,14 +114,14 @@ describe('nextSnapshot', () => {
   const empty = { data: undefined, known: null, arrived: [], isFirst: false };
 
   // feliz
-  it('a primeira leitura não anuncia nada: é o que o diálogo de entrada mostra', () => {
+  it('announces nothing on the first read: the entry dialog shows it', () => {
     const first = nextSnapshot(empty, [notificationFixture('normal')], 1);
 
     expect(first).toMatchObject({ isFirst: true, arrived: [] });
   });
 
   // triste
-  it('as seguintes anunciam só o que é novo de verdade', () => {
+  it('announces only what is really new afterwards', () => {
     const first = nextSnapshot(empty, [notificationFixture('normal')], 1);
     const fresh = notificationFixture('important');
 

@@ -12,7 +12,7 @@ beforeEach(() => vi.mocked(apiRequest).mockClear());
 
 describe('notificationsApi', () => {
   // feliz
-  it('pede o histórico com os filtros e grava a escolha do administrador', async () => {
+  it('asks the history with filters and saves the administrator choice', async () => {
     await notificationsApi.page({ page: 2, status: 'unread', severity: 'urgent' });
     await notificationsApi.saveSettings({
       settings: [{ topic: 'system.release', isEnabled: false, severity: 'normal' }],
@@ -36,7 +36,7 @@ describe('notificationsApi', () => {
   });
 
   // triste
-  it('marcar lida vai pela notificação, sem dizer de quem é', async () => {
+  it('marks read by the notification, without saying whose it is', async () => {
     await notificationsApi.markRead('abc');
     await notificationsApi.markAllRead();
 

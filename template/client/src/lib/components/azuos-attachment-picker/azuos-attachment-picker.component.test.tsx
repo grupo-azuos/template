@@ -162,7 +162,7 @@ describe('AzuosAttachmentPicker', () => {
   });
 
   // Ctrl+V (clipboard paste) e Drag & Drop
-  it('captura arquivos colados via Ctrl+V da área de transferência', () => {
+  it('captures files pasted with Ctrl+V from the clipboard', () => {
     const onChange = vi.fn();
     const onError = vi.fn();
     const { container } = render(
@@ -184,7 +184,7 @@ describe('AzuosAttachmentPicker', () => {
     expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ name: 'print-tela.png' })]);
   });
 
-  it('recusa arquivo colado quando passa do limite de tamanho', () => {
+  it('refuses a pasted file over the size limit', () => {
     const onChange = vi.fn();
     const onError = vi.fn();
     const { container } = render(
@@ -206,7 +206,7 @@ describe('AzuosAttachmentPicker', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('suporta arrastar e soltar arquivos (drag and drop)', () => {
+  it('supports dragging and dropping files', () => {
     const onChange = vi.fn();
     render(
       <AzuosAttachmentPicker
@@ -228,7 +228,7 @@ describe('AzuosAttachmentPicker', () => {
     expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ name: 'documento.pdf' })]);
   });
 
-  it('não processa colagem via Ctrl+V quando o campo está desabilitado', () => {
+  it('ignores Ctrl+V pasting while the field is disabled', () => {
     const onChange = vi.fn();
     const onError = vi.fn();
     const { container } = render(
@@ -259,7 +259,7 @@ describe('AzuosAttachmentPicker', () => {
         actions={{ onChange: vi.fn(), onError: vi.fn() }}
       />,
     );
-    const input = (document.querySelector('input[type="file"]') as HTMLInputElement);
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const click = vi.spyOn(input, 'click').mockImplementation(() => undefined);
     const label = screen.getByText('Escolher arquivos').closest('label')!;
 
@@ -340,7 +340,7 @@ describe('AzuosAttachmentPicker', () => {
     const label = screen.getByText('Escolher arquivos').closest('label')!;
 
     fireEvent.drop(label, { dataTransfer: { files: [] } });
-    fireEvent.change((document.querySelector('input[type="file"]') as HTMLInputElement), {
+    fireEvent.change(document.querySelector('input[type="file"]') as HTMLInputElement, {
       target: { files: [] },
     });
 

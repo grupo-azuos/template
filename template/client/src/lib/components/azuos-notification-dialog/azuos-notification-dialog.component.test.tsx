@@ -17,7 +17,7 @@ function props(items = [notificationFixture('important'), notificationFixture('n
 
 describe('AzuosNotificationDialog', () => {
   // feliz
-  it('grava cada uma como lida no passo em que a pessoa passa por ela', () => {
+  it('marks each one read on the step the person goes through it', () => {
     const view = props();
     render(<AzuosNotificationDialog {...view} />);
 
@@ -32,7 +32,7 @@ describe('AzuosNotificationDialog', () => {
   });
 
   // feliz
-  it('abrir o assunto leva à tela dele', () => {
+  it('takes the subject to its screen when opened', () => {
     const view = props([notificationFixture('important')]);
     render(<AzuosNotificationDialog {...view} />);
 
@@ -42,7 +42,7 @@ describe('AzuosNotificationDialog', () => {
   });
 
   // triste
-  it('fechar pelo X grava só a que estava na frente; a que ela não viu continua não lida', () => {
+  it('marks only the front one when closing by X; the unseen one stays unread', () => {
     const view = props();
     render(<AzuosNotificationDialog {...view} />);
 
@@ -54,19 +54,19 @@ describe('AzuosNotificationDialog', () => {
   });
 
   // triste
-  it('sem notificação, não desenha nada', () => {
+  it('draws nothing without notifications', () => {
     const { container } = render(<AzuosNotificationDialog {...props([])} />);
 
     expect(container).toBeEmptyDOMElement();
   });
 });
 
-describe('AzuosNotificationDialog — urgente', () => {
+describe('AzuosNotificationDialog — urgent', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
   // triste
-  it('não fecha por Esc nem tem X, e o "Li e entendi" espera 10 segundos', () => {
+  it('has no Esc nor X, and "Li e entendi" waits 10 seconds', () => {
     const view = props([notificationFixture('urgent')]);
     render(<AzuosNotificationDialog {...view} />);
 
@@ -78,7 +78,7 @@ describe('AzuosNotificationDialog — urgente', () => {
   });
 
   // feliz
-  it('depois de 10 segundos, "Li e entendi" marca lida e fecha', () => {
+  it('marks as read and closes on "Li e entendi" after 10 seconds', () => {
     const view = props([notificationFixture('urgent')]);
     render(<AzuosNotificationDialog {...view} />);
 

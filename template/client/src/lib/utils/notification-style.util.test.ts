@@ -4,7 +4,7 @@ import { byAttention, notificationLook, timeAgo } from './notification-style.uti
 
 describe('notificationLook', () => {
   // feliz
-  it('dá a cada nível um rótulo e um tom próprios', () => {
+  it('gives each level its own label and tone', () => {
     expect(notificationLook('urgent')).toMatchObject({ label: 'Urgente', hue: 'red' });
     expect(notificationLook('info').tone.dot).toContain('bg-hue-green');
   });
@@ -12,7 +12,7 @@ describe('notificationLook', () => {
 
 describe('byAttention', () => {
   // feliz
-  it('põe a urgente primeiro e, no mesmo nível, a mais nova', () => {
+  it('puts the urgent first and, within a level, the newest', () => {
     const sorted = byAttention([
       { severity: 'normal' as const, createdAt: '2026-11-07T10:00:00Z' },
       { severity: 'urgent' as const, createdAt: '2026-11-01T10:00:00Z' },
@@ -31,7 +31,7 @@ describe('timeAgo', () => {
   const now = new Date('2026-11-07T12:00:00Z');
 
   // feliz
-  it('fala o tempo como gente', () => {
+  it('tells the time like a person would', () => {
     expect(timeAgo('2026-11-07T11:59:40Z', now)).toBe('agora');
     expect(timeAgo('2026-11-07T11:30:00Z', now)).toBe('há 30 min');
     expect(timeAgo('2026-11-07T09:00:00Z', now)).toBe('há 3 h');
@@ -39,7 +39,7 @@ describe('timeAgo', () => {
   });
 
   // triste
-  it('depois de uma semana, mostra a data em vez de uma conta longa', () => {
+  it('shows the date instead of a long count after a week', () => {
     expect(timeAgo('2026-10-01T12:00:00Z', now)).toBe('01/10/2026');
   });
 });

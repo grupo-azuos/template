@@ -24,7 +24,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('useProfileTabModel', () => {
   // feliz
-  it('o administrador tem as três abas e troca pelo endereço', () => {
+  it('gives the administrator three tabs, switching by address', () => {
     as('admin');
     search = { tab: 'settings' };
     const { result } = renderHook(useProfileTabModel);
@@ -40,7 +40,7 @@ describe('useProfileTabModel', () => {
   });
 
   // triste
-  it('"O que notificar" pedida por quem não pode vira a ficha', () => {
+  it('falls back to the profile when "O que notificar" is asked by someone not allowed', () => {
     as('editor');
     search = { tab: 'settings' };
     const { result } = renderHook(useProfileTabModel);
