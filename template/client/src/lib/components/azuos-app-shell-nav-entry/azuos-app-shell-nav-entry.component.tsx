@@ -43,7 +43,7 @@ export function AzuosAppShellNavEntry({ data, state }: AzuosAppShellNavEntryProp
         size="lg"
         isActive={isActive}
         tooltip={data.item.label}
-        className="data-[active=true]:bg-transparent! text-[1rem] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-1.5! [&>svg]:size-5"
+        className="text-[1rem] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-1.5! data-[active=true]:bg-transparent! [&>svg]:size-5"
       >
         <Link
           ref={linkRef}
@@ -56,9 +56,11 @@ export function AzuosAppShellNavEntry({ data, state }: AzuosAppShellNavEntryProp
         </Link>
       </SidebarMenuButton>
 
-      {/* Zero não vira selo: um "0" ao lado de cada item é ruído. Some sozinho recolhida. */}
+      {/* Zero não vira selo: um "0" ao lado de cada item é ruído. Some sozinho recolhida.
+          Centrado na altura do item: o `top` fixo do shadcn é medido para o botão dele, mais
+          baixo que o nosso, e o selo ficava colado em cima. */}
       {data.badge ? (
-        <SidebarMenuBadge className="bg-destructive text-destructive-foreground font-bold shadow-xs">
+        <SidebarMenuBadge className="bg-destructive text-destructive-foreground rounded-chip top-1/2! -translate-y-1/2 px-1.5 leading-none font-bold shadow-xs">
           {data.badge}
         </SidebarMenuBadge>
       ) : null}
