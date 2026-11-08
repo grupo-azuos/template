@@ -524,7 +524,8 @@ function PageTransition({ pageKey, children }: { pageKey?: string; children: Rea
       ref={pageRef}
       className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pt-1.5 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0"
     >
-      {children}
+      {/* Toda tela cabe nesta moldura: inteira até Full HD, centralizada acima disso. */}
+      <div className="page-frame">{children}</div>
     </div>
   );
 }

@@ -32,7 +32,7 @@ export function AzuosPendingArea({ data, ui }: AzuosPendingAreaProps) {
   const Icon = ui?.icon ?? Construction;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 pb-10 sm:px-6">
+    <div className="flex w-full flex-col gap-5 px-4 pb-10 sm:px-6">
       <AzuosPageHeader data={{ title: data.title, description: data.summary }} />
 
       <section className="border-ink-300 bg-card rounded-surface border border-dashed p-6">

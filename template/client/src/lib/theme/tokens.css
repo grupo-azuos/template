@@ -522,6 +522,17 @@
   padding-inline: 0.625rem;
 }
 
+/*
+ * A LARGURA DAS TELAS. Até Full HD a tela ocupa todo o espaço que a barra deixa; numa tela maior
+ * que isso, o conteúdo para na largura que ele teria em Full HD e fica centralizado — linha de
+ * texto e tabela esticadas num monitor de 34" não se leem.
+ */
+@utility page-frame {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+}
+
 @utility control-md {
   height: var(--control-md);
   padding-inline: 0.75rem;
