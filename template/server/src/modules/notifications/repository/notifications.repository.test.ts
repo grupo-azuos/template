@@ -51,7 +51,7 @@ afterAll(() => {
 
 describe('NotificationsRepository', () => {
   // feliz
-  it('grava, lê a caixa da pessoa e conta as não lidas', async () => {
+  it('writes, reads the person inbox and counts the unread', async () => {
     await repository.insertMany([values(), values(), values({ recipientId: BIA })]);
 
     const inbox = await repository.inbox(ANA);
@@ -61,7 +61,7 @@ describe('NotificationsRepository', () => {
   });
 
   // triste
-  it('o mesmo fato para a mesma pessoa não vira duas notificações', async () => {
+  it('does not turn the same fact for the same person into two notifications', async () => {
     await repository.insertMany([values({ dedupeKey: 'release:1.2.0' })]);
     const again = await repository.insertMany([values({ dedupeKey: 'release:1.2.0' })]);
 
@@ -70,7 +70,7 @@ describe('NotificationsRepository', () => {
   });
 
   // feliz
-  it('marca lida só a da pessoa, e a primeira leitura é a que fica', async () => {
+  it('marks read only the person own, keeping the first reading', async () => {
     const [mine] = await repository.insertMany([values()]);
     const first = await repository.markRead(ANA, mine!.id, NOW);
     const second = await repository.markRead(ANA, mine!.id, new Date('2026-12-01'));
@@ -82,7 +82,7 @@ describe('NotificationsRepository', () => {
   });
 
   // feliz
-  it('marca várias e todas de uma vez, sem tocar nas de outra pessoa', async () => {
+  it('marks several and all at once, without touching another person ones', async () => {
     const [first, second] = await repository.insertMany([values(), values()]);
     const [other] = await repository.insertMany([values({ recipientId: BIA })]);
 
@@ -94,7 +94,7 @@ describe('NotificationsRepository', () => {
   });
 
   // feliz
-  it('filtra o histórico por situação, texto e período', async () => {
+  it('filters the history by situation, text and period', async () => {
     await repository.insertMany([
       values({ title: 'Versão 100% nova', createdAt: new Date('2026-11-05T12:00:00.000Z') }),
       values({ title: 'Outra', createdAt: new Date('2026-11-07T12:00:00.000Z') }),
@@ -114,7 +114,7 @@ describe('NotificationsRepository', () => {
   });
 
   // feliz
-  it('grava a escolha do administrador e substitui a anterior do mesmo assunto', async () => {
+  it('saves the administrator choice, replacing the previous one for the subject', async () => {
     await repository.saveSettings(
       [{ topic: 'system.release', isEnabled: false, severity: 'info' }],
       ANA,

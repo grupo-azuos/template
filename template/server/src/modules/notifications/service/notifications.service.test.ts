@@ -59,7 +59,7 @@ const INPUT = {
 
 describe('NotificationsService.notify', () => {
   // feliz
-  it('grava para cada pessoa, menos quem causou o fato, e avisa o tempo real', async () => {
+  it('writes for each person except whoever caused the fact, notifying real time', async () => {
     const announced: string[] = [];
     stream.streamFor(BIA).subscribe(() => announced.push(BIA));
 
@@ -77,7 +77,7 @@ describe('NotificationsService.notify', () => {
   });
 
   // feliz
-  it('respeita o administrador: assunto desligado não notifica, e o nível escolhido vale', async () => {
+  it('respects the administrator: a disabled subject does not notify, the chosen level applies', async () => {
     repository.settings!.mockResolvedValue([
       { topic: 'system.release', isEnabled: true, severity: 'urgent' },
     ]);
@@ -98,16 +98,16 @@ describe('NotificationsService.notify', () => {
   });
 
   // triste
-  it('não derruba quem notifica: banco recusando vira 0, e não erro', async () => {
+  it('does not break the notifier: a refusing database yields 0, not an error', async () => {
     repository.insertMany!.mockRejectedValue(new Error('disk full'));
 
     await expect(makeService().notify({ ...INPUT, recipients: [ANA] })).resolves.toBe(0);
   });
 });
 
-describe('NotificationsService — a pessoa lê as dela', () => {
+describe('NotificationsService — the person reads their own', () => {
   // feliz
-  it('entrega o sininho e marca lida', async () => {
+  it('delivers the bell and marks read', async () => {
     const service = makeService();
 
     await expect(service.inbox(user)).resolves.toMatchObject({ unread: 3 });
@@ -121,7 +121,7 @@ describe('NotificationsService — a pessoa lê as dela', () => {
   });
 
   // feliz
-  it('fora do teste, a caixa traz a versão nova uma vez, pela trava da versão', async () => {
+  it('brings the new version once outside tests, through the version lock', async () => {
     await makeService('production').inbox(user);
 
     expect(repository.insertMany).toHaveBeenCalledWith([
@@ -134,16 +134,16 @@ describe('NotificationsService — a pessoa lê as dela', () => {
   });
 
   // triste
-  it('a notificação de outra pessoa responde como inexistente', async () => {
+  it('answers another person notification as missing', async () => {
     repository.markRead!.mockResolvedValue(null);
 
     await expect(makeService().markRead(user, ROW.id)).rejects.toBeInstanceOf(NotFoundException);
   });
 });
 
-describe('NotificationsService — o que o sistema notifica', () => {
+describe('NotificationsService — what the system notifies', () => {
   // feliz
-  it('o administrador vê os assuntos com o padrão e grava a escolha', async () => {
+  it('shows the administrator the subjects with defaults and saves the choice', async () => {
     const service = makeService();
 
     await expect(service.settings(admin)).resolves.toEqual([
@@ -160,7 +160,7 @@ describe('NotificationsService — o que o sistema notifica', () => {
   });
 
   // triste
-  it('quem não é administrador não vê nem grava', async () => {
+  it('neither shows nor saves for non-administrators', async () => {
     const service = makeService();
 
     await expect(service.settings(user)).rejects.toBeInstanceOf(ForbiddenException);

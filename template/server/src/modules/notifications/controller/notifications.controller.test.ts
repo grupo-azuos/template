@@ -32,7 +32,7 @@ function controllerWith() {
 
 describe('NotificationsController', () => {
   // feliz
-  it('lê, marca e escolhe pelo service, sempre com quem está logado', async () => {
+  it('reads, marks and chooses through the service, always with the logged-in person', async () => {
     const { service, controller } = controllerWith();
     const query = notificationQuerySchema.parse({ status: 'unread' });
 
@@ -47,7 +47,7 @@ describe('NotificationsController', () => {
   });
 
   // triste
-  it('o fluxo só avisa a pessoa da notificação, e não a dos outros', async () => {
+  it('streams only to the notification owner, not to others', async () => {
     const { stream, controller } = controllerWith();
     const events = firstValueFrom(controller.streamOf(ana).pipe(take(1), toArray()));
 

@@ -33,7 +33,7 @@ describe('Notifications API (e2e)', () => {
   });
 
   // feliz
-  it('o que foi gerado para a pessoa aparece na caixa dela, uma vez por fato', async () => {
+  it('shows what was generated for the person in their inbox, once per fact', async () => {
     const inboxBefore = await request(app.getHttpServer())
       .get('/api/v1/notifications/inbox')
       .expect(200);
@@ -72,7 +72,7 @@ describe('Notifications API (e2e)', () => {
   });
 
   // feliz
-  it('o administrador escolhe o nível de cada assunto', async () => {
+  it('lets the administrator choose each subject level', async () => {
     const saved = await request(app.getHttpServer())
       .put('/api/v1/notifications/settings')
       .send({ settings: [{ topic: 'system.release', isEnabled: true, severity: 'urgent' }] })
@@ -84,7 +84,7 @@ describe('Notifications API (e2e)', () => {
   });
 
   // triste
-  it('recusa assunto que não existe e id que não é uuid', async () => {
+  it('refuses an unknown subject and a non-uuid id', async () => {
     await request(app.getHttpServer())
       .put('/api/v1/notifications/settings')
       .send({ settings: [{ topic: 'outro', isEnabled: true, severity: 'urgent' }] })
