@@ -33,7 +33,7 @@ beforeEach(() => {
 
 describe('useNotificationHistoryModel', () => {
   // feliz
-  it('busca paginado, e filtrar volta à primeira página', async () => {
+  it('fetches paged, and filtering goes back to the first page', async () => {
     const { result } = renderHook(useNotificationHistoryModel, { wrapper });
     await waitFor(() => expect(result.current.data.items).toHaveLength(4));
     expect(result.current.data.pagination.total).toBe(64);
@@ -52,7 +52,7 @@ describe('useNotificationHistoryModel', () => {
   });
 
   // feliz
-  it('abrir marca lida e leva ao assunto; marcar todas vai ao servidor', async () => {
+  it('marks read and goes to the subject on open; marking all reaches the server', async () => {
     vi.mocked(notificationsApi.markRead).mockResolvedValue({} as never);
     vi.mocked(notificationsApi.markAllRead).mockResolvedValue({ updated: 4 });
     const { result } = renderHook(useNotificationHistoryModel, { wrapper });
@@ -67,7 +67,7 @@ describe('useNotificationHistoryModel', () => {
   });
 
   // triste
-  it('a falha da busca chega com o motivo', async () => {
+  it('shows a fetch failure with its reason', async () => {
     vi.mocked(notificationsApi.page).mockRejectedValue(new ApiError(503, 'fora do ar'));
     const { result } = renderHook(useNotificationHistoryModel, { wrapper });
 

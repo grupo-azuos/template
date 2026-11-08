@@ -214,9 +214,9 @@ const FIELDS: Field[] = [
   },
 ];
 
-describe('régua dos campos', () => {
+describe('field ruler', () => {
   // feliz
-  it.each(FIELDS)('$name sai com o canto de controle e nenhum outro', ({ element, find }) => {
+  it.each(FIELDS)('$name gets the control radius and no other', ({ element, find }) => {
     render(element);
     const field = find();
 
@@ -226,7 +226,7 @@ describe('régua dos campos', () => {
 
   // feliz
   it.each(FIELDS.filter((field) => !field.hasFreeHeight))(
-    '$name sai com a altura da régua e nenhuma outra',
+    '$name gets the ruler height and no other',
     ({ element, find }) => {
       render(element);
       const field = find();
@@ -237,19 +237,19 @@ describe('régua dos campos', () => {
   );
 
   // triste
-  it('acusa o canto do componente baixado que sobrou ao lado do nosso', () => {
+  it('flags the downloaded radius left beside ours', () => {
     expect(competingRadius(elementWith('rounded-md border rounded-control'))).toEqual([
       'rounded-md',
     ]);
   });
 
   // triste
-  it('acusa a altura solta que sobrou ao lado da régua', () => {
+  it('flags a loose height left beside the ruler', () => {
     expect(competingHeight(elementWith('h-9 control-lg'))).toEqual(['h-9']);
   });
 
   // triste
-  it('acusa a altura que o componente baixado impõe pela variante que está ligada', () => {
+  it('flags the height the downloaded component imposes through the active variant', () => {
     const trigger = elementWith('data-[size=default]:h-9 data-[size=sm]:h-8 control-lg', {
       'data-size': 'default',
     });
@@ -258,14 +258,14 @@ describe('régua dos campos', () => {
   });
 
   // triste
-  it('não confunde o tamanho do ícone de dentro com a altura do campo', () => {
+  it('does not confuse the inner icon size with the field height', () => {
     expect(competingHeight(elementWith("control-lg [&_svg:not([class*='size-'])]:size-4"))).toEqual(
       [],
     );
   });
 
   // triste
-  it('não acusa o arranjo que só liga quando há um filho que o campo não monta', () => {
+  it('does not flag an arrangement that only applies with a child the field never mounts', () => {
     expect(competingHeight(elementWith('control-lg has-[>textarea]:h-auto'))).toEqual([]);
   });
 });

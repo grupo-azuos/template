@@ -39,7 +39,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('useNotificationSettingsModel', () => {
   // feliz
-  it('o administrador muda no rascunho e grava tudo junto no Salvar', async () => {
+  it('lets the administrator change a draft and save it all on Salvar', async () => {
     as('admin');
     vi.mocked(notificationsApi.saveSettings).mockResolvedValue(LIST);
     const { result } = renderHook(useNotificationSettingsModel, { wrapper });
@@ -58,7 +58,7 @@ describe('useNotificationSettingsModel', () => {
   });
 
   // triste
-  it('quem não é administrador nem busca', () => {
+  it('does not even fetch for non-administrators', () => {
     as('editor');
     const { result } = renderHook(useNotificationSettingsModel, { wrapper });
 
@@ -67,7 +67,7 @@ describe('useNotificationSettingsModel', () => {
   });
 
   // triste
-  it('desfazer joga fora o rascunho', async () => {
+  it('throws the draft away on undo', async () => {
     as('admin');
     const { result } = renderHook(useNotificationSettingsModel, { wrapper });
     await waitFor(() => expect(result.current.data.settings).toHaveLength(1));

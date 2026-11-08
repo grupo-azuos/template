@@ -31,7 +31,7 @@ describe('AzuosZuzu', () => {
     expect(image().getAttribute('src')).toContain('festejando');
   });
 
-  it('usa o tamanho pedido, e 96 quando não pedem nenhum', () => {
+  it('uses the asked size, and 96 when none is asked', () => {
     const { unmount } = render(<AzuosZuzu ui={{ size: 40 }} />);
     expect(image().width).toBe(40);
     unmount();
@@ -46,7 +46,7 @@ describe('AzuosZuzu', () => {
    * coisa, e anunciá-lo faria o leitor de tela ler "imagem do Zuzu" antes da frase que importa.
    * É regra de acessibilidade, não detalhe — por isso tem teste.
    */
-  it('não se anuncia para quem usa leitor de tela', () => {
+  it('does not announce itself to screen readers', () => {
     render(<AzuosZuzu data={{ pose: 'idea' }} />);
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('AzuosZuzu', () => {
 
   /* Pose desconhecida não existe no tipo, mas o padrão precisa valer quando nada é passado:
      sem pose, ele fica debruçado — e não some. */
-  it('cai no debruçado quando não pedem pose', () => {
+  it('falls back to the leaning pose when none is asked', () => {
     render(<AzuosZuzu />);
 
     expect(image().getAttribute('src')).toContain('debrucado');

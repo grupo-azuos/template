@@ -28,7 +28,7 @@ function props(
 
 describe('AzuosNotificationSettingsView', () => {
   // feliz
-  it('liga e desliga assunto e salva', async () => {
+  it('turns a subject on and off and saves', async () => {
     const view = props();
     render(<AzuosNotificationSettingsView {...view} />);
 
@@ -40,7 +40,7 @@ describe('AzuosNotificationSettingsView', () => {
   });
 
   // feliz
-  it('diz que salvou, e mostra a recusa do servidor', () => {
+  it('says it saved, and shows the server refusal', () => {
     render(<AzuosNotificationSettingsView {...props({ savedAt: 1, error: 'Recusado.' })} />);
 
     expect(screen.getByRole('status')).toHaveTextContent('Salvo.');
@@ -48,7 +48,7 @@ describe('AzuosNotificationSettingsView', () => {
   });
 
   // triste
-  it('assunto desligado não deixa escolher nível, e sem mudança não salva', () => {
+  it('locks the level of a disabled subject, and does not save without changes', () => {
     render(<AzuosNotificationSettingsView {...props({ isDirty: false }, false)} />);
 
     expect(
@@ -58,7 +58,7 @@ describe('AzuosNotificationSettingsView', () => {
   });
 
   // triste
-  it('quem não é administrador não vê nada', () => {
+  it('shows nothing to non-administrators', () => {
     const { container } = render(
       <AzuosNotificationSettingsView {...props({ canManage: false })} />,
     );

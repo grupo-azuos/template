@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AzuosHeroCard } from './azuos-hero-card.component';
 
 describe('AzuosHeroCard', () => {
-  it('renderiza título, descrição e badge corretamente', () => {
+  it('renders title, description and badge', () => {
     render(
       <AzuosHeroCard
         data={{
@@ -22,7 +22,7 @@ describe('AzuosHeroCard', () => {
     expect(screen.getByText('Até 15%')).toBeInTheDocument();
   });
 
-  it('renderiza como link quando to é fornecido', () => {
+  it('renders as a link when to is given', () => {
     render(
       <AzuosHeroCard
         data={{
@@ -37,7 +37,7 @@ describe('AzuosHeroCard', () => {
     expect(link).toHaveAttribute('href', '/fleet');
   });
 
-  it('aciona actions.onClick no clique quando é botão', () => {
+  it('fires actions.onClick on click as a button', () => {
     const handleClick = vi.fn();
     render(
       <AzuosHeroCard
@@ -54,7 +54,7 @@ describe('AzuosHeroCard', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('aplica classes do tom selecionado (ex: success, accent)', () => {
+  it('applies the chosen tone classes (e.g. success, accent)', () => {
     const { container: containerSuccess } = render(
       <AzuosHeroCard
         data={{
@@ -84,7 +84,7 @@ describe('AzuosHeroCard', () => {
     );
   });
 
-  it('renderiza children adicionais no rodapé', () => {
+  it('renders extra children in the footer', () => {
     render(
       <AzuosHeroCard
         data={{
@@ -100,7 +100,7 @@ describe('AzuosHeroCard', () => {
     expect(screen.getByTestId('custom-tag')).toBeInTheDocument();
   });
 
-  it('renderiza o ícone como marca d água integrada tom-sobre-tom sem branco seco', () => {
+  it('renders the icon as a tone-on-tone watermark without plain white', () => {
     const { container } = render(
       <AzuosHeroCard
         data={{

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AzuosDashboardHeroCard } from './azuos-dashboard-hero-card.component';
 
 describe('AzuosDashboardHeroCard', () => {
-  it('renderiza cabeçalho de alerta com eyebrow, ícone e timestamp', () => {
+  it('renders the alert header with eyebrow, icon and timestamp', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -21,7 +21,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(screen.getByText(/30\/10\/2026, 12:20/)).toBeInTheDocument();
   });
 
-  it('renderiza o Zuzu grande à esquerda sem moldura circular ou bola', () => {
+  it('renders a big Zuzu on the left without a round frame or ball', () => {
     const { container } = render(
       <AzuosDashboardHeroCard
         data={{
@@ -46,7 +46,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(zuzuSlot?.parentElement?.querySelector('.rounded-full')).toBeNull();
   });
 
-  it('renderiza título, descrição e badge com alto contraste em fundo escuro', () => {
+  it('renders title, description and badge with high contrast on a dark background', () => {
     const { container } = render(
       <AzuosDashboardHeroCard
         data={{
@@ -65,7 +65,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(root).toHaveClass('bg-brand-blue-900', 'text-on-dark');
   });
 
-  it('renderiza grade de indicadores (stats) com cores e valores', () => {
+  it('renders the stats grid with colors and values', () => {
     const handleClick = vi.fn();
     render(
       <AzuosDashboardHeroCard
@@ -94,7 +94,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('renderiza children personalizados na área inferior', () => {
+  it('renders custom children in the bottom area', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -138,16 +138,29 @@ describe('AzuosDashboardHeroCard', () => {
         data={{
           title: 'Resumo do Dia',
           stats: [
-            { label: 'Vencidos', value: 3, icon: Siren, tone: 'danger', isActive: true, onClick: vi.fn() },
+            {
+              label: 'Vencidos',
+              value: 3,
+              icon: Siren,
+              tone: 'danger',
+              isActive: true,
+              onClick: vi.fn(),
+            },
             { label: 'Próximos', value: 1, tone: 'warning', isActive: false, onClick: vi.fn() },
           ],
         }}
       />,
     );
 
-    expect(screen.getByRole('button', { name: /Vencidos/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Vencidos/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(screen.getByRole('group', { name: /Vencidos/ })).toHaveClass('bg-card-selected');
-    expect(screen.getByRole('button', { name: /Próximos/ })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /Próximos/ })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   // feliz

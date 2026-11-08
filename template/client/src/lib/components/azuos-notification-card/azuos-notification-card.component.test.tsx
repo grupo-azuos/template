@@ -7,7 +7,7 @@ import { AzuosNotificationCard } from './azuos-notification-card.component';
 
 describe('AzuosNotificationCard', () => {
   // feliz
-  it('mostra título, nível, há quanto tempo, e marca a não lida', async () => {
+  it('shows title, level, how long ago, and marks the unread one', async () => {
     const onOpen = vi.fn();
     const notification = notificationFixture('urgent');
     render(
@@ -24,7 +24,7 @@ describe('AzuosNotificationCard', () => {
   });
 
   // feliz
-  it('no diálogo, oferece a ação do assunto', async () => {
+  it('offers the subject action in the dialog', async () => {
     const onOpen = vi.fn();
     render(
       <AzuosNotificationCard
@@ -40,7 +40,7 @@ describe('AzuosNotificationCard', () => {
   });
 
   // triste
-  it('a lida não tem a marca, e a novidade sem tela não tem botão de abrir', () => {
+  it('shows no mark on a read one, and no open button on news without a screen', () => {
     render(
       <>
         <AzuosNotificationCard

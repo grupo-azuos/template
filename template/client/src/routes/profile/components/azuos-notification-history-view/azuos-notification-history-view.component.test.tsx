@@ -38,7 +38,7 @@ function props(
 
 describe('AzuosNotificationHistoryView', () => {
   // feliz
-  it('lista o histórico e filtra pela situação e pelo texto', async () => {
+  it('lists the history and filters by situation and text', async () => {
     const view = props();
     render(<AzuosNotificationHistoryView {...view} />);
 
@@ -53,7 +53,7 @@ describe('AzuosNotificationHistoryView', () => {
   });
 
   // feliz
-  it('abrir uma leva ao assunto, e "Marcar todas" marca', async () => {
+  it('takes an opened one to its subject, and "Marcar todas" marks all', async () => {
     const view = props();
     render(<AzuosNotificationHistoryView {...view} />);
 
@@ -65,7 +65,7 @@ describe('AzuosNotificationHistoryView', () => {
   });
 
   // triste
-  it('recorte vazio sugere tirar filtro; falha aparece no lugar da lista', () => {
+  it('suggests clearing filters on an empty slice; a failure takes the list place', () => {
     const { rerender } = render(
       <AzuosNotificationHistoryView
         {...props({

@@ -18,7 +18,7 @@ function props(overrides: Partial<AzuosNotificationBellProps> = {}): AzuosNotifi
 
 describe('AzuosNotificationBell', () => {
   // feliz
-  it('diz quantas não lidas e abre a lista; clicar numa leva ao assunto', async () => {
+  it('says how many are unread and opens the list; clicking one goes to its subject', async () => {
     const view = props();
     render(<AzuosNotificationBell {...view} />);
 
@@ -29,7 +29,7 @@ describe('AzuosNotificationBell', () => {
   });
 
   // feliz
-  it('marca todas como lidas e leva ao histórico', async () => {
+  it('marks all as read and goes to the history', async () => {
     const view = props();
     render(<AzuosNotificationBell {...view} />);
     await userEvent.click(screen.getByRole('button', { name: /Notificações/ }));
@@ -42,7 +42,7 @@ describe('AzuosNotificationBell', () => {
   });
 
   // triste
-  it('sem nada novo, mostra o AzuosZuzu dormindo e nenhum selo', async () => {
+  it('shows a sleeping AzuosZuzu and no badge with nothing new', async () => {
     render(<AzuosNotificationBell {...props({ data: { items: [], unread: 0 } })} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Notificações' }));
@@ -52,7 +52,7 @@ describe('AzuosNotificationBell', () => {
   });
 
   // triste
-  it('passa de 99 como 99+ e mostra a falha no lugar da lista', async () => {
+  it('shows over 99 as 99+ and the failure in the list place', async () => {
     render(
       <AzuosNotificationBell
         {...props({ data: { items: [], unread: 575 }, state: { error: 'Falhou' } })}
@@ -65,7 +65,7 @@ describe('AzuosNotificationBell', () => {
   });
 
   // feliz
-  it('na barra de uma coluna, tem rótulo; no trilho, só o ícone', () => {
+  it('has a label in the one-column bar; only the icon on the rail', () => {
     const { rerender } = render(
       <AzuosNotificationBell {...props({ ui: { placement: 'sidebar' } })} />,
     );
