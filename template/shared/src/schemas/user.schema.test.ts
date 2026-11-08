@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { USER_ROLE_LABELS, sessionUserSchema, userRoleLabel, userRoleSchema } from './user.schema';
+import {
+  USER_ROLE_LABELS,
+  canManageNotifications,
+  sessionUserSchema,
+  userRoleLabel,
+  userRoleSchema,
+} from './user.schema';
 
 describe('userRoleSchema', () => {
   it('has a screen label for every role', () => {
@@ -39,5 +45,18 @@ describe('userRoleLabel', () => {
   it('gives the screen name of a role', () => {
     expect(userRoleLabel('admin')).toBe('Administrador');
     expect(userRoleLabel('viewer')).toBe('Consulta');
+  });
+});
+
+describe('canManageNotifications', () => {
+  // feliz
+  it('o administrador escolhe o que o sistema notifica', () => {
+    expect(canManageNotifications('admin')).toBe(true);
+  });
+
+  // triste
+  it('quem edita ou consulta não escolhe', () => {
+    expect(canManageNotifications('editor')).toBe(false);
+    expect(canManageNotifications('viewer')).toBe(false);
   });
 });

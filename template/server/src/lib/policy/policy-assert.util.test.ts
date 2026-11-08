@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertCanDelete,
   assertCanEdit,
+  assertCanManageNotifications,
   assertCanRead,
   assertCanRemoveOwnRecord,
   assertIsAdmin,
@@ -44,5 +45,16 @@ describe('policy asserts', () => {
         'O comentário',
       ),
     ).toThrow(/quem o criou ou por um administrador/);
+  });
+
+  // feliz
+  it('lets the administrator choose what the system notifies', () => {
+    expect(() => assertCanManageNotifications('admin')).not.toThrow();
+  });
+
+  // triste
+  it('refuses anyone else choosing what the system notifies', () => {
+    expect(() => assertCanManageNotifications('editor')).toThrow(/ação de administrador/);
+    expect(() => assertCanManageNotifications(null)).toThrow(ForbiddenException);
   });
 });
