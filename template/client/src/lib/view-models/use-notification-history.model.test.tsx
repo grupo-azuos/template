@@ -33,8 +33,48 @@ beforeEach(() => {
 
 describe('useNotificationHistoryModel', () => {
   // feliz
+  it('starts with only the latest five, and does not ask for the full list yet', async () => {
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+    await waitFor(() => expect(result.current.data.recent.items).toHaveLength(4));
+
+    expect(result.current.state.isExpanded).toBe(false);
+    expect(result.current.data.recent.total).toBe(64);
+    expect(notificationsApi.page).toHaveBeenCalledTimes(1);
+    expect(notificationsApi.page).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, pageSize: 5, status: 'all' }),
+    );
+  });
+
+  // feliz
+  it('opens straight to the full list when the bell asks for it', async () => {
+    const { result } = renderHook(() => useNotificationHistoryModel({ startExpanded: true }), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.data.items).toHaveLength(4));
+
+    expect(result.current.state.isExpanded).toBe(true);
+    expect(result.current.data.pagination.pageSize).toBe(20);
+  });
+
+  // triste
+  it('drops the filters and the page when the dialog closes', () => {
+    const { result } = renderHook(() => useNotificationHistoryModel({ startExpanded: true }), {
+      wrapper,
+    });
+    act(() => result.current.actions.onFiltersChange({ severity: 'urgent' }));
+    act(() => result.current.actions.onPageChange(2));
+
+    act(() => result.current.actions.onCollapse());
+
+    expect(result.current.state.isExpanded).toBe(false);
+    expect(result.current.state.hasFilters).toBe(false);
+    expect(result.current.data.pagination.page).toBe(1);
+  });
+
+  // feliz
   it('fetches paged, and filtering goes back to the first page', async () => {
-    const { result } = renderHook(useNotificationHistoryModel, { wrapper });
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+    act(() => result.current.actions.onExpand());
     await waitFor(() => expect(result.current.data.items).toHaveLength(4));
     expect(result.current.data.pagination.total).toBe(64);
 
@@ -55,8 +95,8 @@ describe('useNotificationHistoryModel', () => {
   it('marks read and goes to the subject on open; marking all reaches the server', async () => {
     vi.mocked(notificationsApi.markRead).mockResolvedValue({} as never);
     vi.mocked(notificationsApi.markAllRead).mockResolvedValue({ updated: 4 });
-    const { result } = renderHook(useNotificationHistoryModel, { wrapper });
-    await waitFor(() => expect(result.current.data.items).toHaveLength(4));
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+    await waitFor(() => expect(result.current.data.recent.items).toHaveLength(4));
 
     act(() => result.current.actions.onOpen(ALL_SEVERITY_NOTIFICATIONS[0]!));
     act(() => result.current.actions.onMarkAllRead());
@@ -69,7 +109,7 @@ describe('useNotificationHistoryModel', () => {
   // triste
   it('shows a fetch failure with its reason', async () => {
     vi.mocked(notificationsApi.page).mockRejectedValue(new ApiError(503, 'fora do ar'));
-    const { result } = renderHook(useNotificationHistoryModel, { wrapper });
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
 
     await waitFor(() => expect(result.current.state.error).toBe('fora do ar'));
   });

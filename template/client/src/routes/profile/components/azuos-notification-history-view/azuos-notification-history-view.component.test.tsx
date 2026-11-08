@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -8,11 +8,23 @@ import {
   type AzuosNotificationHistoryViewProps,
 } from './azuos-notification-history-view.component';
 
+const STATE = {
+  isRecentLoading: false,
+  isLoading: false,
+  isFetching: false,
+  error: null,
+  hasFilters: false,
+  isExpanded: false,
+};
+
+const OPEN = { ...STATE, isExpanded: true };
+
 function props(
   overrides: Partial<AzuosNotificationHistoryViewProps> = {},
 ): AzuosNotificationHistoryViewProps {
   return {
     data: {
+      recent: { items: ALL_SEVERITY_NOTIFICATIONS, total: 312 },
       items: ALL_SEVERITY_NOTIFICATIONS,
       filters: {
         status: 'all',
@@ -22,10 +34,12 @@ function props(
         from: undefined,
         to: undefined,
       },
-      pagination: { page: 1, pageSize: 20, total: 4 },
+      pagination: { page: 1, pageSize: 20, total: 312 },
     },
-    state: { isLoading: false, isFetching: false, error: null, hasFilters: false },
+    state: STATE,
     actions: {
+      onExpand: vi.fn(),
+      onCollapse: vi.fn(),
       onFiltersChange: vi.fn(),
       onClearFilters: vi.fn(),
       onPageChange: vi.fn(),
@@ -38,51 +52,81 @@ function props(
 
 describe('AzuosNotificationHistoryView', () => {
   // feliz
-  it('lists the history and filters by situation and text', async () => {
+  it('shows the latest ones with "Ver todas" telling how many there are', async () => {
     const view = props();
     render(<AzuosNotificationHistoryView {...view} />);
 
     expect(screen.getByText('Prazo de tarefa vencido')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Não lidas' }));
-    fireEvent.change(screen.getByRole('searchbox', { name: /Buscar no título/ }), {
-      target: { value: 'proposta' },
-    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Ver todas (312)' }));
 
-    expect(view.actions.onFiltersChange).toHaveBeenCalledWith({ status: 'unread' });
-    expect(view.actions.onFiltersChange).toHaveBeenCalledWith({ search: 'proposta' });
+    expect(view.actions.onExpand).toHaveBeenCalled();
   });
 
   // feliz
-  it('takes an opened one to its subject, and "Marcar todas" marks all', async () => {
-    const view = props();
+  it('lists everything in a dialog and filters by status and text', async () => {
+    const view = props({ state: OPEN });
     render(<AzuosNotificationHistoryView {...view} />);
+    const dialog = screen.getByRole('dialog', { name: 'Todas as notificações' });
 
-    await userEvent.click(screen.getByRole('button', { name: /Tarefa atribuída a você/ }));
-    await userEvent.click(screen.getByRole('button', { name: /Marcar todas como lidas/ }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Não lidas' }));
+    fireEvent.change(within(dialog).getByRole('searchbox', { name: /Buscar no título/ }), {
+      target: { value: 'bombeiro' },
+    });
+
+    expect(view.actions.onFiltersChange).toHaveBeenCalledWith({ status: 'unread' });
+    expect(view.actions.onFiltersChange).toHaveBeenCalledWith({ search: 'bombeiro' });
+  });
+
+  // feliz
+  it('opens the topic of a notification and marks all from the dialog', async () => {
+    const view = props({ state: OPEN });
+    render(<AzuosNotificationHistoryView {...view} />);
+    const dialog = screen.getByRole('dialog');
+
+    await userEvent.click(within(dialog).getByRole('button', { name: /Tarefa atribuída/ }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /Marcar todas como lidas/ }));
 
     expect(view.actions.onOpen).toHaveBeenCalledWith(ALL_SEVERITY_NOTIFICATIONS[1]);
     expect(view.actions.onMarkAllRead).toHaveBeenCalled();
   });
 
   // triste
-  it('suggests clearing filters on an empty slice; a failure takes the list place', () => {
+  it('closes the dialog on Esc and goes back to the summary', () => {
+    const view = props({ state: OPEN });
+    render(<AzuosNotificationHistoryView {...view} />);
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(view.actions.onCollapse).toHaveBeenCalled();
+  });
+
+  // triste
+  it('offers no "Ver todas" when the latest ones are all there is', () => {
+    render(
+      <AzuosNotificationHistoryView
+        {...props({
+          data: { ...props().data, recent: { items: ALL_SEVERITY_NOTIFICATIONS, total: 4 } },
+        })}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: /Ver todas/ })).not.toBeInTheDocument();
+  });
+
+  // triste
+  it('suggests clearing filters on an empty scope and shows failures in place of the list', () => {
     const { rerender } = render(
       <AzuosNotificationHistoryView
         {...props({
           data: { ...props().data, items: [] },
-          state: { isLoading: false, isFetching: false, error: null, hasFilters: true },
+          state: { ...OPEN, hasFilters: true },
         })}
       />,
     );
     expect(screen.getByText('Nenhuma notificação neste recorte')).toBeInTheDocument();
 
-    rerender(
-      <AzuosNotificationHistoryView
-        {...props({
-          state: { isLoading: false, isFetching: false, error: 'Falhou', hasFilters: false },
-        })}
-      />,
-    );
+    rerender(<AzuosNotificationHistoryView {...props({ state: { ...OPEN, error: 'Falhou' } })} />);
     expect(screen.getByRole('alert')).toHaveTextContent('Falhou');
   });
 });

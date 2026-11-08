@@ -4,10 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MOCK_SESSION_USER, mockAuth } from '../auth/mock-user';
 import { useProfileTabModel } from './use-profile-tab.model';
 
-const navigate = vi.fn();
 let search: Record<string, unknown> = {};
 vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => navigate,
   useSearch: () => search,
 }));
 
@@ -16,7 +14,6 @@ function as(role: 'admin' | 'editor' | 'viewer') {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   search = {};
 });
 
@@ -24,28 +21,22 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('useProfileTabModel', () => {
   // feliz
-  it('gives the administrator three tabs, switching by address', () => {
+  it('opens the full history when the bell asks for it, and lets the administrator manage', () => {
     as('admin');
-    search = { tab: 'settings' };
+    search = { tab: 'notifications' };
     const { result } = renderHook(useProfileTabModel);
 
-    expect(result.current.data.options.map((option) => option.value)).toEqual([
-      'profile',
-      'notifications',
-      'settings',
-    ]);
-    expect(result.current.data.tab).toBe('settings');
-    result.current.actions.onChange('notifications');
-    expect(navigate).toHaveBeenCalledWith({ to: '/profile', search: { tab: 'notifications' } });
+    expect(result.current.data.opensHistory).toBe(true);
+    expect(result.current.state.canManage).toBe(true);
   });
 
   // triste
-  it('falls back to the profile when "O que notificar" is asked by someone not allowed', () => {
+  it('keeps the history as a summary and hides the settings from someone not allowed', () => {
     as('editor');
     search = { tab: 'settings' };
     const { result } = renderHook(useProfileTabModel);
 
-    expect(result.current.data.tab).toBe('profile');
-    expect(result.current.data.options).toHaveLength(2);
+    expect(result.current.data.opensHistory).toBe(false);
+    expect(result.current.state.canManage).toBe(false);
   });
 });
