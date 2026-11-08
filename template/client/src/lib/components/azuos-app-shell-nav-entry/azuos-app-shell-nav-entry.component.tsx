@@ -4,6 +4,7 @@ import { useRef } from 'react';
 
 import { popIn } from '../../motion/motion.util';
 import { type NavItem } from '../../navigation/app-shell-navigation';
+import { cn } from '../../utils/cn.util';
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, useSidebar } from '../ui/sidebar';
 
 /**
@@ -52,7 +53,12 @@ export function AzuosAppShellNavEntry({ data, state }: AzuosAppShellNavEntryProp
           onClick={() => setOpenMobile(false)}
         >
           <Icon ref={iconRef} aria-hidden="true" />
-          <span className="group-data-[collapsible=icon]:hidden">{data.item.label}</span>
+          {/* Com selo, o rótulo para antes dele (e corta com "…"), em vez de passar por baixo. */}
+          <span
+            className={cn('truncate group-data-[collapsible=icon]:hidden', data.badge && 'pr-10')}
+          >
+            {data.item.label}
+          </span>
         </Link>
       </SidebarMenuButton>
 
@@ -60,7 +66,7 @@ export function AzuosAppShellNavEntry({ data, state }: AzuosAppShellNavEntryProp
           Centrado na altura do item: o `top` fixo do shadcn é medido para o botão dele, mais
           baixo que o nosso, e o selo ficava colado em cima. */}
       {data.badge ? (
-        <SidebarMenuBadge className="bg-destructive text-destructive-foreground rounded-chip top-1/2! -translate-y-1/2 px-1.5 leading-none font-bold shadow-xs">
+        <SidebarMenuBadge className="rounded-chip bg-destructive text-destructive-foreground top-1/2! -translate-y-1/2 px-1.5 leading-none font-bold shadow-xs">
           {data.badge}
         </SidebarMenuBadge>
       ) : null}
