@@ -277,7 +277,7 @@ function TwoColumnSidebar({ data, ui, state, actions }: ShellParts) {
             <SidebarSeparator className="my-1 h-px w-6 shrink-0" />
             <nav
               aria-label="Menu principal"
-              className={cn('flex min-h-0 w-full flex-1 flex-col items-center gap-1', NAV_SCROLL)}
+              className={cn('flex min-h-0 w-full flex-1 flex-col items-center gap-1', RAIL_SCROLL)}
             >
               {data.items.map((item) => (
                 <RailHint key={item.key} label={item.label}>
@@ -341,7 +341,7 @@ function TwoColumnSidebar({ data, ui, state, actions }: ShellParts) {
           direto no nome da parte. */}
       <Sidebar collapsible="none" className="hidden min-w-0 flex-1 pt-3 pb-2 md:flex">
         {/* Só a lista de telas rola, e só na vertical; o Zuzu e o nome ficam presos embaixo,
-            depois de um divisor. */}
+            sem divisor — o divisor é o do trilho, acima do sininho. */}
         <SidebarContent className={NAV_SCROLL}>
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs font-semibold tracking-wider uppercase">
@@ -353,7 +353,6 @@ function TwoColumnSidebar({ data, ui, state, actions }: ShellParts) {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarSeparator className="mx-2 w-auto" />
         <SidebarFooter>
           <ZuzuLedge />
           <div className="grid px-2 pb-1 leading-tight">
@@ -422,6 +421,13 @@ function ShortcutsGroup({ data }: { data: { actions: ShellParts['data']['actions
  */
 const NAV_SCROLL =
   'overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:var(--sidebar-border)_transparent]';
+
+/**
+ * A rolagem do trilho recolhido: rola, mas sem a barra. O trilho tem a largura de um ícone, e a
+ * barra comia o lado direito — os ícones saíam do centro e ficavam tortos em relação ao resto.
+ */
+const RAIL_SCROLL =
+  'overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
 
 const ICON_SAFE =
   'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span:last-child]:hidden';
