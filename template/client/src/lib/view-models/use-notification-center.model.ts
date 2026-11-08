@@ -100,7 +100,13 @@ export function useNotificationCenterModel(): NotificationCenterModel {
       },
       onMarkAllRead: () => markAllRead.mutate(),
       onCloseDialog: queue.close,
-      onOpenHistory: () => void navigate({ to: '/profile', search: { tab: 'notifications' } }),
+      /* A seção de notificações do perfil, já aberta na lista inteira, e a página rolada até ela. */
+      onOpenHistory: () =>
+        void navigate({
+          to: '/profile',
+          search: { tab: 'notifications' },
+          hash: 'profile-notifications',
+        }),
     },
   };
 }

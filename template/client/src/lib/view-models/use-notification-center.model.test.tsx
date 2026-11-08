@@ -66,7 +66,11 @@ describe('useNotificationCenterModel', () => {
     expect(result.current.state.canManage).toBe(true);
 
     act(() => result.current.actions.onOpenHistory());
-    expect(navigate).toHaveBeenCalledWith({ to: '/profile', search: { tab: 'notifications' } });
+    expect(navigate).toHaveBeenCalledWith({
+      to: '/profile',
+      search: { tab: 'notifications' },
+      hash: 'profile-notifications',
+    });
   });
 
   // feliz
