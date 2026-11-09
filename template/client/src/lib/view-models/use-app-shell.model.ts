@@ -4,6 +4,8 @@ import { USER_ROLE_LABELS } from '@template/shared/schemas/user.schema';
 import { accountProfileApi } from '../api/account-profile.api';
 import { mockAuth } from '../auth/mock-user';
 import { NAVIGATION } from '../navigation/navigation';
+import { useTheme } from '../theme/theme';
+import { sidebarOpenFromCookie } from '../utils/sidebar-state.util';
 import { useAccountSessionModel } from './use-account-session.model';
 import { useAppShellNavigationModel } from './use-app-shell-navigation.model';
 
@@ -16,6 +18,8 @@ import { useAppShellNavigationModel } from './use-app-shell-navigation.model';
  * menu: o selo simplesmente não aparece.
  */
 export function useAppShellModel() {
+  // Mantém a preferência compartilhada em todas as telas; o seletor fica no perfil.
+  useTheme();
   const user = mockAuth.getUser();
   /* A FOTO vem da conta no Admin Console, a mesma do "Meu perfil" (mesma chave: uma consulta só).
      O banco deste sistema não guarda foto, e o rodapé do menu mostrava só as iniciais. */
@@ -36,6 +40,8 @@ export function useAppShellModel() {
     },
     state: {
       ...navigation.state,
+      /* A barra abre como a pessoa a deixou (ver `sidebarOpenFromCookie`). */
+      isCollapsed: !sidebarOpenFromCookie(readCookie()),
       isSigningOut: session.state.isSigningOut,
       signOutError: session.state.error,
     },
@@ -44,4 +50,8 @@ export function useAppShellModel() {
       onSignOut: session.actions.onSignOut,
     },
   };
+}
+
+function readCookie(): string {
+  return typeof document === 'undefined' ? '' : document.cookie;
 }

@@ -12,8 +12,8 @@ const meta = {
     children: (
       <>
         <h3 className="text-sm font-bold">CLÍNICA ODONTO SORRISO PLENO LTDA</h3>
-        <p className="text-muted-foreground font-mono text-xs">39.099.603/0001-28</p>
-        <p className="text-muted-foreground text-xs">Fortaleza · Marina Prado</p>
+        <p className="font-mono text-xs text-muted-foreground">39.099.603/0001-28</p>
+        <p className="text-xs text-muted-foreground">Fortaleza · Marina Prado</p>
       </>
     ),
   },
@@ -26,7 +26,9 @@ export const Default: Story = {};
 
 /** Hover na cor do sotaque. */
 export const HoverColored: Story = {
-  args: { ui: { tone: 'green', icon: CheckCircle2, isHoverColored: true, className: 'w-64 min-h-44' } },
+  args: {
+    ui: { tone: 'green', icon: CheckCircle2, isHoverColored: true, className: 'w-64 min-h-44' },
+  },
 };
 
 export const Clickable: Story = {

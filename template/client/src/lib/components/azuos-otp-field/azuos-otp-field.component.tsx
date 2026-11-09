@@ -109,7 +109,7 @@ export function AzuosOtpField({ data, ui, state, actions }: AzuosOtpFieldProps) 
 
   return (
     <div className={cn('flex flex-col gap-1.5', ui?.className)}>
-      <span id={groupId} className="text-ink-700 text-sm font-medium">
+      <span id={groupId} className="text-sm font-medium text-ink-700">
         {data.label}
       </span>
 
@@ -147,8 +147,8 @@ export function AzuosOtpField({ data, ui, state, actions }: AzuosOtpFieldProps) 
             onPaste={handlePaste}
             onFocus={(event) => event.target.select()}
             className={cn(
-              'rounded-control aspect-square w-full max-w-12 min-w-0 flex-1 border text-center text-lg font-semibold transition-colors',
-              'focus:ring-brand-blue-800/20 focus:ring-2 focus:outline-none',
+              'aspect-square w-full max-w-12 min-w-0 flex-1 rounded-control border text-center text-lg font-semibold transition-colors',
+              'focus:ring-2 focus:ring-brand-blue-800/20 focus:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-60',
               hasError
                 ? 'border-border bg-destructive-soft text-destructive'
@@ -159,7 +159,7 @@ export function AzuosOtpField({ data, ui, state, actions }: AzuosOtpFieldProps) 
       </div>
 
       {hasError ? (
-        <p id={errorId} role="alert" className="text-destructive text-sm">
+        <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}
         </p>
       ) : null}

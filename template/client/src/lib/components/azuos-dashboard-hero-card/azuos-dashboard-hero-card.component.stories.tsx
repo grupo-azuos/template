@@ -144,13 +144,13 @@ export const IdeaWithChildren: Story = {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            className="rounded-control bg-accent-hero text-accent-hero-foreground hover:bg-accent-strong cursor-pointer px-4 py-2 text-sm font-bold shadow-xs transition-colors"
+            className="cursor-pointer rounded-control bg-accent-hero px-4 py-2 text-sm font-bold text-accent-hero-foreground shadow-xs transition-colors hover:bg-accent-strong"
           >
             Configurar Notificações
           </button>
           <button
             type="button"
-            className="rounded-control bg-brand-blue-800 text-primary-foreground hover:bg-brand-blue-700 cursor-pointer px-4 py-2 text-sm font-medium transition-colors"
+            className="cursor-pointer rounded-control bg-brand-blue-800 px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-blue-700"
           >
             Saiba Mais
           </button>

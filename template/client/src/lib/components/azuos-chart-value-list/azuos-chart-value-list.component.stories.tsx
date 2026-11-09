@@ -13,7 +13,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { data: { slices: [{ label: 'Goiânia', value: 3357 }, { label: 'Anápolis', value: 541 }] } },
+  args: {
+    data: {
+      slices: [
+        { label: 'Goiânia', value: 3357 },
+        { label: 'Anápolis', value: 541 },
+      ],
+    },
+  },
 };
 
 export const Empty: Story = { args: { data: { slices: [] } } };

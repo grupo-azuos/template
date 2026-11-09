@@ -23,16 +23,21 @@ export const Selected: Story = {
 
 /** Nome longo: corta com reticências, o nome inteiro fica no título. */
 export const LongLabel: Story = {
-  args: { data: { label: 'Serviço paralisado por falta de documento', value: 2 }, ui: { tone: 'red' } },
+  args: {
+    data: { label: 'Serviço paralisado por falta de documento', value: 2 },
+    ui: { tone: 'red' },
+  },
 };
 
 /** Uma fileira com os oito sotaques. */
 export const Row: Story = {
   render: () => (
     <div className="grid grid-cols-4 gap-2">
-      {(['blue', 'red', 'amber', 'green', 'steel', 'plum', 'slate', 'copper'] as const).map((tone, index) => (
-        <AzuosMiniStatCard key={tone} data={{ label: tone, value: index + 1 }} ui={{ tone }} />
-      ))}
+      {(['blue', 'red', 'amber', 'green', 'steel', 'plum', 'slate', 'copper'] as const).map(
+        (tone, index) => (
+          <AzuosMiniStatCard key={tone} data={{ label: tone, value: index + 1 }} ui={{ tone }} />
+        ),
+      )}
     </div>
   ),
 };

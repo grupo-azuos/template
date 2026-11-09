@@ -9,7 +9,6 @@ import {
   totalOf,
 } from './azuos-stacked-bar-chart.component';
 
-
 /* Um ECharts de mentira, como no teste do `AzuosEchart`: o desenho em si é do ECharts; o que este
    componente decide é QUAL clique vira seleção e com que nome. */
 const fakeChart = vi.hoisted(() => ({
@@ -27,7 +26,9 @@ vi.mock('../../utils/echarts.util', async (importOriginal) => ({
 /** O que o ECharts chamaria num clique no desenho. */
 async function chartClick(): Promise<(params: unknown) => void> {
   await waitFor(() => expect(fakeChart.on).toHaveBeenCalledWith('click', expect.any(Function)));
-  const call = [...fakeChart.on.mock.calls].reverse().find((entry: unknown[]) => entry[0] === 'click');
+  const call = [...fakeChart.on.mock.calls]
+    .reverse()
+    .find((entry: unknown[]) => entry[0] === 'click');
 
   return call?.[1] as (params: unknown) => void;
 }
@@ -53,7 +54,11 @@ describe('AzuosStackedBarChart', () => {
 
   /* As partes vêm com o nome ESCRITO na legenda, não só pela cor. */
   it('names every part in the legend', () => {
-    render(<AzuosStackedBarChart data={{ categories: CATEGORIES, series: SERIES, seriesLabel: 'Tipos' }} />);
+    render(
+      <AzuosStackedBarChart
+        data={{ categories: CATEGORIES, series: SERIES, seriesLabel: 'Tipos' }}
+      />,
+    );
 
     expect(screen.getByText('Entregue')).toBeInTheDocument();
     expect(screen.getByText('Pendente')).toBeInTheDocument();

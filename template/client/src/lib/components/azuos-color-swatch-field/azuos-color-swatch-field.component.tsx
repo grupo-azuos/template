@@ -50,7 +50,7 @@ export function AzuosColorSwatchField({ data, ui, state, actions }: AzuosColorSw
           onClick={() => actions.onChange(color)}
           style={{ backgroundColor: color }}
           className={cn(
-            'control-lg flex size-10 items-center justify-center rounded-control text-primary-foreground transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'flex size-10 control-lg items-center justify-center rounded-control text-primary-foreground transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             value === color && 'scale-105 shadow-xs',
           )}
         >
@@ -62,7 +62,7 @@ export function AzuosColorSwatchField({ data, ui, state, actions }: AzuosColorSw
       <label
         title="Outra cor"
         className={cn(
-          'control-lg relative flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-control border border-dashed border-input transition hover:scale-105 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+          'relative flex size-10 control-lg cursor-pointer items-center justify-center overflow-hidden rounded-control border border-dashed border-input transition focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:scale-105',
           isCustom && 'border-solid shadow-xs',
         )}
         style={isCustom ? { backgroundColor: value } : undefined}
@@ -110,7 +110,7 @@ function RandomSwatch({
       disabled={state?.isDisabled}
       onClick={actions.onChoose}
       className={cn(
-        'control-lg flex items-center gap-1.5 rounded-control border px-3 text-sm font-medium transition',
+        'flex control-lg items-center gap-1.5 rounded-control border px-3 text-sm font-medium transition',
         data.isChecked
           ? 'bg-primary text-primary-foreground'
           : 'border-input text-foreground hover:bg-muted',

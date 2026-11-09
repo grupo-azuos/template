@@ -10,7 +10,6 @@ import {
   withOthers,
 } from './azuos-treemap-chart.component';
 
-
 /* Um ECharts de mentira, como no teste do `AzuosEchart`: o desenho em si é do ECharts; o que este
    componente decide é QUAL clique vira seleção e com que nome. */
 const fakeChart = vi.hoisted(() => ({
@@ -28,7 +27,9 @@ vi.mock('../../utils/echarts.util', async (importOriginal) => ({
 /** O que o ECharts chamaria num clique no desenho. */
 async function chartClick(): Promise<(params: unknown) => void> {
   await waitFor(() => expect(fakeChart.on).toHaveBeenCalledWith('click', expect.any(Function)));
-  const call = [...fakeChart.on.mock.calls].reverse().find((entry: unknown[]) => entry[0] === 'click');
+  const call = [...fakeChart.on.mock.calls]
+    .reverse()
+    .find((entry: unknown[]) => entry[0] === 'click');
 
   return call?.[1] as (params: unknown) => void;
 }
@@ -70,7 +71,12 @@ describe('AzuosTreemapChart', () => {
 
   // triste
   it('says there is no data instead of drawing an empty box', () => {
-    render(<AzuosTreemapChart data={{ slices: [], seriesLabel: 'Alvarás' }} ui={{ emptyLabel: 'Sem cidades' }} />);
+    render(
+      <AzuosTreemapChart
+        data={{ slices: [], seriesLabel: 'Alvarás' }}
+        ui={{ emptyLabel: 'Sem cidades' }}
+      />,
+    );
 
     expect(screen.getByText('Sem cidades')).toBeInTheDocument();
   });
@@ -91,7 +97,9 @@ describe('treemapOption', () => {
     expect(option.tooltip.formatter({ name: 'Goiânia', value: 3357 })).toBe(
       '<b>Goiânia</b><br/>Empresas: 3.357 (85%)',
     );
-    expect(option.series[0].label.formatter({ name: 'Anápolis', value: 541 })).toBe('Anápolis\n541');
+    expect(option.series[0].label.formatter({ name: 'Anápolis', value: 541 })).toBe(
+      'Anápolis\n541',
+    );
   });
 
   // triste
@@ -112,7 +120,12 @@ describe('AzuosTreemapChart selection', () => {
   // feliz
   it('opens the breakdown of the clicked city', async () => {
     const onSelect = vi.fn();
-    render(<AzuosTreemapChart data={{ slices: SLICES, seriesLabel: 'Empresas' }} actions={{ onSelect }} />);
+    render(
+      <AzuosTreemapChart
+        data={{ slices: SLICES, seriesLabel: 'Empresas' }}
+        actions={{ onSelect }}
+      />,
+    );
     const click = await chartClick();
 
     act(() => click({ name: 'Goiânia', data: { id: 'Goiânia' } }));

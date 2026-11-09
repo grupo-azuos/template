@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCalendarDate, formatDate, formatDateTime } from './format-date.util';
+import { formatCalendarDate, formatDate, formatDateTime, formatTime } from './format-date.util';
 
 describe('formatDate', () => {
   // feliz
@@ -29,6 +29,19 @@ describe('formatDateTime', () => {
   // triste
   it('shows a dash for text that is not a date', () => {
     expect(formatDateTime('amanhã')).toBe('—');
+  });
+});
+
+describe('formatTime', () => {
+  // feliz
+  it('writes only hours and minutes', () => {
+    expect(formatTime('2026-09-14T12:05:00.000Z')).toMatch(/^\d{2}:05$/);
+  });
+
+  // triste
+  it('shows a dash for an empty value or text that is not a date', () => {
+    expect(formatTime(null)).toBe('—');
+    expect(formatTime('ontem')).toBe('—');
   });
 });
 

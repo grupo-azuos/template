@@ -72,7 +72,13 @@ describe('AzuosAreaChart', () => {
     render(
       <AzuosAreaChart
         data={{ points: POINTS, series: SERIES }}
-        ui={{ isPercent: true, layout: 'stack', tick: 'hour', heightClass: 'h-40', className: 'mt-2' }}
+        ui={{
+          isPercent: true,
+          layout: 'stack',
+          tick: 'hour',
+          heightClass: 'h-40',
+          className: 'mt-2',
+        }}
       />,
     );
 

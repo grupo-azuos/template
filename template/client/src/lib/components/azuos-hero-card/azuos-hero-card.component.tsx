@@ -100,7 +100,7 @@ function HeroCardInner({
         {data.badge ? (
           <span
             className={cn(
-              'rounded-chip inline-flex items-center px-2.5 py-1 text-xs font-bold shadow-xs',
+              'inline-flex items-center rounded-chip px-2.5 py-1 text-xs font-bold shadow-xs',
               styles.badge,
             )}
           >
@@ -118,7 +118,7 @@ export function AzuosHeroCard({ data, ui, actions }: AzuosHeroCardProps) {
   const styles = stylesOf(tone);
 
   const containerClassName = cn(
-    'rounded-surface shadow-card relative flex min-h-[148px] w-full flex-col justify-between overflow-hidden p-5 transition-all hover:-translate-y-0.5 hover:shadow-xl',
+    'relative flex min-h-[148px] w-full flex-col justify-between overflow-hidden rounded-surface p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-xl',
     styles.container,
     ui?.className,
   );
@@ -134,7 +134,7 @@ export function AzuosHeroCard({ data, ui, actions }: AzuosHeroCardProps) {
       <a
         href={data.to}
         className={cn(
-          'group focus-visible:ring-ring rounded-surface block no-underline focus-visible:ring-2 focus-visible:outline-none',
+          'group block rounded-surface no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
           containerClassName,
         )}
         data-slot="azuos-hero-card"
@@ -151,7 +151,7 @@ export function AzuosHeroCard({ data, ui, actions }: AzuosHeroCardProps) {
         type="button"
         onClick={actions.onClick}
         className={cn(
-          'group focus-visible:ring-ring rounded-surface block cursor-pointer text-left focus-visible:ring-2 focus-visible:outline-none',
+          'group block cursor-pointer rounded-surface text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
           containerClassName,
         )}
         data-slot="azuos-hero-card"

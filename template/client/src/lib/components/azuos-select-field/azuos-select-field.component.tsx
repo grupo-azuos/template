@@ -76,7 +76,7 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
         aria-label={ui?.ariaLabel}
         title={selectedLabel || undefined}
         className={cn(
-          'control-lg rounded-control max-w-full min-w-40 text-sm data-[size=default]:h-(--control-lg)',
+          'control-lg max-w-full min-w-40 rounded-control text-sm data-[size=default]:h-(--control-lg)',
           ui?.className,
         )}
       >
@@ -95,7 +95,7 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
       <SelectContent
         position="popper"
         sideOffset={4}
-        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-select-trigger-width))]"
+        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-select-trigger-width))] rounded-surface border-border bg-card shadow-xl"
       >
         {data.options.map((option) => (
           <OptionRow key={option.value || EMPTY_VALUE} data={{ option }} />
@@ -147,7 +147,7 @@ function OptionLead({ data }: { data: { option?: AzuosSelectFieldOption } }) {
   const Icon = option?.icon;
   if (!Icon) return null;
 
-  return <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />;
+  return <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />;
 }
 
 /** Uma linha da lista aberta. `truncate` para a opção comprida ser cortada, não a tela. */
@@ -155,7 +155,7 @@ function OptionRow({ data }: { data: { option: AzuosSelectFieldOption } }) {
   const { option } = data;
 
   return (
-    <SelectItem value={option.value || EMPTY_VALUE}>
+    <SelectItem value={option.value || EMPTY_VALUE} className="rounded-chip">
       <OptionLead data={{ option }} />
       <span className="truncate">{option.label}</span>
     </SelectItem>

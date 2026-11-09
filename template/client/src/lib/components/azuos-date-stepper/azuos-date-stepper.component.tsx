@@ -112,11 +112,11 @@ function yearsBetween(min: string | undefined, max: string | undefined, today: D
 
 function cellClassName(state: { isSelected: boolean; isToday?: boolean }, className: string) {
   return cn(
-    'rounded-control text-foreground hover:bg-accent cursor-pointer border border-transparent text-sm transition-colors outline-none',
-    'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+    'cursor-pointer rounded-control border border-transparent text-sm text-foreground transition-colors outline-none hover:bg-accent',
+    'focus-visible:ring-[3px] focus-visible:ring-ring/50',
     'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent',
-    state.isToday && 'bg-primary-soft text-primary font-semibold',
-    state.isSelected && 'bg-primary text-primary-foreground hover:bg-primary font-semibold',
+    state.isToday && 'bg-primary-soft font-semibold text-primary',
+    state.isSelected && 'bg-primary font-semibold text-primary-foreground hover:bg-primary',
     className,
   );
 }
@@ -244,7 +244,7 @@ function StepHeader({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-ink-900 text-sm font-semibold" aria-live="polite">
+      <p className="text-sm font-semibold text-ink-900" aria-live="polite">
         {QUESTIONS[data.step]}
       </p>
 
@@ -278,11 +278,11 @@ function AnswerChip({
       type="button"
       onClick={actions.onClick}
       aria-label={`${data.label}: ${data.value}. Trocar`}
-      className="control-sm rounded-control border-border bg-muted/50 text-ink-700 hover:bg-accent focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-xs transition-colors outline-none focus-visible:ring-[3px]"
+      className="inline-flex control-sm cursor-pointer items-center gap-1 rounded-control border border-border bg-muted/50 text-xs text-ink-700 transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       <span className="text-ink-500">{data.label}:</span>
-      <span className="text-ink-900 font-semibold">{data.value}</span>
-      <span className="text-primary font-medium underline">trocar</span>
+      <span className="font-semibold text-ink-900">{data.value}</span>
+      <span className="font-medium text-primary underline">trocar</span>
     </button>
   );
 }
@@ -391,7 +391,7 @@ function DayStep({
           <span
             key={weekday.long}
             title={weekday.long}
-            className="text-ink-500 py-1 text-center text-xs font-medium"
+            className="py-1 text-center text-xs font-medium text-ink-500"
           >
             {weekday.short}
           </span>

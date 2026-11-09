@@ -63,8 +63,13 @@ export function useSlidingIndicator<T extends HTMLElement>(
     /* O ativo pode nascer um quadro depois (rota resolvida, fonte carregada): um re-snap cobre. */
     const frame = requestAnimationFrame(() => snap(false));
     const mutations = new MutationObserver(() => snap(true));
-    mutations.observe(node, { attributes: true, subtree: true, attributeFilter: attributes.split(',') });
-    const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => snap(false));
+    mutations.observe(node, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: attributes.split(','),
+    });
+    const resize =
+      typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => snap(false));
     resize?.observe(node);
 
     return () => {
@@ -83,12 +88,19 @@ function createIndicator(indicatorClass: string): HTMLDivElement {
   const indicator = document.createElement('div');
   indicator.setAttribute('aria-hidden', 'true');
   indicator.dataset.slot = 'sliding-indicator';
-  indicator.className = cn('pointer-events-none absolute top-0 left-0 -z-10 opacity-0', indicatorClass);
+  indicator.className = cn(
+    'pointer-events-none absolute top-0 left-0 -z-10 opacity-0',
+    indicatorClass,
+  );
 
   return indicator;
 }
 
-/** Onde o destaque tem de estar: a caixa do item ativo, relativa ao container. */
+/**
+ * Onde o destaque tem de estar: a caixa do item ativo, relativa ao container. O `absolute` conta
+ * a partir de DENTRO da borda do container, e o `getBoundingClientRect` de FORA dela — sem descontar
+ * a borda (`clientLeft`/`clientTop`), o destaque ficava 1px à direita e abaixo do ícone.
+ */
 function targetOf(node: HTMLElement, selector: string) {
   const active = node.querySelector<HTMLElement>(selector);
   if (!active) return null;
@@ -98,8 +110,8 @@ function targetOf(node: HTMLElement, selector: string) {
 
   return {
     opacity: 1,
-    x: rect.left - box.left,
-    y: rect.top - box.top,
+    x: rect.left - box.left - node.clientLeft,
+    y: rect.top - box.top - node.clientTop,
     width: rect.width,
     height: rect.height,
   };

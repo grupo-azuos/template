@@ -6,10 +6,22 @@ import {
   AzuosCalendarChart,
   calendarOption,
   calendarRange,
+  chartHeightOf,
   firstDayOfMonth,
 } from './azuos-calendar-chart.component';
 
+describe('chartHeightOf', () => {
+  // feliz
+  it('fills what is left of a given box and fits the legend in it', () => {
+    expect(chartHeightOf('h-full', false)).toBe('min-h-0 flex-1');
+  });
 
+  // triste
+  it('falls back to its own height without a box (smaller on mobile)', () => {
+    expect(chartHeightOf(undefined, false)).toBe('h-48');
+    expect(chartHeightOf(undefined, true)).toBe('h-44');
+  });
+});
 
 describe('calendarRange', () => {
   // feliz
@@ -79,7 +91,9 @@ describe('calendarOption', () => {
       visualMap: { max: number };
     };
 
-    expect(option.tooltip.formatter({ value: [] })).toBe('<b>undefined/undefined/</b><br/>0 vencimentos');
+    expect(option.tooltip.formatter({ value: [] })).toBe(
+      '<b>undefined/undefined/</b><br/>0 vencimentos',
+    );
     expect(option.visualMap.max).toBe(1);
   });
 });

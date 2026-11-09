@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosKanbanColumn } from './azuos-kanban-column.component';
 
 const card = (text: string) => (
-  <div className="bg-card border-border rounded-box border p-3 text-sm shadow-xs">{text}</div>
+  <div className="rounded-box border border-border bg-card p-3 text-sm shadow-xs">{text}</div>
 );
 
 const meta = {

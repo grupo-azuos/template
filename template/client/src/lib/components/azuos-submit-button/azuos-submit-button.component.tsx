@@ -31,7 +31,7 @@ export function AzuosSubmitButton({ data, ui, state }: AzuosSubmitButtonProps) {
            vindo só do padding, dava 4px a mais que o "Cancelar" ao lado. */
         'control-md rounded-control',
         'inline-flex w-full items-center justify-center gap-2 sm:w-auto',
-        'bg-primary text-primary-foreground text-sm font-semibold shadow-xs transition-colors',
+        'bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-colors',
         'hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60',
         ui?.className,
       )}

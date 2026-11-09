@@ -1,3 +1,4 @@
+import { useSlidingIndicator } from '../../motion/use-sliding-indicator';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -25,12 +26,23 @@ export type AzuosSegmentedControlProps = {
 };
 
 export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegmentedControlProps) {
+  /* O fundo do escolhido DESLIZA até o novo, como o destaque do menu: a troca de aba se vê. */
+  const ref = useSlidingIndicator<HTMLDivElement>({
+    selector: '[aria-pressed="true"]',
+    indicatorClass:
+      ui.variant === 'prominent'
+        ? 'rounded-control bg-primary'
+        : 'rounded-control bg-card shadow-xs',
+    attributes: ['aria-pressed'],
+  });
+
   return (
     <div
+      ref={ref}
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'bg-mantle flex flex-wrap gap-1 rounded-surface p-1',
+        'flex flex-wrap gap-1 rounded-surface bg-mantle p-1',
         ui.variant === 'prominent' && 'w-full gap-2 bg-transparent p-0 sm:w-auto',
         ui.className,
       )}
@@ -51,14 +63,14 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
             className={cn(
               'rounded-control px-3 py-1.5 text-sm transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
               isActive
-                ? 'text-primary bg-card font-bold shadow-xs'
-                : 'text-muted-foreground hover:text-foreground font-semibold hover:bg-card',
+                ? 'font-bold text-primary'
+                : 'font-semibold text-muted-foreground hover:bg-card/60 hover:text-foreground',
               ui.variant === 'prominent' &&
-                'control-lg focus-visible:outline-primary flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 sm:flex-none',
+                'control-lg flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-none',
               ui.variant === 'prominent' &&
                 (isActive
-                  ? 'bg-primary text-primary-foreground shadow-none'
-                  : 'bg-primary/10 text-ink-900 hover:bg-primary/20 hover:text-ink-900 shadow-none'),
+                  ? 'text-primary-foreground shadow-none'
+                  : 'bg-primary/10 text-ink-900 shadow-none hover:bg-primary/20 hover:text-ink-900'),
             )}
           >
             {option.label}

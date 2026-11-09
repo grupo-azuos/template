@@ -62,10 +62,10 @@ export function AzuosDonutChart({ data, state, ui, actions }: AzuosDonutChartPro
         />
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-foreground text-xl leading-tight font-bold">
+          <span className="text-xl leading-tight font-bold text-foreground">
             {formatCount(total)}
           </span>
-          <span className="text-muted-foreground text-xs tracking-wide uppercase">
+          <span className="text-xs tracking-wide text-muted-foreground uppercase">
             {data.seriesLabel}
           </span>
         </div>
@@ -128,22 +128,22 @@ function LegendRow({ data }: { data: { slice: ChartSlice; color: string; percent
         style={{ backgroundColor: data.color }}
         aria-hidden="true"
       />
-      <span className="text-muted-foreground w-20 shrink-0 truncate" title={data.slice.label}>
+      <span className="w-20 shrink-0 truncate text-muted-foreground" title={data.slice.label}>
         {data.slice.label}
       </span>
       {/* Barrinha de progresso — não é `AzuosProgressBar` (esse componente é pra "quanto já foi
           cumprido de uma obrigação", com tom por faixa de conclusão). Aqui a cor tem que ser a
           mesma do ponto e da fatia — a identidade da categoria, não "isso está bom ou ruim". */}
-      <span className="bg-muted h-1.5 min-w-8 flex-1 overflow-hidden rounded-full">
+      <span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
         <span
           className="block h-full rounded-full"
           style={{ width: `${data.percent}%`, backgroundColor: data.color }}
         />
       </span>
-      <span className="text-foreground shrink-0 font-semibold">
+      <span className="shrink-0 font-semibold text-foreground">
         {formatCount(data.slice.value)}
       </span>
-      <span className="text-muted-foreground w-9 shrink-0 text-right">{data.percent}%</span>
+      <span className="w-9 shrink-0 text-right text-muted-foreground">{data.percent}%</span>
     </>
   );
 }

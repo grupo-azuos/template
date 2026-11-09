@@ -1,3 +1,4 @@
+import { defaultFilter } from 'cmdk';
 import { Check, ChevronsUpDown, type LucideIcon, Plus } from 'lucide-react';
 import { useState } from 'react';
 
@@ -127,8 +128,8 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           disabled={state?.isDisabled}
           title={selectedOption?.label}
           className={cn(
-            'control-lg rounded-control border-input bg-muted text-foreground flex w-full max-w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
-            'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+            'flex control-lg w-full max-w-full min-w-40 items-center justify-between gap-2 rounded-control border border-input bg-muted px-3 text-sm text-foreground shadow-xs transition-[color,box-shadow] outline-none',
+            'focus-visible:ring-[3px] focus-visible:ring-ring/50',
             'disabled:cursor-not-allowed disabled:opacity-50',
             texts.className,
           )}
@@ -141,10 +142,13 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
       {/* A LARGURA DA LISTA É A DO GATILHO, com um piso. Sem amarrar, ela se estica até o nome mais
           comprido e nasce mais larga que o diálogo em volta, vazando pelos dois lados; sem o piso
           (`min-w-64`), sob um gatilho estreito a lista cortava cada opção no meio. */}
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-64 p-0">
+      <PopoverContent
+        align="start"
+        className="w-(--radix-popover-trigger-width) min-w-64 overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
+      >
         {/* O filtro é o do próprio `cmdk`, por pontuação de semelhança — então "ana s" ainda acha
-            "Ana Souza", o que um `includes` não faria. */}
-        <Command>
+            "Ana Souza", o que um `includes` não faria —, só que sem acento: "goias" acha Goiás. */}
+        <Command filter={accentFreeFilter} className="rounded-surface bg-card">
           <CommandInput value={term} onValueChange={setTerm} placeholder={texts.search} />
           <CommandList>
             <CommandEmpty>{texts.empty}</CommandEmpty>
@@ -212,7 +216,7 @@ function OptionLead({ data }: { data: { option?: AzuosComboboxFieldOption } }) {
   const Icon = option?.icon;
   if (!Icon) return null;
 
-  return <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />;
+  return <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />;
 }
 
 /** Uma opção da lista. O "visto" marca a escolhida; `truncate` corta o nome, não a tela. */
@@ -228,7 +232,7 @@ function OptionRow({
   const { option } = data;
 
   return (
-    <CommandItem value={option.label} onSelect={actions.onSelect}>
+    <CommandItem value={option.label} onSelect={actions.onSelect} className="rounded-chip">
       <Check
         className={cn('size-4 shrink-0', !state.isSelected && 'opacity-0')}
         aria-hidden="true"
@@ -253,11 +257,25 @@ function CreateRow({
   actions: { onSelect: () => void };
 }) {
   return (
-    <CommandItem value={data.term} onSelect={actions.onSelect}>
+    <CommandItem value={data.term} onSelect={actions.onSelect} className="rounded-chip">
       <Plus className="size-4 shrink-0" aria-hidden="true" />
       <span className="truncate">
         {ui.label} “{data.term}”
       </span>
     </CommandItem>
+  );
+}
+
+/** Tira os acentos: quem digita rápido escreve "goias", e a lista tem "Goiás". */
+function withoutAccents(value: string): string {
+  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+}
+
+/** A pontuação de semelhança do `cmdk`, comparando os dois lados sem acento. */
+function accentFreeFilter(value: string, search: string, keywords?: string[]): number {
+  return defaultFilter(
+    withoutAccents(value),
+    withoutAccents(search),
+    keywords?.map(withoutAccents),
   );
 }

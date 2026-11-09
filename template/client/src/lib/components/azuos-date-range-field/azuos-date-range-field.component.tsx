@@ -93,8 +93,8 @@ function triggerClassName(state: { hasError: boolean; hasValue: boolean }): stri
     /* O degrau `lg` da régua de medidas (`lib/theme/tokens.css`): este campo divide fileira com os
        outros filtros e tem de ter a altura e o canto deles. */
     'control-lg rounded-control',
-    'bg-card hover:bg-accent/40 flex w-full cursor-pointer items-center gap-2.5 border text-left text-sm transition-colors outline-none',
-    'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+    'flex w-full cursor-pointer items-center gap-2.5 border bg-card text-left text-sm transition-colors outline-none hover:bg-accent/40',
+    'focus-visible:ring-[3px] focus-visible:ring-ring/50',
     'disabled:cursor-not-allowed disabled:opacity-60',
     state.hasError ? 'border-border bg-destructive-soft' : 'border-input',
     state.hasValue ? 'text-foreground' : 'text-muted-foreground',
@@ -135,7 +135,7 @@ export function AzuosDateRangeField({ data, ui, state, actions }: AzuosDateRange
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={triggerId} className="text-ink-700 text-sm font-medium">
+      <label htmlFor={triggerId} className="text-sm font-medium text-ink-700">
         {data.label}
       </label>
 
@@ -152,14 +152,14 @@ export function AzuosDateRangeField({ data, ui, state, actions }: AzuosDateRange
             aria-describedby={hasError ? errorId : undefined}
             className={triggerClassName({ hasError, hasValue: Boolean(label) })}
           >
-            <CalendarRange className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+            <CalendarRange className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
             <span className="truncate">{label || placeholder}</span>
           </button>
         </PopoverTrigger>
 
         <PopoverContent
           align="start"
-          className="rounded-surface border-border bg-card w-auto max-w-[calc(100vw-2rem)] overflow-x-auto p-0 shadow-xl"
+          className="w-auto max-w-[calc(100vw-2rem)] overflow-x-auto rounded-surface border-border bg-card p-0 shadow-xl"
         >
           <RangePanel
             data={{ value: data.value, min: data.min, max: data.max }}
@@ -169,7 +169,7 @@ export function AzuosDateRangeField({ data, ui, state, actions }: AzuosDateRange
       </Popover>
 
       {hasError ? (
-        <p id={errorId} role="alert" className="text-destructive text-xs font-medium">
+        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
           {error}
         </p>
       ) : null}
@@ -238,8 +238,8 @@ function RangePanel({
         className="rounded-control border-0 p-0"
       />
 
-      <div className="border-border flex flex-wrap items-center justify-between gap-2 border-t pt-3">
-        <p className="text-ink-500 text-xs" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+        <p className="text-xs text-ink-500" aria-live="polite">
           {isComplete ? rangeLabel(orderedRange(draft)) : 'Escolha a data de início e a de fim.'}
         </p>
 
@@ -298,7 +298,7 @@ function EdgeInput({
 
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={inputId} className="text-ink-700 text-xs font-medium">
+      <label htmlFor={inputId} className="text-xs font-medium text-ink-700">
         {data.label}
       </label>
       <input
@@ -312,7 +312,7 @@ function EdgeInput({
         /* Ao sair, o campo volta a mostrar a data que está valendo: texto pela metade some, em
            vez de ficar parecendo uma data aceita. */
         onBlur={() => setDraft(null)}
-        className="control-lg rounded-control bg-muted text-foreground border-input placeholder:text-ink-500 focus-visible:ring-ring/50 w-full min-w-0 border text-sm outline-none focus-visible:ring-[3px]"
+        className="control-lg w-full min-w-0 rounded-control border border-input bg-muted text-sm text-foreground outline-none placeholder:text-ink-500 focus-visible:ring-[3px] focus-visible:ring-ring/50"
       />
     </div>
   );

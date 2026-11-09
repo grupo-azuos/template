@@ -59,7 +59,7 @@ export const LongOptionInNarrowColumn: Story = {
     },
   },
   render: (args) => (
-    <div className="border-ink-300 w-48 border border-dashed p-2">
+    <div className="w-48 border border-dashed border-ink-300 p-2">
       <AzuosFormSelectField {...args} />
     </div>
   ),

@@ -96,7 +96,10 @@ export function AzuosMyProfileView({ data, state, actions, slots }: AzuosMyProfi
 
   return (
     <section aria-label="Meu perfil" className="flex w-full flex-col gap-6 px-4 pb-10 sm:px-6">
-      <Banner data={{ person: data.person, accountUrl: data.accountUrl }} aside={slots?.bannerAside} />
+      <Banner
+        data={{ person: data.person, accountUrl: data.accountUrl }}
+        aside={slots?.bannerAside}
+      />
       {state?.error ? (
         <ErrorNotice data={{ message: state.error }} actions={{ onRetry: actions.onRetry }} />
       ) : null}
@@ -204,15 +207,15 @@ function Banner({
   return (
     <section
       aria-label="Identidade"
-      className="bg-card border-border rounded-surface overflow-hidden border shadow-xs"
+      className="overflow-hidden rounded-surface border border-border bg-card shadow-xs"
     >
-      <div aria-hidden className="bg-primary h-20 sm:h-24" />
+      <div aria-hidden className="h-20 bg-primary sm:h-24" />
       <div className="flex flex-col gap-5 px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <BigAvatar data={{ name: person.name, avatarUrl: person.avatarUrl }} />
           <div className="flex min-w-0 flex-1 flex-col gap-1 sm:pt-3">
-            <h1 className="text-primary text-2xl font-bold break-words">{person.name}</h1>
-            <p className="text-ink-500 flex min-w-0 items-center gap-1.5 text-sm">
+            <h1 className="text-2xl font-bold break-words text-primary">{person.name}</h1>
+            <p className="flex min-w-0 items-center gap-1.5 text-sm text-ink-500">
               <Mail className="size-4 shrink-0" aria-hidden />
               <span className="break-all">{person.email ?? 'Sem e-mail'}</span>
             </p>
@@ -225,7 +228,10 @@ function Banner({
         <dl className="grid gap-3 sm:grid-cols-3">
           <Fact data={{ label: 'Telefone', value: person.phone ?? null }} ui={{ icon: Phone }} />
           <Fact data={{ label: 'Cargo', value: person.jobTitle }} ui={{ icon: Briefcase }} />
-          <Fact data={{ label: 'Departamento', value: person.department }} ui={{ icon: Building2 }} />
+          <Fact
+            data={{ label: 'Departamento', value: person.department }}
+            ui={{ icon: Building2 }}
+          />
         </dl>
       </div>
     </section>
@@ -238,7 +244,7 @@ function BigAvatar({ data }: { data: { name: string; avatarUrl: string | null } 
     <span
       role={data.avatarUrl ? undefined : 'img'}
       aria-label={data.avatarUrl ? undefined : data.name}
-      className="bg-brand-yellow-400 text-brand-blue-900 ring-card relative -mt-12 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full text-2xl font-bold ring-4"
+      className="relative -mt-12 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-yellow-400 text-2xl font-bold text-brand-blue-900 ring-4 ring-card"
     >
       <span aria-hidden={data.avatarUrl ? true : undefined}>{initialsOf(data.name)}</span>
       {data.avatarUrl ? (
@@ -256,7 +262,7 @@ function EditLink({ data }: { data: { href: string } }) {
   return (
     <a
       href={data.href}
-      className="border-border text-foreground hover:bg-muted rounded-control inline-flex shrink-0 items-center gap-2 self-start border px-3 py-2 text-sm font-medium transition-colors sm:mt-3"
+      className="inline-flex shrink-0 items-center gap-2 self-start rounded-control border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted sm:mt-3"
     >
       <ExternalLink className="size-4" aria-hidden />
       Editar no Admin Console
@@ -266,23 +272,34 @@ function EditLink({ data }: { data: { href: string } }) {
 
 function RoleBadge({ data }: { data: { label: string } }) {
   return (
-    <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold">
+    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
       {data.label}
     </span>
   );
 }
 
-function Fact({ data, ui }: { data: { label: string; value: string | null }; ui: { icon: LucideIcon } }) {
+function Fact({
+  data,
+  ui,
+}: {
+  data: { label: string; value: string | null };
+  ui: { icon: LucideIcon };
+}) {
   const Icon = ui.icon;
 
   return (
-    <div className="bg-muted rounded-box flex min-w-0 items-center gap-3 p-3">
-      <span className="bg-primary/10 text-primary rounded-chip flex size-9 shrink-0 items-center justify-center">
+    <div className="flex min-w-0 items-center gap-3 rounded-box bg-muted p-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-chip bg-primary/10 text-primary">
         <Icon className="size-4" aria-hidden />
       </span>
       <div className="min-w-0">
-        <dt className="text-ink-500 text-xs">{data.label}</dt>
-        <dd className={cn('truncate text-sm font-medium', data.value ? 'text-foreground' : 'text-ink-500')}>
+        <dt className="text-xs text-ink-500">{data.label}</dt>
+        <dd
+          className={cn(
+            'truncate text-sm font-medium',
+            data.value ? 'text-foreground' : 'text-ink-500',
+          )}
+        >
           {data.value ?? EMPTY}
         </dd>
       </div>
@@ -290,10 +307,14 @@ function Fact({ data, ui }: { data: { label: string; value: string | null }; ui:
   );
 }
 
-function SectionNav({ data }: { data: { sections: { id: string; label: string; icon: LucideIcon }[] } }) {
+function SectionNav({
+  data,
+}: {
+  data: { sections: { id: string; label: string; icon: LucideIcon }[] };
+}) {
   return (
     <nav aria-label="Seções da página" className="hidden lg:sticky lg:top-6 lg:col-span-3 lg:block">
-      <p className="text-ink-500 mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+      <p className="mb-2 px-3 text-xs font-semibold tracking-wider text-ink-500 uppercase">
         Nesta página
       </p>
       <ul className="flex flex-col gap-0.5">
@@ -301,7 +322,7 @@ function SectionNav({ data }: { data: { sections: { id: string; label: string; i
           <li key={id}>
             <a
               href={`#${id}`}
-              className="rounded-control hover:bg-muted hover:text-foreground text-ink-700 flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors"
+              className="flex items-center gap-2.5 rounded-control px-3 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-muted hover:text-foreground"
             >
               <Icon className="size-4 shrink-0" aria-hidden />
               {label}
@@ -313,16 +334,22 @@ function SectionNav({ data }: { data: { sections: { id: string; label: string; i
   );
 }
 
-function Card({ data, children }: { data: { title: string; icon: LucideIcon }; children: ReactNode }) {
+function Card({
+  data,
+  children,
+}: {
+  data: { title: string; icon: LucideIcon };
+  children: ReactNode;
+}) {
   const Icon = data.icon;
 
   return (
     <section
       aria-label={data.title}
-      className="bg-card border-border rounded-surface flex flex-col gap-4 border p-4 shadow-xs sm:p-6"
+      className="flex flex-col gap-4 rounded-surface border border-border bg-card p-4 shadow-xs sm:p-6"
     >
-      <h2 className="text-foreground flex items-center gap-2 text-base font-semibold">
-        <span className="bg-primary/10 text-primary rounded-chip flex size-8 items-center justify-center">
+      <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+        <span className="flex size-8 items-center justify-center rounded-chip bg-primary/10 text-primary">
           <Icon className="size-4" aria-hidden />
         </span>
         {data.title}
@@ -333,11 +360,22 @@ function Card({ data, children }: { data: { title: string; icon: LucideIcon }; c
 }
 
 /** Um dado só de leitura: rótulo miúdo em cima, valor embaixo — sem caixa de texto. */
-function Field({ data, ui }: { data: { label: string; value: string | null }; ui?: { isWide?: boolean } }) {
+function Field({
+  data,
+  ui,
+}: {
+  data: { label: string; value: string | null };
+  ui?: { isWide?: boolean };
+}) {
   return (
     <div className={cn('flex min-w-0 flex-col gap-1', ui?.isWide && 'sm:col-span-2')}>
-      <dt className="text-ink-500 text-xs font-medium">{data.label}</dt>
-      <dd className={cn('text-sm break-words whitespace-pre-line', data.value ? 'text-foreground' : 'text-ink-500')}>
+      <dt className="text-xs font-medium text-ink-500">{data.label}</dt>
+      <dd
+        className={cn(
+          'text-sm break-words whitespace-pre-line',
+          data.value ? 'text-foreground' : 'text-ink-500',
+        )}
+      >
         {data.value ?? EMPTY}
       </dd>
     </div>
@@ -348,10 +386,10 @@ function SystemsCard({ data }: { data: { systems: MyProfileSystem[] | undefined 
   return (
     <section
       aria-label="Sistemas"
-      className="bg-card border-border rounded-surface flex flex-col gap-4 border p-4 shadow-xs sm:p-6"
+      className="flex flex-col gap-4 rounded-surface border border-border bg-card p-4 shadow-xs sm:p-6"
     >
-      <h2 className="text-foreground flex items-center gap-2 text-base font-semibold">
-        <span className="bg-primary/10 text-primary rounded-chip flex size-8 items-center justify-center">
+      <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+        <span className="flex size-8 items-center justify-center rounded-chip bg-primary/10 text-primary">
           <AppWindow className="size-4" aria-hidden />
         </span>
         Sistemas
@@ -363,19 +401,19 @@ function SystemsCard({ data }: { data: { systems: MyProfileSystem[] | undefined 
 
 function SystemsList({ data }: { data: { systems: MyProfileSystem[] | undefined } }) {
   if (!data.systems) {
-    return <p className="text-ink-500 text-sm">Não consegui ver seus sistemas agora.</p>;
+    return <p className="text-sm text-ink-500">Não consegui ver seus sistemas agora.</p>;
   }
   if (data.systems.length === 0) {
-    return <p className="text-ink-500 text-sm">Você ainda não tem acesso a nenhum sistema.</p>;
+    return <p className="text-sm text-ink-500">Você ainda não tem acesso a nenhum sistema.</p>;
   }
 
   return (
-    <ul className="divide-border flex flex-col divide-y">
+    <ul className="flex flex-col divide-y divide-border">
       {data.systems.map((system) => (
         <li key={system.url} className="flex items-center justify-between gap-3 py-2.5">
           <a
             href={system.url}
-            className="text-foreground hover:text-primary min-w-0 truncate text-sm font-medium transition-colors"
+            className="min-w-0 truncate text-sm font-medium text-foreground transition-colors hover:text-primary"
           >
             {system.name}
           </a>
@@ -399,8 +437,10 @@ function ThemeSwitch({
   return (
     <div className="flex items-center justify-between gap-4 sm:col-span-2">
       <div className="flex min-w-0 flex-col gap-1">
-        <dt className="text-foreground text-sm font-medium">Tema escuro</dt>
-        <dd className="text-ink-500 text-xs">Vale para todos os sistemas do grupo neste navegador.</dd>
+        <dt className="text-sm font-medium text-foreground">Tema escuro</dt>
+        <dd className="text-xs text-ink-500">
+          Vale para todos os sistemas do grupo neste navegador.
+        </dd>
       </div>
       {/* design-ignore-next-line fitts/target-size: switch toggle compacto de 28px */}
       <button
@@ -416,7 +456,7 @@ function ThemeSwitch({
       >
         <span
           className={cn(
-            'bg-card text-primary flex size-5 items-center justify-center rounded-full shadow-xs transition-transform',
+            'flex size-5 items-center justify-center rounded-full bg-card text-primary shadow-xs transition-transform',
             isDark ? 'translate-x-6' : 'translate-x-1',
           )}
         >
@@ -437,14 +477,14 @@ function ErrorNotice({
   return (
     <div
       role="alert"
-      className="border-border text-destructive rounded-box flex flex-wrap items-center justify-between gap-3 border px-4 py-3 text-sm"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-box border border-border px-4 py-3 text-sm text-destructive"
     >
       <span>{data.message}</span>
       {actions.onRetry ? (
         <button
           type="button"
           onClick={actions.onRetry}
-          className="rounded-control hover:bg-muted px-3 py-1.5 text-sm font-medium"
+          className="rounded-control px-3 py-1.5 text-sm font-medium hover:bg-muted"
         >
           Tentar de novo
         </button>
@@ -458,19 +498,19 @@ function ProfileSkeleton() {
   return (
     <div role="status" aria-busy="true" className="flex w-full flex-col gap-6 px-4 pb-10 sm:px-6">
       <span className="sr-only">Carregando seu perfil…</span>
-      <div className="bg-card border-border rounded-surface overflow-hidden border shadow-xs">
-        <div className="bg-muted h-20 animate-pulse" />
+      <div className="overflow-hidden rounded-surface border border-border bg-card shadow-xs">
+        <div className="h-20 animate-pulse bg-muted" />
         <div className="flex flex-col gap-4 p-4 sm:p-6">
-          <div className="bg-muted -mt-16 size-24 animate-pulse rounded-full" />
-          <div className="bg-muted rounded-box h-6 w-56 animate-pulse" />
+          <div className="-mt-16 size-24 animate-pulse rounded-full bg-muted" />
+          <div className="h-6 w-56 animate-pulse rounded-box bg-muted" />
           <div className="grid gap-3 sm:grid-cols-3">
             {[0, 1, 2].map((item) => (
-              <div key={item} className="bg-muted rounded-box h-16 animate-pulse" />
+              <div key={item} className="h-16 animate-pulse rounded-box bg-muted" />
             ))}
           </div>
         </div>
       </div>
-      <div className="bg-muted rounded-surface h-40 animate-pulse" />
+      <div className="h-40 animate-pulse rounded-surface bg-muted" />
     </div>
   );
 }

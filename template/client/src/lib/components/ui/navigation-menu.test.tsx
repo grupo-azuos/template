@@ -41,7 +41,10 @@ describe('NavigationMenu', () => {
     expect(screen.getByRole('button', { name: 'Cadastros' })).toHaveAttribute('data-state', 'open');
     expect(screen.getByRole('link', { name: 'Clientes' })).toBeInTheDocument();
     expect(document.querySelector('[data-slot="navigation-menu-viewport"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-slot="navigation-menu"]')).toHaveAttribute('data-viewport', 'true');
+    expect(document.querySelector('[data-slot="navigation-menu"]')).toHaveAttribute(
+      'data-viewport',
+      'true',
+    );
   });
 
   it('marks the current page link as active', () => {
@@ -54,8 +57,13 @@ describe('NavigationMenu', () => {
   it('drops into the item itself without a viewport', () => {
     renderMenu(false);
 
-    expect(document.querySelector('[data-slot="navigation-menu-viewport"]')).not.toBeInTheDocument();
-    expect(document.querySelector('[data-slot="navigation-menu"]')).toHaveAttribute('data-viewport', 'false');
+    expect(
+      document.querySelector('[data-slot="navigation-menu-viewport"]'),
+    ).not.toBeInTheDocument();
+    expect(document.querySelector('[data-slot="navigation-menu"]')).toHaveAttribute(
+      'data-viewport',
+      'false',
+    );
     expect(screen.getByRole('link', { name: 'Clientes' })).toBeInTheDocument();
   });
 });

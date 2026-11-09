@@ -47,7 +47,7 @@ export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
   /* Situação vazia não é uma situação: um selo cinza escrito "—" faria parecer que alguém
      respondeu algo. Linha que ninguém tocou fica sem selo. */
   if (!data.label) {
-    return <span className={cn('text-ink-500 text-xs', ui?.className)}>Não preenchido</span>;
+    return <span className={cn('text-xs text-ink-500', ui?.className)}>Não preenchido</span>;
   }
 
   return (

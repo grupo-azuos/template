@@ -60,7 +60,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
     <>
       <nav
         aria-label="Menu principal"
-        className="bg-card border-border fixed inset-x-0 bottom-0 z-40 border-t px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-xl md:hidden"
       >
         <ul className="grid grid-cols-4 gap-2">
           {barItems.map((item) => {
@@ -105,7 +105,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
           side="bottom"
           showCloseButton={false}
           style={drag.style}
-          className="bg-sidebar text-sidebar-foreground max-h-[85svh] gap-0 overflow-y-auto rounded-t-[28px] border-0 p-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
+          className="max-h-[85svh] gap-0 overflow-y-auto rounded-t-[28px] border-0 bg-sidebar p-0 pb-[max(1rem,env(safe-area-inset-bottom))] text-sidebar-foreground md:hidden"
         >
           <SheetDragHandle handlers={drag.handlers} />
           <SheetHeader className="flex-row items-center px-4 pt-0 pb-2">
@@ -121,7 +121,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
               <div
                 role="group"
                 aria-label="Partes do sistema"
-                className="rounded-box flex gap-1 bg-sidebar-accent/40 p-1"
+                className="flex gap-1 rounded-box bg-sidebar-accent/40 p-1"
               >
                 {data.areas.map((area) => (
                   <button
@@ -129,7 +129,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
                     type="button"
                     aria-pressed={area.key === state?.activeArea}
                     onClick={() => actions.onSelectArea(area.key)}
-                    className="rounded-control text-sidebar-foreground aria-pressed:bg-brand-yellow-400 aria-pressed:text-brand-blue-900 flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-1.5 text-xs font-semibold transition-colors [&>svg]:size-5"
+                    className="flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-control px-1 py-1.5 text-xs font-semibold text-sidebar-foreground transition-colors aria-pressed:bg-brand-yellow-400 aria-pressed:text-brand-blue-900 [&>svg]:size-5"
                   >
                     <area.icon aria-hidden="true" />
                     <span className="max-w-full truncate">{area.label}</span>
@@ -151,7 +151,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
                     <item.icon aria-hidden="true" />
                     <span className="flex-1 truncate">{item.label}</span>
                     {data.badges?.[item.key] ? (
-                      <span className="bg-destructive text-destructive-foreground rounded-full px-2 text-xs font-bold">
+                      <span className="rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">
                         {data.badges?.[item.key]}
                       </span>
                     ) : null}
@@ -161,7 +161,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
             </ul>
 
             {data.actions.length > 0 ? (
-              <ul className="border-sidebar-border flex flex-col gap-1 border-t pt-3">
+              <ul className="flex flex-col gap-1 border-t border-sidebar-border pt-3">
                 {data.actions.map((action) => (
                   <li key={action.key}>
                     <AzuosAppShellTargetLink
@@ -177,7 +177,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
               </ul>
             ) : null}
 
-            <div className="border-sidebar-border pointer-events-none flex justify-center border-b">
+            <div className="pointer-events-none flex justify-center border-b border-sidebar-border">
               <AzuosZuzu data={{ pose: 'leaning' }} ui={{ size: 86, className: '-mb-1.5' }} />
             </div>
 
@@ -231,7 +231,7 @@ function BarIcon({ badge, children }: { badge?: number; children: ReactNode }) {
     <span className="relative">
       {children}
       {badge ? (
-        <span className="bg-destructive text-destructive-foreground absolute -top-1.5 -right-2.5 min-w-4 rounded-full px-1 text-center text-xs leading-4 font-bold">
+        <span className="absolute -top-1.5 -right-2.5 min-w-4 rounded-full bg-destructive px-1 text-center text-xs leading-4 font-bold text-destructive-foreground">
           {badge}
         </span>
       ) : null}
@@ -294,7 +294,7 @@ function SheetDragHandle({ handlers }: { handlers: ReturnType<typeof useSheetDra
       className="flex h-9 shrink-0 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
       {...handlers}
     >
-      <span className="bg-sidebar-foreground/40 h-1 w-8 rounded-full" />
+      <span className="h-1 w-8 rounded-full bg-sidebar-foreground/40" />
     </div>
   );
 }

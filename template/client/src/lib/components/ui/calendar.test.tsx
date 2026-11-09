@@ -14,11 +14,22 @@ describe('Calendar', () => {
     fireEvent.click(screen.getByRole('button', { name: /March 20/ }));
 
     expect(onSelect).toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: /March 10/ })).toHaveAttribute('data-selected-single', 'true');
+    expect(screen.getByRole('button', { name: /March 10/ })).toHaveAttribute(
+      'data-selected-single',
+      'true',
+    );
   });
 
   it('offers month and year dropdowns with short month names and the week numbers', () => {
-    render(<Calendar mode="single" month={MARCH} captionLayout="dropdown" showWeekNumber buttonVariant="outline" />);
+    render(
+      <Calendar
+        mode="single"
+        month={MARCH}
+        captionLayout="dropdown"
+        showWeekNumber
+        buttonVariant="outline"
+      />,
+    );
 
     expect(screen.getByRole('combobox', { name: /month/i })).toHaveTextContent('Mar');
     expect(screen.getByRole('combobox', { name: /year/i })).toBeInTheDocument();

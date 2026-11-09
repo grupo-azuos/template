@@ -10,7 +10,10 @@ import {
   CarouselPrevious,
 } from './carousel';
 
-function renderCarousel(orientation: 'horizontal' | 'vertical' = 'horizontal', setApi?: (api: CarouselApi) => void) {
+function renderCarousel(
+  orientation: 'horizontal' | 'vertical' = 'horizontal',
+  setApi?: (api: CarouselApi) => void,
+) {
   return render(
     <Carousel orientation={orientation} setApi={setApi} aria-label="Destaques">
       <CarouselContent>

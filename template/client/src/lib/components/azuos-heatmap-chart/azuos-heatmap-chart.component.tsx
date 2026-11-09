@@ -81,7 +81,9 @@ export function heatmapOption(
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
-        const cell = (params as { data: { row: string; column: string; value: [number, number, number] } }).data;
+        const cell = (
+          params as { data: { row: string; column: string; value: [number, number, number] } }
+        ).data;
 
         return `<b>${cell.row}</b><br/>${cell.column}: ${formatCount(cell.value[2])}`;
       },
@@ -101,7 +103,11 @@ export function heatmapOption(
       data: [...data.rows],
       axisTick: { show: false },
       axisLine: { show: false },
-      axisLabel: { color: theme.foreground, fontSize: 11, formatter: (label: string) => shortenLabel(label, 18) },
+      axisLabel: {
+        color: theme.foreground,
+        fontSize: 11,
+        formatter: (label: string) => shortenLabel(label, 18),
+      },
     },
     visualMap: {
       show: false,
@@ -130,7 +136,9 @@ export function heatmapOption(
           column: cell.column,
           value: [data.columns.indexOf(cell.column), data.rows.indexOf(cell.row), cell.value],
           /* Texto claro na célula escura e escuro na clara: com uma cor só, metade dos números some. */
-          label: { color: cell.value > top * 0.55 ? 'var(--primary-foreground)' : theme.foreground },
+          label: {
+            color: cell.value > top * 0.55 ? 'var(--primary-foreground)' : theme.foreground,
+          },
         })),
       },
     ],
@@ -138,10 +146,16 @@ export function heatmapOption(
 }
 
 /** Toda combinação linha × coluna, com zero onde não veio célula: o buraco se lê como "zero". */
-export function cellsOf(data: Pick<AzuosHeatmapChartProps['data'], 'rows' | 'columns' | 'cells'>): HeatmapCell[] {
+export function cellsOf(
+  data: Pick<AzuosHeatmapChartProps['data'], 'rows' | 'columns' | 'cells'>,
+): HeatmapCell[] {
   const values = new Map(data.cells.map((cell) => [`${cell.row}\u0000${cell.column}`, cell.value]));
 
   return data.rows.flatMap((row) =>
-    data.columns.map((column) => ({ row, column, value: values.get(`${row}\u0000${column}`) ?? 0 })),
+    data.columns.map((column) => ({
+      row,
+      column,
+      value: values.get(`${row}\u0000${column}`) ?? 0,
+    })),
   );
 }

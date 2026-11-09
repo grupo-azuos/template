@@ -1,5 +1,10 @@
 import { type ChartSlice } from '../../utils/chart-slice.util';
-import { type ChartOption, type ChartTheme, formatCount, resolveColor } from '../../utils/echarts.util';
+import {
+  type ChartOption,
+  type ChartTheme,
+  formatCount,
+  resolveColor,
+} from '../../utils/echarts.util';
 import { AzuosChartValueList } from '../azuos-chart-value-list/azuos-chart-value-list.component';
 import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 

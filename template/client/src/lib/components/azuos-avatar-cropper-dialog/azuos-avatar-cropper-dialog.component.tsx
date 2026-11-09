@@ -101,7 +101,7 @@ function CropEditor({
     <div className="flex flex-col gap-4">
       {/* Mais baixo no celular: 288px de recorte mais o cabeçalho, o zoom e os botões não
           cabem numa tela de 640px de altura sem empurrar "Salvar" para fora da dobra. */}
-      <div className="bg-backdrop rounded-box relative h-56 w-full overflow-hidden sm:h-72">
+      <div className="relative h-56 w-full overflow-hidden rounded-box bg-backdrop sm:h-72">
         <Cropper
           image={data.imageUrl}
           crop={crop}
@@ -121,8 +121,8 @@ function CropEditor({
       <AzuosSliderField
         data={{ label: 'Zoom', value: zoom, min: MIN_ZOOM, max: MAX_ZOOM, step: 0.05 }}
         ui={{
-          startIcon: <ZoomOut className="text-ink-500 size-4 shrink-0" aria-hidden />,
-          endIcon: <ZoomIn className="text-ink-500 size-4 shrink-0" aria-hidden />,
+          startIcon: <ZoomOut className="size-4 shrink-0 text-ink-500" aria-hidden />,
+          endIcon: <ZoomIn className="size-4 shrink-0 text-ink-500" aria-hidden />,
         }}
         state={{ isDisabled: state.isSaving }}
         actions={{ onChange: setZoom }}

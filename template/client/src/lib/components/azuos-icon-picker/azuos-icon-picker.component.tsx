@@ -24,7 +24,7 @@ export function AzuosIconPicker({ data, ui, state, actions }: AzuosIconPickerPro
 
   return (
     <div className={cn('flex flex-col gap-1.5', ui.className)}>
-      <span id={labelId} className="text-ink-700 text-sm font-medium">
+      <span id={labelId} className="text-sm font-medium text-ink-700">
         {ui.label}
       </span>
       <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
@@ -41,7 +41,7 @@ export function AzuosIconPicker({ data, ui, state, actions }: AzuosIconPickerPro
               disabled={state?.isDisabled}
               onClick={() => actions.onChange(value)}
               className={cn(
-                'rounded-control focus-visible:ring-ring flex size-(--control-lg) cursor-pointer items-center justify-center border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                'flex size-(--control-lg) cursor-pointer items-center justify-center rounded-control border transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                 isSelected
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-card text-ink-700 hover:bg-muted',

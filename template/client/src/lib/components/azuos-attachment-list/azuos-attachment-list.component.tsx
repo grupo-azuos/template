@@ -60,22 +60,22 @@ export function AzuosAttachmentList({ data, ui, state, actions }: AzuosAttachmen
     );
   }
 
-  if (state?.isLoading) return <p className="text-ink-500 text-sm">Carregando os anexos…</p>;
+  if (state?.isLoading) return <p className="text-sm text-ink-500">Carregando os anexos…</p>;
 
   if (data.attachments.length === 0) {
-    return <p className="text-ink-500 text-sm">{ui?.emptyLabel ?? 'Nenhum arquivo anexado.'}</p>;
+    return <p className="text-sm text-ink-500">{ui?.emptyLabel ?? 'Nenhum arquivo anexado.'}</p>;
   }
 
   return (
-    <ul className="rounded-box divide-y border">
+    <ul className="divide-y rounded-box border">
       {data.attachments.map((attachment) => (
         <li key={attachment.id} className="flex items-center justify-between gap-3 p-2.5">
           <div className="min-w-0 flex-1">
-            <p className="text-ink-900 truncate text-sm">{attachment.fileName}</p>
+            <p className="truncate text-sm text-ink-900">{attachment.fileName}</p>
             {/* De quem é o arquivo vai ESCRITO na linha. Sem isso, a única pista de por que uns têm
                 botão de excluir e outros não seria a ausência do botão — e ausência não explica
                 nada a quem está olhando. */}
-            <p className="text-ink-500 text-xs">
+            <p className="text-xs text-ink-500">
               {[attachment.kindLabel, fileSizeOf(attachment.sizeBytes), attachment.originLabel]
                 .filter(Boolean)
                 .join(' · ')}
@@ -90,7 +90,7 @@ export function AzuosAttachmentList({ data, ui, state, actions }: AzuosAttachmen
               `rel="noreferrer"` porque o endereço assinado não deve viajar como referência.
             */}
             <a
-              className="text-ink-700 hover:bg-muted rounded-chip inline-flex items-center gap-1 px-2 py-1 text-xs"
+              className="inline-flex items-center gap-1 rounded-chip px-2 py-1 text-xs text-ink-700 hover:bg-muted"
               href={attachment.viewUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -100,7 +100,7 @@ export function AzuosAttachmentList({ data, ui, state, actions }: AzuosAttachmen
             </a>
 
             <a
-              className="text-ink-700 hover:bg-muted rounded-chip inline-flex items-center gap-1 px-2 py-1 text-xs"
+              className="inline-flex items-center gap-1 rounded-chip px-2 py-1 text-xs text-ink-700 hover:bg-muted"
               href={attachment.downloadUrl}
               download={attachment.fileName}
               rel="noopener noreferrer"

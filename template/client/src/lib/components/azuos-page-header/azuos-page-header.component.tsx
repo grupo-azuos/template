@@ -1,3 +1,4 @@
+import { type LucideIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
 
 import { cn } from '../../utils/cn.util';
@@ -10,7 +11,11 @@ import { cn } from '../../utils/cn.util';
  */
 export type AzuosPageHeaderProps = {
   data: { title: string; description?: string };
-  ui?: { className?: string };
+  /**
+   * `icon`: o ícone do item do menu, ao lado do título — o cabeçalho das telas de trabalho
+   * (Novas Empresas, Resumo do Dia…). Com ele, o título sobe para o tamanho dessas telas.
+   */
+  ui?: { className?: string; icon?: LucideIcon };
   /** As ações da tela, já montadas (normalmente `AzuosActionButton`). Ficam à direita. */
   children?: ReactNode;
 };
@@ -24,9 +29,22 @@ export function AzuosPageHeader({ data, ui, children }: AzuosPageHeaderProps) {
       )}
     >
       <div className="min-w-0">
-        <h1 className="text-ink-900 text-xl font-bold">{data.title}</h1>
+        <h1
+          className={cn(
+            'font-bold text-ink-900',
+            ui?.icon ? 'flex items-center gap-2 text-2xl' : 'text-xl',
+          )}
+        >
+          {ui?.icon ? (
+            <ui.icon
+              className="size-6 text-brand-blue-700 dark:text-foreground"
+              aria-hidden="true"
+            />
+          ) : null}
+          {data.title}
+        </h1>
         {data.description ? (
-          <p className="text-ink-500 mt-0.5 text-sm">{data.description}</p>
+          <p className="mt-0.5 text-sm text-ink-500">{data.description}</p>
         ) : null}
       </div>
 

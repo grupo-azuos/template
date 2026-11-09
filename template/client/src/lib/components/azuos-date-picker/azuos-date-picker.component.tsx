@@ -108,17 +108,17 @@ export function AzuosDatePicker({ data, ui, state, actions }: AzuosDatePickerPro
               'control-lg rounded-control',
               /* Fundo sólido de campo, também no escuro: a variante `outline` do `ui/button` traz
                  `dark:bg-input/30`, e só a mesma variante (`dark:`) a derruba. */
-              'border-input bg-muted dark:bg-muted hover:bg-accent/40 dark:hover:bg-accent/40 text-foreground w-full justify-start text-left font-normal shadow-xs transition-colors',
+              'w-full justify-start border-input bg-muted text-left font-normal text-foreground shadow-xs transition-colors hover:bg-accent/40 dark:bg-muted dark:hover:bg-accent/40',
               !selected && 'text-muted-foreground',
             )}
           >
-            <CalendarIcon className="text-muted-foreground mr-2.5 size-4" aria-hidden="true" />
+            <CalendarIcon className="mr-2.5 size-4 text-muted-foreground" aria-hidden="true" />
             <span className="truncate">{label}</span>
           </Button>
         </PopoverTrigger>
 
         <PopoverContent
-          className="rounded-surface border-border bg-card w-auto p-0 shadow-xl"
+          className="w-auto rounded-surface border-border bg-card p-0 shadow-xl"
           align="start"
         >
           <Calendar

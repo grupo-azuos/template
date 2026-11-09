@@ -61,7 +61,7 @@ export const LongErrorInNarrowColumn: Story = {
     state: { error: 'A senha precisa ter ao menos 8 caracteres' },
   },
   render: (args) => (
-    <div className="border-ink-300 w-56 border border-dashed p-2">
+    <div className="w-56 border border-dashed border-ink-300 p-2">
       <AzuosTextField {...args} />
     </div>
   ),

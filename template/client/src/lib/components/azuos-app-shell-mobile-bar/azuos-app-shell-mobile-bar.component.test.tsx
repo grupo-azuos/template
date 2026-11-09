@@ -111,7 +111,9 @@ describe('AzuosAppShellMobileBar', () => {
     });
 
     const sheet = await screen.findByRole('dialog');
-    expect(within(sheet).queryByRole('group', { name: 'Partes do sistema' })).not.toBeInTheDocument();
+    expect(
+      within(sheet).queryByRole('group', { name: 'Partes do sistema' }),
+    ).not.toBeInTheDocument();
   });
 
   // feliz
@@ -209,7 +211,9 @@ describe('AzuosAppShellMobileBar', () => {
       data: {
         user: { name: 'Ana Souza', role: 'Administradora' },
         items,
-        actions: [{ key: 'help', label: 'Ajuda', icon: Wrench, href: 'https://ajuda.exemplo.test' }],
+        actions: [
+          { key: 'help', label: 'Ajuda', icon: Wrench, href: 'https://ajuda.exemplo.test' },
+        ],
         profile: { to: '/profile' },
         areas: [],
       },

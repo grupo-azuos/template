@@ -24,8 +24,8 @@ export const Default: Story = {};
 export const WithIcons: Story = {
   args: {
     ui: {
-      startIcon: <ZoomOut className="text-ink-500 size-4 shrink-0" aria-hidden />,
-      endIcon: <ZoomIn className="text-ink-500 size-4 shrink-0" aria-hidden />,
+      startIcon: <ZoomOut className="size-4 shrink-0 text-ink-500" aria-hidden />,
+      endIcon: <ZoomIn className="size-4 shrink-0 text-ink-500" aria-hidden />,
     },
   },
 };

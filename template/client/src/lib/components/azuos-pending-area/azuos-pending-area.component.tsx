@@ -35,20 +35,20 @@ export function AzuosPendingArea({ data, ui }: AzuosPendingAreaProps) {
     <div className="flex w-full flex-col gap-5 px-4 pb-10 sm:px-6">
       <AzuosPageHeader data={{ title: data.title, description: data.summary }} />
 
-      <section className="border-ink-300 bg-card rounded-surface border border-dashed p-6">
+      <section className="rounded-surface border border-dashed border-ink-300 bg-card p-6">
         <div className="flex items-start gap-3">
-          <Icon className="text-ink-500 mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <Icon className="mt-0.5 size-5 shrink-0 text-ink-500" aria-hidden="true" />
           <div className="min-w-0">
-            <h2 className="text-ink-900 text-base font-semibold">
+            <h2 className="text-base font-semibold text-ink-900">
               Esta área ainda não foi construída
             </h2>
-            <p className="text-ink-700 mt-1 text-sm">O que está previsto para ela:</p>
+            <p className="mt-1 text-sm text-ink-700">O que está previsto para ela:</p>
 
-            <ul className="text-ink-700 mt-3 flex flex-col gap-1.5 text-sm">
+            <ul className="mt-3 flex flex-col gap-1.5 text-sm text-ink-700">
               {data.features.map((feature) => (
                 <li key={feature} className="flex gap-2">
                   <span
-                    className="bg-ink-300 mt-2 size-1.5 shrink-0 rounded-full"
+                    className="mt-2 size-1.5 shrink-0 rounded-full bg-ink-300"
                     aria-hidden="true"
                   />
                   <span className="break-words">{feature}</span>
@@ -63,7 +63,7 @@ export function AzuosPendingArea({ data, ui }: AzuosPendingAreaProps) {
                 Clientes estar pronto" não é português. Sem verbo, a mesma frase serve para qualquer
                 quantidade. */}
             {data.dependsOn ? (
-              <p className="text-ink-500 mt-4 text-sm">
+              <p className="mt-4 text-sm text-ink-500">
                 Antes desta área: <strong className="font-semibold">{data.dependsOn}</strong>.
               </p>
             ) : null}

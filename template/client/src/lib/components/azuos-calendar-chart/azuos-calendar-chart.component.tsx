@@ -5,6 +5,7 @@ import {
   formatCount,
   resolveColor,
 } from '../../utils/echarts.util';
+import { cn } from '../../utils/cn.util';
 import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 
 /**
@@ -30,7 +31,12 @@ export type AzuosCalendarChartProps = {
     from?: string;
   };
   state?: { isLoading?: boolean };
-  ui?: { emptyLabel?: string };
+  /**
+   * `heightClass`: a caixa inteira (quadro + legenda), para caber num bloco do painel. Sem ela,
+   * o quadro tem altura própria — e, dentro de um bloco mais baixo, vazava com a legenda por
+   * baixo do bloco vizinho.
+   */
+  ui?: { emptyLabel?: string; heightClass?: string };
 };
 
 const DESKTOP_MONTHS = 12;
@@ -53,13 +59,13 @@ export function AzuosCalendarChart({ data, state, ui }: AzuosCalendarChartProps)
   const total = data.days.reduce((sum, day) => sum + day.count, 0);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn('flex flex-col gap-2', ui?.heightClass)}>
       <AzuosEchart
         data={{
           option: (theme) => calendarOption(data.days, range, data.seriesLabel, theme),
           description: `${formatCount(total)} ${data.seriesLabel} entre ${range[0]} e ${range[1]}`,
         }}
-        ui={{ heightClass: isMobile ? 'h-44' : 'h-48', emptyLabel: ui?.emptyLabel }}
+        ui={{ heightClass: chartHeightOf(ui?.heightClass, isMobile), emptyLabel: ui?.emptyLabel }}
         state={{ isLoading: state?.isLoading, isEmpty: data.days.length === 0 }}
       />
       {data.days.length > 0 && !state?.isLoading ? <HeatLegend /> : null}
@@ -67,15 +73,22 @@ export function AzuosCalendarChart({ data, state, ui }: AzuosCalendarChartProps)
   );
 }
 
+/** Com caixa dada, o quadro ocupa o que sobra dela depois da legenda; sem, a altura própria. */
+export function chartHeightOf(boxClass: string | undefined, isMobile: boolean): string {
+  if (boxClass) return 'min-h-0 flex-1';
+
+  return isMobile ? 'h-44' : 'h-48';
+}
+
 /** "Menos ▢▢▢▢ Mais" — a escala escrita, para a cor não ser o único jeito de ler o quadro. */
 function HeatLegend() {
   return (
-    <div className="text-muted-foreground flex items-center justify-end gap-1 text-xs">
+    <div className="flex shrink-0 items-center justify-end gap-1 text-xs text-muted-foreground">
       <span>Menos</span>
       {HEAT_COLORS.map((color) => (
         <span
           key={color}
-          className="rounded-chip size-3"
+          className="size-3 rounded-chip"
           style={{ backgroundColor: color }}
           aria-hidden="true"
         />

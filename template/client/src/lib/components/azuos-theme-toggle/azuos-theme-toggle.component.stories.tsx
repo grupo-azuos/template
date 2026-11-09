@@ -17,7 +17,7 @@ export const Default: Story = {};
 /** Como ele aparece no canto do menu, ao lado de outro controle discreto. */
 export const InAToolbar: Story = {
   render: () => (
-    <div className="border-border bg-card flex w-40 items-center justify-end gap-1 rounded-lg border p-2">
+    <div className="flex w-40 items-center justify-end gap-1 rounded-lg border border-border bg-card p-2">
       <AzuosThemeToggle />
     </div>
   ),

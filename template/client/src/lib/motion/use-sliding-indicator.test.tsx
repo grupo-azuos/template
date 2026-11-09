@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { useSlidingIndicator } from './use-sliding-indicator';
 
@@ -31,6 +31,23 @@ describe('useSlidingIndicator', () => {
     expect(indicators[0]).toHaveAttribute('aria-hidden', 'true');
     expect(indicators[0]).toHaveClass('bg-sidebar-accent', 'absolute');
     expect(container.querySelector('nav')).toHaveClass('relative', 'isolate');
+  });
+
+  it('discounts the container border so the highlight sits exactly behind the item', () => {
+    const rect = (left: number, top: number) => ({ left, top, width: 32, height: 32 }) as DOMRect;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.tagName === 'NAV' ? rect(100, 50) : rect(103, 53);
+    });
+    vi.spyOn(HTMLElement.prototype, 'clientLeft', 'get').mockReturnValue(1);
+    vi.spyOn(HTMLElement.prototype, 'clientTop', 'get').mockReturnValue(1);
+
+    const { container } = render(<Menu active="a" />);
+    const indicator = container.querySelector<HTMLElement>('[data-slot="sliding-indicator"]');
+
+    expect(indicator?.style.transform).toContain('translate(2px, 2px)');
+    vi.restoreAllMocks();
   });
 
   it('keeps a single highlight when the active item changes', () => {

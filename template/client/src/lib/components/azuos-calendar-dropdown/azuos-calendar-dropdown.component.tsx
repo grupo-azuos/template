@@ -73,10 +73,10 @@ export function AzuosCalendarDropdown({
         aria-controls={listId}
         aria-label={`${name}: ${selected?.label ?? ''}`}
         onClick={() => setIsOpen((current) => !current)}
-        className="control-sm rounded-control border-input bg-card text-foreground hover:bg-accent/60 focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex control-sm cursor-pointer items-center gap-1 rounded-control border border-input bg-card text-sm font-medium text-foreground transition-colors outline-none hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {selected?.label}
-        <ChevronDown className="text-muted-foreground size-3.5" aria-hidden="true" />
+        <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
       </button>
 
       {isOpen ? (
@@ -84,7 +84,7 @@ export function AzuosCalendarDropdown({
           id={listId}
           role="listbox"
           aria-label={name}
-          className="rounded-box border-border bg-card absolute top-full left-0 z-20 mt-1 flex max-h-56 min-w-full flex-col gap-0.5 overflow-y-auto border p-1 shadow-xl"
+          className="absolute top-full left-0 z-20 mt-1 flex max-h-56 min-w-full flex-col gap-0.5 overflow-y-auto rounded-box border border-border bg-card p-1 shadow-xl"
         >
           {items.map((option) => {
             const isSelected = option.value === selected?.value;
@@ -99,9 +99,9 @@ export function AzuosCalendarDropdown({
                 disabled={option.disabled}
                 onClick={() => choose(option.value)}
                 className={cn(
-                  'control-sm rounded-chip text-foreground hover:bg-accent shrink-0 cursor-pointer text-left text-sm whitespace-nowrap transition-colors outline-none',
+                  'control-sm shrink-0 cursor-pointer rounded-chip text-left text-sm whitespace-nowrap text-foreground transition-colors outline-none hover:bg-accent',
                   'focus-visible:bg-accent disabled:cursor-not-allowed disabled:opacity-40',
-                  isSelected && 'bg-primary text-primary-foreground hover:bg-primary font-semibold',
+                  isSelected && 'bg-primary font-semibold text-primary-foreground hover:bg-primary',
                 )}
               >
                 {option.label}

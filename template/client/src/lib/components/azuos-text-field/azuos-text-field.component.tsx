@@ -11,9 +11,10 @@ import { cn } from '../../utils/cn.util';
  * certo e reenvia o mesmo erro.
  *
  * `date` entra aqui, e não num componente separado, porque só o `type` do `input` muda — rótulo,
- * erro e acessibilidade são exatamente os mesmos.
+ * erro e acessibilidade são exatamente os mesmos. `month` (`AAAA-MM`) entra pelo mesmo motivo: é o
+ * mês de uma declaração de faturamento, e o navegador já traz o seletor de mês e ano.
  */
-export type AzuosTextFieldType = 'text' | 'email' | 'password' | 'date' | 'tel';
+export type AzuosTextFieldType = 'text' | 'email' | 'password' | 'date' | 'month' | 'tel';
 
 export type AzuosTextFieldProps = {
   data: {
@@ -65,7 +66,7 @@ export function AzuosTextField({ data, ui, state, actions }: AzuosTextFieldProps
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={inputId} className="text-ink-700 text-sm font-medium">
+      <label htmlFor={inputId} className="text-sm font-medium text-ink-700">
         {data.label}
         {data.isRequired ? (
           <span className="text-destructive" aria-hidden="true">
@@ -151,7 +152,7 @@ function inputClassName({
        formulário. Com a altura vindo só do padding, campo de texto, seletor, data e botão nunca
        alinhavam na mesma fileira nem pareciam a mesma família de controle. */
     'control-lg rounded-control',
-    'bg-muted text-foreground w-full border text-sm transition-colors',
+    'w-full border bg-muted text-sm text-foreground transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
     hasError ? 'border-border bg-destructive-soft' : 'border-input',
@@ -175,7 +176,7 @@ function RevealButton({
       tabIndex={-1}
       onClick={actions.onToggle}
       aria-label={state.isRevealed ? 'Ocultar senha' : 'Mostrar senha'}
-      className="text-ink-500 hover:text-ink-700 absolute inset-y-0 right-0 flex w-11 items-center justify-center"
+      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-500 hover:text-ink-700"
     >
       {state.isRevealed ? (
         <EyeOff className="size-4" aria-hidden />
@@ -189,7 +190,7 @@ function RevealButton({
 /** `role="alert"` para o erro ser anunciado quando aparece, e não só quando alguém voltar ao campo. */
 function FieldError({ data }: { data: { id: string; message: string } }) {
   return (
-    <p id={data.id} role="alert" className="text-destructive text-xs font-medium">
+    <p id={data.id} role="alert" className="text-xs font-medium text-destructive">
       {data.message}
     </p>
   );
