@@ -32,6 +32,7 @@
     "db:reset": "npm run build -w @template/shared && tsx scripts/seed/seed-all.ts --reset",
     "seed:all": "npm run build -w @template/shared && tsx scripts/seed/seed-all.ts",
     "seed:tasks": "npm run build -w @template/shared && tsx scripts/seed/tasks/seed-tasks.ts",
+    "seed:history": "npm run build -w @template/shared && tsx scripts/seed/history/seed-history.ts",
     "prepare": "cd .. && husky template/.husky && node template/scripts/git/setup-git.mjs"
   },
   "devDependencies": {
