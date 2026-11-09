@@ -15,6 +15,13 @@
       "when": 1794101516267,
       "tag": "0001_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794231540538,
+      "tag": "0002_history",
+      "breakpoints": true
     }
   ]
 }
