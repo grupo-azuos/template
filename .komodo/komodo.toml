@@ -164,7 +164,7 @@ name = "prod_template"
 description = "Serviços do template no Swarm de produção"
 tags = ["context:apps", "env:prod", "server:core"]
 [stack.config]
-swarm = "core-prod"
+swarm = "core"
 project_name = "prod_template"
 linked_repo = "prod_template"
 webhook_enabled = false
