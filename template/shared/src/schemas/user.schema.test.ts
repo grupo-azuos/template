@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   USER_ROLE_LABELS,
+  USER_ROLES,
   canManageNotifications,
+  hasRoleAtLeast,
+  roleRank,
   sessionUserSchema,
   userRoleLabel,
   userRoleSchema,
@@ -44,7 +47,23 @@ describe('userRoleLabel', () => {
   // feliz
   it('gives the screen name of a role', () => {
     expect(userRoleLabel('admin')).toBe('Administrador');
-    expect(userRoleLabel('viewer')).toBe('Consulta');
+    expect(userRoleLabel('owner')).toBe('Dono');
+    expect(userRoleLabel('user')).toBe('Consulta');
+  });
+});
+
+describe('the role ladder', () => {
+  // feliz: em cascata, o de cima vale pelo de baixo.
+  it('ranks the five roles from the lowest up', () => {
+    expect(USER_ROLES).toEqual(['user', 'manager', 'operations_manager', 'owner', 'admin']);
+    expect(roleRank('admin')).toBe(4);
+    expect(hasRoleAtLeast('owner', 'manager')).toBe(true);
+  });
+
+  // triste
+  it('does not let a lower role, or no role, pass for a higher one', () => {
+    expect(hasRoleAtLeast('operations_manager', 'owner')).toBe(false);
+    expect(hasRoleAtLeast(null, 'user')).toBe(false);
   });
 });
 
@@ -56,7 +75,7 @@ describe('canManageNotifications', () => {
 
   // triste
   it('quem edita ou consulta não escolhe', () => {
-    expect(canManageNotifications('editor')).toBe(false);
-    expect(canManageNotifications('viewer')).toBe(false);
+    expect(canManageNotifications('owner')).toBe(false);
+    expect(canManageNotifications('user')).toBe(false);
   });
 });

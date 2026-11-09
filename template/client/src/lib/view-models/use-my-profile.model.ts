@@ -36,6 +36,8 @@ export type MyProfileModel = {
 
 export const ACCOUNT_ROLE_LABELS: Record<AccountRole, string> = {
   admin: 'Administrador',
+  owner: 'Dono',
+  operations_manager: 'Gestor da operação',
   manager: 'Gestor',
   user: 'Usuário',
 };

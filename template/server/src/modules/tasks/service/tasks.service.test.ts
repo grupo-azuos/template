@@ -11,10 +11,10 @@ const editor: RequestUser = {
   id: '1',
   email: 'ana@empresa.com.br',
   name: 'Ana',
-  role: 'editor',
+  role: 'manager',
 };
 
-const viewer: RequestUser = { ...editor, id: '2', email: 'bia@empresa.com.br', role: 'viewer' };
+const viewer: RequestUser = { ...editor, id: '2', email: 'bia@empresa.com.br', role: 'user' };
 
 function taskRow(overrides: Partial<TaskRow> = {}): TaskRow {
   return {

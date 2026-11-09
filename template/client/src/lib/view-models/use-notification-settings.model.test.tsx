@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { type UserRole } from '@template/shared/schemas/user.schema';
 import { type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,7 +27,7 @@ function wrapper({ children }: { children: ReactNode }) {
   );
 }
 
-function as(role: 'admin' | 'editor' | 'viewer') {
+function as(role: UserRole) {
   vi.spyOn(mockAuth, 'getUser').mockReturnValue({ ...MOCK_SESSION_USER, role });
 }
 
@@ -59,7 +60,7 @@ describe('useNotificationSettingsModel', () => {
 
   // triste
   it('does not even fetch for non-administrators', () => {
-    as('editor');
+    as('owner');
     const { result } = renderHook(useNotificationSettingsModel, { wrapper });
 
     expect(result.current.state.canManage).toBe(false);

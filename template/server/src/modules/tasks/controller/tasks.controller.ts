@@ -70,7 +70,7 @@ export class TasksController {
   }
 
   @Post()
-  @Roles('admin', 'editor')
+  @Roles('manager')
   @ApiOperation({
     summary: 'Cadastra uma tarefa',
     description:
@@ -84,7 +84,7 @@ export class TasksController {
   }
 
   @Patch(':id')
-  @Roles('admin', 'editor')
+  @Roles('manager')
   @ApiOperation({
     summary: 'Altera uma tarefa',
     description:

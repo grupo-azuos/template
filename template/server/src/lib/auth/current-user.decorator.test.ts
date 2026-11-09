@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { CurrentUser } from './current-user.decorator';
 import { type RequestUser } from './request-user.type';
 
-const ana: RequestUser = { id: '1', email: 'ana@empresa.com.br', name: 'Ana', role: 'editor' };
+const ana: RequestUser = { id: '1', email: 'ana@empresa.com.br', name: 'Ana', role: 'manager' };
 
 /**
  * Um decorator de parâmetro só guarda a sua "fábrica" nos metadados da rota. Para chamá-la

@@ -9,7 +9,7 @@ import { NotificationsService } from './notifications.service';
 
 const ANA = 'ana-id';
 const BIA = 'bia-id';
-const user: RequestUser = { id: ANA, email: 'ana@exemplo.test', name: 'Ana', role: 'editor' };
+const user: RequestUser = { id: ANA, email: 'ana@exemplo.test', name: 'Ana', role: 'manager' };
 const admin: RequestUser = { ...user, role: 'admin' };
 
 const ROW: NotificationRow = {
