@@ -11,6 +11,8 @@ export type DataField = {
   type: DataFieldType;
   /** As opções de um campo `enum` — o que o construtor de filtro oferece. */
   options?: readonly string[];
+  /** O texto de tela de cada opção: a chave é o valor gravado, a tela mostra o rótulo. */
+  optionLabels?: Readonly<Record<string, string>>;
   /** O campo guarda uma pessoa: o filtro escolhe da lista de pessoas e aceita "eu". */
   isPerson?: boolean;
 };

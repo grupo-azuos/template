@@ -1,5 +1,5 @@
-import { TASK_STATUSES } from '../domain/task-status.util';
-import { historyActionSchema } from './history.schema';
+import { TASK_STATUS_LABELS, TASK_STATUSES } from '../domain/task-status.util';
+import { HISTORY_ACTION_LABELS, historyActionSchema } from './history.schema';
 import { type BoardFieldFilter, type DataSource } from './dashboard-source.types';
 
 /**
@@ -15,7 +15,12 @@ export const DATA_SOURCES = {
     label: 'Tarefas',
     noun: 'tarefas',
     fields: {
-      status: { label: 'Status', type: 'enum', options: TASK_STATUSES },
+      status: {
+        label: 'Status',
+        type: 'enum',
+        options: TASK_STATUSES,
+        optionLabels: TASK_STATUS_LABELS,
+      },
       createdBy: { label: 'Quem cadastrou', type: 'text', isPerson: true },
       createdAt: { label: 'Cadastrada em', type: 'date' },
     },
@@ -31,7 +36,12 @@ export const DATA_SOURCES = {
     label: 'Movimento nas tarefas',
     noun: 'movimentos',
     fields: {
-      action: { label: 'O que foi feito', type: 'enum', options: historyActionSchema.options },
+      action: {
+        label: 'O que foi feito',
+        type: 'enum',
+        options: historyActionSchema.options,
+        optionLabels: HISTORY_ACTION_LABELS,
+      },
       actor: { label: 'Quem fez', type: 'text', isPerson: true },
       occurredAt: { label: 'Quando', type: 'date' },
     },
