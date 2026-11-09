@@ -63,7 +63,8 @@ async function bootstrap(): Promise<void> {
             type: 'apiKey',
             in: 'header',
             name: 'x-forwarded-user-role',
-            description: 'Perfil: `admin`, `editor` ou `viewer`. Decide o que a policy permite.',
+            description:
+              'Perfil, em cascata: `user`, `manager`, `operations_manager`, `owner` ou `admin`. Decide o que a policy permite.',
           },
           'auth-forward-role',
         )

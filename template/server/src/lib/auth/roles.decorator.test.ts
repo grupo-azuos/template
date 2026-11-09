@@ -9,9 +9,9 @@ describe('@Roles and @Public', () => {
   // feliz
   it('records the required roles for the guard to read', () => {
     class Probe {}
-    Roles('admin', 'editor')(Probe);
+    Roles('admin', 'manager')(Probe);
 
-    expect(Reflect.getMetadata(REQUIRED_ROLES, Probe)).toEqual(['admin', 'editor']);
+    expect(Reflect.getMetadata(REQUIRED_ROLES, Probe)).toEqual(['admin', 'manager']);
   });
 
   it('marks a route as public', () => {

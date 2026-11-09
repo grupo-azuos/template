@@ -23,13 +23,13 @@ describe('AuthenticationMiddleware', () => {
       [FORWARDED_IDENTITY_HEADERS.id]: '7',
       [FORWARDED_IDENTITY_HEADERS.email]: 'ana@empresa.com.br',
       [FORWARDED_IDENTITY_HEADERS.name]: 'Ana',
-      [FORWARDED_IDENTITY_HEADERS.role]: 'editor',
+      [FORWARDED_IDENTITY_HEADERS.role]: 'manager',
     });
     const next = vi.fn() as NextFunction;
 
     new AuthenticationMiddleware().use(request, response, next);
 
-    expect(request.user).toMatchObject({ id: '7', email: 'ana@empresa.com.br', role: 'editor' });
+    expect(request.user).toMatchObject({ id: '7', email: 'ana@empresa.com.br', role: 'manager' });
     expect(next).toHaveBeenCalledOnce();
   });
 

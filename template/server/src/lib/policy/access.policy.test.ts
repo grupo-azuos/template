@@ -15,13 +15,16 @@ describe('access.policy', () => {
   // feliz
   it('lets every known role read', () => {
     expect(canRead('admin')).toBe(true);
-    expect(canRead('editor')).toBe(true);
-    expect(canRead('viewer')).toBe(true);
+    expect(canRead('manager')).toBe(true);
+    expect(canRead('user')).toBe(true);
   });
 
-  it('lets admin and editor write', () => {
+  /* Em cascata: do gestor para cima, todo papel escreve — dono e gestor da operação também. */
+  it('lets the manager and every role above it write', () => {
     expect(canEdit('admin')).toBe(true);
-    expect(canEdit('editor')).toBe(true);
+    expect(canEdit('owner')).toBe(true);
+    expect(canEdit('operations_manager')).toBe(true);
+    expect(canEdit('manager')).toBe(true);
   });
 
   // triste
@@ -33,13 +36,14 @@ describe('access.policy', () => {
     expect(isAdmin(undefined)).toBe(false);
   });
 
-  it('keeps viewer read-only', () => {
-    expect(canEdit('viewer')).toBe(false);
-    expect(canDelete('viewer')).toBe(false);
+  it('keeps the user read-only', () => {
+    expect(canEdit('user')).toBe(false);
+    expect(canDelete('user')).toBe(false);
   });
 
-  it('keeps deleting as an admin decision, even for an editor', () => {
-    expect(canDelete('editor')).toBe(false);
+  it('keeps deleting as an admin decision, even for an owner', () => {
+    expect(canDelete('manager')).toBe(false);
+    expect(canDelete('owner')).toBe(false);
     expect(canDelete('admin')).toBe(true);
   });
 });
@@ -58,8 +62,8 @@ describe('isOwnRecord', () => {
 });
 
 describe('canRemoveOwnRecord', () => {
-  it('lets an editor remove what they created', () => {
-    expect(canRemoveOwnRecord('editor', 'ana@empresa.com.br', 'ana@empresa.com.br')).toBe(true);
+  it('lets a manager remove what they created', () => {
+    expect(canRemoveOwnRecord('manager', 'ana@empresa.com.br', 'ana@empresa.com.br')).toBe(true);
   });
 
   it('lets an admin remove what someone else created', () => {
@@ -67,34 +71,34 @@ describe('canRemoveOwnRecord', () => {
   });
 
   // triste
-  it('does not let an editor remove what someone else created', () => {
-    expect(canRemoveOwnRecord('editor', 'bia@empresa.com.br', 'ana@empresa.com.br')).toBe(false);
+  it('does not let a manager remove what someone else created', () => {
+    expect(canRemoveOwnRecord('manager', 'bia@empresa.com.br', 'ana@empresa.com.br')).toBe(false);
   });
 
-  /* Escalada de privilégio: viewer não escreve, nem no que "é dele". */
-  it('does not let a viewer remove even their own record', () => {
-    expect(canRemoveOwnRecord('viewer', 'ana@empresa.com.br', 'ana@empresa.com.br')).toBe(false);
+  /* Escalada de privilégio: quem só consulta não escreve, nem no que "é dele". */
+  it('does not let a user remove even their own record', () => {
+    expect(canRemoveOwnRecord('user', 'ana@empresa.com.br', 'ana@empresa.com.br')).toBe(false);
   });
 });
 
 describe('policy-assert.util', () => {
   it('passes silently when allowed', () => {
-    expect(() => assertCanEdit('editor', 'a tarefa')).not.toThrow();
+    expect(() => assertCanEdit('manager', 'a tarefa')).not.toThrow();
   });
 
   // triste
   it('refuses with 403 and says what was being attempted', () => {
-    expect(() => assertCanEdit('viewer', 'a tarefa')).toThrow(ForbiddenException);
-    expect(() => assertCanEdit('viewer', 'a tarefa')).toThrow(/a tarefa/);
+    expect(() => assertCanEdit('user', 'a tarefa')).toThrow(ForbiddenException);
+    expect(() => assertCanEdit('user', 'a tarefa')).toThrow(/a tarefa/);
   });
 
   it('says deleting is an admin action', () => {
-    expect(() => assertCanDelete('editor', 'a tarefa')).toThrow(/administrador/);
+    expect(() => assertCanDelete('manager', 'a tarefa')).toThrow(/administrador/);
   });
 
   it('says who can remove a record that belongs to someone else', () => {
     expect(() =>
-      assertCanRemoveOwnRecord('editor', 'bia@empresa.com.br', 'ana@empresa.com.br', 'A tarefa'),
+      assertCanRemoveOwnRecord('manager', 'bia@empresa.com.br', 'ana@empresa.com.br', 'A tarefa'),
     ).toThrow(/quem o criou/);
   });
 });

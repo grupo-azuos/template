@@ -6,7 +6,7 @@ import { type CreateTaskDto, type UpdateTaskDto } from '../dto/task.dto';
 import { type TasksService } from '../service/tasks.service';
 import { TasksController } from './tasks.controller';
 
-const ana: RequestUser = { id: '1', email: 'ana@empresa.com.br', name: 'Ana', role: 'editor' };
+const ana: RequestUser = { id: '1', email: 'ana@empresa.com.br', name: 'Ana', role: 'manager' };
 
 /* O controller só compõe: identidade + corpo + id vão para o service, e a resposta volta
    como veio. A regra de quem pode o quê mora no service, e é testada lá. */
