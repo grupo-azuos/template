@@ -1,10 +1,13 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import { type AzuosCardTone } from '../../utils/card-tone.util';
-import { AzuosStatCard } from '../azuos-stat-card/azuos-stat-card.component';
-import { cn } from '../../utils/cn.util';
-import { AzuosZuzu, type AzuosZuzuPose } from '../azuos-zuzu/azuos-zuzu.component';
+import { type AzuosCardTone } from '../../../../lib/utils/card-tone.util';
+import { AzuosStatCard } from '../../../../lib/components/azuos-stat-card/azuos-stat-card.component';
+import { cn } from '../../../../lib/utils/cn.util';
+import {
+  AzuosZuzu,
+  type AzuosZuzuPose,
+} from '../../../../lib/components/azuos-zuzu/azuos-zuzu.component';
 
 /** O nome de estado (`danger`, `info`…) ou o matiz direto (`violet`, `pink`…) da paleta de card. */
 export type AzuosDashboardHeroCardStatTone = AzuosCardTone;
