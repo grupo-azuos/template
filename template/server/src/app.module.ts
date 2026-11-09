@@ -9,6 +9,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { AuthModule } from './lib/auth/auth.module';
 import { AppConfigModule } from './lib/config/app-config.module';
 import { DbModule } from './lib/db/db.module';
+import { HistoryModule } from './modules/history/history.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { ZodValidationPipe } from './lib/http/zod-validation.pipe';
@@ -40,6 +41,7 @@ const CLIENT_DIST = join(__dirname, '..', '..', 'client', 'dist');
        linha o token `DB` não existe em lugar nenhum, e todo repository falha na injeção. */
     DbModule,
     AuthModule,
+    HistoryModule,
     TasksModule,
     NotificationsModule,
   ],

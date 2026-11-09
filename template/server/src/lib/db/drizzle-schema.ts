@@ -1,3 +1,4 @@
+import { history } from './schema/history.schema';
 import { notifications, notificationSettings } from './schema/notifications.schema';
 import { tasks } from './schema/tasks.schema';
 
@@ -15,6 +16,7 @@ export const drizzleSchema = {
   tasks,
   notifications,
   notificationSettings,
+  history,
 };
 
 export type DrizzleSchema = typeof drizzleSchema;
