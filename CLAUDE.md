@@ -145,6 +145,9 @@ Antes de começar uma tarefa, veja se há skill para ela em `.claude/skills/` e 
 | Erro de ambiente, porta ocupada, instalação                                | `troubleshoot`                                    | `/socorro`           |
 | Login, usuários, senha, dados em outro PC, servidor, internet              | `mvp-limits`                                      | `/limites-do-mvp`    |
 | Erro estrutural grande, bloqueio de arquivo de estrutura                   | `support`                                         | `/suporte`           |
+| **Qualquer campo de escolher** (select, combobox, pessoa, várias pessoas)  | `select-standard`                                 | —                    |
+| Dashboard, gráfico, bloco, "mostrar no painel", fonte de dados             | `dashboard-standard`                              | —                    |
+| **Qualquer escrita** (cadastrar, alterar, arquivar); "quem mudou isso?"    | `history-standard`                                | —                    |
 
 A pessoa pode chamar pelo nome em inglês (`/troubleshoot`) ou pelo atalho em português
 (`/socorro`); os dois fazem o mesmo. `/help` não serve de atalho: é comando nativo do Claude Code.
@@ -280,6 +283,26 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
   `AzuosAttachmentPicker`) deve obrigatoriamente aceitar colar arquivos via `Ctrl+V` (captura
   direta de imagens/prints e arquivos do clipboard).
 - Checado no hook e no CI (`check:design`). Exceção só pelo suporte (Central de Chamados).
+
+## CAMPOS DE ESCOLHA, DASHBOARD E HISTÓRICO — PADRÃO DO GRUPO
+
+- **Campo de escolher — pergunte antes** (skill `select-standard`): é pessoa? várias? quantas
+  opções? dá para cadastrar ali mesmo? A régua decide, nesta ordem: **pessoa** →
+  `AzuosPersonPickerField` (sempre, com foto, guarda o id; sem outra opção); **várias pessoas** →
+  `AzuosPersonMultiPickerField`; **cadastrar ali mesmo** → combobox com "Cadastrar «termo»";
+  **mais de 10 opções** → combobox com busca; **até 10** → seletor simples. Opção de pessoa
+  montada à mão é recusada no CI (regra `person-field`).
+- **Dashboard** (skill `dashboard-standard`): todo sistema tem, primeiro no menu. O projeto muda
+  só as fontes (`dashboard-sources.ts`, `widget-sources.ts`) e o painel padrão
+  (`default-boards.ts`). O motor e **os gráficos são do suporte** — nem outro administrador
+  mexe: trava no Claude e no git (`protected-structure.txt`).
+- **Histórico** (skill `history-standard`): todo sistema tem a tabela, a API e a tela Histórico,
+  último no menu, exatamente neste padrão. Toda escrita grava uma linha. O projeto muda só o
+  vocabulário em `history.schema.ts`.
+- Faltar a tela, o módulo ou a entrada no menu do Dashboard ou do Histórico reprova o CI (regra
+  `standard-screens`).
+- **Biblioteca nova para algo que outro sistema já resolveu**: use a mesma, na mesma versão
+  (`docs/approved-libraries.md`).
 
 ## Promoção para produção
 
