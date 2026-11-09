@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type OnApplicationShutdown } from '@nestjs/common';
+import { map, type Observable, Subject, throttleTime } from 'rxjs';
 import {
   type HistoryAction,
   type HistoryChange,
@@ -17,15 +18,34 @@ export type RecordHistoryInput = {
   changes?: HistoryChange[];
 };
 
+/** No máximo um sinal a cada 3 s: uma rajada de edições vira uma releitura só na tela. */
+const CHANGE_THROTTLE_MS = 3000;
+
 /**
  * A ESCRITA DO HISTÓRICO — o único caminho. Os services das outras entidades chamam `record`
  * no mesmo passo da escrita que ele descreve.
+ *
+ * Como TODA escrita passa por aqui, é daqui que sai o sinal "os números mudaram" que o
+ * dashboard escuta para reler os blocos (`changes()`).
  */
 @Injectable()
-export class HistoryService {
+export class HistoryService implements OnApplicationShutdown {
   private readonly logger = new Logger(HistoryService.name);
+  private readonly written = new Subject<void>();
 
   constructor(private readonly repository: HistoryRepository) {}
+
+  /** O aviso de que algo mudou no sistema — o mesmo para todo mundo, no máximo a cada 3 s. */
+  changes(): Observable<{ type: 'changed' }> {
+    return this.written.pipe(
+      throttleTime(CHANGE_THROTTLE_MS, undefined, { leading: true, trailing: true }),
+      map(() => ({ type: 'changed' as const })),
+    );
+  }
+
+  onApplicationShutdown(): void {
+    this.written.complete();
+  }
 
   /**
    * FALHAR AQUI NÃO DESFAZ A ESCRITA PRINCIPAL. O histórico é diagnóstico; recusar o
@@ -47,6 +67,7 @@ export class HistoryService {
         actorEmail: input.actor.email,
         actorName: input.actor.name,
       });
+      this.written.next();
     } catch (error) {
       this.logger.error(
         `History not recorded for ${input.action} on ${input.targetType}:${input.targetId}`,
