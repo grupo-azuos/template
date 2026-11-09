@@ -43,14 +43,26 @@ const meta = {
   decorators: [withRouter],
   parameters: { layout: 'fullscreen' },
   args: {
-    children: <div className="text-ink-700 p-8 text-sm">Conteúdo da rota entra aqui.</div>,
+    children: <div className="p-8 text-sm text-ink-700">Conteúdo da rota entra aqui.</div>,
     data: {
       user: { name: 'Ana Souza', role: 'Administradora' },
       areas: [],
       items,
       actions: [
-        { key: 'support', label: 'Abrir chamado', icon: LifeBuoy, href: '/support', opensInNewTab: true },
-        { key: 'verify', label: 'Validar documento', icon: FileCheck, href: '/verify', opensInNewTab: true },
+        {
+          key: 'support',
+          label: 'Abrir chamado',
+          icon: LifeBuoy,
+          href: '/support',
+          opensInNewTab: true,
+        },
+        {
+          key: 'verify',
+          label: 'Validar documento',
+          icon: FileCheck,
+          href: '/verify',
+          opensInNewTab: true,
+        },
       ],
       profile: { to: '/profile' },
       badges: { schedule: 3 },

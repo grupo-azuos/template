@@ -16,19 +16,34 @@ const SLICES = [
   { label: 'Cidade Grande', value: 3200 },
   { label: 'Cidade Média', value: 820 },
   { label: 'Cidade Vizinha', value: 510 },
-  ...Array.from({ length: 40 }, (_, index) => ({ label: `Cidade ${index + 1}`, value: 40 - index })),
+  ...Array.from({ length: 40 }, (_, index) => ({
+    label: `Cidade ${index + 1}`,
+    value: 40 - index,
+  })),
 ];
 
-export const Default: Story = { args: { data: { slices: SLICES, seriesLabel: 'Alvarás' }, ui: { heightClass: 'h-80' } } };
+export const Default: Story = {
+  args: { data: { slices: SLICES, seriesLabel: 'Alvarás' }, ui: { heightClass: 'h-80' } },
+};
 
 export const FewBlocks: Story = {
-  args: { data: { slices: SLICES, seriesLabel: 'Alvarás' }, ui: { heightClass: 'h-80', maxItems: 5 } },
+  args: {
+    data: { slices: SLICES, seriesLabel: 'Alvarás' },
+    ui: { heightClass: 'h-80', maxItems: 5 },
+  },
 };
 
 export const Loading: Story = {
-  args: { data: { slices: [], seriesLabel: 'Alvarás' }, state: { isLoading: true }, ui: { heightClass: 'h-80' } },
+  args: {
+    data: { slices: [], seriesLabel: 'Alvarás' },
+    state: { isLoading: true },
+    ui: { heightClass: 'h-80' },
+  },
 };
 
 export const Empty: Story = {
-  args: { data: { slices: [], seriesLabel: 'Alvarás' }, ui: { heightClass: 'h-80', emptyLabel: 'Nenhuma cidade' } },
+  args: {
+    data: { slices: [], seriesLabel: 'Alvarás' },
+    ui: { heightClass: 'h-80', emptyLabel: 'Nenhuma cidade' },
+  },
 };

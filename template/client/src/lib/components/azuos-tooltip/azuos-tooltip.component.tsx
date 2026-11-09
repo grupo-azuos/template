@@ -19,7 +19,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
  */
 export type AzuosTooltipProps = {
   data: { content: ReactNode };
-  ui?: { side?: 'top' | 'right' | 'bottom' | 'left'; className?: string };
+  /** `align`: onde o balão encosta no gatilho — `start` deixa o texto cortado começar alinhado. */
+  ui?: {
+    side?: 'top' | 'right' | 'bottom' | 'left';
+    align?: 'start' | 'center' | 'end';
+    className?: string;
+  };
   state?: { isDisabled?: boolean };
   /** O elemento que dispara a dica. */
   children: ReactElement;
@@ -37,6 +42,7 @@ export function AzuosTooltip({ data, ui, state, children }: AzuosTooltipProps) {
         <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent
           side={ui?.side ?? 'top'}
+          align={ui?.align ?? 'center'}
           className={ui?.className ?? 'max-w-xs break-words'}
         >
           {data.content}

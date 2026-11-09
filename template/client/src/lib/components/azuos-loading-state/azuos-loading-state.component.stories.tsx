@@ -19,7 +19,7 @@ export const Default: Story = {
 export const LongLabelInNarrowColumn: Story = {
   args: { data: { label: 'Conferindo a sua sessão antes de abrir a administração…' } },
   render: (args) => (
-    <div className="border-ink-300 w-56 border border-dashed p-2">
+    <div className="w-56 border border-dashed border-ink-300 p-2">
       <AzuosLoadingState {...args} />
     </div>
   ),

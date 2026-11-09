@@ -65,7 +65,7 @@ export function AzuosTextAreaField({ data, ui, state, actions }: AzuosTextAreaFi
  */
 function FieldLabel({ data }: { data: { id: string; label: string; isRequired?: boolean } }) {
   return (
-    <label htmlFor={data.id} className="text-ink-700 text-sm font-medium">
+    <label htmlFor={data.id} className="text-sm font-medium text-ink-700">
       {data.label}
       {data.isRequired ? (
         <span className="text-destructive" aria-hidden="true">
@@ -84,7 +84,7 @@ function FieldError({ data }: { data: { id: string; message: string | null } }) 
   if (!data.message) return <span />;
 
   return (
-    <p id={data.id} role="alert" className="text-destructive text-xs font-medium">
+    <p id={data.id} role="alert" className="text-xs font-medium text-destructive">
       {data.message}
     </p>
   );
@@ -96,7 +96,7 @@ function textAreaClassName(hasError: boolean): string {
        do `AzuosActionButton`. A altura não entra: aqui ela é o número de linhas, e um campo
        multilinha com 40px fixos não caberia texto nenhum. */
     'rounded-control',
-    'bg-card text-foreground w-full resize-y border px-3 py-2.5 text-sm transition-colors',
+    'w-full resize-y border bg-card px-3 py-2.5 text-sm text-foreground transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     hasError ? 'border-border bg-destructive-soft' : 'border-input',
   );
@@ -110,7 +110,7 @@ function CharacterCount({ data }: { data: { length: number; maxLength?: number }
     <span
       className={cn(
         'shrink-0 text-xs tabular-nums',
-        data.length > data.maxLength ? 'text-destructive font-semibold' : 'text-ink-500',
+        data.length > data.maxLength ? 'font-semibold text-destructive' : 'text-ink-500',
       )}
     >
       {data.length}/{data.maxLength}

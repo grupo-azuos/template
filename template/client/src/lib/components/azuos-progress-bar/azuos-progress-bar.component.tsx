@@ -44,7 +44,7 @@ export function AzuosProgressBar({ data, ui }: AzuosProgressBarProps) {
      como atraso, e manda alguém correr atrás de trabalho que não existe. */
   if (data.total === 0) {
     return (
-      <span className={cn('text-ink-500 text-xs', ui?.className)}>
+      <span className={cn('text-xs text-ink-500', ui?.className)}>
         {ui?.emptyLabel ?? 'Nada a cumprir'}
       </span>
     );
@@ -57,7 +57,7 @@ export function AzuosProgressBar({ data, ui }: AzuosProgressBarProps) {
   return (
     <div className={cn('flex items-center gap-2', ui?.className)}>
       <div
-        className="bg-ink-100 h-2 w-full overflow-hidden rounded-full"
+        className="h-2 w-full overflow-hidden rounded-full bg-ink-100"
         role="progressbar"
         aria-valuenow={percentage}
         aria-valuemin={0}
@@ -69,7 +69,7 @@ export function AzuosProgressBar({ data, ui }: AzuosProgressBarProps) {
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <span className="text-ink-700 w-14 shrink-0 text-right text-xs tabular-nums">
+      <span className="w-14 shrink-0 text-right text-xs text-ink-700 tabular-nums">
         {ui?.showCount ? `${data.done}/${data.total}` : `${percentage}%`}
       </span>
     </div>

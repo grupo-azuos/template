@@ -40,7 +40,13 @@ const meta = {
       areas: [],
       items: [
         { key: 'tasks', label: 'Tarefas', to: '/tasks', icon: ListChecks, area: 'operation' },
-        { key: 'schedule', label: 'Cronograma', to: '/schedule', icon: CalendarRange, area: 'operation' },
+        {
+          key: 'schedule',
+          label: 'Cronograma',
+          to: '/schedule',
+          icon: CalendarRange,
+          area: 'operation',
+        },
         { key: 'reports', label: 'Relatórios', to: '/reports', icon: BarChart3, area: 'operation' },
         { key: 'team', label: 'Equipe', to: '/team', icon: Users, area: 'operation' },
       ],

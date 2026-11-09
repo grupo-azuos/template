@@ -37,7 +37,9 @@ export function AzuosSankeyChart({ data, state, ui, actions }: AzuosSankeyChartP
   /* O total é o que ENTRA no fluxo (as faixas da primeira coluna): somar todas as faixas contaria o
      mesmo alvará uma vez por coluna. */
   const targets = new Set(data.links.map((link) => link.to));
-  const total = data.links.filter((link) => !targets.has(link.from)).reduce((sum, link) => sum + link.value, 0);
+  const total = data.links
+    .filter((link) => !targets.has(link.from))
+    .reduce((sum, link) => sum + link.value, 0);
 
   return (
     <AzuosEchart
@@ -70,7 +72,12 @@ export function sankeyOption(
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
-        const item = params as { dataType: string; name: string; value: number; data: { source?: string; target?: string } };
+        const item = params as {
+          dataType: string;
+          name: string;
+          value: number;
+          data: { source?: string; target?: string };
+        };
         if (item.dataType === 'edge') {
           return `${labels.get(item.data.source ?? '') ?? ''} → ${labels.get(item.data.target ?? '') ?? ''}<br/><b>${formatCount(item.value)}</b> ${data.seriesLabel.toLowerCase()}`;
         }
@@ -96,10 +103,18 @@ export function sankeyOption(
         label: {
           color: theme.foreground,
           fontSize: 11,
-          formatter: (params: unknown) => shortenLabel(labels.get((params as { name: string }).name) ?? '', 16),
+          formatter: (params: unknown) =>
+            shortenLabel(labels.get((params as { name: string }).name) ?? '', 16),
         },
-        data: data.nodes.map((node) => ({ name: node.id, itemStyle: { color: resolveColor(node.color), borderWidth: 0 } })),
-        links: data.links.map((link) => ({ source: link.from, target: link.to, value: link.value })),
+        data: data.nodes.map((node) => ({
+          name: node.id,
+          itemStyle: { color: resolveColor(node.color), borderWidth: 0 },
+        })),
+        links: data.links.map((link) => ({
+          source: link.from,
+          target: link.to,
+          value: link.value,
+        })),
       },
     ],
   };

@@ -78,7 +78,7 @@ export function AzuosPaginationBar({ data, state, ui, actions }: AzuosPagination
     /* Empilha no celular: os três blocos lado a lado a 360px espremem o texto do meio. */
     <div
       className={cn(
-        'text-muted-foreground flex flex-col items-center justify-between gap-2 pt-3 text-xs sm:flex-row',
+        'flex flex-col items-center justify-between gap-2 pt-3 text-xs text-muted-foreground sm:flex-row',
         ui?.className,
       )}
     >

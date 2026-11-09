@@ -114,7 +114,7 @@ function StatCardValue({
       </p>
 
       {data.hint ? (
-        <p className="text-muted-foreground group-data-[selected=true]/card:text-on-card-selected mt-0.5 text-xs">
+        <p className="mt-0.5 text-xs text-muted-foreground group-data-[selected=true]/card:text-on-card-selected">
           {data.hint}
         </p>
       ) : null}
@@ -143,7 +143,7 @@ function StatCardLabel({
     <div className="mb-3 flex items-center gap-2.5">
       <span
         className={cn(
-          'rounded-chip inline-flex size-9 shrink-0 items-center justify-center',
+          'inline-flex size-9 shrink-0 items-center justify-center rounded-chip',
           'group-data-[selected=true]/card:bg-on-card-selected group-data-[selected=true]/card:text-card-selected',
           cardToneClasses(tone).dot,
         )}

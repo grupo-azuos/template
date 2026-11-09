@@ -19,7 +19,7 @@ export function AzuosLoadingState({ data, ui }: AzuosLoadingStateProps) {
       role="status"
       aria-live="polite"
       className={cn(
-        'text-ink-500 flex items-center justify-center gap-2 py-10 text-sm',
+        'flex items-center justify-center gap-2 py-10 text-sm text-ink-500',
         ui?.className,
       )}
     >

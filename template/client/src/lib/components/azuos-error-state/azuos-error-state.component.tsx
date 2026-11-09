@@ -29,7 +29,7 @@ export function AzuosErrorState({ data, ui, state, actions }: AzuosErrorStatePro
     <div
       role="alert"
       className={cn(
-        cn('rounded-box flex gap-3', 'bg-card text-destructive border border-border'),
+        cn('flex gap-3 rounded-box', 'border border-border bg-card text-destructive'),
         isInline ? 'items-center px-3 py-2' : 'items-start p-4',
         ui?.className,
       )}
@@ -44,7 +44,7 @@ export function AzuosErrorState({ data, ui, state, actions }: AzuosErrorStatePro
       ) : (
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">{data.title ?? 'Algo deu errado'}</p>
-          <p className="text-destructive mt-0.5 text-sm break-words">{data.message}</p>
+          <p className="mt-0.5 text-sm break-words text-destructive">{data.message}</p>
         </div>
       )}
 
@@ -72,7 +72,7 @@ function RetryButton({
       type="button"
       onClick={actions.onRetry}
       disabled={state.isRetrying}
-      className="control-sm rounded-control border-border bg-card text-destructive hover:bg-destructive-soft inline-flex shrink-0 items-center gap-1.5 border text-xs font-semibold disabled:opacity-60"
+      className="inline-flex control-sm shrink-0 items-center gap-1.5 rounded-control border border-border bg-card text-xs font-semibold text-destructive hover:bg-destructive-soft disabled:opacity-60"
     >
       <RotateCw className={cn('size-3.5', state.isRetrying && 'animate-spin')} aria-hidden="true" />
       Tentar de novo

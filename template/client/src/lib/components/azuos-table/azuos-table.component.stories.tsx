@@ -135,7 +135,7 @@ export const LongTextWraps: Story = {
 /** Dentro de um cartão: a superfície em volta sai, para não virar caixa dentro de caixa. */
 export const InsideACard: Story = {
   render: () => (
-    <div className="bg-card border-border rounded-surface border p-5 shadow-xs">
+    <div className="rounded-surface border border-border bg-card p-5 shadow-xs">
       <AzuosTable containerClassName="border-0 shadow-none rounded-none">
         <Head />
         <Rows />

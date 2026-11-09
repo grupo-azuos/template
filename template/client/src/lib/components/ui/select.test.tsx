@@ -12,7 +12,10 @@ import {
   SelectValue,
 } from './select';
 
-function renderSelect(position: 'popper' | 'item-aligned' = 'popper', size: 'sm' | 'default' = 'default') {
+function renderSelect(
+  position: 'popper' | 'item-aligned' = 'popper',
+  size: 'sm' | 'default' = 'default',
+) {
   const onValueChange = vi.fn();
   render(
     <Select onValueChange={onValueChange}>

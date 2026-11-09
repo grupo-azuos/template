@@ -41,7 +41,7 @@ export function AzuosTable({
     <div
       data-slot="table-surface"
       className={cn(
-        'border-border bg-card rounded-surface w-full overflow-hidden border shadow-xs',
+        'w-full overflow-hidden rounded-surface border border-border bg-card shadow-xs',
         containerClassName,
       )}
     >
@@ -52,7 +52,7 @@ export function AzuosTable({
       </Table>
 
       {footer ? (
-        <div className="border-border/80 bg-muted/40 text-ink-500 flex items-center justify-between border-t px-6 py-3 text-xs">
+        <div className="flex items-center justify-between border-t border-border/80 bg-muted/40 px-6 py-3 text-xs text-ink-500">
           {footer}
         </div>
       ) : null}
@@ -67,7 +67,7 @@ export function AzuosTableHeader({ className, ...rest }: ComponentProps<typeof T
   return (
     <TableHeader
       className={cn(
-        'border-border/80 bg-muted/70 text-ink-500 border-b text-xs font-semibold tracking-widest uppercase',
+        'border-b border-border/80 bg-muted/70 text-xs font-semibold tracking-widest text-ink-500 uppercase',
         className,
       )}
       {...rest}
@@ -83,7 +83,7 @@ export function AzuosTableHead({ className, ...rest }: ComponentProps<typeof Tab
   return (
     <TableHead
       className={cn(
-        'text-ink-500 h-auto px-6 py-3.5 text-xs font-semibold tracking-widest uppercase',
+        'h-auto px-6 py-3.5 text-xs font-semibold tracking-widest text-ink-500 uppercase',
         '[&>[role=checkbox]]:translate-y-[2px]',
         className,
       )}
@@ -96,7 +96,7 @@ export function AzuosTableHead({ className, ...rest }: ComponentProps<typeof Tab
 export function AzuosTableRow({ className, ...rest }: ComponentProps<typeof TableRow>) {
   return (
     <TableRow
-      className={cn('border-border/60 hover:bg-muted/80 last:border-b-0', className)}
+      className={cn('border-border/60 last:border-b-0 hover:bg-muted/80', className)}
       {...rest}
     />
   );
@@ -128,7 +128,7 @@ export function AzuosTableFooter({ className, ...rest }: ComponentProps<typeof T
   return (
     <TableFooter
       className={cn(
-        'border-border/80 bg-muted/40 text-ink-500 px-6 py-3 text-xs font-normal',
+        'border-border/80 bg-muted/40 px-6 py-3 text-xs font-normal text-ink-500',
         className,
       )}
       {...rest}

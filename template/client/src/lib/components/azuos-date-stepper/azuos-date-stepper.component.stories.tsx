@@ -9,7 +9,7 @@ const meta = {
   args: { actions: { onChange: fn() } },
   decorators: [
     (Story) => (
-      <div className="rounded-surface border-border bg-card inline-block border shadow-xl">
+      <div className="inline-block rounded-surface border border-border bg-card shadow-xl">
         <Story />
       </div>
     ),

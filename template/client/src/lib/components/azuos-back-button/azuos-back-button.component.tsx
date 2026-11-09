@@ -56,8 +56,8 @@ export function AzuosBackButton({ data, ui, state, actions }: AzuosBackButtonPro
   };
 
   const sharedClassName = cn(
-    'text-brand-blue-700 dark:text-foreground inline-flex items-center gap-1 self-start text-sm hover:underline',
-    'focus-visible:ring-ring rounded-control focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+    'inline-flex items-center gap-1 self-start text-sm text-brand-blue-700 hover:underline dark:text-foreground',
+    'rounded-control focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
     isDisabled && 'pointer-events-none opacity-50',
     ui?.className,
   );

@@ -24,7 +24,7 @@ function StatefulDateField(args: AzuosDateFieldProps) {
           },
         }}
       />
-      <p className="text-ink-500 text-xs">Valor entregue: {value ?? 'nenhum'}</p>
+      <p className="text-xs text-ink-500">Valor entregue: {value ?? 'nenhum'}</p>
     </div>
   );
 }

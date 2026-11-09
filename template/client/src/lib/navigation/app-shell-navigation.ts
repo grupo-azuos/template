@@ -103,10 +103,7 @@ export function visibleActionsOf(actions: readonly NavAction[], viewer: NavViewe
  * O item aceso pelo prefixo do caminho — o MAIS LONGO vence, para `/tasks/archive` acender
  * "Arquivo" e não "Tarefas", e para a ordem da lista nunca decidir sozinha.
  */
-export function activeNavItemOf(
-  pathname: string,
-  items: readonly NavItem[],
-): NavItem | undefined {
+export function activeNavItemOf(pathname: string, items: readonly NavItem[]): NavItem | undefined {
   return items
     .filter((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))
     .sort((one, other) => other.to.length - one.to.length)[0];

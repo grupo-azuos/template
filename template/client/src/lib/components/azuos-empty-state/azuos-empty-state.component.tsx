@@ -23,16 +23,16 @@ export function AzuosEmptyState({ data, ui, children }: AzuosEmptyStateProps) {
   return (
     <div
       className={cn(
-        'border-ink-300 rounded-box flex flex-col items-center justify-center gap-2 border border-dashed px-6 py-12 text-center',
+        'flex flex-col items-center justify-center gap-2 rounded-box border border-dashed border-ink-300 px-6 py-12 text-center',
         ui?.className,
       )}
     >
-      <span className="bg-ink-100 text-ink-500 flex size-11 items-center justify-center rounded-full">
+      <span className="flex size-11 items-center justify-center rounded-full bg-ink-100 text-ink-500">
         <Icon className="size-5" aria-hidden="true" />
       </span>
-      <p className="text-ink-900 text-sm font-semibold">{data.title}</p>
+      <p className="text-sm font-semibold text-ink-900">{data.title}</p>
       {data.description ? (
-        <p className="text-ink-500 max-w-sm text-sm">{data.description}</p>
+        <p className="max-w-sm text-sm text-ink-500">{data.description}</p>
       ) : null}
       {children ? <div className="mt-2">{children}</div> : null}
     </div>

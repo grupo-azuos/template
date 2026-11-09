@@ -33,12 +33,12 @@ export function AzuosSliderField({ data, ui, state, actions }: AzuosSliderFieldP
         onValueChange={([value]) => actions?.onChange?.(value ?? data.min)}
         className="relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50"
       >
-        <SliderPrimitive.Track className="bg-muted relative h-1.5 w-full grow overflow-hidden rounded-full">
-          <SliderPrimitive.Range className="bg-primary absolute h-full" />
+        <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-muted">
+          <SliderPrimitive.Range className="absolute h-full bg-primary" />
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           aria-label={data.label}
-          className="border-border bg-card block size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none"
+          className="block size-4 shrink-0 rounded-full border border-border bg-card shadow-xs transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none"
         />
       </SliderPrimitive.Root>
       {ui?.endIcon}

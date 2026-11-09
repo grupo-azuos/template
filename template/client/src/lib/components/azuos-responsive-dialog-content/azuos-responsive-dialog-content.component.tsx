@@ -80,9 +80,9 @@ export function AzuosResponsiveDialogContent({
         style={dragStyle}
         className={cn(
           /* Celular: nasce de baixo, cantos de cima arredondados — o bottom sheet. */
-          'border-border bg-card data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] w-full flex-col rounded-t-3xl border-t p-6 pt-2 shadow-2xl outline-none',
+          'fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] w-full flex-col rounded-t-3xl border-t border-border bg-card p-6 pt-2 shadow-2xl outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom',
           /* Desktop: volta a ser o modal centrado — as mesmas classes do `DialogContent` base. */
-          'sm:rounded-surface sm:data-[state=closed]:fade-out-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:fade-in-0 sm:data-[state=open]:zoom-in-95 sm:data-[state=open]:slide-in-from-bottom-0 sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-none sm:w-full sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:border sm:pt-6 sm:duration-200',
+          'sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-none sm:w-full sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-surface sm:border sm:pt-6 sm:duration-200 sm:data-[state=closed]:fade-out-0 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:fade-in-0 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=open]:zoom-in-95',
           className,
         )}
         {...rest}
@@ -97,7 +97,7 @@ export function AzuosResponsiveDialogContent({
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
         >
-          <span className="bg-muted-foreground/30 h-1.5 w-10 rounded-full" />
+          <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" />
         </div>
 
         {/* Rola como um bloco só, cabeçalho e rodapé inclusos — igual ao bottom sheet nativo. No
@@ -114,7 +114,7 @@ export function AzuosResponsiveDialogContent({
           aria-hidden={showCloseButton ? undefined : true}
           className={
             showCloseButton
-              ? 'rounded-chip ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0'
+              ? 'absolute top-4 right-4 cursor-pointer rounded-chip opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0'
               : 'sr-only'
           }
         >

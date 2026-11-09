@@ -208,7 +208,7 @@ function FieldIcon({
       onClick={actions.onSubmit}
       className={cn(
         place,
-        'hover:text-ink-700 focus-visible:ring-brand-blue-700 rounded-chip cursor-pointer focus-visible:ring-2 focus-visible:outline-none',
+        'cursor-pointer rounded-chip hover:text-ink-700 focus-visible:ring-2 focus-visible:ring-brand-blue-700 focus-visible:outline-none',
       )}
     >
       <Icon aria-hidden="true" className="size-4" />
@@ -225,7 +225,7 @@ export function FieldLabel({
   state?: { isRequired?: boolean };
 }) {
   return (
-    <label htmlFor={data.htmlFor} className="text-ink-700 text-sm font-medium">
+    <label htmlFor={data.htmlFor} className="text-sm font-medium text-ink-700">
       {data.label}
       {state?.isRequired ? (
         <span className="text-destructive" aria-hidden="true">
@@ -314,7 +314,7 @@ function RevealButton({
       tabIndex={-1}
       onClick={actions.onToggle}
       aria-label={state.isRevealed ? 'Ocultar senha' : 'Mostrar senha'}
-      className="text-ink-500 hover:text-ink-700 absolute inset-y-0 right-0 flex w-11 items-center justify-center"
+      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-500 hover:text-ink-700"
     >
       {state.isRevealed ? (
         <EyeOff className="size-4" aria-hidden />
@@ -328,7 +328,7 @@ function RevealButton({
 /** `role="alert"` para o erro ser anunciado quando aparece, e não só quando alguém voltar ao campo. */
 export function FieldError({ data }: { data: { id: string; message: string } }) {
   return (
-    <p id={data.id} role="alert" className="text-destructive text-xs font-medium">
+    <p id={data.id} role="alert" className="text-xs font-medium text-destructive">
       {data.message}
     </p>
   );

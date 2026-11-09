@@ -39,7 +39,10 @@ describe('Breadcrumb', () => {
 
     expect(screen.getByRole('navigation', { name: 'breadcrumb' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Início' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Clientes' })).toHaveAttribute('data-slot', 'breadcrumb-link');
+    expect(screen.getByRole('button', { name: 'Clientes' })).toHaveAttribute(
+      'data-slot',
+      'breadcrumb-link',
+    );
     expect(screen.getByText('Ana')).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('/')).toBeInTheDocument();
     expect(document.querySelector('[data-slot="breadcrumb-ellipsis"]')).toHaveTextContent('More');
@@ -55,6 +58,9 @@ describe('Breadcrumb', () => {
       </Breadcrumb>,
     );
 
-    expect(document.querySelector('[data-slot="breadcrumb-separator"]')).toHaveAttribute('aria-hidden', 'true');
+    expect(document.querySelector('[data-slot="breadcrumb-separator"]')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
   });
 });

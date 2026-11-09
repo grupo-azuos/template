@@ -10,9 +10,8 @@ import { cn } from '../../utils/cn.util';
 export type AzuosPersonAvatarProps = {
   name: string;
   /**
-   * Hoje ninguém tem foto — não existe tabela de usuário, então não há de onde vir uma. O campo já
-   * existe para o dia em que a identidade resolver o nome para uma pessoa de verdade: quem usa
-   * `AzuosPersonAvatar` não muda, só passa a receber `avatarUrl`.
+   * A foto vem do admin-console (a pessoa logada, no menu e no Perfil). Sem foto, ou se ela não
+   * carregar, ficam as iniciais.
    */
   avatarUrl?: string | null;
   ui?: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string };
@@ -60,7 +59,7 @@ export function AzuosPersonAvatar({ name, avatarUrl, ui }: AzuosPersonAvatarProp
           que a lista passa de umas poucas linhas. */}
       <AvatarFallback
         className={cn(
-          'bg-primary text-primary-foreground flex aspect-square size-full items-center justify-center rounded-full font-bold select-none',
+          'flex aspect-square size-full items-center justify-center rounded-full bg-primary font-bold text-primary-foreground select-none',
           SIZE_CLASS[size],
         )}
       >

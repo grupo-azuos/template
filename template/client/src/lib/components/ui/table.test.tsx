@@ -38,7 +38,10 @@ describe('Table', () => {
 
     expect(screen.getByRole('table', { name: 'Tarefas do mês' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Título' })).toBeInTheDocument();
-    expect(screen.getByText('1 tarefa').closest('tfoot')).toHaveAttribute('data-slot', 'table-footer');
+    expect(screen.getByText('1 tarefa').closest('tfoot')).toHaveAttribute(
+      'data-slot',
+      'table-footer',
+    );
   });
 
   // triste

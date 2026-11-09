@@ -19,9 +19,9 @@ describe('drag item', () => {
   it('carries the id from the dragged card to the drop zone', () => {
     const event = transfer();
 
-    writeDragItem(event, 42);
+    writeDragItem(event, '00000000-0000-8000-8000-00000000002a');
 
-    expect(readDragItem(event)).toBe(42);
+    expect(readDragItem(event)).toBe('00000000-0000-8000-8000-00000000002a');
     expect(event.dataTransfer.effectAllowed).toBe('move');
   });
 

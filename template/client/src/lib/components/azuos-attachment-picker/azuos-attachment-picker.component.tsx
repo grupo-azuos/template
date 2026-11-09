@@ -175,10 +175,7 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
   };
 
   return (
-    <div
-      className={cn('relative flex flex-col gap-2', ui?.className)}
-      onPaste={handlePaste}
-    >
+    <div className={cn('relative flex flex-col gap-2', ui?.className)} onPaste={handlePaste}>
       <label
         htmlFor="azuos-attachments"
         aria-label="Escolher arquivos"
@@ -193,16 +190,16 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          'border-input hover:bg-muted control-lg rounded-control flex cursor-pointer items-center justify-between border border-dashed px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'flex control-lg cursor-pointer items-center justify-between rounded-control border border-dashed border-input px-3 text-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
           isDragOver && 'border-ring bg-muted',
           isDisabled && 'pointer-events-none opacity-60',
         )}
       >
         <div className="flex items-center gap-2">
-          <Paperclip className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
-          <span className="text-foreground font-medium">Escolher arquivos</span>
+          <Paperclip className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="font-medium text-foreground">Escolher arquivos</span>
         </div>
-        <span className="text-muted-foreground text-xs">ou cole com Ctrl+V</span>
+        <span className="text-xs text-muted-foreground">ou cole com Ctrl+V</span>
       </label>
 
       <input
@@ -216,16 +213,16 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
         onChange={(event) => choose(Array.from(event.target.files ?? []))}
       />
 
-      <p className="text-muted-foreground text-xs">{limitsSummary(data.limits)}</p>
+      <p className="text-xs text-muted-foreground">{limitsSummary(data.limits)}</p>
 
       {state?.error ? (
-        <p className="text-destructive text-xs" role="alert">
+        <p className="text-xs text-destructive" role="alert">
           {state.error}
         </p>
       ) : null}
 
       {data.files.length > 0 ? (
-        <ul className="rounded-box divide-border border-border divide-y border">
+        <ul className="divide-y divide-border rounded-box border border-border">
           {data.files.map((file, index) => (
             /* A chave leva a POSIÇÃO junto com a identidade. A recusa acima já barra o mesmo arquivo
                duas vezes, mas chave repetida derruba a tela inteira — e nenhuma lista de anexos vale
@@ -235,8 +232,8 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
               className="flex items-center justify-between gap-2 p-2"
             >
               <div className="min-w-0">
-                <p className="text-foreground truncate text-sm font-medium">{file.name}</p>
-                <p className="text-muted-foreground text-xs">{fileSizeOf(file.size)}</p>
+                <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+                <p className="text-xs text-muted-foreground">{fileSizeOf(file.size)}</p>
               </div>
 
               <AzuosActionButton

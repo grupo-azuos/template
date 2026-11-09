@@ -34,8 +34,13 @@ const DATA = {
 
 export const Default: Story = { args: { data: DATA, ui: { heightClass: 'h-80' } } };
 
-export const Loading: Story = { args: { data: DATA, state: { isLoading: true }, ui: { heightClass: 'h-80' } } };
+export const Loading: Story = {
+  args: { data: DATA, state: { isLoading: true }, ui: { heightClass: 'h-80' } },
+};
 
 export const Empty: Story = {
-  args: { data: { ...DATA, links: [] }, ui: { heightClass: 'h-80', emptyLabel: 'Nenhuma tarefa no período' } },
+  args: {
+    data: { ...DATA, links: [] },
+    ui: { heightClass: 'h-80', emptyLabel: 'Nenhuma tarefa no período' },
+  },
 };

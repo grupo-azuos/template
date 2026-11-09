@@ -31,18 +31,18 @@ export function AzuosPanelCard({ data, ui, tools, children }: AzuosPanelCardProp
   return (
     <section
       aria-labelledby={titleId}
-      className={cn('bg-card border-border rounded-surface shadow-card border p-5', ui?.className)}
+      className={cn('rounded-surface border border-border bg-card p-5 shadow-card', ui?.className)}
     >
       {/* Empilhado no celular: título e controle lado a lado a 360px espremem os dois. */}
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2
             id={titleId}
-            className="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
+            className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
           >
             {data.title}
           </h2>
-          {data.hint ? <p className="text-muted-foreground mt-0.5 text-xs">{data.hint}</p> : null}
+          {data.hint ? <p className="mt-0.5 text-xs text-muted-foreground">{data.hint}</p> : null}
         </div>
         {tools ? <div className="shrink-0">{tools}</div> : null}
       </div>

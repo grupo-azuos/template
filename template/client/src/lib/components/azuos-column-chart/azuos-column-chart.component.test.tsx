@@ -3,12 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type * as EchartsUtil from '../../utils/echarts.util';
 import { themeColor } from '../../utils/theme-color.util';
-import {
-  AzuosColumnChart,
-  barOption,
-  columnOption,
-} from './azuos-column-chart.component';
-
+import { AzuosColumnChart, barOption, columnOption } from './azuos-column-chart.component';
 
 /* Um ECharts de mentira, como no teste do `AzuosEchart`: o desenho em si é do ECharts; o que este
    componente decide é QUAL clique vira seleção e com que nome. */
@@ -27,7 +22,9 @@ vi.mock('../../utils/echarts.util', async (importOriginal) => ({
 /** O que o ECharts chamaria num clique no desenho. */
 async function chartClick(): Promise<(params: unknown) => void> {
   await waitFor(() => expect(fakeChart.on).toHaveBeenCalledWith('click', expect.any(Function)));
-  const call = [...fakeChart.on.mock.calls].reverse().find((entry: unknown[]) => entry[0] === 'click');
+  const call = [...fakeChart.on.mock.calls]
+    .reverse()
+    .find((entry: unknown[]) => entry[0] === 'click');
 
   return call?.[1] as (params: unknown) => void;
 }
@@ -63,10 +60,15 @@ describe('AzuosColumnChart', () => {
   /* Nome longo é CORTADO no eixo (o nome inteiro continua no balão): sem o corte, nomes compridos
      girados se encavalam e nenhum fica legível. */
   it('shortens a long name on the axis', () => {
-    const option = columnOption([{ label: 'Departamento Jurídico e Contratos', value: 4 }], 'Tarefas');
+    const option = columnOption(
+      [{ label: 'Departamento Jurídico e Contratos', value: 4 }],
+      'Tarefas',
+    );
     const axis = option.xAxis as { axisLabel: { formatter: (label: string) => string } };
 
-    expect(axis.axisLabel.formatter('Departamento Jurídico e Contratos')).toBe('Departamento Jurídi…');
+    expect(axis.axisLabel.formatter('Departamento Jurídico e Contratos')).toBe(
+      'Departamento Jurídi…',
+    );
   });
 
   /* Série no tempo: uma cor só, porque cada coluna é a mesma medida. */
@@ -146,12 +148,17 @@ describe('columnOption and barOption', () => {
       tooltip: { formatter: Formatter };
       series: [BarSeries];
     };
-    const lying = barOption(SLICES, 'Tarefas') as { tooltip: { formatter: Formatter }; series: [BarSeries] };
+    const lying = barOption(SLICES, 'Tarefas') as {
+      tooltip: { formatter: Formatter };
+      series: [BarSeries];
+    };
 
     expect(standing.tooltip.formatter({ name: 'Caio Prado', value: 5 })).toBe(
       '<b>Caio Prado</b><br/>Tarefas: 5',
     );
-    expect(lying.tooltip.formatter({ name: 'Ana Luz', value: 2 })).toBe('<b>Ana Luz</b><br/>Tarefas: 2');
+    expect(lying.tooltip.formatter({ name: 'Ana Luz', value: 2 })).toBe(
+      '<b>Ana Luz</b><br/>Tarefas: 2',
+    );
     expect(standing.series[0].label.formatter({ value: 1234 })).toBe('1.234');
     expect(lying.series[0].label.formatter({ value: '8' })).toBe('8');
   });
@@ -184,7 +191,9 @@ describe('AzuosColumnChart selection', () => {
   // feliz
   it('opens the breakdown of the clicked column by its name', async () => {
     const onSelect = vi.fn();
-    render(<AzuosColumnChart data={{ slices: SLICES, seriesLabel: 'Tarefas' }} actions={{ onSelect }} />);
+    render(
+      <AzuosColumnChart data={{ slices: SLICES, seriesLabel: 'Tarefas' }} actions={{ onSelect }} />,
+    );
     const click = await chartClick();
 
     act(() => click({ name: 'Caio Prado' }));

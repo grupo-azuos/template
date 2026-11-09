@@ -63,7 +63,13 @@ describe('fadeInUp and staggerIn', () => {
 
     expect(gsap.from).toHaveBeenCalledWith(
       target,
-      expect.objectContaining({ opacity: 0, y: 12, duration: DURATION.base, ease: EASE.out, delay: 0.1 }),
+      expect.objectContaining({
+        opacity: 0,
+        y: 12,
+        duration: DURATION.base,
+        ease: EASE.out,
+        delay: 0.1,
+      }),
     );
   });
 
@@ -128,7 +134,11 @@ describe('highlightIn', () => {
     expect(gsap.fromTo).toHaveBeenCalledWith(
       target,
       { backgroundColor: 'transparent' },
-      expect.objectContaining({ backgroundColor: color, delay: 0.2, clearProps: 'backgroundColor' }),
+      expect.objectContaining({
+        backgroundColor: color,
+        delay: 0.2,
+        clearProps: 'backgroundColor',
+      }),
     );
   });
 

@@ -91,7 +91,7 @@ function resolveListTexts(ui: AzuosFormComboboxFieldProps['ui']) {
 /** O `*` é desenho: o leitor de tela ouve "obrigatório" pelo contexto do formulário. */
 function FieldLabel({ data, state }: { data: { label: string }; state: { isRequired?: boolean } }) {
   return (
-    <span className="text-ink-700 text-sm font-medium">
+    <span className="text-sm font-medium text-ink-700">
       {data.label}
       {state.isRequired ? (
         <span className="text-destructive" aria-hidden="true">
@@ -113,7 +113,7 @@ function FieldMessage({
     <p
       id={data.id}
       role={state.isError ? 'alert' : undefined}
-      className={cn('text-xs', state.isError ? 'text-destructive font-medium' : 'text-ink-500')}
+      className={cn('text-xs', state.isError ? 'font-medium text-destructive' : 'text-ink-500')}
     >
       {data.message}
     </p>

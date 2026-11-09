@@ -92,7 +92,39 @@ describe('AzuosSegmentedControl', () => {
     const group = screen.getByRole('group', { name: 'Recorte' });
     expect(group.className).toContain('bg-transparent');
     expect(group.className).toContain('mt-2');
-    expect(screen.getByRole('button', { name: 'Todas as empresas' }).className).toContain('bg-primary ');
+    /* O fundo cheio do escolhido é o destaque que desliza, não o botão. */
+    expect(screen.getByRole('button', { name: 'Todas as empresas' }).className).toContain(
+      'text-primary-foreground',
+    );
+    expect(group.querySelector('[data-slot="sliding-indicator"]')?.className).toContain(
+      'bg-primary',
+    );
     expect(screen.getByRole('button', { name: 'Ano em dia' }).className).toContain('bg-primary/10');
+  });
+
+  // triste
+  it('the highlight moves with the choice instead of each button painting itself', () => {
+    const { rerender } = render(
+      <AzuosSegmentedControl
+        data={{ value: 'all', options }}
+        ui={{ ariaLabel: 'Abas' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+    const group = screen.getByRole('group', { name: 'Abas' });
+    expect(group.querySelectorAll('[data-slot="sliding-indicator"]')).toHaveLength(1);
+
+    rerender(
+      <AzuosSegmentedControl
+        data={{ value: options[1]!.value, options }}
+        ui={{ ariaLabel: 'Abas' }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
+    expect(group.querySelectorAll('[data-slot="sliding-indicator"]')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: options[1]!.label })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 });

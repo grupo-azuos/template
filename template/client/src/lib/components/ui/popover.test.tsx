@@ -34,8 +34,14 @@ describe('Popover', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(true);
     expect(screen.getByText('Filtrar')).toHaveAttribute('data-slot', 'popover-title');
-    expect(screen.getByText('Escolha o período.')).toHaveAttribute('data-slot', 'popover-description');
-    expect(screen.getByText('Filtrar').parentElement).toHaveAttribute('data-slot', 'popover-header');
+    expect(screen.getByText('Escolha o período.')).toHaveAttribute(
+      'data-slot',
+      'popover-description',
+    );
+    expect(screen.getByText('Filtrar').parentElement).toHaveAttribute(
+      'data-slot',
+      'popover-header',
+    );
   });
 
   // triste

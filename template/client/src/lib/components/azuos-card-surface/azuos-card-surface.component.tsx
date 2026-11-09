@@ -65,11 +65,11 @@ function washStyleOf(ui: AzuosCardSurfaceProps['ui']): CSSProperties {
 /** A casca: superfície da marca, ou o azul claro do escolhido; sobe no hover quando é clicável. */
 function surfaceClassOf(props: { isSelected: boolean; isClickable: boolean; className?: string }) {
   return cn(
-    'group/card rounded-surface shadow-card relative isolate overflow-hidden transition-[box-shadow,transform,background-color] duration-150',
+    'group/card relative isolate overflow-hidden rounded-surface shadow-card transition-[box-shadow,transform,background-color] duration-150',
     /* A borda NEUTRA separa o card do fundo da página, que no claro é quase do mesmo branco. */
     props.isSelected
-      ? 'bg-card-selected text-on-card-selected border border-transparent'
-      : 'bg-card text-card-foreground border-border border',
+      ? 'border border-transparent bg-card-selected text-on-card-selected'
+      : 'border border-border bg-card text-card-foreground',
     props.isClickable && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
     props.isSelected && props.isClickable && 'hover:bg-card-selected-hover',
     props.className,
@@ -133,7 +133,7 @@ function CardClickTarget({
       aria-pressed={state.isSelected}
       disabled={state.isDisabled}
       onClick={actions.onClick}
-      className="rounded-surface focus-visible:ring-ring absolute inset-0 z-10 cursor-pointer focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
+      className="absolute inset-0 z-10 cursor-pointer rounded-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default"
     />
   );
 }

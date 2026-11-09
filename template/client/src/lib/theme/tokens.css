@@ -220,8 +220,6 @@
   --card-selected-hover: #3a6be0;
   --on-card-selected: #f8fafc;
 
-
-
   /**
    * ---- As cores de CATEGORIA dos gráficos ----
    *
@@ -677,7 +675,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
   }
 
   /* Foco visível SEMPRE: o sistema é operado no teclado o dia inteiro, e um contorno que

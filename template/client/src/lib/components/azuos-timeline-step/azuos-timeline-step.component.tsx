@@ -48,13 +48,13 @@ export function AzuosTimelineStep({ data, ui, children }: AzuosTimelineStepProps
         >
           <Icon className="size-4" aria-hidden="true" />
         </span>
-        {ui?.isLast ? null : <span className="bg-border mt-1 w-px flex-1" aria-hidden="true" />}
+        {ui?.isLast ? null : <span className="mt-1 w-px flex-1 bg-border" aria-hidden="true" />}
       </div>
 
       <div className="min-w-0 flex-1 pt-1">
-        <h3 className="text-foreground text-sm font-semibold">{data.title}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{data.title}</h3>
         {data.description ? (
-          <p className="text-muted-foreground mt-0.5 text-xs">{data.description}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{data.description}</p>
         ) : null}
         <div className="mt-3 flex flex-col gap-3">{children}</div>
       </div>

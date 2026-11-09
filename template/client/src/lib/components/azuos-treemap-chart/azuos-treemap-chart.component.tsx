@@ -55,7 +55,10 @@ export function AzuosTreemapChart({ data, state, ui, actions }: AzuosTreemapChar
 }
 
 /** As `max` maiores, do maior para o menor, e o resto somado num bloco "Outros". */
-export function withOthers(slices: readonly ChartSlice[], max: number): (ChartSlice & { id: string })[] {
+export function withOthers(
+  slices: readonly ChartSlice[],
+  max: number,
+): (ChartSlice & { id: string })[] {
   const sorted = [...slices].sort((a, b) => b.value - a.value);
   const head = sorted.slice(0, max).map((slice) => ({ ...slice, id: slice.label }));
   const rest = sorted.slice(max);
@@ -109,7 +112,9 @@ export function treemapOption(
           id: slice.id,
           name: slice.label,
           value: slice.value,
-          itemStyle: { color: slice.id === OTHERS_ID ? theme.muted : colorOfSlice(slice.label, index) },
+          itemStyle: {
+            color: slice.id === OTHERS_ID ? theme.muted : colorOfSlice(slice.label, index),
+          },
         })),
       },
     ],

@@ -1,3 +1,4 @@
+import { BellRing } from 'lucide-react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -26,5 +27,14 @@ describe('AzuosPageHeader', () => {
     const { container } = render(<AzuosPageHeader data={{ title: 'Tarefas' }} />);
 
     expect(container.querySelector('p')).toBeNull();
+  });
+
+  // feliz
+  it('grows the title to the work-screen size when there is an icon', () => {
+    render(<AzuosPageHeader data={{ title: 'Avisos do Cadastro' }} ui={{ icon: BellRing }} />);
+
+    const title = screen.getByRole('heading', { name: 'Avisos do Cadastro' });
+    expect(title.className).toContain('text-2xl');
+    expect(title.querySelector('svg')).not.toBeNull();
   });
 });

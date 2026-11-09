@@ -1,3 +1,4 @@
+import { useSlidingIndicator } from '../../motion/use-sliding-indicator';
 import { cn } from '../../utils/cn.util';
 import { Button } from '../ui/button';
 import { ButtonGroup } from '../ui/button-group';
@@ -27,8 +28,20 @@ export type AzuosButtonGroupProps = {
 };
 
 export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupProps) {
+  /* O preenchimento do escolhido desliza até o novo — a troca de aba se vê. */
+  const ref = useSlidingIndicator<HTMLDivElement>({
+    selector: '[aria-pressed="true"]',
+    indicatorClass: 'rounded-control bg-primary',
+    attributes: ['aria-pressed'],
+  });
+
   return (
-    <ButtonGroup aria-label={ui.ariaLabel} orientation={ui.orientation} className={ui.className}>
+    <ButtonGroup
+      ref={ref}
+      aria-label={ui.ariaLabel}
+      orientation={ui.orientation}
+      className={ui.className}
+    >
       {data.options.map((option) => {
         const isSelected = option.value === data.value;
 
@@ -39,7 +52,10 @@ export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupP
             variant={isSelected ? 'default' : 'outline'}
             aria-pressed={isSelected}
             disabled={state?.isDisabled}
-            className={cn('control-md rounded-control', !isSelected && 'bg-card')}
+            className={cn(
+              'control-md rounded-control transition-colors duration-200',
+              isSelected ? 'bg-transparent hover:bg-transparent' : 'bg-card',
+            )}
             onClick={() => actions?.onChange?.(option.value)}
           >
             {option.label}

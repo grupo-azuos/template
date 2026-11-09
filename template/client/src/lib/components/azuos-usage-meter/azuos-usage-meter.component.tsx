@@ -45,14 +45,14 @@ export function AzuosUsageMeter({ data, ui }: AzuosUsageMeterProps) {
   return (
     <div className={cn('min-w-0', ui?.className)}>
       <div className="mb-1 flex items-baseline justify-between gap-2">
-        <span className="text-ink-700 truncate text-xs">{data.label}</span>
-        <span className="text-ink-900 shrink-0 text-xs font-medium tabular-nums">
+        <span className="truncate text-xs text-ink-700">{data.label}</span>
+        <span className="shrink-0 text-xs font-medium text-ink-900 tabular-nums">
           {formatPercent(percentage)}
         </span>
       </div>
 
       <div
-        className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
+        className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
         role="progressbar"
         aria-label={data.label}
         aria-valuenow={Math.round(percentage)}
@@ -65,7 +65,7 @@ export function AzuosUsageMeter({ data, ui }: AzuosUsageMeterProps) {
         />
       </div>
 
-      {data.detail ? <p className="text-ink-500 mt-1 truncate text-xs">{data.detail}</p> : null}
+      {data.detail ? <p className="mt-1 truncate text-xs text-ink-500">{data.detail}</p> : null}
     </div>
   );
 }

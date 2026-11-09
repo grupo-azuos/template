@@ -79,10 +79,10 @@ function DashboardEyebrowHeader({
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
-      {Icon ? <Icon size={18} className="text-accent-hero shrink-0" aria-hidden="true" /> : null}
+      {Icon ? <Icon size={18} className="shrink-0 text-accent-hero" aria-hidden="true" /> : null}
       {eyebrow ? <span className="text-on-dark">{eyebrow}</span> : null}
       {timestamp ? (
-        <span className="text-on-dark/80 font-normal tracking-normal normal-case">
+        <span className="font-normal tracking-normal text-on-dark/80 normal-case">
           — {timestamp}
         </span>
       ) : null}
@@ -114,17 +114,17 @@ function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data']
       </div>
 
       <div className="flex min-h-[120px] min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left">
-        <h2 className="text-on-dark text-xl leading-snug font-bold tracking-tight sm:text-2xl">
+        <h2 className="text-xl leading-snug font-bold tracking-tight text-on-dark sm:text-2xl">
           <HighlightedTitle data={{ text: data.title, highlight: data.titleHighlight }} />
         </h2>
         {data.description ? (
-          <p className="text-on-dark/80 text-sm leading-relaxed font-normal sm:text-base">
+          <p className="text-sm leading-relaxed font-normal text-on-dark/80 sm:text-base">
             {data.description}
           </p>
         ) : null}
         {data.badge ? (
           <div className="mt-1 flex items-center justify-center sm:justify-start">
-            <span className="bg-accent-hero text-accent-hero-foreground rounded-chip inline-flex items-center px-2.5 py-1 text-xs font-bold shadow-xs">
+            <span className="inline-flex items-center rounded-chip bg-accent-hero px-2.5 py-1 text-xs font-bold text-accent-hero-foreground shadow-xs">
               {data.badge}
             </span>
           </div>
@@ -153,7 +153,7 @@ export function AzuosDashboardHeroCard({ data, ui }: AzuosDashboardHeroCardProps
       aria-label={data.eyebrow ?? data.title}
       data-slot="azuos-dashboard-hero-card"
       className={cn(
-        'rounded-surface shadow-card bg-brand-blue-900 text-on-dark relative flex w-full flex-col gap-6 overflow-hidden p-6 sm:p-7',
+        'relative flex w-full flex-col gap-6 overflow-hidden rounded-surface bg-brand-blue-900 p-6 text-on-dark shadow-card sm:p-7',
         ui?.className,
       )}
     >

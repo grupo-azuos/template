@@ -7,24 +7,11 @@
  * Tailwind só gera a classe que ele LÊ no código.
  */
 export type AzuosCardHue =
-  | 'blue'
-  | 'red'
-  | 'amber'
-  | 'green'
-  | 'steel'
-  | 'plum'
-  | 'slate'
-  | 'copper';
+  'blue' | 'red' | 'amber' | 'green' | 'steel' | 'plum' | 'slate' | 'copper';
 
 /** Os nomes de estado que as telas já usam, cada um preso a um sotaque. */
 export type AzuosCardSemanticTone =
-  | 'danger'
-  | 'warning'
-  | 'info'
-  | 'success'
-  | 'brand'
-  | 'neutral'
-  | 'default';
+  'danger' | 'warning' | 'info' | 'success' | 'brand' | 'neutral' | 'default';
 
 export type AzuosCardTone = AzuosCardHue | AzuosCardSemanticTone;
 

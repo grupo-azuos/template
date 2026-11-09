@@ -67,7 +67,7 @@ const PILL_MAX_OPTIONS = { filter: 6, form: 3 } as const;
  * `min-h`, e não `h`: no celular as opções quebram em mais de uma linha.
  */
 const optionTrack = tv({
-  base: 'rounded-control border-border/70 bg-muted/50 min-h-(--control-lg) items-stretch gap-1 border p-1',
+  base: 'min-h-(--control-lg) items-stretch gap-1 rounded-control border border-border/70 bg-muted/50 p-1',
   variants: {
     layout: {
       filter: 'inline-flex flex-wrap',
@@ -91,7 +91,7 @@ const optionTrack = tv({
  * A cor só entra quando a pastilha está ESCOLHIDA, e aí é a do tom.
  */
 const optionPill = tv({
-  base: 'rounded-box inline-flex cursor-pointer items-center gap-1.5 border px-3 py-1 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-60',
+  base: 'inline-flex cursor-pointer items-center gap-1.5 rounded-box border px-3 py-1 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-60',
   variants: {
     layout: {
       filter: '',
@@ -101,7 +101,7 @@ const optionPill = tv({
     },
     isSelected: {
       true: 'font-semibold shadow-xs',
-      false: 'hover:bg-card/70 hover:text-foreground text-muted-foreground border-transparent',
+      false: 'border-transparent text-muted-foreground hover:bg-card/70 hover:text-foreground',
     },
     tone: { neutral: '', info: '', success: '', warning: '', danger: '', brand: '' },
   },
@@ -195,7 +195,7 @@ export function AzuosOptionPicker({ data, ui, state, actions }: AzuosOptionPicke
           estreito (e o balão parecia solto, fora do lugar). O teto impede que uma opção de nome
           comprido estique o balão pela tela — a opção é cortada, não a tela. */}
       <PopoverContent
-        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-popover-trigger-width))] p-0"
+        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-popover-trigger-width))] overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
         align="start"
       >
         <OptionSearch data={{ query }} actions={{ onQueryChange: setQuery }} />
@@ -229,13 +229,13 @@ function PickerTrigger({
       aria-label={ui?.ariaLabel}
       className={cn(
         'control-lg',
-        'rounded-control border-border/70 bg-card text-foreground hover:bg-muted/40 inline-flex w-full min-w-40 cursor-pointer items-center justify-between gap-2 border text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex w-full min-w-40 cursor-pointer items-center justify-between gap-2 rounded-control border border-border/70 bg-card text-sm font-medium text-foreground transition-colors hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-60',
         ui?.fullWidth ? 'sm:w-full' : 'sm:w-auto sm:min-w-[180px]',
         ui?.className,
       )}
     >
       <SelectedLabel data={data} ui={{ placeholder: ui?.placeholder }} />
-      <ChevronDown className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />
+      <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
     </PopoverTrigger>
   );
 }
@@ -374,9 +374,9 @@ function OptionSearch({
   actions: { onQueryChange: (query: string) => void };
 }) {
   return (
-    <div className="border-border/70 relative border-b p-2">
+    <div className="relative border-b border-border/70 p-2">
       <Search
-        className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 size-3.5 -translate-y-1/2"
+        className="pointer-events-none absolute top-1/2 left-4 size-3.5 -translate-y-1/2 text-muted-foreground"
         aria-hidden="true"
       />
       <input
@@ -388,7 +388,7 @@ function OptionSearch({
         className={cn(
           /* A busca do balão é um controle como os outros: degrau `sm` da régua. */
           'control-sm rounded-control',
-          'border-border/60 bg-muted/30 text-foreground w-full border pr-2 pl-7 text-xs outline-none',
+          'w-full border border-border/60 bg-muted/30 pr-2 pl-7 text-xs text-foreground outline-none',
         )}
       />
     </div>
@@ -412,7 +412,7 @@ function OptionList({
   return (
     <div className="max-h-64 overflow-x-hidden overflow-y-auto p-1">
       {filtered.length === 0 ? (
-        <p className="text-muted-foreground px-2.5 py-3 text-center text-xs">Nada encontrado.</p>
+        <p className="px-2.5 py-3 text-center text-xs text-muted-foreground">Nada encontrado.</p>
       ) : (
         filtered.map((option) => {
           const isSelected = option.value === data.value;
@@ -424,9 +424,9 @@ function OptionList({
               onClick={() => actions.onSelect(option.value)}
               className={cn(
                 /* Item de lista dentro de um balão é MIUDEZA, não controle: raio `chip`. */
-                'rounded-chip flex w-full cursor-pointer items-center gap-2 px-2.5 py-1.5 text-left text-xs transition-colors',
+                'flex w-full cursor-pointer items-center gap-2 rounded-chip px-2.5 py-1.5 text-left text-xs transition-colors',
                 isSelected
-                  ? 'bg-primary/10 text-primary font-semibold'
+                  ? 'bg-primary/10 font-semibold text-primary'
                   : 'text-foreground hover:bg-muted/60',
               )}
             >

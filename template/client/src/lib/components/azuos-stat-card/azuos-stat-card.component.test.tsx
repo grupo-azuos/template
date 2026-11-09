@@ -152,5 +152,4 @@ describe('AzuosStatCard', () => {
     expect(card.querySelector('svg')?.parentElement).toHaveClass('bg-hue-steel');
     expect(card.getAttribute('style')).toBeNull();
   });
-
 });

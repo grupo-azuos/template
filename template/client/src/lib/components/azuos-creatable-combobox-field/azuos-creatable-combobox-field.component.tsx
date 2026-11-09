@@ -138,7 +138,10 @@ export function AzuosCreatableComboboxField({
     <Popover open={isOpen} onOpenChange={changeOpen} modal>
       <ComboboxTrigger data={{ value: data.value, listId }} ui={ui} state={{ ...state, isOpen }} />
 
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-64 p-0">
+      <PopoverContent
+        align="start"
+        className="w-(--radix-popover-trigger-width) min-w-64 overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
+      >
         <ComboboxSearch
           data={{
             term,
@@ -189,8 +192,8 @@ function ComboboxTrigger({
       className={cn(
         /* O degrau `lg` da régua de medidas (`lib/theme/tokens.css`) e o raio de controle, os mesmos do
            `AzuosTextField` e do `AzuosSelectField`. */
-        'control-lg rounded-control border-input bg-muted text-foreground flex w-full min-w-40 items-center justify-between gap-2 border px-3 text-left text-sm shadow-xs transition-[color,box-shadow] outline-none',
-        'focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+        'flex control-lg w-full min-w-40 items-center justify-between gap-2 rounded-control border border-input bg-muted px-3 text-left text-sm text-foreground shadow-xs transition-[color,box-shadow] outline-none',
+        'focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
         ui?.className,
       )}
     >
@@ -222,7 +225,7 @@ function ComboboxSearch({
 }) {
   return (
     <div className="flex items-center gap-2 border-b px-3">
-      <Search size={14} aria-hidden="true" className="text-muted-foreground shrink-0" />
+      <Search size={14} aria-hidden="true" className="shrink-0 text-muted-foreground" />
       <input
         autoFocus
         value={data.term}
@@ -232,13 +235,13 @@ function ComboboxSearch({
         aria-label={ui?.searchPlaceholder ?? ui?.ariaLabel}
         aria-controls={data.listId}
         aria-activedescendant={data.activeId}
-        className="control-lg rounded-control bg-muted placeholder:text-muted-foreground w-full px-2 text-sm outline-none"
+        className="control-lg w-full rounded-control bg-muted px-2 text-sm outline-none placeholder:text-muted-foreground"
       />
       {state?.isLoading ? (
         <LoaderCircle
           size={14}
           aria-hidden="true"
-          className="text-muted-foreground shrink-0 animate-spin"
+          className="shrink-0 animate-spin text-muted-foreground"
         />
       ) : null}
     </div>
@@ -256,7 +259,7 @@ function ComboboxList({
 }) {
   if (data.items.length === 0) {
     return (
-      <p className="text-muted-foreground px-3 py-4 text-center text-xs">
+      <p className="px-3 py-4 text-center text-xs text-muted-foreground">
         {state.isLoading ? 'Buscando…' : 'Digite para buscar ou cadastrar'}
       </p>
     );
@@ -273,9 +276,9 @@ function ComboboxList({
           onMouseMove={() => actions.onHighlight(index)}
           onClick={() => actions.onChoose(item)}
           className={cn(
-            'rounded-chip flex cursor-default items-center gap-2 px-2 py-1.5 text-sm select-none',
+            'flex cursor-default items-center gap-2 rounded-chip px-2 py-1.5 text-sm select-none',
             index === data.activeIndex && 'bg-accent text-accent-foreground',
-            item.kind === 'create' && 'text-brand-blue-800 mt-1 border-t pt-2 font-medium',
+            item.kind === 'create' && 'mt-1 border-t pt-2 font-medium text-brand-blue-800',
             item.kind === 'clear' && 'text-muted-foreground italic',
           )}
         >
