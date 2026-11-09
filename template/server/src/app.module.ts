@@ -12,6 +12,7 @@ import { DbModule } from './lib/db/db.module';
 import { HistoryModule } from './modules/history/history.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { UsersModule } from './modules/users/users.module';
 import { ZodValidationPipe } from './lib/http/zod-validation.pipe';
 
 /**
@@ -44,6 +45,7 @@ const CLIENT_DIST = join(__dirname, '..', '..', 'client', 'dist');
     HistoryModule,
     TasksModule,
     NotificationsModule,
+    UsersModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }],
