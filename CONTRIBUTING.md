@@ -652,8 +652,9 @@ Cada uma custou um incidente real num sistema da casa. Estão aqui para não ser
 
 O MVP **não tem e não terá** login, cadastro de usuário, senha, sessão, "esqueci a senha",
 logout nem permissão por pessoa. Quem diz quem é a pessoa é o **auth-forward**, na frente do
-sistema, gerenciado pelo suporte. Os papéis são os três que existem (`admin`, `editor`,
-`viewer`), e as features usam a policy de `lib/policy`.
+sistema, gerenciado pelo suporte. Os papéis são os cinco do admin-console, em cascata
+(`user` < `manager` < `operations_manager` < `owner` < `admin`), e as features usam a policy
+de `lib/policy`, que pergunta "a partir de qual papel?" (`hasRoleAtLeast`).
 
 ### Dados são locais
 

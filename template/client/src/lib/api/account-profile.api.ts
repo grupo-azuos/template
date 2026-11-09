@@ -1,3 +1,5 @@
+import { type UserRole } from '@template/shared/schemas/user.schema';
+
 import { accountOrigin } from './account-session.api';
 
 /**
@@ -7,7 +9,7 @@ import { accountOrigin } from './account-session.api';
  * aceita LEITURA destas duas rotas vindas de qualquer sistema do grupo, e só leitura. Editar
  * continua sendo no próprio admin-console.
  */
-export type AccountRole = 'admin' | 'manager' | 'user';
+export type AccountRole = UserRole;
 
 export type AccountProfile = {
   name: string;

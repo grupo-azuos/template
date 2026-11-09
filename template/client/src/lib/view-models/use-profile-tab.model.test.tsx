@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react';
+import { type UserRole } from '@template/shared/schemas/user.schema';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MOCK_SESSION_USER, mockAuth } from '../auth/mock-user';
@@ -9,7 +10,7 @@ vi.mock('@tanstack/react-router', () => ({
   useSearch: () => search,
 }));
 
-function as(role: 'admin' | 'editor' | 'viewer') {
+function as(role: UserRole) {
   vi.spyOn(mockAuth, 'getUser').mockReturnValue({ ...MOCK_SESSION_USER, role });
 }
 
@@ -32,7 +33,7 @@ describe('useProfileTabModel', () => {
 
   // triste
   it('keeps the history as a summary and hides the settings from someone not allowed', () => {
-    as('editor');
+    as('owner');
     search = { tab: 'settings' };
     const { result } = renderHook(useProfileTabModel);
 

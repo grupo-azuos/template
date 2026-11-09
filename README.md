@@ -231,8 +231,9 @@ O contato do suporte está em **[`SUPORTE.md`](./SUPORTE.md)**.
 
 Toda requisição entra como uma pessoa fixa de desenvolvimento, com papel `admin`
 (`server/src/lib/auth/identity.provider.ts`). Em produção, o auth-forward injeta
-`x-forwarded-user-{id,email,name,role}`. Os papéis são `admin`, `editor` e `viewer`, e as
-permissões moram em `server/src/lib/policy/`.
+`x-forwarded-user-{id,email,name,role}`. Os papéis são os do admin-console, em cascata
+(`user` < `manager` < `operations_manager` < `owner` < `admin`), e as permissões moram em
+`server/src/lib/policy/`.
 
 **Antes de publicar um MVP:** colocá-lo atrás do auth-forward, remover o `MOCK_IDENTITY`,
 garantir que o container só é alcançável pelo proxy e trocar os dados de teste por dados reais
