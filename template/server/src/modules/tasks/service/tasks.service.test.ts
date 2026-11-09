@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { type RequestUser } from '../../../lib/auth/request-user.type';
 import { type TaskRow } from '../../../lib/db/schema/tasks.schema';
+import { type HistoryService } from '../../history/service/history.service';
 import { type TasksRepository } from '../repository/tasks.repository';
 import { TasksService } from './tasks.service';
 
@@ -30,8 +31,13 @@ function taskRow(overrides: Partial<TaskRow> = {}): TaskRow {
   };
 }
 
+const history = { record: vi.fn(), recordIfChanged: vi.fn() };
+
 function makeService(repository: Partial<TasksRepository>) {
-  return new TasksService(repository as TasksRepository);
+  history.record.mockReset();
+  history.recordIfChanged.mockReset();
+
+  return new TasksService(repository as TasksRepository, history as unknown as HistoryService);
 }
 
 const query = (overrides: Record<string, unknown> = {}) => taskListQuerySchema.parse(overrides);
@@ -67,6 +73,9 @@ describe('TasksService.create', () => {
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({ createdBy: 'ana@empresa.com.br' }),
     );
+    expect(history.record).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: editor, action: 'task.created', targetId: 1 }),
+    );
   });
 
   // triste
@@ -77,6 +86,7 @@ describe('TasksService.create', () => {
 
     await expect(service.create(viewer, { title: 'Nova' })).rejects.toThrow(ForbiddenException);
     expect(insert).not.toHaveBeenCalled();
+    expect(history.record).not.toHaveBeenCalled();
   });
 });
 
@@ -92,6 +102,12 @@ describe('TasksService.update', () => {
     expect(update).toHaveBeenCalledWith(
       1,
       expect.objectContaining({ status: 'done', updatedBy: 'ana@empresa.com.br' }),
+    );
+    expect(history.recordIfChanged).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'task.updated',
+        changes: [{ field: 'Status', from: 'todo', to: 'done' }],
+      }),
     );
   });
 
@@ -124,6 +140,9 @@ describe('TasksService.remove', () => {
     await service.remove({ ...editor, role: 'admin' }, 1);
 
     expect(remove).toHaveBeenCalledWith(1);
+    expect(history.record).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'task.deleted', targetLabel: 'Ligar para o cliente' }),
+    );
   });
 
   // triste
