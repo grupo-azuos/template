@@ -11,9 +11,10 @@ import { cn } from '../../utils/cn.util';
  * - Fundo: sempre a superfície da marca (`bg-card`), com a borda neutra. Cor de card entra só como
  *   sotaque, em quem usa esta superfície: bolinha do ícone, número, marca d'água
  *   (`lib/utils/card-tone.util.ts`).
- * - Hover: um véu parado cobre o card — a mesma cor que a antiga mancha animada deixava no fim,
- *   sem a animação. Neutro por padrão (`--hover-veil`); no tom só quando a tela pede, com
- *   `ui.isHoverColored` + `ui.hoverTone`.
+ * - Cor: card com tom (`ui.isHoverColored` + `ui.hoverTone`) fica TINGIDO o tempo todo — o tom a
+ *   16%. Card sem tom fica na superfície e ganha só o véu neutro (`--hover-veil`) no hover.
+ * - Sem animação: o card não sobe, a sombra não cresce, a marca d'água não aumenta. O hover é só
+ *   a troca de cor, na hora.
  * - Marca d'água: `ui.mark` desenha o ícone grande no canto, no sotaque de `ui.markTone`, como no
  *   hero card. Fica atrás do texto.
  * - Escolhido: o azul claro da marca (`bg-card-selected`) com texto branco. Quem está dentro lê o
@@ -26,7 +27,7 @@ export type AzuosCardSurfaceProps = {
   data?: { label?: string };
   ui?: {
     className?: string;
-    /** O hover pinta o véu na cor de `hoverTone`. Sem a flag, o véu é neutro. */
+    /** O card fica tingido, o tempo todo, na cor de `hoverTone`. Sem a flag, só o véu neutro no hover. */
     isHoverColored?: boolean;
     hoverTone?: AzuosCardTone;
     /** O ícone grande no canto, como marca d'água. */
@@ -46,15 +47,25 @@ function washColorOf(ui: AzuosCardSurfaceProps['ui']): string {
   return 'var(--hover-veil)';
 }
 
-/** A casca: superfície da marca, ou o azul claro do escolhido; sobe no hover quando é clicável. */
+/** O véu sempre à vista (card com tom) ou só no hover (card neutro). */
+function washClassOf(ui: AzuosCardSurfaceProps['ui']): string {
+  const isTinted = Boolean(ui?.isHoverColored && ui.hoverTone);
+
+  return cn(
+    'pointer-events-none absolute inset-0 -z-10',
+    isTinted ? 'bg-(--card-veil)' : 'group-hover/card:bg-(--card-veil)',
+  );
+}
+
+/** A casca: superfície da marca, ou o azul claro do escolhido. Parada no hover: sem subir. */
 function surfaceClassOf(props: { isSelected: boolean; isClickable: boolean; className?: string }) {
   return cn(
-    'group/card relative isolate overflow-hidden rounded-surface shadow-card transition-[box-shadow,transform,background-color] duration-150',
+    'group/card relative isolate overflow-hidden rounded-surface shadow-card',
     /* A borda NEUTRA separa o card do fundo da página, que no claro é quase do mesmo branco. */
     props.isSelected
       ? 'border border-transparent bg-card-selected text-on-card-selected'
       : 'border border-border bg-card text-card-foreground',
-    props.isClickable && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
+    props.isClickable && 'cursor-pointer',
     props.isSelected && props.isClickable && 'hover:bg-card-selected-hover',
     props.className,
   );
@@ -82,11 +93,11 @@ export function AzuosCardSurface({ data, ui, state, actions, children }: AzuosCa
       data-selected={flags.isSelected ? 'true' : undefined}
       className={surfaceClassOf({ ...flags, className: ui?.className })}
     >
-      {/* O véu cobre o card inteiro e só aparece no hover — sem crescer de onde o mouse entrou. */}
+      {/* O véu cobre o card inteiro: sempre no card com tom, só no hover no neutro. */}
       <span
         aria-hidden="true"
         data-slot="card-wash"
-        className="pointer-events-none absolute inset-0 -z-10 transition-colors duration-150 group-hover/card:bg-(--card-veil)"
+        className={washClassOf(ui)}
         style={{ '--card-veil': washColorOf(ui) } as CSSProperties}
       />
       <CardMark ui={ui} />
@@ -130,7 +141,7 @@ function CardMark({ ui }: { ui: AzuosCardSurfaceProps['ui'] }) {
       aria-hidden="true"
       data-slot="card-mark"
       className={cn(
-        'pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31 transition-transform duration-200 group-hover/card:scale-105 group-data-[selected=true]/card:text-on-card-selected',
+        'pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31 group-data-[selected=true]/card:text-on-card-selected',
         cardToneClasses(ui.markTone).text,
       )}
     >

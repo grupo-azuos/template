@@ -40,6 +40,39 @@ describe('AzuosCardSurface', () => {
     expect(veil()).toContain('--hue-red');
   });
 
+  /* Card com cor fica tingido por padrão, sem esperar o mouse. */
+  it('keeps the tone veil on all the time on a coloured card', () => {
+    const { container } = render(
+      <AzuosCardSurface ui={{ hoverTone: 'red', isHoverColored: true }}>x</AzuosCardSurface>,
+    );
+
+    const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
+    expect(wash).toHaveClass('bg-(--card-veil)');
+    expect(wash.className).not.toMatch(/group-hover/);
+  });
+
+  /* Sem animação no hover: o card não sobe, a sombra não cresce, nada transiciona. */
+  it('does not move, grow or animate on hover', () => {
+    const { container } = render(
+      <AzuosCardSurface
+        data={{ label: 'Parado' }}
+        ui={{ mark: Building2 }}
+        actions={{ onClick: vi.fn() }}
+      >
+        x
+      </AzuosCardSurface>,
+    );
+
+    const all = [
+      screen.getByRole('group', { name: 'Parado' }),
+      container.querySelector('[data-slot="card-wash"]'),
+      container.querySelector('[data-slot="card-mark"]'),
+    ].map((node) => node?.className ?? '');
+    for (const className of all) {
+      expect(className).not.toMatch(/translate|scale|shadow-xl|transition|duration/);
+    }
+  });
+
   it('draws the mark icon in the accent, and turns into a real button when clickable', async () => {
     const onClick = vi.fn();
     const { container } = render(
