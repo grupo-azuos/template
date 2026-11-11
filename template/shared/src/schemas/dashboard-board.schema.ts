@@ -20,9 +20,10 @@ export { DATA_SOURCES } from './dashboard-sources';
  * - `manager` (Gestor): só gestor e administrador veem e editam.
  * - `personal` (Pessoal): só quem é dono vê e edita — um por pessoa.
  *
- * Cada um é um canvas de 4 colunas com até `MAX_WIDGETS` blocos. Cada bloco ocupa no mínimo
- * duas casas (duas de largura ou duas de altura), e mostra uma FONTE de dados agrupada por um
- * campo, com um FILTRO salvo opcional. Os filtros são do sistema: montados uma vez, servem a
+ * Cada um é um canvas de 4 colunas com blocos até a cota de pontos (`MAX_BOARD_WEIGHT`, o peso
+ * de cada bloco está em `WIDGET_WEIGHTS`). Cada bloco ocupa no mínimo duas casas (duas de
+ * largura ou duas de altura) — menos o card com anel, que cabe numa —, e mostra uma FONTE de
+ * dados agrupada por um campo, com um FILTRO salvo opcional. Os filtros são do sistema: montados uma vez, servem a
  * qualquer dashboard (e às listas), e podem ser só de quem criou ou compartilhados.
  */
 export const DASHBOARD_SCOPES = ['team', 'manager', 'personal'] as const;
@@ -35,7 +36,11 @@ export const DASHBOARD_SCOPE_LABELS: Record<DashboardScope, string> = {
   personal: 'Pessoal',
 };
 
-export const MAX_WIDGETS = 10;
+/**
+ * O teto de blocos é só a trava da lista: quem limita o painel é a cota de pontos
+ * (`MAX_BOARD_WEIGHT`), e com o bloco mais leve valendo 1 ponto cabem no máximo 24.
+ */
+export const MAX_WIDGETS = 24;
 export const GRID_COLUMNS = 4;
 export const MAX_GRID_ROWS = 40;
 export const MAX_STAT_CARDS = 4;
@@ -238,6 +243,7 @@ export const WIDGET_KINDS = [
   'pareto',
   'cumulative',
   'grouped',
+  'ringCard',
 ] as const;
 export const widgetKindSchema = z.enum(WIDGET_KINDS);
 export type WidgetKind = z.infer<typeof widgetKindSchema>;
@@ -264,6 +270,7 @@ export const WIDGET_KIND_LABELS: Record<WidgetKind, string> = {
   pareto: 'Pareto (barras em ordem e o percentual acumulado)',
   cumulative: 'Acumulado no tempo',
   grouped: 'Colunas lado a lado (dois agrupamentos)',
+  ringCard: 'Card com anel (o filtro sobre o total)',
 };
 
 /** Os blocos que precisam de um agrupamento no tempo, e os que agrupam por categoria. */
@@ -286,6 +293,59 @@ export const CATEGORY_WIDGETS: readonly WidgetKind[] = [
 export const PAIR_WIDGETS: readonly WidgetKind[] = ['stacked', 'heatmap', 'sankey', 'grouped'];
 /** Os de cards: agrupar é opcional — sem agrupar, o total; agrupando, um card por grupo (até 4). */
 export const CARD_WIDGETS: readonly WidgetKind[] = ['stats', 'hero'];
+
+/**
+ * O PESO DE CADA BLOCO — o quanto ele custa ao banco, e não o espaço que ocupa. O painel tem
+ * uma cota de pontos (`MAX_BOARD_WEIGHT`) em vez de um número fixo de blocos: dez blocos
+ * tratavam igual um card de um número só e um mapa de calor que cruza dois agrupamentos.
+ *
+ * 1: um número só · 2: uma contagem agrupada · 3: uma série no tempo · 4: dois agrupamentos.
+ * "Números" só agrupa se a pessoa quiser: sem agrupar, é um número (peso 1).
+ */
+export const WIDGET_WEIGHTS: Record<WidgetKind, number> = {
+  ringCard: 1,
+  radial: 1,
+  stats: 2,
+  hero: 2,
+  column: 2,
+  bar: 2,
+  donut: 2,
+  pie: 2,
+  rose: 2,
+  halfDonut: 2,
+  list: 2,
+  radar: 2,
+  treemap: 2,
+  pareto: 2,
+  area: 3,
+  cumulative: 3,
+  calendar: 3,
+  agenda: 3,
+  stacked: 4,
+  heatmap: 4,
+  sankey: 4,
+  grouped: 4,
+};
+
+/** A cota de um painel: doze gráficos comuns, vinte e quatro cards de um número, ou seis cruzados. */
+export const MAX_BOARD_WEIGHT = 24;
+
+export function widgetWeight(widget: { kind: WidgetKind; groupBy?: string | null }): number {
+  if (widget.kind === 'stats' && !widget.groupBy) return 1;
+
+  return WIDGET_WEIGHTS[widget.kind];
+}
+
+export function boardWeight(
+  widgets: readonly { kind: WidgetKind; groupBy?: string | null }[],
+): number {
+  return widgets.reduce((sum, widget) => sum + widgetWeight(widget), 0);
+}
+
+/** "1 ponto", "4 pontos" — o rótulo do peso que a tela mostra em cada bloco. */
+export function weightLabel(weight: number): string {
+  return weight === 1 ? '1 ponto' : `${weight} pontos`;
+}
 
 /**
  * O PERÍODO DO BLOCO — a janela de tempo sobre a data principal da fonte (vencimento não: a
@@ -550,9 +610,15 @@ export const widgetSchema = z
 
 export type Widget = z.infer<typeof widgetSchema>;
 
+/** Os blocos que cabem numa casa só (1×1). Os outros ocupam no mínimo duas. */
+export const COMPACT_WIDGET_KINDS: readonly WidgetKind[] = ['ringCard'];
+
+export const MIN_CELLS_PROBLEM = 'O bloco ocupa no mínimo duas casas';
+
 /**
- * Onde cada bloco fica no canvas de 4 colunas. Cada um ocupa no mínimo DUAS casas: duas de
- * largura ou duas de altura (nunca 1×1).
+ * Onde cada bloco fica no canvas de 4 colunas. O item sozinho aceita 1×1: quem decide se o bloco
+ * cabe numa casa é o tipo dele (`COMPACT_WIDGET_KINDS`), conferido no `saveBoardSchema`, que
+ * conhece os dois.
  */
 export const layoutItemSchema = z
   .object({
@@ -566,8 +632,7 @@ export const layoutItemSchema = z
     w: z.number().int().min(1).max(GRID_COLUMNS),
     h: z.number().int().min(1).max(8),
   })
-  .refine((item) => item.x + item.w <= GRID_COLUMNS, { message: 'O bloco passa da borda' })
-  .refine((item) => item.w >= 2 || item.h >= 2, { message: 'O bloco ocupa no mínimo duas casas' });
+  .refine((item) => item.x + item.w <= GRID_COLUMNS, { message: 'O bloco passa da borda' });
 
 export type LayoutItem = z.infer<typeof layoutItemSchema>;
 
@@ -708,6 +773,13 @@ export const saveBoardSchema = z
         path: ['layout'],
       });
     }
+    const kindOf = new Map(board.widgets.map((widget) => [widget.id, widget.kind]));
+    board.layout.forEach((item, index) => {
+      if (item.w >= 2 || item.h >= 2) return;
+      const kind = kindOf.get(item.i);
+      if (kind && COMPACT_WIDGET_KINDS.includes(kind)) return;
+      context.addIssue({ code: 'custom', message: MIN_CELLS_PROBLEM, path: ['layout', index] });
+    });
   });
 
 export type SaveBoardInput = z.infer<typeof saveBoardSchema>;
