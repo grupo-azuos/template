@@ -7,7 +7,7 @@
  * Tailwind só gera a classe que ele LÊ no código.
  */
 export type AzuosCardHue =
-  'blue' | 'red' | 'amber' | 'green' | 'steel' | 'plum' | 'slate' | 'copper';
+  'blue' | 'red' | 'yellow' | 'green' | 'steel' | 'plum' | 'slate' | 'copper';
 
 /** Os nomes de estado que as telas já usam, cada um preso a um sotaque. */
 export type AzuosCardSemanticTone =
@@ -28,7 +28,7 @@ export type AzuosCardToneClasses = {
 
 const SEMANTIC_HUE: Record<AzuosCardSemanticTone, AzuosCardHue> = {
   danger: 'red',
-  warning: 'amber',
+  warning: 'yellow',
   info: 'steel',
   success: 'green',
   brand: 'blue',
@@ -49,11 +49,12 @@ const HUE_CLASSES: Record<AzuosCardHue, AzuosCardToneClasses> = {
     swatch: 'bg-hue-red',
     color: 'var(--hue-red)',
   },
-  amber: {
-    dot: 'bg-hue-amber text-on-hue',
-    text: 'text-hue-amber',
-    swatch: 'bg-hue-amber',
-    color: 'var(--hue-amber)',
+  /* O amarelo é claro: o ícone na bolinha é escuro (`on-yellow`), e não o `on-hue`. */
+  yellow: {
+    dot: 'bg-hue-yellow text-on-yellow',
+    text: 'text-hue-yellow',
+    swatch: 'bg-hue-yellow',
+    color: 'var(--hue-yellow)',
   },
   green: {
     dot: 'bg-hue-green text-on-hue',
@@ -107,7 +108,7 @@ export function cardToneClasses(tone: AzuosCardTone | null | undefined): AzuosCa
 const HUE_ANGLE: [AzuosCardHue, number][] = [
   ['red', 0],
   ['copper', 22],
-  ['amber', 40],
+  ['yellow', 40],
   ['green', 160],
   ['steel', 200],
   ['blue', 228],

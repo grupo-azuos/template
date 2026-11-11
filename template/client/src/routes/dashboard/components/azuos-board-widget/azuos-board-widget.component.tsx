@@ -67,7 +67,7 @@ export const DRAG_HANDLE = 'board-drag-handle';
 /** O que, dentro da alça, é clique e não começo de arrasto: os botões do cabeçalho. */
 export const NO_DRAG = 'board-no-drag';
 
-const STAT_HUES: AzuosCardHue[] = ['blue', 'green', 'amber', 'plum'];
+const STAT_HUES: AzuosCardHue[] = ['blue', 'green', 'yellow', 'plum'];
 
 export function AzuosBoardWidget({ data, state, actions }: AzuosBoardWidgetProps) {
   const { widget } = data;

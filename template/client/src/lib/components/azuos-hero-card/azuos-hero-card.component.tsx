@@ -37,11 +37,11 @@ export type AzuosHeroCardProps = {
 
 /**
  * O card fica na superfície da marca; o tom é sotaque (`lib/utils/card-tone.util.ts`): o ícone
- * grande no canto e a pastilha. `accent` usa o âmbar. Sem fundo colorido, sem opacidade.
+ * grande no canto e a pastilha. `accent` usa o amarelo. Sem fundo colorido, sem opacidade.
  */
 const TONE_HUE: Record<AzuosHeroCardTone, AzuosCardTone> = {
   brand: 'brand',
-  accent: 'amber',
+  accent: 'yellow',
   success: 'success',
   warning: 'warning',
   danger: 'danger',

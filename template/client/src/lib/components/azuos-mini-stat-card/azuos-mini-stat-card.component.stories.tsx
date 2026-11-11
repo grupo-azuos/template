@@ -33,7 +33,7 @@ export const LongLabel: Story = {
 export const Row: Story = {
   render: () => (
     <div className="grid grid-cols-4 gap-2">
-      {(['blue', 'red', 'amber', 'green', 'steel', 'plum', 'slate', 'copper'] as const).map(
+      {(['blue', 'red', 'yellow', 'green', 'steel', 'plum', 'slate', 'copper'] as const).map(
         (tone, index) => (
           <AzuosMiniStatCard key={tone} data={{ label: tone, value: index + 1 }} ui={{ tone }} />
         ),

@@ -18,7 +18,7 @@ describe('AzuosMiniStatCard', () => {
     render(
       <AzuosMiniStatCard
         data={{ label: 'Aguardando', value: 6 }}
-        ui={{ tone: 'amber' }}
+        ui={{ tone: 'yellow' }}
         state={{ isSelected: true }}
         actions={{ onClick }}
       />,

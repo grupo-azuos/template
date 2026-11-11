@@ -39,7 +39,7 @@ afterEach(() => {
 
 const SERIES = [
   { key: 'done', label: 'Entregue', color: '#047857' },
-  { key: 'pending', label: 'Pendente', color: '#b45309' },
+  { key: 'pending', label: 'Pendente', color: '#ffdc00' },
 ];
 const CATEGORIES = [
   { label: 'BOMBEIRO', values: { done: 6, pending: 3 } },
