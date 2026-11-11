@@ -117,6 +117,27 @@ describe('AzuosNotificationDialog — urgent', () => {
     expect(screen.getByRole('button', { name: 'Ir para Urgentes (1)' })).toBeInTheDocument();
   });
 
+  /* Cada linha do placar na cor do nível dela — antes só a urgente tinha cor. O amarelo é claro
+     e leva o texto escuro. */
+  it('paints each scoreboard line in the colour of its level', () => {
+    render(
+      <AzuosNotificationDialog
+        {...props([
+          notificationFixture('urgent'),
+          notificationFixture('important'),
+          notificationFixture('normal'),
+          notificationFixture('info'),
+        ])}
+      />,
+    );
+    const line = (name: RegExp) => screen.getByRole('button', { name });
+
+    expect(line(/Ir para Urgentes/)).toHaveClass('bg-hue-red', 'text-on-hue');
+    expect(line(/Ir para Importantes/)).toHaveClass('bg-hue-yellow', 'text-on-yellow');
+    expect(line(/Ir para Avisos/)).toHaveClass('bg-hue-blue', 'text-on-hue');
+    expect(line(/Ir para Novidades/)).toHaveClass('bg-hue-green', 'text-on-hue');
+  });
+
   // feliz
   /* O `scrollIntoView` rolava também a janela do diálogo, e o hero sumia. Só a lista rola. */
   it('takes the scoreboard click to its group, scrolling only the list', () => {

@@ -215,7 +215,11 @@ function Greeting({ data, ui }: { data: { total: number }; ui: { hasUrgent: bool
   );
 }
 
-/** O placar: quantas de cada nível. Cada linha leva ao grupo dela, na lista ao lado. */
+/**
+ * O placar: quantas de cada nível. Cada linha leva ao grupo dela, na lista ao lado, e vem
+ * pintada na cor DO NÍVEL — a mesma da bolinha do ícone (`look.tone.dot`): vermelho, amarelo com
+ * texto escuro, azul e verde. Só a urgente tinha cor; as outras eram todas o mesmo azul.
+ */
 function Scoreboard({
   data,
   actions,
@@ -228,7 +232,6 @@ function Scoreboard({
       {data.groups.map((group) => {
         const look = notificationLook(group.severity);
         const Icon = look.icon;
-        const isUrgent = group.severity === 'urgent';
 
         return (
           <li key={group.severity}>
@@ -236,11 +239,10 @@ function Scoreboard({
               type="button"
               aria-label={`Ir para ${group.title} (${group.items.length})`}
               onClick={() => actions.onGoTo(group.severity)}
+              data-severity={group.severity}
               className={cn(
                 'rounded-box focus-visible:ring-ring flex h-10 w-full items-center gap-2 px-3 text-left text-sm font-semibold outline-none focus-visible:ring-2',
-                isUrgent
-                  ? 'bg-hue-red text-on-hue'
-                  : 'bg-brand-blue-800 text-on-dark hover:bg-brand-blue-700',
+                look.tone.dot,
               )}
             >
               <Icon className="size-4 shrink-0" aria-hidden="true" />
