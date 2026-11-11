@@ -10,11 +10,13 @@ import {
   type Board,
   type BoardMatch,
   boardMatchGroup,
+  boardWeight,
   type DashboardScope,
   type DataSourceKey,
   dimensionsOf,
   type FilterGroup,
   hasPersonField,
+  MAX_BOARD_WEIGHT,
   ME_VALUE,
   periodRange,
   type SaveBoardInput,
@@ -71,12 +73,37 @@ export class DashboardBoardsService {
     if (!canEdit(user, scope)) {
       throw new ForbiddenException('Este dashboard é editado pelo gestor para cima.');
     }
+    await this.assertWithinWeight(scope, ownerOf(user, scope), input);
     for (const widget of input.widgets) {
       if (widget.filterId) await this.usableFilter(user, widget.filterId, widget.source);
     }
     const row = await this.repository.saveBoard(scope, ownerOf(user, scope), input, user.id);
 
     return toBoard(scope, row, row, true);
+  }
+
+  /**
+   * A COTA DE PONTOS do painel, conferida aqui e não só na tela — pela API, ninguém passa dela.
+   *
+   * O painel montado antes da cota pode estar acima dela, e ele continua salvando (mudar um
+   * bloco de lugar não pode virar erro): o que se recusa é PASSAR da cota, ou subir ainda mais
+   * quem já passou.
+   */
+  private async assertWithinWeight(
+    scope: DashboardScope,
+    owner: string | null,
+    input: SaveBoardInput,
+  ): Promise<void> {
+    const weight = boardWeight(input.widgets);
+    if (weight <= MAX_BOARD_WEIGHT) return;
+
+    const saved = await this.repository.findBoard(scope, owner);
+    const before = boardWeight(saved?.widgets ?? defaultBoard(scope).widgets);
+    if (weight <= before) return;
+
+    throw new UnprocessableEntityException(
+      `O painel passa da cota de ${MAX_BOARD_WEIGHT} pontos (${weight}). Tire ou troque um bloco.`,
+    );
   }
 
   async data(user: RequestUser, query: WidgetQuery): Promise<WidgetData> {
