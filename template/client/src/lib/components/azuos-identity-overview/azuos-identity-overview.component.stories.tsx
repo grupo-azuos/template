@@ -5,7 +5,7 @@ const meta = {
   component: AzuosIdentityOverview,
   args: {
     data: {
-      person: { name: 'Ana Souza', email: 'ana@example.test', roleLabel: 'Consulta' },
+      person: { name: 'Ana Souza', email: 'ana@example.test', roleLabel: 'Usuário' },
       accountUrl: 'https://account.example.test/profile',
     },
   },

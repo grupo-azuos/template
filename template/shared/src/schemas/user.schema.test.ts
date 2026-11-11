@@ -45,10 +45,12 @@ describe('sessionUserSchema', () => {
 
 describe('userRoleLabel', () => {
   // feliz
-  it('gives the screen name of a role', () => {
+  it('gives the screen name of a role, only the three of the screen', () => {
     expect(userRoleLabel('admin')).toBe('Administrador');
-    expect(userRoleLabel('owner')).toBe('Dono');
-    expect(userRoleLabel('user')).toBe('Consulta');
+    expect(userRoleLabel('owner')).toBe('Administrador');
+    expect(userRoleLabel('operations_manager')).toBe('Gestor');
+    expect(userRoleLabel('manager')).toBe('Gestor');
+    expect(userRoleLabel('user')).toBe('Usuário');
   });
 });
 

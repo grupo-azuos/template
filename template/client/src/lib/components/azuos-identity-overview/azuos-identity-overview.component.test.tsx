@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { AzuosIdentityOverview } from './azuos-identity-overview.component';
 
-const person = { name: 'Ana Souza', email: 'ana@example.test', roleLabel: 'Consulta' };
+const person = { name: 'Ana Souza', email: 'ana@example.test', roleLabel: 'Usuário' };
 describe('AzuosIdentityOverview', () => {
   // feliz
   it('shows identity, account details and theme preferences', () => {

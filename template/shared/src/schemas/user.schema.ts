@@ -31,12 +31,17 @@ export const userRoleSchema = z.enum(USER_ROLES);
 
 export type UserRole = z.infer<typeof userRoleSchema>;
 
+/**
+ * Na tela só existem TRÊS perfis: Usuário, Gestor e Administrador. Os cinco papéis da
+ * identidade se agrupam neles — traduzir cada papel ao pé da letra punha "Consulta" no
+ * app-shell de quem trabalha no cadastro.
+ */
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
   admin: 'Administrador',
-  owner: 'Dono',
-  operations_manager: 'Gestor da operação',
+  owner: 'Administrador',
+  operations_manager: 'Gestor',
   manager: 'Gestor',
-  user: 'Consulta',
+  user: 'Usuário',
 };
 
 export function userRoleLabel(role: UserRole): string {
