@@ -4,8 +4,8 @@ import { type AzuosCardTone } from '../../utils/card-tone.util';
 import { AzuosCardSurface } from '../azuos-card-surface/azuos-card-surface.component';
 
 /**
- * O card de uso geral com tom, sobre a `AzuosCardSurface`: superfície da marca, hover com a mancha
- * do GSAP (no tom quando `mode="interactive"`) e escolhido no azul claro da marca. Mantido para as
+ * O card de uso geral com tom, sobre a `AzuosCardSurface`: superfície da marca, hover com o véu
+ * da superfície (no tom quando `mode="interactive"`) e escolhido no azul claro da marca. Mantido para as
  * telas que já o usam; card novo usa um dos quatro formatos (`AzuosStatCard`,
  * `AzuosMiniStatCard`, `AzuosContentCard`, `AzuosDashboardHeroCard`).
  */

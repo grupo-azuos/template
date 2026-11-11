@@ -10,7 +10,7 @@ import { AzuosCardSurface } from '../azuos-card-surface/azuos-card-surface.compo
  *
  * Superfície da marca (`AzuosCardSurface`) com o ícone do assunto grande no canto, no sotaque dele
  * (como no hero card) — é por ali que a cor escolhida pela pessoa aparece sem pintar o card. O
- * conteúdo é livre (`children`). O hover é a mancha do GSAP; colorida com `ui.isHoverColored`.
+ * conteúdo é livre (`children`). O hover é o véu da superfície; no tom com `ui.isHoverColored`.
  */
 export type AzuosContentCardProps = {
   data?: { label?: string };

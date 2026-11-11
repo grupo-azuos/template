@@ -36,7 +36,7 @@ export type AzuosStatCardProps = {
     icon?: LucideIcon;
     /** Uma cor que a PESSOA escolheu (`#rrggbb`): vira o sotaque mais próximo e vence o tom. */
     color?: string | null;
-    /** O hover pinta a mancha no sotaque do card, em vez do véu neutro. */
+    /** O hover pinta o véu no sotaque do card, em vez do véu neutro. */
     isHoverColored?: boolean;
   };
   state?: {

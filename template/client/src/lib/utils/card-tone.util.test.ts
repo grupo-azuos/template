@@ -1,6 +1,24 @@
 import { describe, expect, it } from 'vitest';
 
-import { CARD_HUES, cardHueFromHex, cardHueOf, cardToneClasses } from './card-tone.util';
+import {
+  CARD_HUES,
+  cardHueFromHex,
+  cardHueOf,
+  cardToneClasses,
+  cardToneVeilOf,
+} from './card-tone.util';
+
+describe('cardToneVeilOf', () => {
+  // feliz
+  it('mixes the accent at 16% over transparent', () => {
+    expect(cardToneVeilOf('yellow')).toBe('color-mix(in srgb, var(--hue-yellow) 16%, transparent)');
+  });
+
+  // triste
+  it('falls back to the neutral accent without a tone', () => {
+    expect(cardToneVeilOf(null)).toContain('var(--hue-slate)');
+  });
+});
 
 describe('card tone', () => {
   // feliz

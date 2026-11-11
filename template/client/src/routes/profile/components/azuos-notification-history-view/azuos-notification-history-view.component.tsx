@@ -71,7 +71,10 @@ export function AzuosNotificationHistoryView({
         open={state.isExpanded}
         onOpenChange={(open) => (open ? actions.onExpand() : actions.onCollapse())}
       >
-        <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(94vw,64rem)]">
+        {/* ALTURA FIXA, e não máxima: com `max-h` o diálogo encolhia a cada filtro que esvaziava a
+            lista e crescia de novo ao limpar — a janela pulava debaixo do mouse. Quem rola é a
+            lista, por dentro. */}
+        <DialogContent className="flex h-[min(44rem,90dvh)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(94vw,64rem)]">
           <DialogHeader className="border-border flex-row items-center justify-between gap-3 border-b px-6 py-4">
             <span className="min-w-0">
               <DialogTitle>Todas as notificações</DialogTitle>

@@ -85,4 +85,12 @@ describe('AzuosTable', () => {
 
     expect(cell?.className).toContain('[&:has(button)]:whitespace-nowrap');
   });
+
+  it('hovers a row with the same veil as the cards', () => {
+    renderTable();
+
+    expect(screen.getByRole('cell', { name: 'Revisar contrato' }).closest('tr')).toHaveClass(
+      'hover:bg-hover-veil',
+    );
+  });
 });

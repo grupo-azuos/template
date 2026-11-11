@@ -6,7 +6,7 @@ import { AzuosCardSurface } from '../azuos-card-surface/azuos-card-surface.compo
  * O FILTRO PEQUENO: uma fileira de contagens por status (o painel tem uma), cada uma clicável.
  *
  * Superfície da marca (`AzuosCardSurface`), bolinha e número no sotaque do status. Escolhido = o
- * azul claro da marca com texto branco. O hover é a mancha do GSAP; colorida com
+ * azul claro da marca com texto branco. O hover é o véu da superfície; no tom com
  * `ui.isHoverColored`.
  */
 export type AzuosMiniStatCardProps = {

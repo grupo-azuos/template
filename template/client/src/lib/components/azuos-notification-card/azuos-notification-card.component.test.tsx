@@ -39,6 +39,35 @@ describe('AzuosNotificationCard', () => {
     expect(onOpen).toHaveBeenCalled();
   });
 
+  /* REGRESSÃO: o nível era só a palavra no tom — o amarelo sumia no claro e o vermelho no escuro.
+     Agora é uma pílula com o tom a 16% de fundo e o texto do tema. */
+  it('shows the level as a pill with the tone veil behind the theme text', () => {
+    const { container } = render(
+      <AzuosNotificationCard
+        data={{ notification: notificationFixture('important'), now: NOTIFICATION_NOW }}
+      />,
+    );
+    const pill = container.querySelector<HTMLElement>('[data-slot="notification-level"]');
+
+    expect(pill).toHaveTextContent('Importante');
+    expect(pill).toHaveClass('rounded-chip', 'text-foreground');
+    expect(pill?.className).not.toMatch(/text-hue/);
+    expect(pill?.style.backgroundColor).toContain('--hue-yellow');
+  });
+
+  /* O hover da linha é reto, no véu do card: nada de pílula arredondada por dentro da lista. */
+  it('hovers the row with the card veil, without rounded corners', () => {
+    render(
+      <AzuosNotificationCard
+        data={{ notification: notificationFixture('normal'), now: NOTIFICATION_NOW }}
+      />,
+    );
+
+    const row = screen.getByRole('button');
+    expect(row).toHaveClass('hover:bg-hover-veil');
+    expect(row.className).not.toMatch(/rounded/);
+  });
+
   // triste
   it('shows no mark on a read one, and no open button on news without a screen', () => {
     render(

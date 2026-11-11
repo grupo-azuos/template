@@ -39,6 +39,20 @@ describe('AzuosNotificationSettingsView', () => {
     expect(view.actions.onSave).toHaveBeenCalled();
   });
 
+  /* O seletor leva a cor do nível escolhido; o desligado fica no cinza de sempre. */
+  it('tints the level picker with the colour of the chosen level', () => {
+    const veil = (container: HTMLElement) =>
+      container
+        .querySelector<HTMLElement>('[data-slot="severity-select"]')
+        ?.style.getPropertyValue('--level-veil');
+    const enabled = render(<AzuosNotificationSettingsView {...props()} />);
+    expect(veil(enabled.container)).toContain('--hue-green');
+    enabled.unmount();
+
+    const disabled = render(<AzuosNotificationSettingsView {...props({}, false)} />);
+    expect(veil(disabled.container)).toBe('transparent');
+  });
+
   // feliz
   it('says it saved, and shows the server refusal', () => {
     render(<AzuosNotificationSettingsView {...props({ savedAt: 1, error: 'Recusado.' })} />);

@@ -92,11 +92,14 @@ export function AzuosTableHead({ className, ...rest }: ComponentProps<typeof Tab
   );
 }
 
-/** A linha: divisória mais leve que a borda de fora, e nenhuma depois da última. */
+/**
+ * A linha: divisória mais leve que a borda de fora, e nenhuma depois da última. O hover é o véu do
+ * card (`--hover-veil`), para linha e card responderem ao mouse no mesmo tom.
+ */
 export function AzuosTableRow({ className, ...rest }: ComponentProps<typeof TableRow>) {
   return (
     <TableRow
-      className={cn('border-border/60 last:border-b-0 hover:bg-muted/80', className)}
+      className={cn('border-border/60 last:border-b-0 hover:bg-hover-veil', className)}
       {...rest}
     />
   );
