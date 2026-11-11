@@ -22,8 +22,22 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Ao entrar no sistema: as quatro, a urgente primeiro — o "Li e entendi" libera em 10 s. */
+/** Ao entrar no sistema: as quatro numa lista só, a urgente primeiro, em vermelho — o "Li e
+    entendi" libera em 10 s. */
 export const AllOnEntry: Story = {};
+
+/** Sem urgente: a lista com "Li todas", e o X e o Esc também marcam todas. */
+export const WithoutUrgent: Story = {
+  args: {
+    data: {
+      items: [
+        notificationFixture('important'),
+        notificationFixture('normal'),
+        notificationFixture('info'),
+      ],
+    },
+  },
+};
 
 export const UrgentOnly: Story = { args: { data: { items: [notificationFixture('urgent')] } } };
 

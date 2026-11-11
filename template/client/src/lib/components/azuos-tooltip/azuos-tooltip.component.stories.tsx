@@ -36,6 +36,9 @@ export const LongText: Story = {
   },
 };
 
+/** Aberta por comando, sem o mouse: a tela aponta para o elemento. */
+export const OpenOnCommand: Story = { args: { state: { isOpen: true } } };
+
 export const Disabled: Story = { args: { state: { isDisabled: true } } };
 
 export const WithoutContent: Story = { args: { data: { content: '' } } };
