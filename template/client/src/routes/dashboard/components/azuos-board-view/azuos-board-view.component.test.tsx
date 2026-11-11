@@ -89,7 +89,7 @@ describe('AzuosBoardView', () => {
     render(<AzuosBoardView {...props} />);
 
     expect(screen.getByRole('dialog', { name: 'Montar o painel Equipe' })).toBeInTheDocument();
-    expect(screen.getByText('1/10')).toBeInTheDocument();
+    expect(screen.getByText(/^\d+ de 24 pontos$/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Pôr bloco Rosca' }));
     fireEvent.click(screen.getByRole('button', { name: 'Montar filtros' }));
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
@@ -109,7 +109,9 @@ describe('AzuosBoardView', () => {
 
     rerender(<AzuosBoardView {...makeProps({ isEditing: true, canAdd: false })} />);
     expect(screen.getByRole('button', { name: 'Pôr bloco Colunas' })).toBeDisabled();
-    expect(screen.getByText('O painel já tem o máximo de blocos.')).toBeInTheDocument();
+    expect(
+      screen.getByText('O painel usou a cota toda. Tire ou troque um bloco para pôr outro.'),
+    ).toBeInTheDocument();
   });
 
   // triste

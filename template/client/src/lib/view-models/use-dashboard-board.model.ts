@@ -15,6 +15,8 @@ import {
   BOARD_FILTER_KIND_LABELS,
   type BoardFilterValues,
   boardMatches,
+  boardWeight,
+  COMPACT_WIDGET_KINDS,
   DASHBOARD_SCOPE_LABELS,
   DATA_SOURCE_KEYS,
   dimensionsOf,
@@ -22,7 +24,7 @@ import {
   type DashboardScope,
   GRID_COLUMNS,
   type LayoutItem,
-  MAX_WIDGETS,
+  MAX_BOARD_WEIGHT,
   type Widget,
   type WidgetData,
   type WidgetKind,
@@ -31,7 +33,7 @@ import {
 import { hasRoleAtLeast } from '@template/shared/schemas/user.schema';
 
 import { dashboardBoardsApi } from '../api/dashboard-boards.api';
-import { readError } from '../api/http-client';
+import { ApiError, readError } from '../api/http-client';
 import { mockAuth } from '../auth/mock-user';
 import { type PersonOption, usePeopleModel } from './use-people.model';
 
@@ -158,8 +160,9 @@ export function useDashboardBoardModel(): DashboardBoardModel {
       isSaving: save.isPending,
       isRefreshing: board.isFetching || isAnyLoading(results),
       canEdit: saved.canEdit,
-      canAdd: shown.widgets.length < MAX_WIDGETS,
-      error: readError(board.error) ?? readError(save.error),
+      // Cabe mais um bloco enquanto sobra ao menos 1 ponto (o peso do mais leve) na cota.
+      canAdd: boardWeight(shown.widgets) < MAX_BOARD_WEIGHT,
+      error: readError(board.error) ?? saveErrorOf(save.error, shown.widgets, shown.layout),
     },
     actions: {
       onScopeChange: (next) => {
@@ -179,7 +182,10 @@ export function useDashboardBoardModel(): DashboardBoardModel {
         if (draft) save.mutate(draft);
       },
       onLayoutChange: (layout) =>
-        edit((current) => ({ ...current, layout: normalizeLayout(layout) })),
+        edit((current) => ({
+          ...current,
+          layout: normalizeLayout(layout, compactIdsOf(current.widgets)),
+        })),
       onNewWidget: (kind, place) => setEditing({ widget: newWidget(kind), isNew: true, place }),
       onEditWidget: (id) => {
         const widget = shown.widgets.find((item) => item.id === id);
@@ -378,20 +384,67 @@ export function upsertWidget(current: Draft, widget: Widget, place?: Omit<Layout
   }
   const bottom = Math.max(0, ...current.layout.map((item) => item.y + item.h));
   const spot = place ?? { x: 0, y: bottom, w: 2, h: 2 };
+  const widgets = [...current.widgets, widget];
 
   return {
     ...current,
-    widgets: [...current.widgets, widget],
-    layout: normalizeLayout([...current.layout, { i: widget.id, ...spot }]),
+    widgets,
+    layout: normalizeLayout([...current.layout, { i: widget.id, ...spot }], compactIdsOf(widgets)),
   };
 }
 
-/** Nenhum bloco fica 1×1, e nenhum passa da borda das 4 colunas. */
-export function normalizeLayout(layout: readonly LayoutItem[]): LayoutItem[] {
+/** Os tipos que cabem numa casa só (1×1) vêm do contrato: a tela e o servidor contam igual. */
+export function compactIdsOf(widgets: readonly Widget[]): ReadonlySet<string> {
+  return new Set(
+    widgets
+      .filter((widget) => COMPACT_WIDGET_KINDS.includes(widget.kind))
+      .map((widget) => widget.id),
+  );
+}
+
+/**
+ * A recusa do "Guardar", dita pelo NOME do bloco. O servidor aponta o problema por posição
+ * (`layout.9`, `widgets.2.groupBy`), que não diz nada a quem monta o painel; aqui cada um vira
+ * `"Tarefas": o motivo`. O rascunho continua aberto, para a pessoa consertar e guardar de novo.
+ */
+export function saveErrorOf(
+  error: unknown,
+  widgets: readonly Widget[],
+  layout: readonly LayoutItem[],
+): string | null {
+  if (!error) return null;
+  const details = error instanceof ApiError ? error.details : [];
+  if (details.length === 0) return `Não guardei o painel: ${readError(error)}`;
+
+  const titleAt = (path: string): string | null => {
+    const [list, index] = path.split('.');
+    const position = Number(index);
+    if (list === 'widgets') return widgets[position]?.title ?? null;
+    if (list !== 'layout') return null;
+    const id = layout[position]?.i;
+    return widgets.find((widget) => widget.id === id)?.title ?? null;
+  };
+  const reasons = details.map((detail) => {
+    const title = titleAt(detail.field);
+    return title ? `"${title}": ${detail.message}` : detail.message;
+  });
+
+  return `Não guardei o painel. ${[...new Set(reasons)].join('. ')}.`;
+}
+
+/**
+ * Nenhum bloco passa da borda das 4 colunas, e nenhum fica 1×1 — gráfico numa casa só vira
+ * borrão. A exceção são os de `compactIds` (o card com anel), que são um card e cabem nela.
+ */
+export function normalizeLayout(
+  layout: readonly LayoutItem[],
+  compactIds: ReadonlySet<string> = new Set(),
+): LayoutItem[] {
   return layout.map((item) => {
     const w = Math.min(Math.max(item.w, 1), GRID_COLUMNS);
     const x = Math.min(item.x, GRID_COLUMNS - w);
+    const isTooSmall = w < 2 && item.h < 2 && !compactIds.has(item.i);
 
-    return { i: item.i, x, y: item.y, w, h: w < 2 && item.h < 2 ? 2 : item.h };
+    return { i: item.i, x, y: item.y, w, h: isTooSmall ? 2 : item.h };
   });
 }

@@ -27,7 +27,7 @@ export const NO_FILTER = '';
 type Option = { value: string; label: string };
 
 /** Os gráficos que mostram um número só (sem agrupar). O destaque agrupa: os grupos viram cards. */
-const SINGLE_VALUE: readonly WidgetKind[] = ['radial'];
+const SINGLE_VALUE: readonly WidgetKind[] = ['radial', 'ringCard'];
 
 export function isPair(kind: WidgetKind): boolean {
   return PAIR_WIDGETS.includes(kind);

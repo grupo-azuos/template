@@ -76,6 +76,14 @@ export const Gauge: Story = withWidget({
   onlyMine: true,
 });
 
+/** O card com anel: o número, "de" o total, e a fatia ao lado. */
+export const RingCard: Story = withWidget({
+  kind: 'ringCard',
+  title: 'Meus no total',
+  groupBy: null,
+  onlyMine: true,
+});
+
 export const StackedBars: Story = withWidget(
   {
     kind: 'stacked',

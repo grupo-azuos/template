@@ -2,6 +2,7 @@ import {
   CalendarDays,
   CalendarRange,
   ChartArea,
+  Donut,
   ChartBar,
   ChartColumnBig,
   ChartColumnDecreasing,
@@ -50,10 +51,11 @@ export const WIDGET_KIND_LOOK: Record<WidgetKind, { icon: LucideIcon; short: str
   pareto: { icon: ChartColumnDecreasing, short: 'Pareto' },
   cumulative: { icon: ChartLine, short: 'Acumulado' },
   grouped: { icon: ChartColumnBig, short: 'Lado a lado' },
+  ringCard: { icon: Donut, short: 'Card com anel' },
 };
 
 /**
- * OS SEIS MAIS USADOS, à frente; os outros quinze num segundo grupo. Vinte e uma opções com o
+ * OS SEIS MAIS USADOS, à frente; os outros dezesseis num segundo grupo. Vinte e duas opções com o
  * mesmo peso demoram para escolher (Lei de Hick) — o comum fica à mão, o raro continua a um passo.
  */
 export const MAIN_KINDS: readonly WidgetKind[] = [
@@ -70,6 +72,7 @@ export const OTHER_KINDS: readonly WidgetKind[] = [
   'radar',
   'treemap',
   'radial',
+  'ringCard',
   'stacked',
   'heatmap',
   'calendar',
@@ -90,6 +93,8 @@ export function defaultSizeOf(kind: WidgetKind): { w: number; h: number } {
   // A agenda mostra o mês inteiro (até seis semanas): três andares.
   if (kind === 'agenda') return { w: 4, h: 3 };
   if (kind === 'radial' || kind === 'list') return { w: 1, h: 2 };
+  // O card com anel é um card só, como os de número: um andar.
+  if (kind === 'ringCard') return { w: 1, h: 1 };
 
   return { w: 2, h: 2 };
 }
