@@ -78,6 +78,15 @@ describe('AzuosNotificationHistoryView', () => {
     expect(view.actions.onFiltersChange).toHaveBeenCalledWith({ search: 'bombeiro' });
   });
 
+  /* REGRESSÃO: com altura máxima, o diálogo encolhia a cada filtro que esvaziava a lista. */
+  it('keeps the dialog at a fixed height, whatever the filters leave in the list', () => {
+    render(<AzuosNotificationHistoryView {...props({ state: OPEN })} />);
+    const dialog = screen.getByRole('dialog', { name: 'Todas as notificações' });
+
+    expect(dialog.className).toContain('h-[min(44rem,90dvh)]');
+    expect(dialog.className).not.toMatch(/\bmax-h-/);
+  });
+
   // feliz
   it('opens the topic of a notification and marks all from the dialog', async () => {
     const view = props({ state: OPEN });

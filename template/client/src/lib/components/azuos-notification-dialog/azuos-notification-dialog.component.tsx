@@ -284,7 +284,8 @@ function NotificationGroup({
       </h3>
       <ul className="flex flex-col gap-2">
         {group.items.map((item) => (
-          <li key={item.id} className="rounded-box bg-card text-foreground">
+          /* `overflow-hidden`: o hover reto da linha fica dentro do canto arredondado do card. */
+          <li key={item.id} className="rounded-box bg-card text-foreground overflow-hidden">
             {/* O anel de foco por DENTRO do card: a lista rola e cortava o anel por fora. */}
             <AzuosNotificationCard
               data={{ notification: isUrgent ? { ...item, action: null } : item }}

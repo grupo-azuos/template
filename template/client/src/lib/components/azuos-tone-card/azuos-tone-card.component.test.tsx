@@ -26,7 +26,7 @@ describe('AzuosToneCard', () => {
     );
 
     const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-    expect(wash.style.backgroundColor).toContain('--hue-green');
+    expect(wash.style.getPropertyValue('--card-veil')).toContain('--hue-green');
   });
 
   it('turns the whole card into a button when it is clickable', async () => {
@@ -56,7 +56,7 @@ describe('AzuosToneCard', () => {
     const { container } = render(<AzuosToneCard data={{ label: 'Neutro' }}>x</AzuosToneCard>);
 
     const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-    expect(wash.style.backgroundColor).toContain('--foreground');
+    expect(wash.style.getPropertyValue('--card-veil')).toContain('--hover-veil');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

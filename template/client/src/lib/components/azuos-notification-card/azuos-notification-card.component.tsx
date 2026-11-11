@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 
 import { type Notification } from '@template/shared/schemas/notification.schema';
 
+import { type AzuosCardHue, cardToneClasses, cardToneVeilOf } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 import { notificationLook, timeAgo } from '../../utils/notification-style.util';
 
@@ -36,7 +37,8 @@ function CompactCard({ data, ui, actions }: AzuosNotificationCardProps) {
       type="button"
       onClick={() => actions?.onOpen?.(notification)}
       className={cn(
-        'rounded-box hover:bg-accent focus-visible:ring-ring/50 flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors outline-none focus-visible:ring-[3px]',
+        /* Hover reto, no véu do card: a linha não ganha pílula arredondada por dentro da lista. */
+        'hover:bg-hover-veil focus-visible:ring-ring/50 flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors outline-none focus-visible:ring-[3px]',
         ui?.className,
       )}
     >
@@ -63,9 +65,7 @@ function CompactCard({ data, ui, actions }: AzuosNotificationCardProps) {
           </span>
         </span>
         <span className="text-ink-600 line-clamp-2 block text-xs">{notification.body}</span>
-        <span className={cn('mt-1 block text-xs font-semibold uppercase', look.tone.text)}>
-          {look.label}
-        </span>
+        <LevelPill data={{ label: look.label, hue: look.hue }} />
       </span>
       {isUnread ? (
         <span className={cn('mt-1.5 size-2 shrink-0 rounded-full', look.tone.swatch)}>
@@ -73,6 +73,26 @@ function CompactCard({ data, ui, actions }: AzuosNotificationCardProps) {
         </span>
       ) : null}
     </button>
+  );
+}
+
+/**
+ * O NÍVEL EM PÍLULA: o fundo é o tom a 16% (o véu do card colorido) e o texto segue o do tema.
+ * Era só a palavra pintada no tom — o amarelo sumia no claro e o vermelho apagava no escuro.
+ */
+function LevelPill({ data }: { data: { label: string; hue: AzuosCardHue } }) {
+  return (
+    <span
+      data-slot="notification-level"
+      className="rounded-chip text-foreground mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold uppercase"
+      style={{ backgroundColor: cardToneVeilOf(data.hue) }}
+    >
+      <span
+        aria-hidden="true"
+        className={cn('size-1.5 rounded-full', cardToneClasses(data.hue).swatch)}
+      />
+      {data.label}
+    </span>
   );
 }
 

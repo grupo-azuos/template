@@ -1,12 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import gsap from 'gsap';
 import { Building2 } from 'lucide-react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AzuosCardSurface } from './azuos-card-surface.component';
-
-afterEach(() => vi.restoreAllMocks());
 
 describe('AzuosCardSurface', () => {
   // feliz
@@ -18,29 +15,29 @@ describe('AzuosCardSurface', () => {
     expect(card.className).not.toMatch(/border-(?!border)|bg-hue/);
   });
 
-  it('grows the wash from the pointer with GSAP on hover, and shrinks it on leave', () => {
-    const fromTo = vi.spyOn(gsap, 'fromTo');
-    const to = vi.spyOn(gsap, 'to');
-    render(<AzuosCardSurface data={{ label: 'Empresa' }}>x</AzuosCardSurface>);
-    const card = screen.getByRole('group', { name: 'Empresa' });
+  /* O hover é um véu PARADO que cobre o card inteiro: a mancha que crescia do mouse saiu. */
+  it('covers the whole card with a still veil that only shows on hover', () => {
+    const { container } = render(
+      <AzuosCardSurface data={{ label: 'Empresa' }}>x</AzuosCardSurface>,
+    );
+    const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
 
-    fireEvent.pointerEnter(card, { clientX: 5, clientY: 5 });
-    expect(fromTo).toHaveBeenCalledOnce();
-    fireEvent.pointerLeave(card, { clientX: 5, clientY: 5 });
-    expect(to).toHaveBeenCalledOnce();
+    expect(wash).toHaveClass('inset-0', 'group-hover/card:bg-(--card-veil)');
+    expect(wash.className).not.toMatch(/rounded-full/);
   });
 
-  it('paints the wash in the accent only when the flag is on', () => {
+  it('paints the veil in the accent only when the flag is on', () => {
     const { container, rerender } = render(
       <AzuosCardSurface ui={{ hoverTone: 'red' }}>x</AzuosCardSurface>,
     );
     const wash = () => container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-    expect(wash().style.backgroundColor).toContain('--foreground');
+    const veil = () => wash().style.getPropertyValue('--card-veil');
+    expect(veil()).toContain('--hover-veil');
 
     rerender(
       <AzuosCardSurface ui={{ hoverTone: 'red', isHoverColored: true }}>x</AzuosCardSurface>,
     );
-    expect(wash().style.backgroundColor).toContain('--hue-red');
+    expect(veil()).toContain('--hue-red');
   });
 
   it('draws the mark icon in the accent, and turns into a real button when clickable', async () => {
@@ -73,16 +70,9 @@ describe('AzuosCardSurface', () => {
   });
 
   // triste
-  it('skips the growth when motion is reduced, and is not a button without an action', () => {
-    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true } as MediaQueryList);
-    const fromTo = vi.spyOn(gsap, 'fromTo');
+  it('is not a button without an action', () => {
     render(<AzuosCardSurface data={{ label: 'Parado' }}>x</AzuosCardSurface>);
-    const card = screen.getByRole('group', { name: 'Parado' });
 
-    fireEvent.pointerEnter(card, { clientX: 1, clientY: 1 });
-    fireEvent.pointerLeave(card, { clientX: 1, clientY: 1 });
-
-    expect(fromTo).not.toHaveBeenCalled();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

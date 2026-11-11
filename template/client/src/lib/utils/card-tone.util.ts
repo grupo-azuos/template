@@ -104,6 +104,15 @@ export function cardToneClasses(tone: AzuosCardTone | null | undefined): AzuosCa
   return HUE_CLASSES[cardHueOf(tone)];
 }
 
+/**
+ * O VÉU NO TOM: o sotaque a 16%, por cima do fundo. É o hover do card colorido e o fundo da pill
+ * de nível da notificação — transparente de propósito, para o texto por cima seguir no tom do tema
+ * (escuro no claro, claro no escuro) em vez de brigar com um fundo cheio.
+ */
+export function cardToneVeilOf(tone: AzuosCardTone | null | undefined): string {
+  return `color-mix(in srgb, ${cardToneClasses(tone).color} 16%, transparent)`;
+}
+
 /** O ângulo de cada sotaque no círculo de cores, para casar uma cor livre com o mais próximo. */
 const HUE_ANGLE: [AzuosCardHue, number][] = [
   ['red', 0],

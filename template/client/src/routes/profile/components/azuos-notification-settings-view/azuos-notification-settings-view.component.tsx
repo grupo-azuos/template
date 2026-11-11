@@ -1,4 +1,5 @@
 import { Save } from 'lucide-react';
+import { type CSSProperties } from 'react';
 
 import {
   NOTIFICATION_SEVERITIES,
@@ -10,6 +11,7 @@ import { AzuosActionButton } from '../../../../lib/components/azuos-action-butto
 import { AzuosCheckboxField } from '../../../../lib/components/azuos-checkbox-field/azuos-checkbox-field.component';
 import { AzuosPanelCard } from '../../../../lib/components/azuos-panel-card/azuos-panel-card.component';
 import { AzuosSelectField } from '../../../../lib/components/azuos-select-field/azuos-select-field.component';
+import { cardToneVeilOf } from '../../../../lib/utils/card-tone.util';
 import { cn } from '../../../../lib/utils/cn.util';
 import { notificationLook } from '../../../../lib/utils/notification-style.util';
 import { type NotificationSettingsModel } from '../../../../lib/view-models/use-notification-settings.model';
@@ -70,15 +72,28 @@ export function AzuosNotificationSettingsView({
               >
                 <Icon className="size-4" />
               </span>
-              <AzuosSelectField
-                data={{ value: setting.severity, options: SEVERITY_OPTIONS }}
-                ui={{ ariaLabel: `Nível de ${topic.label}`, className: 'w-44' }}
-                state={{ isDisabled: !setting.isEnabled || state.isSaving }}
-                actions={{
-                  onChange: (value) =>
-                    actions.onSeverityChange(setting.topic, value as NotificationSeverity),
-                }}
-              />
+              {/* O seletor leva a cor do nível escolhido, no mesmo véu da pill da notificação. O
+                  fundo sólido de campo fica embaixo (`bg-muted` no invólucro), e o véu do tom por
+                  cima — o campo continua opaco. Desligado, fica no cinza de sempre. */}
+              <span
+                data-slot="severity-select"
+                className="rounded-control bg-muted"
+                style={
+                  {
+                    '--level-veil': setting.isEnabled ? cardToneVeilOf(look.hue) : 'transparent',
+                  } as CSSProperties
+                }
+              >
+                <AzuosSelectField
+                  data={{ value: setting.severity, options: SEVERITY_OPTIONS }}
+                  ui={{ ariaLabel: `Nível de ${topic.label}`, className: 'w-44 bg-(--level-veil)' }}
+                  state={{ isDisabled: !setting.isEnabled || state.isSaving }}
+                  actions={{
+                    onChange: (value) =>
+                      actions.onSeverityChange(setting.topic, value as NotificationSeverity),
+                  }}
+                />
+              </span>
             </li>
           );
         })}
