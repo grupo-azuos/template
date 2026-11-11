@@ -11,12 +11,15 @@ import {
 } from '@template/shared/schemas/dashboard-board.schema';
 import { type UserRole } from '@template/shared/schemas/user.schema';
 
+import { ApiError } from '../api/http-client';
 import { MOCK_SESSION_USER, mockAuth } from '../auth/mock-user';
 import { widgetFixture } from '../utils/dashboard-fixture.util';
 import {
   activeValues,
+  compactIdsOf,
   normalizeLayout,
   queryOf,
+  saveErrorOf,
   upsertWidget,
   useDashboardBoardModel,
   visibleScopes,
@@ -318,5 +321,68 @@ describe('board layout', () => {
     expect(normalizeLayout([{ i: 'a', x: 3, y: 0, w: 3, h: 1 }])).toEqual([
       { i: 'a', x: 1, y: 0, w: 3, h: 1 },
     ]);
+  });
+
+  // feliz
+  it('lets the ring card stay 1x1, and only it', () => {
+    const compact = compactIdsOf([
+      widgetFixture({ id: 'ring', kind: 'ringCard' }),
+      widgetFixture({ id: 'gauge', kind: 'radial' }),
+    ]);
+
+    expect(
+      normalizeLayout(
+        [
+          { i: 'ring', x: 0, y: 0, w: 1, h: 1 },
+          { i: 'gauge', x: 1, y: 0, w: 1, h: 1 },
+        ],
+        compact,
+      ),
+    ).toEqual([
+      { i: 'ring', x: 0, y: 0, w: 1, h: 1 },
+      { i: 'gauge', x: 1, y: 0, w: 1, h: 2 },
+    ]);
+  });
+});
+
+describe('saveErrorOf', () => {
+  const widgets = [
+    widgetFixture({ id: 'a', title: 'Tarefas' }),
+    widgetFixture({ id: 'b', title: 'Atrasadas' }),
+  ];
+  const layout = [
+    { i: 'b', x: 0, y: 0, w: 1, h: 1 },
+    { i: 'a', x: 1, y: 0, w: 2, h: 2 },
+  ];
+
+  // triste
+  /* A recusa chegava com a posição ("layout.0"), sem dizer qual bloco. */
+  it('names the refused block instead of its position', () => {
+    const error = new ApiError(422, 'Confira os campos destacados.', [
+      { field: 'layout.0', message: 'O bloco ocupa no mínimo duas casas' },
+      { field: 'widgets.0.groupBy', message: 'Escolha o agrupamento' },
+    ]);
+
+    expect(saveErrorOf(error, widgets, layout)).toBe(
+      'Não guardei o painel. "Atrasadas": O bloco ocupa no mínimo duas casas. "Tarefas": Escolha o agrupamento.',
+    );
+  });
+
+  // triste
+  it('keeps the reason of a refusal without details, and of a field outside the blocks', () => {
+    expect(saveErrorOf(new ApiError(422, 'Passa da cota'), widgets, layout)).toBe(
+      'Não guardei o painel: Passa da cota',
+    );
+    const filters = new ApiError(400, 'x', [
+      { field: 'filters', message: 'O painel tem um filtro de cada tipo' },
+    ]);
+    expect(saveErrorOf(filters, widgets, layout)).toBe(
+      'Não guardei o painel. O painel tem um filtro de cada tipo.',
+    );
+  });
+
+  // feliz
+  it('says nothing while the save did not fail', () => {
+    expect(saveErrorOf(null, widgets, layout)).toBeNull();
   });
 });

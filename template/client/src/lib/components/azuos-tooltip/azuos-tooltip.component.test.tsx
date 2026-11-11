@@ -39,6 +39,22 @@ describe('AzuosTooltip', () => {
     );
   });
 
+  // feliz
+  it('opens on command, without the mouse, when the screen points at the element', async () => {
+    renderTooltip({ state: { isOpen: true } });
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('O texto inteiro');
+  });
+
+  // triste
+  it('stays closed on hover while the command says closed', async () => {
+    renderTooltip({ state: { isOpen: false } });
+
+    await userEvent.hover(screen.getByRole('button', { name: 'Gatilho' }));
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
   // triste
   it('gives back the plain element, with no tooltip, when it is disabled', async () => {
     renderTooltip({ state: { isDisabled: true } });

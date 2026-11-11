@@ -9,7 +9,25 @@ import {
   attachDragGhost,
   AzuosBoardStudio,
   type AzuosBoardStudioProps,
+  paletteHint,
 } from './azuos-board-studio.component';
+
+describe('paletteHint', () => {
+  // feliz
+  it('says how many points are left', () => {
+    expect(paletteHint(1)).toBe('Sobram 1 ponto. Arraste para a grade, ou clique para pôr no fim.');
+  });
+
+  // triste
+  it('says the quota is used up, or how far an old board went past it', () => {
+    expect(paletteHint(0)).toBe(
+      'O painel usou a cota toda. Tire ou troque um bloco para pôr outro.',
+    );
+    expect(paletteHint(-4)).toBe(
+      'O painel passou 4 da cota. Tire ou troque um bloco para pôr outro.',
+    );
+  });
+});
 
 function makeProps(
   overrides: Partial<AzuosBoardStudioProps['state']> = {},
@@ -54,7 +72,10 @@ describe('AzuosBoardStudio', () => {
 
     expect(props.actions.onNewWidget).toHaveBeenCalledWith('heatmap', { x: 0, y: 2, w: 2, h: 2 });
     // O destaque nasce na largura toda, em dois andares: o Zuzu, o total e os quatro cards.
-    expect(screen.getAllByText('4 × 2 casas').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('4 × 2 casas · 2 pontos').length).toBeGreaterThan(0);
+    // Cada tipo mostra o seu peso: o card com anel é o mais leve, o mapa de calor o mais pesado.
+    expect(screen.getByText('1 × 1 casas · 1 ponto')).toBeInTheDocument();
+    expect(screen.getAllByText('2 × 2 casas · 4 pontos').length).toBeGreaterThan(0);
     // Sem o bloco de "disposição" em código: quem monta não lê coordenada, vê a grade.
     expect(screen.queryByText('Disposição')).not.toBeInTheDocument();
   });
@@ -104,9 +125,25 @@ describe('AzuosBoardStudio', () => {
   it('locks the kinds when the board is full, and shows the save error', () => {
     render(<AzuosBoardStudio {...makeProps({ canAdd: false, error: 'Falhou ao salvar' }, [])} />);
 
-    expect(screen.getByText('O painel já tem o máximo de blocos.')).toBeInTheDocument();
+    expect(
+      screen.getByText('O painel usou a cota toda. Tire ou troque um bloco para pôr outro.'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pôr bloco Colunas' })).toBeDisabled();
     expect(screen.getByRole('alert')).toHaveTextContent('Falhou ao salvar');
+  });
+
+  // triste
+  it('turns off only the kinds that no longer fit what is left of the quota', () => {
+    /* 22 de 24 pontos: sobram 2 — cabe um gráfico comum, não um cruzado. */
+    const widgets = Array.from({ length: 11 }, (_, index) =>
+      widgetFixture({ id: `c${index}`, kind: 'column', groupBy: 'status' }),
+    );
+    render(<AzuosBoardStudio {...makeProps({}, widgets)} />);
+
+    expect(screen.getByText('22 de 24 pontos')).toBeInTheDocument();
+    expect(screen.getByText(/^Sobram 2 pontos\./)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pôr bloco Colunas' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Pôr bloco Calor' })).toBeDisabled();
   });
 
   // triste

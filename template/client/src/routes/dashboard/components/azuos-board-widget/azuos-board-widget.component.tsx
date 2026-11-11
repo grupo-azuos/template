@@ -7,6 +7,9 @@ import {
   DEFAULT_WINDOW,
   type Widget,
   WIDGET_PERIOD_LABELS,
+  WIDGET_WEIGHTS,
+  weightLabel,
+  widgetWeight,
   windowLabel,
   windowRange,
 } from '@template/shared/schemas/dashboard-board.schema';
@@ -17,6 +20,7 @@ import { AzuosCalendarChart } from '../../../../lib/components/azuos-calendar-ch
 import { AzuosColumnChart } from '../../../../lib/components/azuos-column-chart/azuos-column-chart.component';
 import { AzuosDashboardHeroCard } from '../azuos-dashboard-hero-card/azuos-dashboard-hero-card.component';
 import { AzuosDonutChart } from '../../../../lib/components/azuos-donut-chart/azuos-donut-chart.component';
+import { AzuosEchart } from '../../../../lib/components/azuos-echart/azuos-echart.component';
 import { AzuosHeatmapChart } from '../../../../lib/components/azuos-heatmap-chart/azuos-heatmap-chart.component';
 import { AzuosRadarChart } from '../../../../lib/components/azuos-radar-chart/azuos-radar-chart.component';
 import { AzuosRadialChart } from '../../../../lib/components/azuos-radial-chart/azuos-radial-chart.component';
@@ -30,8 +34,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../../../../lib/components/azuos-popover/azuos-popover';
-import { type AzuosCardHue } from '../../../../lib/utils/card-tone.util';
+import { type AzuosCardHue, cardToneClasses } from '../../../../lib/utils/card-tone.util';
 import { cn } from '../../../../lib/utils/cn.util';
+import {
+  type ChartOption,
+  type ChartTheme,
+  formatCount,
+  resolveColor,
+} from '../../../../lib/utils/echarts.util';
 import { themeColor } from '../../../../lib/utils/theme-color.util';
 import { type WidgetState } from '../../../../lib/view-models/use-dashboard-board.model';
 import { AzuosAgendaCalendar } from '../azuos-agenda-calendar/azuos-agenda-calendar.component';
@@ -67,13 +77,13 @@ export const DRAG_HANDLE = 'board-drag-handle';
 /** O que, dentro da alça, é clique e não começo de arrasto: os botões do cabeçalho. */
 export const NO_DRAG = 'board-no-drag';
 
-const STAT_HUES: AzuosCardHue[] = ['blue', 'green', 'amber', 'plum'];
+const STAT_HUES: AzuosCardHue[] = ['blue', 'green', 'yellow', 'plum'];
 
 export function AzuosBoardWidget({ data, state, actions }: AzuosBoardWidgetProps) {
   const { widget } = data;
   const [isExpanded, setIsExpanded] = useState(false);
   /* Os cards e o destaque já são superfícies; os gráficos ganham a moldura do bloco. */
-  if (widget.kind === 'stats' || widget.kind === 'hero') {
+  if (widget.kind === 'stats' || widget.kind === 'hero' || widget.kind === 'ringCard') {
     return (
       <div className="relative h-full">
         <WidgetBody data={data} />
@@ -219,6 +229,13 @@ function EditTools({
   return (
     <>
       {ui?.withHandle ? <DragHandle data={{ title: widget.title }} /> : null}
+      {/* O peso do bloco na cota do painel, à vista de quem monta — é o que se gasta com ele. */}
+      <span
+        aria-label={`Peso: ${weightLabel(widgetWeight(widget))}`}
+        className="shrink-0 rounded-chip bg-muted px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-ink-700"
+      >
+        {weightLabel(widgetWeight(widget))}
+      </span>
       {actions.onChangeKind ? (
         <KindSwitch
           data={{ kind: widget.kind, title: widget.title }}
@@ -316,6 +333,7 @@ function KindGroup({
               type="button"
               role="radio"
               aria-checked={isChosen}
+              aria-description={weightLabel(WIDGET_WEIGHTS[kind])}
               onClick={() => actions.onPick(kind)}
               className={cn(
                 'flex control-lg items-center gap-2 rounded-control text-left text-xs font-semibold',
@@ -323,7 +341,17 @@ function KindGroup({
               )}
             >
               <Icon className="size-4" aria-hidden="true" />
-              {look.short}
+              <span className="min-w-0 flex-1 truncate">{look.short}</span>
+              {/* O peso de cada tipo ao trocar o gráfico; o leitor de tela o ouve na descrição. */}
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'shrink-0 pr-1 font-medium',
+                  isChosen ? 'text-primary-foreground' : 'text-ink-500',
+                )}
+              >
+                {WIDGET_WEIGHTS[kind]} pt
+              </span>
             </button>
           );
         })}
@@ -496,7 +524,107 @@ const BODIES: Record<Widget['kind'], (props: BodyProps) => ReactNode> = {
       state={{ isLoading }}
     />
   ),
+  /* O card com anel: o mesmo número do medidor — quantos o recorte pega da fonte inteira —, só
+     que como card, com a fatia ao lado. */
+  ringCard: ({ widget, result, isLoading, noun }) => (
+    <RingCardBody
+      data={{
+        title: widget.title,
+        count: result.data?.total ?? 0,
+        total: result.data?.grandTotal ?? 0,
+        noun,
+      }}
+      state={{ isLoading }}
+    />
+  ),
 };
+
+/**
+ * O card de número com o ANEL ao lado: o número diz QUANTOS, o anel mostra a fatia do total que
+ * isso representa, e o meio do anel repete a contagem ("14 de 136"). O card reserva a direita
+ * (`pr-32`) para o texto nunca passar por baixo do anel.
+ */
+function RingCardBody({
+  data,
+  state,
+}: {
+  data: { title: string; count: number; total: number; noun: string };
+  state: { isLoading: boolean };
+}) {
+  const hue = cardToneClasses(RING_TONE).color;
+  const isEmpty = data.total <= 0;
+
+  return (
+    <div className="relative h-full">
+      <AzuosStatCard
+        data={{
+          label: data.title,
+          value: formatCount(data.count),
+          hint: `de ${formatCount(data.total)} ${data.noun}`,
+        }}
+        ui={{ tone: RING_TONE, icon: Hash, className: 'h-full pr-32' }}
+        state={{ isLoading: state.isLoading }}
+      />
+      <div className="absolute top-1/2 right-5 size-24 -translate-y-1/2">
+        <AzuosEchart
+          data={{
+            option: (theme) =>
+              countRingOption({ count: data.count, total: data.total, hue }, theme),
+            description: `${data.title}: ${formatCount(data.count)} de ${formatCount(data.total)} ${data.noun}`,
+          }}
+          ui={{ heightClass: 'h-full' }}
+          state={{ isLoading: state.isLoading }}
+        />
+        {state.isLoading ? null : (
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl leading-none font-bold text-foreground tabular-nums">
+              {isEmpty ? '—' : formatCount(data.count)}
+            </span>
+            {isEmpty ? null : (
+              <span className="mt-0.5 text-xs leading-none text-muted-foreground tabular-nums">
+                de {formatCount(data.total)}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const RING_TONE: AzuosCardHue = 'blue';
+
+/**
+ * Duas fatias: a contagem no sotaque e o que falta na trilha do tema. A contagem nunca passa do
+ * total (um dado fora do esperado não "estoura" o anel), e sem total o anel é só a trilha.
+ */
+export function countRingOption(
+  data: { count: number; total: number; hue: string },
+  theme: Pick<ChartTheme, 'track'>,
+): ChartOption {
+  const total = Math.max(data.total, 0);
+  const done = Math.min(Math.max(data.count, 0), total);
+
+  return {
+    series: [
+      {
+        type: 'pie',
+        radius: ['72%', '100%'],
+        silent: true,
+        label: { show: false },
+        emphasis: { disabled: true },
+        data: [
+          { name: 'Contagem', value: done, itemStyle: { color: resolveColor(data.hue) } },
+          {
+            name: 'Restante',
+            value: total > 0 ? total - done : 1,
+            itemStyle: { color: theme.track },
+          },
+        ],
+      },
+    ],
+  };
+}
 
 function ColumnBody({
   slices,

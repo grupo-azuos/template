@@ -61,6 +61,69 @@ describe('who sees and edits a board', () => {
   });
 });
 
+describe('the weight quota of a board', () => {
+  /* Cada bloco cruzado vale 4 pontos: sete são 28, e passam da cota de 24. */
+  const heavy = (count: number) => {
+    const widgets = Array.from({ length: count }, (_, index) => ({
+      id: `h${index}`,
+      kind: 'heatmap' as const,
+      title: 'Cruzado',
+      source: 'tasks' as const,
+      groupBy: 'status',
+      splitBy: 'createdBy',
+      filterId: null,
+      onlyMine: false,
+      period: 'all' as const,
+      window: null,
+    }));
+
+    return {
+      widgets,
+      layout: widgets.map((widget, index) => ({ i: widget.id, x: 0, y: index * 2, w: 2, h: 2 })),
+      filters: [],
+    };
+  };
+  const saved = {
+    scope: 'team',
+    widgets: [],
+    layout: [],
+    filters: [],
+    updatedAt: new Date(),
+    updatedBy: gestora.id,
+  };
+
+  // triste
+  it('refuses a board that goes past the weight quota', async () => {
+    const saveBoard = vi.fn();
+    const service = makeService({ findBoard: vi.fn().mockResolvedValue(null), saveBoard });
+
+    await expect(service.saveBoard(gestora, 'team', heavy(7))).rejects.toThrow(
+      'O painel passa da cota de 24 pontos (28). Tire ou troque um bloco.',
+    );
+    expect(saveBoard).not.toHaveBeenCalled();
+  });
+
+  // feliz
+  it('saves a board right at the quota', async () => {
+    const saveBoard = vi.fn().mockResolvedValue(saved);
+    const service = makeService({ findBoard: vi.fn().mockResolvedValue(null), saveBoard });
+
+    await expect(service.saveBoard(gestora, 'team', heavy(6))).resolves.toBeDefined();
+  });
+
+  // feliz
+  it('still saves a board that was already past the quota, as long as it does not grow', async () => {
+    const saveBoard = vi.fn().mockResolvedValue(saved);
+    const findBoard = vi.fn().mockResolvedValue({ ...saved, widgets: heavy(7).widgets });
+    const service = makeService({ findBoard, saveBoard });
+
+    await expect(service.saveBoard(gestora, 'team', heavy(7))).resolves.toBeDefined();
+    await expect(service.saveBoard(gestora, 'team', heavy(8))).rejects.toThrow(
+      UnprocessableEntityException,
+    );
+  });
+});
+
 describe('DashboardBoardsService.data', () => {
   // feliz
   it('turns the saved person id into what the source keeps and labels by name', async () => {

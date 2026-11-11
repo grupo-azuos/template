@@ -4,10 +4,13 @@ import {
   type BoardFilter,
   type BoardFilterKind,
   type BoardFilterValues,
-  MAX_WIDGETS,
+  boardWeight,
   type LayoutItem,
+  MAX_BOARD_WEIGHT,
   type Widget,
+  WIDGET_WEIGHTS,
   type WidgetKind,
+  weightLabel,
 } from '@template/shared/schemas/dashboard-board.schema';
 
 import { AzuosActionButton } from '../../../../lib/components/azuos-action-button/azuos-action-button.component';
@@ -156,27 +159,29 @@ function KindPalette({
   state: AzuosBoardStudioProps['state'];
   actions: AzuosBoardStudioProps['actions'];
 }) {
+  /* A cota é de PONTOS, não de blocos: cada tipo pesa o quanto custa ao banco, e o tipo que não
+     cabe no que sobra fica desligado — os mais leves continuam à mão. */
+  const used = boardWeight(data.widgets);
+  // `canAdd` é a palavra final do view-model: sem ela, nada sobra para pôr.
+  const left = state.canAdd ? MAX_BOARD_WEIGHT - used : Math.min(MAX_BOARD_WEIGHT - used, 0);
+
   return (
     <div>
       <h3 className="flex items-center gap-2 text-sm font-bold text-ink-900">
         <LayoutDashboard className="size-4" aria-hidden="true" />
         Blocos
         <span className="ml-auto rounded-chip bg-muted px-2 py-0.5 text-xs font-medium text-ink-700">
-          {data.widgets.length}/{MAX_WIDGETS}
+          {used} de {MAX_BOARD_WEIGHT} pontos
         </span>
       </h3>
-      <p className="mt-0.5 text-xs text-ink-500">
-        {state.canAdd
-          ? 'Arraste para a grade, ou clique para pôr no fim.'
-          : 'O painel já tem o máximo de blocos.'}
-      </p>
+      <p className="mt-0.5 text-xs text-ink-500">{paletteHint(left)}</p>
       <KindGroup
-        data={{ title: 'Mais usados', kinds: MAIN_KINDS, layout: data.layout }}
+        data={{ title: 'Mais usados', kinds: MAIN_KINDS, layout: data.layout, left }}
         state={state}
         actions={actions}
       />
       <KindGroup
-        data={{ title: 'Outros', kinds: OTHER_KINDS, layout: data.layout }}
+        data={{ title: 'Outros', kinds: OTHER_KINDS, layout: data.layout, left }}
         state={state}
         actions={actions}
       />
@@ -184,12 +189,20 @@ function KindPalette({
   );
 }
 
+/** O que a lateral diz sobre a cota: quanto sobra, ou que acabou (ou passou, num painel antigo). */
+export function paletteHint(left: number): string {
+  if (left < 0) return `O painel passou ${-left} da cota. Tire ou troque um bloco para pôr outro.`;
+  if (left === 0) return 'O painel usou a cota toda. Tire ou troque um bloco para pôr outro.';
+
+  return `Sobram ${weightLabel(left)}. Arraste para a grade, ou clique para pôr no fim.`;
+}
+
 function KindGroup({
   data,
   state,
   actions,
 }: {
-  data: { title: string; kinds: readonly WidgetKind[]; layout: LayoutItem[] };
+  data: { title: string; kinds: readonly WidgetKind[]; layout: LayoutItem[]; left: number };
   state: AzuosBoardStudioProps['state'];
   actions: AzuosBoardStudioProps['actions'];
 }) {
@@ -203,13 +216,15 @@ function KindGroup({
           const look = WIDGET_KIND_LOOK[kind];
           const Icon = look.icon;
           const size = defaultSizeOf(kind);
+          const weight = WIDGET_WEIGHTS[kind];
+          const fits = state.canAdd && weight <= data.left;
 
           return (
             <li key={kind}>
               <button
                 type="button"
-                draggable={state.canAdd}
-                disabled={!state.canAdd}
+                draggable={fits}
+                disabled={!fits}
                 aria-label={`Pôr bloco ${look.short}`}
                 onDragStart={(event) => {
                   event.dataTransfer.setData(KIND_DRAG_TYPE, kind);
@@ -230,7 +245,7 @@ function KindGroup({
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-ink-900">{look.short}</span>
                   <span className="block text-xs text-ink-500">
-                    {size.w} × {size.h} casas
+                    {size.w} × {size.h} casas · {weightLabel(weight)}
                   </span>
                 </span>
                 <GripVertical

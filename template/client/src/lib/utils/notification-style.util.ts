@@ -22,7 +22,7 @@ export type NotificationLook = {
 
 const LOOKS: Record<NotificationSeverity, Omit<NotificationLook, 'tone'>> = {
   urgent: { label: 'Urgente', ask: 'Leia antes de continuar', icon: Siren, hue: 'red' },
-  important: { label: 'Importante', ask: 'Pede sua atenção hoje', icon: BellRing, hue: 'amber' },
+  important: { label: 'Importante', ask: 'Pede sua atenção hoje', icon: BellRing, hue: 'yellow' },
   normal: { label: 'Aviso', ask: 'Para você acompanhar', icon: MessageCircle, hue: 'blue' },
   info: { label: 'Novidade', ask: 'Para saber', icon: Sparkles, hue: 'green' },
 };

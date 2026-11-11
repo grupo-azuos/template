@@ -14,7 +14,9 @@ import {
   WIDGET_KIND_LABELS,
   WIDGET_PERIOD_LABELS,
   WIDGET_PERIODS,
+  WIDGET_WEIGHTS,
   type WidgetPeriod,
+  weightLabel,
   widgetSchema,
   type WidgetWindow,
   WINDOW_COUNTS,
@@ -375,7 +377,7 @@ function KindRow({
               type="button"
               role="radio"
               aria-checked={isChosen}
-              aria-description={WIDGET_KIND_LABELS[kind]}
+              aria-description={`${WIDGET_KIND_LABELS[kind]} · ${weightLabel(WIDGET_WEIGHTS[kind])}`}
               onClick={() => actions.onChange(kind)}
               className={cn(
                 'flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-box px-2 py-2.5 text-xs font-semibold transition-colors',
@@ -387,6 +389,14 @@ function KindRow({
             >
               <Icon className="size-5" aria-hidden="true" />
               {look.short}
+              {/* O peso à vista na hora de escolher: trocar o gráfico muda a conta do painel. Fora
+                  do nome acessível (o leitor de tela o ouve na descrição). */}
+              <span
+                aria-hidden="true"
+                className={cn('font-medium', isChosen ? 'text-primary-foreground' : 'text-ink-500')}
+              >
+                {weightLabel(WIDGET_WEIGHTS[kind])}
+              </span>
             </button>
           );
         })}
@@ -640,7 +650,7 @@ function Preview({
         state={state}
         actions={actions}
       />
-      <div className={state.isWide ? 'h-[62vh]' : 'h-96'}>
+      <div className={previewHeightClass(data.widget.kind, state.isWide)}>
         <AzuosBoardWidget
           data={{
             widget: { ...data.widget, title: data.widget.title || 'Sem título' },
@@ -653,6 +663,17 @@ function Preview({
       </div>
     </aside>
   );
+}
+
+/**
+ * A altura da pré-visualização. O card com anel é um card só: esticado na caixa dos gráficos
+ * (`h-96`) ele ficava gordo, com o anel solto no meio — aqui ele tem a altura de uma linha do
+ * painel (140px), a mesma em que vai nascer.
+ */
+export function previewHeightClass(kind: Widget['kind'], isWide: boolean): string {
+  if (kind === 'ringCard') return 'h-36';
+
+  return isWide ? 'h-[62vh]' : 'h-96';
 }
 
 /** O rótulo, quantos itens entram e o botão de ampliar/voltar. */

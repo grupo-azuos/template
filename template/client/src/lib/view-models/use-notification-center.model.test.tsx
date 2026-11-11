@@ -4,7 +4,11 @@ import { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { notificationFixture } from '../utils/notification-fixture.util';
-import { nextSnapshot, useNotificationCenterModel } from './use-notification-center.model';
+import {
+  nextSnapshot,
+  NOTIFICATION_TOAST_CLASSES,
+  useNotificationCenterModel,
+} from './use-notification-center.model';
 
 const navigate = vi.fn();
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
@@ -74,7 +78,9 @@ describe('useNotificationCenterModel', () => {
   });
 
   // feliz
-  it('toasts incoming news with the system open, and opens the dialog for urgent ones', async () => {
+  /* Com o sistema aberto, a notificação nova de QUALQUER nível entra no hero — não só a urgente —,
+     e a que não é urgente sai também no toast azul da marca. */
+  it('opens the dialog for every incoming one, and toasts the non urgent in blue', async () => {
     answering([]);
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
     await waitFor(() => expect(result.current.state.isLoading).toBe(false));
@@ -83,10 +89,16 @@ describe('useNotificationCenterModel', () => {
     act(() => result.current.actions.onMarkAllRead());
 
     await waitFor(() => expect(result.current.state.isDialogOpen).toBe(true));
-    expect(result.current.data.dialogItems.map((item) => item.severity)).toEqual(['urgent']);
+    expect(result.current.data.dialogItems.map((item) => item.severity)).toEqual([
+      'urgent',
+      'normal',
+    ]);
     expect(toast).toHaveBeenCalledWith(
       expect.stringContaining('Ana comentou numa tarefa sua'),
-      expect.objectContaining({ id: notificationFixture('normal').id }),
+      expect.objectContaining({
+        id: notificationFixture('normal').id,
+        classNames: NOTIFICATION_TOAST_CLASSES,
+      }),
     );
   });
 

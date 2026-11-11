@@ -4,17 +4,25 @@ import {
   boardFilterApplies,
   boardMatches,
   boardMatchGroup,
+  boardWeight,
   DEFAULT_WINDOW,
   EMPTY_BOARD_FILTER_VALUES,
   type FilterGroup,
   filterProblems,
   filterSize,
   layoutItemSchema,
+  MAX_BOARD_WEIGHT,
+  MAX_WIDGETS,
+  MIN_CELLS_PROBLEM,
   periodRange,
   saveBoardSchema,
   saveFilterSchema,
+  WIDGET_KINDS,
+  WIDGET_WEIGHTS,
+  weightLabel,
   widgetQuerySchema,
   widgetSchema,
+  widgetWeight,
   widgetWindowSchema,
   windowLabel,
   windowRange,
@@ -110,16 +118,21 @@ describe('layoutItemSchema', () => {
   });
 
   // triste
-  it('rejects 1x1 and blocks past the edge', () => {
-    expect(layoutItemSchema.safeParse({ i: 'a', x: 0, y: 0, w: 1, h: 1 }).success).toBe(false);
+  it('rejects blocks past the edge, and leaves 1x1 to the board, which knows the kind', () => {
     expect(layoutItemSchema.safeParse({ i: 'a', x: 3, y: 0, w: 2, h: 2 }).success).toBe(false);
+    expect(layoutItemSchema.safeParse({ i: 'a', x: 0, y: 0, w: 1, h: 1 }).success).toBe(true);
   });
 });
 
 describe('saveBoardSchema', () => {
   // triste
-  it('rejects more than 10 blocks and blocks without a place', () => {
-    const widgets = Array.from({ length: 11 }, (_, index) => ({ ...WIDGET, id: `w${index}` }));
+  /* O teto da lista (24) é só a trava contra um pedido absurdo; quem limita o painel é a cota de
+     pontos, conferida no servidor. */
+  it('rejects more blocks than the list cap and blocks without a place', () => {
+    const widgets = Array.from({ length: MAX_WIDGETS + 1 }, (_, index) => ({
+      ...WIDGET,
+      id: `w${index}`,
+    }));
     const layout = widgets.map((widget, index) => ({
       i: widget.id,
       x: 0,
@@ -139,6 +152,58 @@ describe('saveBoardSchema', () => {
         layout: [{ i: 'w1', x: 0, y: 0, w: 2, h: 2 }],
       }).success,
     ).toBe(true);
+  });
+
+  // feliz
+  /* A tela deixa o card com anel em 1x1: o contrato precisa aceitar, ou o painel não salva. */
+  it('accepts a ring card in a single cell', () => {
+    const ring = { ...WIDGET, id: 'r1', kind: 'ringCard', groupBy: null };
+    expect(
+      saveBoardSchema.safeParse({
+        widgets: [WIDGET, ring],
+        layout: [
+          { i: 'w1', x: 0, y: 0, w: 2, h: 2 },
+          { i: 'r1', x: 2, y: 0, w: 1, h: 1 },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  // triste
+  it('rejects any other block in a single cell, pointing at its place', () => {
+    const result = saveBoardSchema.safeParse({
+      widgets: [WIDGET],
+      layout: [{ i: 'w1', x: 0, y: 0, w: 1, h: 1 }],
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]).toMatchObject({
+      message: MIN_CELLS_PROBLEM,
+      path: ['layout', 0],
+    });
+  });
+});
+
+describe('widget weights', () => {
+  // feliz
+  it('weighs each block by what it costs, and sums the board', () => {
+    expect(widgetWeight({ kind: 'ringCard' })).toBe(1);
+    expect(widgetWeight({ kind: 'stats', groupBy: null })).toBe(1);
+    expect(widgetWeight({ kind: 'stats', groupBy: 'status' })).toBe(2);
+    expect(widgetWeight({ kind: 'area' })).toBe(3);
+    expect(widgetWeight({ kind: 'heatmap' })).toBe(4);
+    expect(boardWeight([{ kind: 'ringCard' }, { kind: 'column' }, { kind: 'sankey' }])).toBe(7);
+    expect(weightLabel(1)).toBe('1 ponto');
+    expect(weightLabel(4)).toBe('4 pontos');
+  });
+
+  // triste
+  it('gives every kind a weight between 1 and 4, and an empty board weighs nothing', () => {
+    for (const kind of WIDGET_KINDS) {
+      expect(WIDGET_WEIGHTS[kind]).toBeGreaterThanOrEqual(1);
+      expect(WIDGET_WEIGHTS[kind]).toBeLessThanOrEqual(4);
+    }
+    expect(boardWeight([])).toBe(0);
+    expect(MAX_WIDGETS).toBeGreaterThanOrEqual(MAX_BOARD_WEIGHT);
   });
 });
 

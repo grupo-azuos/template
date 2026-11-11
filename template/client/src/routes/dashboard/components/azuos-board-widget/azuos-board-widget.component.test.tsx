@@ -78,6 +78,15 @@ describe('AzuosBoardWidget', () => {
   });
 
   // feliz
+  it('shows the block weight only while the board is being built', () => {
+    const { rerender } = render(<AzuosBoardWidget {...makeProps({ kind: 'heatmap' }, true)} />);
+    expect(screen.getByLabelText('Peso: 4 pontos')).toHaveTextContent('4 pontos');
+
+    rerender(<AzuosBoardWidget {...makeProps({ kind: 'heatmap' }, false)} />);
+    expect(screen.queryByLabelText(/^Peso:/)).not.toBeInTheDocument();
+  });
+
+  // feliz
   it('switches the chart from the card itself, with the current one checked', () => {
     const props = makeProps({}, true);
     const onChangeKind = vi.fn();
@@ -134,6 +143,34 @@ describe('AzuosBoardWidget', () => {
       expect(screen.getByRole('heading', { name: kind })).toBeInTheDocument();
       unmount();
     }
+  });
+
+  // feliz
+  it('draws the ring card as a card: the count, "de" the total, and the count again in the ring', () => {
+    render(
+      <AzuosBoardWidget {...makeProps({ kind: 'ringCard', title: 'Atrasadas', groupBy: null })} />,
+    );
+
+    expect(screen.getByText('Atrasadas')).toBeInTheDocument();
+    expect(screen.getByText('de 20 tarefas')).toBeInTheDocument();
+    expect(screen.getAllByText('12')).toHaveLength(2);
+    expect(screen.getByText('de 20')).toBeInTheDocument();
+    // Card é superfície: sem a moldura de gráfico (nem o botão de expandir).
+    expect(screen.queryByRole('button', { name: /^Expandir/ })).not.toBeInTheDocument();
+  });
+
+  // triste
+  it('shows a dash in the ring when the source is empty', () => {
+    const props = makeProps({ kind: 'ringCard', title: 'Atrasadas', groupBy: null });
+    render(
+      <AzuosBoardWidget
+        {...props}
+        data={{ ...props.data, result: widgetResultFixture({ total: 0, grandTotal: 0 }) }}
+      />,
+    );
+
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByText('de 0')).not.toBeInTheDocument();
   });
 
   // triste

@@ -17,8 +17,9 @@ import { byAttention, notificationLook } from '../utils/notification-style.util'
  *
  * - AO ENTRAR: se há não lidas, o diálogo abre com elas, a urgente primeiro. O conjunto é
  *   CONGELADO na abertura: marcar uma como lida não a tira da frente de quem está lendo.
- * - COM O SISTEMA ABERTO: o servidor avisa (SSE) e a caixa é relida. A urgente nova abre o
- *   diálogo; as outras chegam como toast. Sem SSE (queda), a caixa é relida a cada 5 min.
+ * - COM O SISTEMA ABERTO: o servidor avisa (SSE) e a caixa é relida. Toda notificação nova
+ *   abre o diálogo (o hero), e a que não é urgente chega também como toast. Sem SSE (queda), a
+ *   caixa é relida a cada 5 min.
  * - Abrir uma notificação marca como lida e leva à tela do assunto.
  */
 export type NotificationCenterModel = {
@@ -37,7 +38,7 @@ export type NotificationCenterModel = {
   };
   actions: {
     onOpen: (notification: Notification) => void;
-    /** Grava como lidas, numa chamada só — o diálogo manda a cada passo. */
+    /** Grava como lidas, numa chamada só — o diálogo manda todas que mostrou. */
     onMarkRead: (ids: string[]) => void;
     onMarkAllRead: () => void;
     onCloseDialog: () => void;
@@ -114,7 +115,7 @@ export function useNotificationCenterModel(): NotificationCenterModel {
 /**
  * A FILA DO DIÁLOGO. Cada caixa relida é comparada com a anterior AQUI, no render (e não num
  * efeito): a primeira abre o diálogo com as não lidas; as seguintes separam o que é novo de
- * verdade, e só a urgente nova entra na fila. O resto vira toast, fora daqui.
+ * verdade, e tudo o que é novo entra na fila. O toast sai fora daqui.
  */
 function useDialogQueue(data: { items: Notification[] } | undefined) {
   const [items, setItems] = useState<Notification[]>([]);
@@ -124,9 +125,9 @@ function useDialogQueue(data: { items: Notification[] } | undefined) {
     const notifications = data.items;
     const next = nextSnapshot(snapshot, notifications, data);
     setSnapshot(next);
-    const opening = next.isFirst
-      ? notifications
-      : next.arrived.filter((item) => item.severity === 'urgent');
+    /* Toda notificação que CHEGA com o sistema aberto entra no hero, de qualquer nível — e não
+       só a urgente: a pessoa vê na hora, no mesmo lugar onde vê as de entrada. */
+    const opening = next.isFirst ? notifications : next.arrived;
     if (opening.length > 0) setItems((current) => byAttention([...current, ...opening]));
   }
 
@@ -177,6 +178,19 @@ function useNotificationStream(queryClient: QueryClient): void {
   }, [queryClient]);
 }
 
+/**
+ * A cara do toast de notificação: o azul escuro da marca, igual ao hero, com o texto claro e a
+ * ação no amarelo de destaque. Só este toast é azul — os avisos de "salvo" seguem os do tema.
+ * O `!` vence as cores que o Sonner põe por conta própria.
+ */
+export const NOTIFICATION_TOAST_CLASSES = {
+  toast: '!border-0 !bg-brand-blue-900 !text-on-dark !shadow-card',
+  title: '!font-semibold !text-on-dark',
+  description: '!text-on-dark/80',
+  actionButton: '!bg-accent-hero !font-semibold !text-accent-hero-foreground',
+  closeButton: '!border-0 !bg-brand-blue-800 !text-on-dark',
+};
+
 /** O toast da notificação nova: o nível no título, o texto embaixo, e a ação de abrir. */
 function announce(notification: Notification, onOpen: () => void): void {
   if (notification.severity === 'info') return;
@@ -185,6 +199,7 @@ function announce(notification: Notification, onOpen: () => void): void {
   toast(`${look.label} · ${notification.title}`, {
     id: notification.id,
     description: notification.body,
+    classNames: NOTIFICATION_TOAST_CLASSES,
     action: notification.action ? { label: notification.action.label, onClick: onOpen } : undefined,
   });
 }

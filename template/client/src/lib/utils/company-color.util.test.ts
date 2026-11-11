@@ -28,12 +28,14 @@ describe('normalizeHexColor', () => {
 });
 
 describe('isLightColor', () => {
-  it('keeps white text on every palette color', () => {
-    for (const color of COMPANY_COLOR_PALETTE) expect(isLightColor(color)).toBe(false);
+  it('keeps white text on every dark palette color, and dark text on the group yellow', () => {
+    for (const color of COMPANY_COLOR_PALETTE) {
+      expect(isLightColor(color)).toBe(color === '#ffdc00');
+    }
   });
 
   it('asks for dark text on a light color', () => {
-    expect(isLightColor('#facc15')).toBe(true);
+    expect(isLightColor('#ffdc00')).toBe(true);
     expect(isLightColor('#ffffff')).toBe(true);
   });
 
