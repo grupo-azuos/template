@@ -59,6 +59,32 @@ describe('useSlidingIndicator', () => {
   });
 
   // triste
+  /* REGRESSÃO: sem ativo na lista (a tela aberta é de outra parte do menu), o destaque ficava
+     invisível mas do tamanho e na altura do ativo antigo, e esticava o menu com uma rolagem. */
+  it('shrinks the highlight to nothing at the top when the list has no active item', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return (
+        this.tagName === 'NAV'
+          ? { left: 0, top: 0, width: 200, height: 80 }
+          : { left: 0, top: 600, width: 200, height: 40 }
+      ) as DOMRect;
+    });
+    const { container, rerender } = render(<Menu active="b" />);
+    const indicator = container.querySelector<HTMLElement>('[data-slot="sliding-indicator"]');
+    expect(indicator?.style.height).toBe('40px');
+
+    rerender(<Menu active="nenhum" />);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(indicator?.style.height).toBe('0px');
+    expect(indicator?.style.width).toBe('0px');
+    expect(indicator?.style.opacity).toBe('0');
+    vi.restoreAllMocks();
+  });
+
+  // triste
   it('takes the highlight away when it unmounts', () => {
     const { container, unmount } = render(<Menu active="a" />);
     const nav = container.querySelector('nav');

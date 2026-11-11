@@ -44,8 +44,11 @@ export function useSlidingIndicator<T extends HTMLElement>(
     function snap(isAnimated: boolean) {
       tween?.kill();
       const target = targetOf(node as HTMLElement, selector);
+      /* Sem ativo na lista (a tela aberta é de outra parte do menu), o destaque some E encolhe no
+         topo: só invisível, ele ficava do tamanho e na altura do ativo antigo — e, lá embaixo,
+         esticava a lista e deixava uma barra de rolagem num menu curto. */
       if (!target) {
-        gsap.set(indicator, { opacity: 0 });
+        gsap.set(indicator, { opacity: 0, x: 0, y: 0, width: 0, height: 0 });
         return;
       }
       if (!isAnimated || prefersReducedMotion()) {
@@ -63,8 +66,11 @@ export function useSlidingIndicator<T extends HTMLElement>(
     /* O ativo pode nascer um quadro depois (rota resolvida, fonte carregada): um re-snap cobre. */
     const frame = requestAnimationFrame(() => snap(false));
     const mutations = new MutationObserver(() => snap(true));
+    /* `childList`: trocar a parte do menu troca a LISTA inteira, e os itens novos nascem sem
+       mudar atributo nenhum — sem isto, o destaque ficava onde estava. */
     mutations.observe(node, {
       attributes: true,
+      childList: true,
       subtree: true,
       attributeFilter: attributes.split(','),
     });
