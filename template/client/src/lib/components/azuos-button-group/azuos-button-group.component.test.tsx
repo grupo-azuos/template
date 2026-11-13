@@ -76,6 +76,18 @@ describe('AzuosButtonGroup', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  /* O hover do não escolhido é neutro: o azul claro do `outline` deixava a aba sob o mouse com
+     cara de aberta, ao lado da aberta de verdade. */
+  it('gives the options not chosen a neutral hover, never the light blue of a choice', () => {
+    render(
+      <AzuosButtonGroup data={{ options: PERIODS, value: 'week' }} ui={{ ariaLabel: 'Período' }} />,
+    );
+
+    const notChosen = screen.getByRole('button', { name: 'Dia' });
+    expect(notChosen).toHaveClass('hover:bg-hover-veil');
+    expect(notChosen.className).not.toMatch(/(?<!\S)hover:bg-accent(?!\S)/);
+  });
+
   it('draws an empty group when there is no option, instead of breaking', () => {
     render(<AzuosButtonGroup data={{ options: [], value: '' }} ui={{ ariaLabel: 'Período' }} />);
 
