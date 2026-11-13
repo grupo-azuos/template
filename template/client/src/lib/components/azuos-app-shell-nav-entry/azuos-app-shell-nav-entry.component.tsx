@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useRef } from 'react';
 
 import { popIn } from '../../motion/motion.util';
-import { type NavItem } from '../../navigation/app-shell-navigation';
+import { type NavItem, SHELL_LINK_ACTIVE_OPTIONS } from '../../navigation/app-shell-navigation';
 import { cn } from '../../utils/cn.util';
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, useSidebar } from '../ui/sidebar';
 
@@ -49,6 +49,7 @@ export function AzuosAppShellNavEntry({ data, state }: AzuosAppShellNavEntryProp
         <Link
           ref={linkRef}
           to={data.item.to}
+          activeOptions={SHELL_LINK_ACTIVE_OPTIONS}
           aria-current={isActive ? 'page' : undefined}
           onClick={() => setOpenMobile(false)}
         >
