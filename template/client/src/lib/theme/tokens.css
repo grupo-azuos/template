@@ -189,12 +189,14 @@
    */
   --success: #047857;
   --success-soft: #d1fae5;
-  /* O aviso é o amarelo do grupo, rgb(255, 220, 0) — nada de âmbar nem de laranja-marrom. Ele é
-     FUNDO, traço e gráfico; como TEXTO ou ícone solto, o amarelo do grupo some no claro — aí é
-     o `--warning-ink`: o mesmo amarelo, escurecido até ler (≥ 5:1 sobre o cinza e o branco). A
-     regra `brand/readable-yellow-text` do `check:design` recusa `text-warning` e `text-hue-yellow`. */
+  /* O aviso é o amarelo do grupo, rgb(255, 220, 0) — nada de âmbar nem de laranja-marrom, nem
+     amarelo escurecido (que vira âmbar). Ele é FUNDO, traço, bolinha e gráfico. Como TEXTO ou
+     ícone solto o amarelo some no claro, e aí o `--warning-ink` é o texto escuro da marca: a cor
+     fica na bolinha ao lado, nunca na letra. No escuro o `-ink` volta a ser o amarelo do grupo.
+     A regra `brand/readable-yellow-text` do `check:design` recusa `text-warning` e
+     `text-hue-yellow`. */
   --warning: var(--yellow);
-  --warning-ink: color-mix(in srgb, var(--yellow) 40%, var(--black));
+  --warning-ink: var(--ink-900);
   --warning-soft: #fff6bf;
   --info: #1d4ed8;
   --info-soft: #dbeafe;

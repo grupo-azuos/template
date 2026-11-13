@@ -140,8 +140,9 @@ const tokensOnly = {
 };
 /**
 * O AMARELO DO GRUPO COMO TEXTO some no tema claro (1,3:1 sobre o branco). Ele é fundo, traço e
-* gráfico; texto e ícone amarelos usam o `-ink` (`text-warning-ink`, `text-hue-yellow-ink`), o
-* mesmo amarelo escurecido no claro e o amarelo puro no escuro, definido no tokens.css.
+* gráfico; texto e ícone amarelos usam o `-ink` (`text-warning-ink`, `text-hue-yellow-ink`): o
+* texto escuro da marca no claro e o amarelo puro no escuro, definido no tokens.css. Amarelo
+* escurecido não existe — vira âmbar, que a marca não usa.
 * O `brand-yellow-*` e o `accent-hero` ficam de fora: vivem sobre o azul da marca (menu, hero),
 * onde o amarelo se lê. O `color` de dado (fatia de gráfico, evento) também: lá ele é fundo.
 */
@@ -367,6 +368,35 @@ const hickSelectOptions = {
 		return count > max && !grouped ? [{
 			index: select.index,
 			message: `Select com ${count} opções (máximo ${max}).`
+		}] : [];
+	})
+};
+/**
+* UF E MUNICÍPIO SEMPRE COM BUSCA. São 27 UFs e milhares de municípios, e quem procura "GO" ou
+* "Goiânia" digita em vez de rolar — mesmo quando o recorte deixa poucos. Um seletor sem busca
+* (`AzuosSelectField`, `AzuosFormSelectField`, o `Select` do shadcn) com rótulo de lugar é recusado.
+*/
+const PLACE_NAME = /^(?:UF|Estado|Munic[ií]pio|Cidade)\b/i;
+const LABEL_TEXT = /\b(?:ariaLabel|label|aria-label)\s*[:=]\s*\{?\s*[`'"]([^`'"]+)/g;
+const PLAIN_SELECT = /<(AzuosSelectField|AzuosFormSelectField|Select)\b[\s\S]*?(?:\/>|>\s*\n)/g;
+/** O rótulo do seletor: o dele mesmo, ou o ÚLTIMO antes dele (o do campo que o envolve). */
+function selectLabelOf(code, index, tagText) {
+	const own = [...matches(tagText, LABEL_TEXT)].at(-1);
+	if (own) return own[1];
+	const before = [...matches(code.slice(Math.max(0, index - 200), index), LABEL_TEXT)].at(-1);
+	return before?.[1] ?? "";
+}
+const searchablePlaceSelect = {
+	id: "ux/searchable-place-select",
+	law: "Lei de Hick",
+	severity: "error",
+	description: "UF ou município num seletor sem busca.",
+	hint: "Use `AzuosComboboxField` com `searchPlaceholder` (ou `AzuosCityPickerField`/`AzuosStateField`): UF e município sempre têm busca.",
+	enabled: (c) => c.brandRules?.searchablePlaceSelect ?? true,
+	check: (file) => [...matches(file.code, PLAIN_SELECT)].flatMap((m) => {
+		return PLACE_NAME.test(selectLabelOf(file.code, m.index, m[0]).trim()) ? [{
+			index: m.index,
+			message: `\`<${m[1]}>\` de UF ou município sem busca.`
 		}] : [];
 	})
 };
@@ -656,6 +686,7 @@ export const RULES = [
 	pasteFileAttachment,
 	hickNavItems,
 	hickSelectOptions,
+	searchablePlaceSelect,
 	fittsTargetSize,
 	jakobClickable,
 	jakobAnchorHref,

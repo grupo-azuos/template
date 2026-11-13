@@ -81,6 +81,19 @@ describe("brand/readable-yellow-text", () => {
 		assert.equal(found.filter((r) => r === "brand/readable-yellow-text").length, 3);
 	});
 });
+describe("ux/searchable-place-select", () => {
+	const tsx = "src/x.tsx";
+	// feliz: UF no combobox com busca, e um seletor simples que não é de lugar, passam.
+	it("passes a place combobox and a plain select of something else", () => {
+		const code = "<AzuosComboboxField ui={{ ariaLabel: 'UF', searchPlaceholder: 'Buscar UF...' }} />\n<AzuosFilterField data={{ label: 'Situação' }}>\n<AzuosSelectField ui={{ ariaLabel: 'Situação' }} />";
+		assert.deepEqual(rulesFor(code, tsx).filter((r) => r === "ux/searchable-place-select"), []);
+	});
+	// triste: UF pelo rótulo do próprio seletor, e município pelo rótulo do campo que o envolve.
+	it("catches UF and município in a select without search", () => {
+		const code = "<AzuosSelectField\n  data={{ value }}\n  ui={{ ariaLabel: 'UF' }}\n/>\n<AzuosFilterField data={{ label: 'Município' }}>\n  <AzuosSelectField data={{ value }} />";
+		assert.equal(rulesFor(code, tsx).filter((r) => r === "ux/searchable-place-select").length, 2);
+	});
+});
 describe("brand/no-arbitrary-values", () => {
 	it("allows var() and the scale", () => assert.deepEqual(rulesFor("<div class=\"rounded-[var(--radius)] text-sm\"></div>"), []));
 	it("catches arbitrary sizes", () => assert.deepEqual(rulesFor("<div class=\"text-[13px]\"></div>"), ["brand/no-arbitrary-values"]));
