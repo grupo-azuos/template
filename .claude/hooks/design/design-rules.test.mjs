@@ -94,6 +94,19 @@ describe("ux/searchable-place-select", () => {
 		assert.equal(rulesFor(code, tsx).filter((r) => r === "ux/searchable-place-select").length, 2);
 	});
 });
+describe("ux/special-option-format", () => {
+	const tsx = "src/x.tsx";
+	// feliz: entre parênteses e com maiúscula; o "Todos", as opções comuns e um status "Sem …" de verdade passam.
+	it("passes the group format", () => {
+		const code = "const o = [{ value: '', label: 'Todos os status' }, { value: 'none', label: '(Sem status)' }, { value: 'a', label: 'Aberta' }, { value: 'Sem obrigatoriedade', label: 'Sem obrigatoriedade' }];";
+		assert.deepEqual(rulesFor(code, tsx).filter((r) => r === "ux/special-option-format"), []);
+	});
+	// triste: travessão, "Sem" solto na opção sem valor e parêntese minúsculo.
+	it("catches the other formats", () => {
+		const code = "const o = [{ value: '', label: '— herda —' }, { value: 'none', label: 'Sem status' }, { value: 'x', label: '(sem tipo)' }];";
+		assert.equal(rulesFor(code, tsx).filter((r) => r === "ux/special-option-format").length, 3);
+	});
+});
 describe("brand/no-arbitrary-values", () => {
 	it("allows var() and the scale", () => assert.deepEqual(rulesFor("<div class=\"rounded-[var(--radius)] text-sm\"></div>"), []));
 	it("catches arbitrary sizes", () => assert.deepEqual(rulesFor("<div class=\"text-[13px]\"></div>"), ["brand/no-arbitrary-values"]));
