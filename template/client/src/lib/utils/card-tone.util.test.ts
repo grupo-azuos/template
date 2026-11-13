@@ -34,11 +34,13 @@ describe('card tone', () => {
   it('gives every accent its dot, text, swatch and colour, all from tokens', () => {
     expect(CARD_HUES).toHaveLength(8);
     for (const hue of CARD_HUES) {
-      /* O amarelo é claro: o ícone na bolinha dele é escuro (`on-yellow`). */
-      const onHue = hue === 'yellow' ? 'text-on-yellow' : 'text-on-hue';
+      /* O amarelo é claro: o ícone na bolinha dele é escuro (`on-yellow`), e como texto ele é o
+         `-ink`, para não sumir no tema claro. */
+      const isYellow = hue === 'yellow';
+      const onHue = isYellow ? 'text-on-yellow' : 'text-on-hue';
       expect(cardToneClasses(hue)).toEqual({
         dot: `bg-hue-${hue} ${onHue}`,
-        text: `text-hue-${hue}`,
+        text: isYellow ? 'text-hue-yellow-ink' : `text-hue-${hue}`,
         swatch: `bg-hue-${hue}`,
         color: `var(--hue-${hue})`,
       });

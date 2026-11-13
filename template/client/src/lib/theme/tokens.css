@@ -189,8 +189,12 @@
    */
   --success: #047857;
   --success-soft: #d1fae5;
-  /* O aviso é o amarelo do grupo, rgb(255, 220, 0) — nada de âmbar nem de laranja-marrom. */
+  /* O aviso é o amarelo do grupo, rgb(255, 220, 0) — nada de âmbar nem de laranja-marrom. Ele é
+     FUNDO, traço e gráfico; como TEXTO ou ícone solto, o amarelo do grupo some no claro — aí é
+     o `--warning-ink`: o mesmo amarelo, escurecido até ler (≥ 5:1 sobre o cinza e o branco). A
+     regra `brand/readable-yellow-text` do `check:design` recusa `text-warning` e `text-hue-yellow`. */
   --warning: var(--yellow);
+  --warning-ink: color-mix(in srgb, var(--yellow) 40%, var(--black));
   --warning-soft: #fff6bf;
   --info: #1d4ed8;
   --info-soft: #dbeafe;
@@ -224,6 +228,8 @@
   --yellow: #ffdc00;
   --on-yellow: #111827;
   --hue-yellow: var(--yellow);
+  /* O amarelo como texto (o número do card, o selo): ver `--warning-ink`. */
+  --hue-yellow-ink: var(--warning-ink);
   --hue-green: #23705f;
   --hue-steel: #2f6383;
   --hue-plum: #62468a;
@@ -307,10 +313,11 @@
   --surface: #1f2937;
   --subtext: #9ca3af;
 
-  /* O vermelho é o das tags, o mesmo do tema claro: ele já é claro o bastante para o fundo
-     escuro, e o texto sobre ele continua o claro. */
-  --destructive: var(--red);
-  --destructive-foreground: #f8fafc;
+  /* O vermelho do tema claro (3,8:1) se apaga no fundo escuro: aqui o texto, o ícone e o sotaque
+     sobem para o tom pastel (≥ 5,4:1), como o verde e o azul, e o texto sobre ele desce para
+     escuro. O preenchimento cheio continua o vermelho das tags (`--destructive-fill`). */
+  --destructive: #fb7185;
+  --destructive-foreground: #111827;
   --success-foreground: #111827;
   --warning-foreground: #111827;
   --info-foreground: #111827;
@@ -326,6 +333,8 @@
      legíveis com o texto do tom por cima. */
   --success-soft: #0f2e2a;
   --warning: var(--yellow);
+  /* No escuro o amarelo do grupo já se lê como texto (10:1). */
+  --warning-ink: var(--yellow);
   --warning-soft: #2f2a17;
   --info: #60a5fa;
   --info-soft: #172554;
@@ -343,8 +352,9 @@
   --sidebar: #16265c;
 
   --hue-blue: #6f8fe0;
-  --hue-red: var(--red);
+  --hue-red: #fb7185;
   --hue-yellow: var(--yellow);
+  --hue-yellow-ink: var(--yellow);
   --hue-green: #6cc3ad;
   --hue-steel: #86b5d6;
   --hue-plum: #b09ad6;
@@ -426,6 +436,7 @@
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
+  --color-warning-ink: var(--warning-ink);
   --color-warning-soft: var(--warning-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
@@ -438,6 +449,7 @@
   --color-hue-blue: var(--hue-blue);
   --color-hue-red: var(--hue-red);
   --color-hue-yellow: var(--hue-yellow);
+  --color-hue-yellow-ink: var(--hue-yellow-ink);
   --color-on-yellow: var(--on-yellow);
   --color-hue-green: var(--hue-green);
   --color-hue-steel: var(--hue-steel);
@@ -710,7 +722,7 @@
   }
 
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
   }
 
   /* Foco visível SEMPRE: o sistema é operado no teclado o dia inteiro, e um contorno que

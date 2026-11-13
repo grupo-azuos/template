@@ -49,10 +49,11 @@ const HUE_CLASSES: Record<AzuosCardHue, AzuosCardToneClasses> = {
     swatch: 'bg-hue-red',
     color: 'var(--hue-red)',
   },
-  /* O amarelo é claro: o ícone na bolinha é escuro (`on-yellow`), e não o `on-hue`. */
+  /* O amarelo é claro: o ícone na bolinha é escuro (`on-yellow`), e não o `on-hue`; e como texto
+     ele é o `-ink` (o mesmo amarelo, escurecido no tema claro), senão o número some no card. */
   yellow: {
     dot: 'bg-hue-yellow text-on-yellow',
-    text: 'text-hue-yellow',
+    text: 'text-hue-yellow-ink',
     swatch: 'bg-hue-yellow',
     color: 'var(--hue-yellow)',
   },
