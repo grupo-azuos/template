@@ -337,7 +337,7 @@ export function FieldError({ data }: { data: { id: string; message: string } }) 
 const HINT_TONES: Record<AzuosRichTextFieldHint['tone'], string> = {
   neutral: 'text-ink-500',
   calculated: 'text-brand-blue-800 dark:text-foreground',
-  error: 'text-warning',
+  error: 'text-warning-ink',
 };
 
 /**

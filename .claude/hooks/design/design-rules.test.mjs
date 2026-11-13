@@ -72,6 +72,15 @@ describe("brand/tokens-only", () => {
 		assert.equal(found.filter((r) => r === "brand/tokens-only").length, 3);
 	});
 });
+describe("brand/readable-yellow-text", () => {
+	// feliz: o amarelo de fundo, o texto sobre ele e o `-ink` passam.
+	it("passes yellow fills and the ink tokens", () => assert.deepEqual(rulesFor("<p class=\"bg-warning text-warning-foreground\"><b class=\"text-warning-ink\">1</b><i class=\"text-hue-yellow-ink bg-hue-yellow\"></i></p>"), []));
+	// triste: amarelo do grupo como texto, nem com ignore.
+	it("catches yellow text classes, even with an ignore", () => {
+		const found = rulesFor("// design-ignore-next-line\n<p class=\"text-warning\"><b class=\"dark:text-hue-yellow placeholder-warning\">1</b></p>");
+		assert.equal(found.filter((r) => r === "brand/readable-yellow-text").length, 3);
+	});
+});
 describe("brand/no-arbitrary-values", () => {
 	it("allows var() and the scale", () => assert.deepEqual(rulesFor("<div class=\"rounded-[var(--radius)] text-sm\"></div>"), []));
 	it("catches arbitrary sizes", () => assert.deepEqual(rulesFor("<div class=\"text-[13px]\"></div>"), ["brand/no-arbitrary-values"]));

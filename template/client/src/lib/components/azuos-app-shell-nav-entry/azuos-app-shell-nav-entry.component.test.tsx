@@ -16,7 +16,7 @@ import {
 
 const item = { key: 'tasks', label: 'Tarefas', to: '/tasks', icon: ListChecks };
 
-function renderEntry(props: AzuosAppShellNavEntryProps) {
+function renderEntry(props: AzuosAppShellNavEntryProps, path = '/') {
   const router = createRouter({
     routeTree: createRootRoute({
       component: () => (
@@ -27,7 +27,7 @@ function renderEntry(props: AzuosAppShellNavEntryProps) {
         </SidebarProvider>
       ),
     }),
-    history: createMemoryHistory({ initialEntries: ['/'] }),
+    history: createMemoryHistory({ initialEntries: [path] }),
   });
 
   render(<RouterProvider router={router} />);
@@ -66,6 +66,16 @@ describe('AzuosAppShellNavEntry', () => {
 
   it('is not the current page when inactive', async () => {
     renderEntry({ data: { item } });
+
+    expect(await screen.findByRole('link', { name: 'Tarefas' })).not.toHaveAttribute(
+      'aria-current',
+    );
+  });
+
+  /* Numa tela FILHA (`/tasks/archive`), o item pai não se marca sozinho: o router marcaria pelo
+     começo do caminho, e o destaque do menu, que procura o primeiro marcado, pararia no pai. */
+  it('is not marked by the router on a child path when it is not the active item', async () => {
+    renderEntry({ data: { item } }, '/tasks/archive');
 
     expect(await screen.findByRole('link', { name: 'Tarefas' })).not.toHaveAttribute(
       'aria-current',
