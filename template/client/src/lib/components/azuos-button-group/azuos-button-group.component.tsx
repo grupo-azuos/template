@@ -1,11 +1,14 @@
 import { useSlidingIndicator } from '../../motion/use-sliding-indicator';
 import { cn } from '../../utils/cn.util';
-import { Button } from '../ui/button';
-import { ButtonGroup } from '../ui/button-group';
 
 /**
- * Botões que são UMA escolha só, colados um no outro (Dia · Semana · Mês). Envolve o
- * `ui/button-group` do shadcn, que arredonda só as pontas do grupo.
+ * Botões que são UMA escolha só, lado a lado (Dia · Semana · Mês, as abas de um contrato).
+ *
+ * O DESENHO É O SEGMENTADO: um trilho com borda e um respiro por dentro, e o escolhido como uma
+ * pastilha azul que DESLIZA até o novo. A pastilha mora dentro do trilho — tem a mesma forma na
+ * ponta e no meio, e nunca cobre a borda. (Era o `ui/button-group` do shadcn, com bordas coladas e
+ * só as pontas arredondadas: a pastilha redonda por cima ficava com um canto redondo encostado num
+ * reto, e saía da borda do grupo.)
  *
  * Para muitas opções ou espaço estreito, use o `AzuosOptionPicker` (quebra linha e vira seletor);
  * este aqui é para duas a quatro opções curtas que cabem numa fileira.
@@ -28,45 +31,47 @@ export type AzuosButtonGroupProps = {
 };
 
 export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupProps) {
-  /* O preenchimento do escolhido desliza até o novo — a troca de aba se vê. */
   const ref = useSlidingIndicator<HTMLDivElement>({
     selector: '[aria-pressed="true"]',
-    indicatorClass: 'rounded-control bg-primary',
+    indicatorClass: 'rounded-control bg-primary shadow-xs',
     attributes: ['aria-pressed'],
   });
 
   return (
-    <ButtonGroup
+    <div
       ref={ref}
+      role="group"
       aria-label={ui.ariaLabel}
-      orientation={ui.orientation}
-      className={ui.className}
+      className={cn(
+        'inline-flex w-fit gap-1 rounded-control border border-border bg-muted p-1',
+        ui.orientation === 'vertical' && 'flex-col',
+        ui.className,
+      )}
     >
       {data.options.map((option) => {
         const isSelected = option.value === data.value;
 
         return (
-          <Button
+          <button
             key={option.value}
             type="button"
-            variant={isSelected ? 'default' : 'outline'}
             aria-pressed={isSelected}
             disabled={state?.isDisabled}
-            /* O hover do não escolhido é o véu NEUTRO, e não o azul claro do `outline` do shadcn:
-               azul claro parecia escolhido, e a aba que estava sob o mouse (ou acabara de ser
-               clicada) ficava com cara de aba aberta ao lado da que estava aberta de verdade. */
+            /* O hover do não escolhido é o véu NEUTRO: um azul claro ali parecia escolhido. */
             className={cn(
-              'control-md rounded-control transition-colors duration-200',
+              'control-sm rounded-control px-3 text-sm font-medium whitespace-nowrap transition-colors duration-200',
+              'focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+              'disabled:cursor-not-allowed disabled:opacity-60',
               isSelected
-                ? 'bg-transparent hover:bg-transparent'
-                : 'bg-card text-foreground hover:bg-hover-veil hover:text-foreground',
+                ? 'text-primary-foreground'
+                : 'text-foreground hover:bg-hover-veil hover:text-foreground',
             )}
             onClick={() => actions?.onChange?.(option.value)}
           >
             {option.label}
-          </Button>
+          </button>
         );
       })}
-    </ButtonGroup>
+    </div>
   );
 }
