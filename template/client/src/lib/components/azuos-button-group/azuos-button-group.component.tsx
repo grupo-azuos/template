@@ -52,9 +52,14 @@ export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupP
             variant={isSelected ? 'default' : 'outline'}
             aria-pressed={isSelected}
             disabled={state?.isDisabled}
+            /* O hover do não escolhido é o véu NEUTRO, e não o azul claro do `outline` do shadcn:
+               azul claro parecia escolhido, e a aba que estava sob o mouse (ou acabara de ser
+               clicada) ficava com cara de aba aberta ao lado da que estava aberta de verdade. */
             className={cn(
               'control-md rounded-control transition-colors duration-200',
-              isSelected ? 'bg-transparent hover:bg-transparent' : 'bg-card',
+              isSelected
+                ? 'bg-transparent hover:bg-transparent'
+                : 'bg-card text-foreground hover:bg-hover-veil hover:text-foreground',
             )}
             onClick={() => actions?.onChange?.(option.value)}
           >
