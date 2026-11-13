@@ -38,7 +38,9 @@ const TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
   neutral: cn('bg-muted', cardToneClasses('neutral').text),
   info: cn('bg-muted', cardToneClasses('info').text),
   success: cn('bg-muted', cardToneClasses('success').text),
-  warning: cn('bg-muted', cardToneClasses('warning').text),
+  /* O amarelo é a exceção: letra pequena amarela no cinza não se lê. O selo fica no amarelo do
+     grupo, cheio, com a letra escura por cima. */
+  warning: 'bg-warning text-warning-foreground',
   danger: cn('bg-muted', cardToneClasses('danger').text),
   brand: cn('bg-muted', cardToneClasses('brand').text),
 };

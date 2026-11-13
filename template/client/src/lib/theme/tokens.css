@@ -230,8 +230,10 @@
   --yellow: #ffdc00;
   --on-yellow: #111827;
   --hue-yellow: var(--yellow);
-  /* O amarelo como texto (o número do card, o selo): ver `--warning-ink`. */
-  --hue-yellow-ink: var(--warning-ink);
+  /* O SOTAQUE amarelo do card (o número grande, o ícone do canto) é o amarelo do grupo, puro, nos
+     dois temas — decisão de quem administra. Letra pequena em amarelo (selo, aviso) não usa este:
+     usa o `--warning-ink`, o texto escuro. */
+  --hue-yellow-ink: var(--yellow);
   --hue-green: #23705f;
   --hue-steel: #2f6383;
   --hue-plum: #62468a;

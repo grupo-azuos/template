@@ -400,6 +400,25 @@ const searchablePlaceSelect = {
 		}] : [];
 	})
 };
+/**
+* AS OPÇÕES ESPECIAIS DE UMA LISTA têm UMA forma no grupo: entre parênteses, com a primeira letra
+* maiúscula — "(Sem responsável)", "(Empresa nova)", "(Sem status)" — e logo depois do "Todos".
+* Travessão, sublinhado e parêntese minúsculo valem para qualquer opção. "Sem …" e "Nenhum …"
+* soltos, só na opção SEM VALOR (vazia ou sentinela): "Sem obrigatoriedade" é um status de verdade.
+*/
+const SPECIAL_OPTION = new RegExp([String.raw`\{\s*value:[^{}]*?\blabel:\s*['"\x60]((?:—|–|-|_)\s*\S[^'"\x60]*|\((?:sem|nenhum|nenhuma|vazio)\b[^'"\x60]*)['"\x60]`, String.raw`\{\s*value:\s*(?:''|""|'none'|[A-Z][A-Z0-9_]*)\s*,\s*label:\s*['"\x60]((?:Sem|Nenhum|Nenhuma)\s[^'"\x60]*)['"\x60]`].join("|"), "g");
+const specialOptionFormat = {
+	id: "ux/special-option-format",
+	law: "Lei de Jakob",
+	severity: "error",
+	description: "Opção especial de lista fora do padrão do grupo.",
+	hint: "Escreva entre parênteses, com maiúscula: `(Sem responsável)`, `(Sem status)`, `(Empresa nova)` — e ponha logo depois do \"Todos\".",
+	enabled: (c) => c.brandRules?.specialOptionFormat ?? true,
+	check: (file) => [...matches(file.code, SPECIAL_OPTION)].map((m) => ({
+		index: m.index,
+		message: `Opção especial fora do padrão: \`${m[1] ?? m[2]}\`.`
+	}))
+};
 /* ------------------------------------------------------------------ Lei de Fitts */
 const TAILWIND_SPACING_PX = 4;
 /** Altura declarada num tag (Tailwind `h-*`/`size-*`/`min-h-*`, `h-[Npx]` ou style inline), em px. */
@@ -687,6 +706,7 @@ export const RULES = [
 	hickNavItems,
 	hickSelectOptions,
 	searchablePlaceSelect,
+	specialOptionFormat,
 	fittsTargetSize,
 	jakobClickable,
 	jakobAnchorHref,

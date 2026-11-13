@@ -305,7 +305,7 @@ describe('block grouping and filters', () => {
     ]);
     expect(groupOptions({ ...WIDGET, kind: 'stats' })[0]).toEqual({
       value: '',
-      label: 'Sem agrupar (o total)',
+      label: '(Sem agrupar: o total)',
     });
   });
 
@@ -344,7 +344,7 @@ describe('block grouping and filters', () => {
     };
 
     expect(filterOptions([...FILTERS, archived], 'tasks').map((option) => option.label)).toEqual([
-      'Sem filtro (tudo)',
+      '(Sem filtro: tudo)',
       'Só as minhas',
     ]);
     expect(filterOptions(FILTERS, 'activity')[1]?.label).toBe(
