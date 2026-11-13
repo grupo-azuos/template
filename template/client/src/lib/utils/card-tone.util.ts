@@ -50,7 +50,7 @@ const HUE_CLASSES: Record<AzuosCardHue, AzuosCardToneClasses> = {
     color: 'var(--hue-red)',
   },
   /* O amarelo é claro: o ícone na bolinha é escuro (`on-yellow`), e não o `on-hue`; e como texto
-     ele é o `-ink` (o texto escuro no tema claro, o amarelo no escuro), senão o número some. */
+     ele é o `-ink`: o amarelo do grupo, puro, no número do card (ver `--hue-yellow-ink`). */
   yellow: {
     dot: 'bg-hue-yellow text-on-yellow',
     text: 'text-hue-yellow-ink',
