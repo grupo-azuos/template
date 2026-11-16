@@ -80,7 +80,7 @@ describe('AzuosHeroCard', () => {
     );
 
     expect(containerAccent.querySelector('[data-slot="hero-card-icon"]')).toHaveClass(
-      'text-hue-yellow',
+      'text-hue-yellow-ink',
     );
   });
 

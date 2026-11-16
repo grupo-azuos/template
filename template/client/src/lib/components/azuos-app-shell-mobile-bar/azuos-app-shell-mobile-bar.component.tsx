@@ -14,6 +14,7 @@ import {
   type NavAreaSpec,
   type NavItem,
   type NavProfile,
+  SHELL_LINK_ACTIVE_OPTIONS,
 } from '../../navigation/app-shell-navigation';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../ui/sheet';
 
@@ -70,6 +71,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
               <li key={item.key} className="min-w-0">
                 <Link
                   to={item.to}
+                  activeOptions={SHELL_LINK_ACTIVE_OPTIONS}
                   aria-current={isActive ? 'page' : undefined}
                   data-active={isActive}
                   className={BAR_ITEM}
@@ -143,6 +145,7 @@ export function AzuosAppShellMobileBar({ data, state, actions }: AzuosAppShellMo
                 <li key={item.key}>
                   <Link
                     to={item.to}
+                    activeOptions={SHELL_LINK_ACTIVE_OPTIONS}
                     onClick={close}
                     aria-current={state?.activeKey === item.key ? 'page' : undefined}
                     data-active={state?.activeKey === item.key}

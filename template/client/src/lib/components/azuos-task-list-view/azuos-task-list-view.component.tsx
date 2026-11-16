@@ -186,7 +186,7 @@ function TaskListBody({ data, state, actions }: AzuosTaskListViewProps) {
       </div>
 
       {state.isTruncated ? (
-        <p className="text-warning text-xs">
+        <p className="text-warning-ink text-xs">
           Mostrando só as primeiras {data.tasks.length}. Use a busca para achar as outras.
         </p>
       ) : null}

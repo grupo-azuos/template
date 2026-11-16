@@ -100,6 +100,14 @@ export function visibleActionsOf(actions: readonly NavAction[], viewer: NavViewe
 }
 
 /**
+ * Os links da casca só se dizem "página atual" no caminho EXATO. Por padrão o `Link` do router
+ * marca `aria-current="page"` em todo item cujo caminho é começo do aberto — em `/permits/pending`
+ * "Alvarás" (`/permits`) também ficava marcado, e o destaque, que procura o primeiro marcado,
+ * parava nele. Quem decide o item aceso é `activeNavItemOf`; o router só não pode atrapalhar.
+ */
+export const SHELL_LINK_ACTIVE_OPTIONS = { exact: true, includeSearch: false } as const;
+
+/**
  * O item aceso pelo prefixo do caminho — o MAIS LONGO vence, para `/tasks/archive` acender
  * "Arquivo" e não "Tarefas", e para a ordem da lista nunca decidir sozinha.
  */

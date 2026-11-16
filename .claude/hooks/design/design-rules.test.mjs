@@ -72,6 +72,41 @@ describe("brand/tokens-only", () => {
 		assert.equal(found.filter((r) => r === "brand/tokens-only").length, 3);
 	});
 });
+describe("brand/readable-yellow-text", () => {
+	// feliz: o amarelo de fundo, o texto sobre ele e o `-ink` passam.
+	it("passes yellow fills and the ink tokens", () => assert.deepEqual(rulesFor("<p class=\"bg-warning text-warning-foreground\"><b class=\"text-warning-ink\">1</b><i class=\"text-hue-yellow-ink bg-hue-yellow\"></i></p>"), []));
+	// triste: amarelo do grupo como texto, nem com ignore.
+	it("catches yellow text classes, even with an ignore", () => {
+		const found = rulesFor("// design-ignore-next-line\n<p class=\"text-warning\"><b class=\"dark:text-hue-yellow placeholder-warning\">1</b></p>");
+		assert.equal(found.filter((r) => r === "brand/readable-yellow-text").length, 3);
+	});
+});
+describe("ux/searchable-place-select", () => {
+	const tsx = "src/x.tsx";
+	// feliz: UF no combobox com busca, e um seletor simples que não é de lugar, passam.
+	it("passes a place combobox and a plain select of something else", () => {
+		const code = "<AzuosComboboxField ui={{ ariaLabel: 'UF', searchPlaceholder: 'Buscar UF...' }} />\n<AzuosFilterField data={{ label: 'Situação' }}>\n<AzuosSelectField ui={{ ariaLabel: 'Situação' }} />";
+		assert.deepEqual(rulesFor(code, tsx).filter((r) => r === "ux/searchable-place-select"), []);
+	});
+	// triste: UF pelo rótulo do próprio seletor, e município pelo rótulo do campo que o envolve.
+	it("catches UF and município in a select without search", () => {
+		const code = "<AzuosSelectField\n  data={{ value }}\n  ui={{ ariaLabel: 'UF' }}\n/>\n<AzuosFilterField data={{ label: 'Município' }}>\n  <AzuosSelectField data={{ value }} />";
+		assert.equal(rulesFor(code, tsx).filter((r) => r === "ux/searchable-place-select").length, 2);
+	});
+});
+describe("ux/special-option-format", () => {
+	const tsx = "src/x.tsx";
+	// feliz: entre parênteses e com maiúscula; o "Todos", as opções comuns e um status "Sem …" de verdade passam.
+	it("passes the group format", () => {
+		const code = "const o = [{ value: '', label: 'Todos os status' }, { value: 'none', label: '(Sem status)' }, { value: 'a', label: 'Aberta' }, { value: 'Sem obrigatoriedade', label: 'Sem obrigatoriedade' }];";
+		assert.deepEqual(rulesFor(code, tsx).filter((r) => r === "ux/special-option-format"), []);
+	});
+	// triste: travessão, "Sem" solto na opção sem valor e parêntese minúsculo.
+	it("catches the other formats", () => {
+		const code = "const o = [{ value: '', label: '— herda —' }, { value: 'none', label: 'Sem status' }, { value: 'x', label: '(sem tipo)' }];";
+		assert.equal(rulesFor(code, tsx).filter((r) => r === "ux/special-option-format").length, 3);
+	});
+});
 describe("brand/no-arbitrary-values", () => {
 	it("allows var() and the scale", () => assert.deepEqual(rulesFor("<div class=\"rounded-[var(--radius)] text-sm\"></div>"), []));
 	it("catches arbitrary sizes", () => assert.deepEqual(rulesFor("<div class=\"text-[13px]\"></div>"), ["brand/no-arbitrary-values"]));

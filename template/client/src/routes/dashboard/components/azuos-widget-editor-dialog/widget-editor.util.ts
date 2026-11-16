@@ -58,7 +58,7 @@ export function groupOptions(widget: Widget): Option[] {
   const options = categoryOptions(widget.source, widget.kind);
 
   return CARD_WIDGETS.includes(widget.kind)
-    ? [{ value: NO_GROUP, label: 'Sem agrupar (o total)' }, ...options]
+    ? [{ value: NO_GROUP, label: '(Sem agrupar: o total)' }, ...options]
     : options;
 }
 
@@ -78,7 +78,7 @@ export function filterOptions(filters: SavedFilter[], source: DataSourceKey): Op
       label: filter.scope === 'shared' ? `${filter.name} (compartilhado)` : filter.name,
     }));
 
-  return [{ value: NO_FILTER, label: 'Sem filtro (tudo)' }, ...own];
+  return [{ value: NO_FILTER, label: '(Sem filtro: tudo)' }, ...own];
 }
 
 /**

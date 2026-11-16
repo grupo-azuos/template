@@ -54,7 +54,8 @@ export const STAT_TONE_BADGE: Record<AzuosCardSemanticTone, string> = {
   neutral: cn('bg-muted', cardToneClasses('neutral').text),
   default: cn('bg-muted', cardToneClasses('default').text),
   success: cn('bg-muted', cardToneClasses('success').text),
-  warning: cn('bg-muted', cardToneClasses('warning').text),
+  /* Amarelo em letra pequena não se lê no cinza: a pastilha é o amarelo cheio, letra escura. */
+  warning: 'bg-warning text-warning-foreground',
   danger: cn('bg-muted', cardToneClasses('danger').text),
   info: cn('bg-muted', cardToneClasses('info').text),
 };
