@@ -9,17 +9,20 @@ import { canManageNotifications } from '@template/shared/schemas/user.schema';
 import { readError } from '../api/http-client';
 import { notificationsApi } from '../api/notifications.api';
 import { mockAuth } from '../auth/mock-user';
+import { isEntryDue, markEntrySeen, todayInBrasilia } from '../utils/notification-entry.util';
 import { byAttention, notificationLook } from '../utils/notification-style.util';
 
 /**
  * A CENTRAL DE NOTIFICAÇÕES de quem está logado — o sininho, o diálogo de entrada, o toast em
  * tempo real. Zero JSX.
  *
- * - AO ENTRAR: se há não lidas, o diálogo abre com elas, a urgente primeiro. O conjunto é
- *   CONGELADO na abertura: marcar uma como lida não a tira da frente de quem está lendo.
- * - COM O SISTEMA ABERTO: o servidor avisa (SSE) e a caixa é relida. Toda notificação nova
- *   abre o diálogo (o hero), e a que não é urgente chega também como toast. Sem SSE (queda), a
- *   caixa é relida a cada 5 min.
+ * - AO ENTRAR (sessão nova do navegador ou primeiro acesso do dia, `notification-entry.util`): se
+ *   há não lidas, o diálogo abre com elas, a urgente primeiro. O conjunto é CONGELADO na
+ *   abertura: marcar uma como lida não a tira da frente de quem está lendo. F5 e aba nova no
+ *   mesmo dia não abrem de novo — as não lidas seguem no sininho.
+ * - COM O SISTEMA ABERTO: o servidor avisa (SSE) e a caixa é relida. Toda notificação nova, de
+ *   qualquer nível, chega como TOAST no canto da tela — nunca abre o diálogo por cima do
+ *   trabalho. A urgente fica mais tempo na tela. Sem SSE (queda), a caixa é relida a cada 5 min.
  * - Abrir uma notificação marca como lida e leva à tela do assunto.
  */
 export type NotificationCenterModel = {
@@ -62,7 +65,7 @@ export function useNotificationCenterModel(): NotificationCenterModel {
     refetchInterval: FALLBACK_REFRESH_MS,
   });
   const items = inbox.data?.items ?? [];
-  const queue = useDialogQueue(inbox.data);
+  const queue = useDialogQueue(inbox.data, user.id);
 
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['notifications'] });
   const markRead = useMutation({ mutationFn: notificationsApi.markRead, onSettled: refresh });
@@ -80,9 +83,7 @@ export function useNotificationCenterModel(): NotificationCenterModel {
 
   useNotificationStream(queryClient);
   useEffect(() => {
-    for (const item of queue.arrived) {
-      if (item.severity !== 'urgent') announce(item, () => openNotification(item));
-    }
+    for (const item of queue.arrived) announce(item, () => openNotification(item));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- anuncia uma vez por chegada
   }, [queue.arrived]);
 
@@ -114,10 +115,10 @@ export function useNotificationCenterModel(): NotificationCenterModel {
 
 /**
  * A FILA DO DIÁLOGO. Cada caixa relida é comparada com a anterior AQUI, no render (e não num
- * efeito): a primeira abre o diálogo com as não lidas; as seguintes separam o que é novo de
- * verdade, e tudo o que é novo entra na fila. O toast sai fora daqui.
+ * efeito): a primeira abre o diálogo com as não lidas, se a entrada está devida; as seguintes só
+ * separam o que é novo de verdade, para o toast (que sai fora daqui).
  */
-function useDialogQueue(data: { items: Notification[] } | undefined) {
+function useDialogQueue(data: { items: Notification[] } | undefined, userId: string) {
   const [items, setItems] = useState<Notification[]>([]);
   const [snapshot, setSnapshot] = useState<Snapshot>(EMPTY_SNAPSHOT);
 
@@ -125,11 +126,17 @@ function useDialogQueue(data: { items: Notification[] } | undefined) {
     const notifications = data.items;
     const next = nextSnapshot(snapshot, notifications, data);
     setSnapshot(next);
-    /* Toda notificação que CHEGA com o sistema aberto entra no hero, de qualquer nível — e não
-       só a urgente: a pessoa vê na hora, no mesmo lugar onde vê as de entrada. */
-    const opening = next.isFirst ? notifications : next.arrived;
-    if (opening.length > 0) setItems((current) => byAttention([...current, ...opening]));
+    if (next.isFirst && notifications.length > 0 && isEntryDue(userId, todayInBrasilia())) {
+      setItems(byAttention(notifications));
+    }
   }
+
+  /* A marca da entrada é gravada DEPOIS de desenhar, e não no render: o render pode rodar duas
+     vezes, e a segunda leria a marca da primeira e não abriria o hero. Conta como entrada vista
+     mesmo sem não lidas — o primeiro acesso do dia já passou. */
+  useEffect(() => {
+    if (snapshot.isFirst) markEntrySeen(userId, todayInBrasilia());
+  }, [snapshot.isFirst, userId]);
 
   return { items, arrived: snapshot.arrived, close: () => setItems([]) };
 }
@@ -191,15 +198,21 @@ export const NOTIFICATION_TOAST_CLASSES = {
   closeButton: '!border-0 !bg-brand-blue-800 !text-on-dark',
 };
 
-/** O toast da notificação nova: o nível no título, o texto embaixo, e a ação de abrir. */
+/** Quanto a urgente fica na tela — o triplo do aviso comum, para não passar despercebida. */
+export const URGENT_TOAST_DURATION_MS = 15_000;
+
+/**
+ * O toast da notificação nova, de qualquer nível: o nível no título, o texto embaixo, e a ação de
+ * abrir. A urgente fica mais tempo; as outras, o tempo padrão do `AzuosToaster`.
+ */
 function announce(notification: Notification, onOpen: () => void): void {
-  if (notification.severity === 'info') return;
   const look = notificationLook(notification.severity);
 
   toast(`${look.label} · ${notification.title}`, {
     id: notification.id,
     description: notification.body,
     classNames: NOTIFICATION_TOAST_CLASSES,
+    ...(notification.severity === 'urgent' ? { duration: URGENT_TOAST_DURATION_MS } : {}),
     action: notification.action ? { label: notification.action.label, onClick: onOpen } : undefined,
   });
 }

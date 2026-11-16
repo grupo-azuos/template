@@ -7,6 +7,7 @@ import { notificationFixture } from '../utils/notification-fixture.util';
 import {
   nextSnapshot,
   NOTIFICATION_TOAST_CLASSES,
+  URGENT_TOAST_DURATION_MS,
   useNotificationCenterModel,
 } from './use-notification-center.model';
 
@@ -38,6 +39,12 @@ function answering(items = [notificationFixture('normal'), notificationFixture('
 
 beforeEach(() => {
   vi.clearAllMocks();
+  /* Cada teste é uma sessão nova do navegador: sem a marca da entrada. */
+  for (const part of document.cookie.split(';')) {
+    const name = part.split('=')[0]?.trim();
+    if (name) document.cookie = `${name}=; path=/; max-age=0`;
+  }
+  localStorage.clear();
   vi.mocked(notificationsApi.markRead).mockResolvedValue({} as never);
 });
 
@@ -78,9 +85,9 @@ describe('useNotificationCenterModel', () => {
   });
 
   // feliz
-  /* Com o sistema aberto, a notificação nova de QUALQUER nível entra no hero — não só a urgente —,
-     e a que não é urgente sai também no toast azul da marca. */
-  it('opens the dialog for every incoming one, and toasts the non urgent in blue', async () => {
+  /* Com o sistema aberto, a notificação nova vira toast azul da marca — de qualquer nível, e sem
+     abrir o hero. A urgente fica mais tempo. */
+  it('only toasts every incoming one, keeping the urgent longer', async () => {
     answering([]);
     const { result } = renderHook(useNotificationCenterModel, { wrapper });
     await waitFor(() => expect(result.current.state.isLoading).toBe(false));
@@ -88,11 +95,8 @@ describe('useNotificationCenterModel', () => {
     answering([notificationFixture('normal'), notificationFixture('urgent')]);
     act(() => result.current.actions.onMarkAllRead());
 
-    await waitFor(() => expect(result.current.state.isDialogOpen).toBe(true));
-    expect(result.current.data.dialogItems.map((item) => item.severity)).toEqual([
-      'urgent',
-      'normal',
-    ]);
+    await waitFor(() => expect(toast).toHaveBeenCalledTimes(2));
+    expect(result.current.state.isDialogOpen).toBe(false);
     expect(toast).toHaveBeenCalledWith(
       expect.stringContaining('Ana comentou numa tarefa sua'),
       expect.objectContaining({
@@ -100,6 +104,27 @@ describe('useNotificationCenterModel', () => {
         classNames: NOTIFICATION_TOAST_CLASSES,
       }),
     );
+    expect(toast).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        id: notificationFixture('urgent').id,
+        duration: URGENT_TOAST_DURATION_MS,
+      }),
+    );
+  });
+
+  // triste
+  /* F5 ou aba nova na mesma sessão e no mesmo dia: as não lidas ficam no sininho. */
+  it('does not open the dialog again after the entry was seen today', async () => {
+    answering();
+    const first = renderHook(useNotificationCenterModel, { wrapper });
+    await waitFor(() => expect(first.result.current.state.isDialogOpen).toBe(true));
+    first.unmount();
+
+    const { result } = renderHook(useNotificationCenterModel, { wrapper });
+
+    await waitFor(() => expect(result.current.data.unread).toBe(2));
+    expect(result.current.state.isDialogOpen).toBe(false);
   });
 
   // feliz
