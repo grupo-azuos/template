@@ -49,7 +49,7 @@ function RootRoute() {
           onClose: notifications.actions.onCloseDialog,
         }}
       />
-      <AzuosToaster ui={{ position: 'top-right' }} />
+      <AzuosToaster ui={{ position: 'bottom-right' }} />
     </AzuosAppShell>
   );
 }
