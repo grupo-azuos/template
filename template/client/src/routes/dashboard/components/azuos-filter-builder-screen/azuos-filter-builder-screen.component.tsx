@@ -259,7 +259,7 @@ export function AzuosFilterBuilderScreen({ data, state, actions }: AzuosFilterBu
                 }}
               />
               {draft.tree.rules.length === 0 ? (
-                <p className="flex items-center gap-2 text-sm text-ink-500">
+                <p className="text-ink-500 flex items-center gap-2 text-sm">
                   <Info className="size-4 shrink-0" aria-hidden="true" />
                   Nenhuma condição ainda: o filtro pega tudo de {DATA_SOURCES[draft.source].noun}.
                   Use “Condição” para recortar.
@@ -279,21 +279,21 @@ function SavedList({ data, actions }: Pick<AzuosFilterBuilderScreenProps, 'data'
   return (
     <aside aria-label="Filtros salvos" className="flex flex-col gap-4">
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-ink-900">Filtros salvos</h3>
+        <h3 className="text-ink-900 mb-2 text-sm font-semibold">Filtros salvos</h3>
         {data.filters.length === 0 ? (
-          <p className="text-sm text-ink-500">Nenhum ainda. O que você salvar aparece aqui.</p>
+          <p className="text-ink-500 text-sm">Nenhum ainda. O que você salvar aparece aqui.</p>
         ) : null}
         <ul className="flex flex-col gap-1">
           {data.filters.map((filter) => (
             <li
               key={filter.id}
-              className="flex items-center justify-between gap-2 rounded-box px-2 py-1.5 hover:bg-accent"
+              className="rounded-box hover:bg-accent flex items-center justify-between gap-2 px-2 py-1.5"
             >
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-ink-900">
+                <span className="text-ink-900 block truncate text-sm font-medium">
                   {filter.name}
                 </span>
-                <span className="block truncate text-xs text-ink-500">
+                <span className="text-ink-500 block truncate text-xs">
                   {DATA_SOURCES[filter.source].label} ·{' '}
                   {filter.scope === 'shared' ? 'Equipe' : 'Só eu'}
                 </span>
@@ -318,11 +318,11 @@ function SavedList({ data, actions }: Pick<AzuosFilterBuilderScreenProps, 'data'
       </div>
       {data.archived.length > 0 ? (
         <div>
-          <h3 className="mb-2 text-xs font-semibold text-ink-500 uppercase">Arquivados</h3>
+          <h3 className="text-ink-500 mb-2 text-xs font-semibold uppercase">Arquivados</h3>
           <ul className="flex flex-col gap-1">
             {data.archived.map((filter) => (
               <li key={filter.id} className="flex items-center justify-between gap-2 px-2 py-1">
-                <span className="truncate text-sm text-ink-500">{filter.name}</span>
+                <span className="text-ink-500 truncate text-sm">{filter.name}</span>
                 {filter.canEdit ? (
                   <AzuosActionButton
                     data={{ label: `Desarquivar ${filter.name}` }}
@@ -350,12 +350,12 @@ function Problems({ data }: { data: { problems: string[]; error: string | null }
   return (
     <div className="flex flex-col gap-2">
       {data.problems.length > 0 ? (
-        <div className="rounded-box bg-muted p-3 text-sm text-ink-700">
-          <p className="mb-1 font-semibold text-ink-900">Para salvar:</p>
+        <div className="rounded-box bg-muted text-ink-700 p-3 text-sm">
+          <p className="text-ink-900 mb-1 font-semibold">Para salvar:</p>
           <ul className="flex flex-col gap-1">
             {data.problems.map((problem) => (
               <li key={problem} className="flex items-center gap-2">
-                <CircleDashed className="size-4 shrink-0 text-ink-500" aria-hidden="true" />
+                <CircleDashed className="text-ink-500 size-4 shrink-0" aria-hidden="true" />
                 {problem}
               </li>
             ))}
@@ -363,7 +363,7 @@ function Problems({ data }: { data: { problems: string[]; error: string | null }
         </div>
       ) : null}
       {data.error ? (
-        <p role="alert" className="flex items-center gap-2 text-sm font-medium text-hue-red">
+        <p role="alert" className="text-hue-red flex items-center gap-2 text-sm font-medium">
           <CircleAlert className="size-4 shrink-0" aria-hidden="true" />
           {data.error}
         </p>
@@ -381,10 +381,10 @@ function FormGroup({
   children: ReactNode;
 }) {
   return (
-    <fieldset className="flex flex-col gap-4 rounded-surface border border-border bg-card p-4">
-      <legend className="px-1 text-sm font-bold text-ink-900">
+    <fieldset className="rounded-surface bg-card shadow-card flex flex-col gap-4 p-4">
+      <legend className="text-ink-900 px-1 text-sm font-bold">
         {data.legend}
-        <span className="ml-2 text-xs font-normal text-ink-500">{data.hint}</span>
+        <span className="text-ink-500 ml-2 text-xs font-normal">{data.hint}</span>
       </legend>
       {children}
     </fieldset>

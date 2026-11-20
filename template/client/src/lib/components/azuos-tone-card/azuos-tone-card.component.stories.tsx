@@ -6,7 +6,7 @@ import { AzuosToneCard, type AzuosToneCardTone } from './azuos-tone-card.compone
 const TONES: AzuosToneCardTone[] = ['brand', 'neutral', 'success', 'warning', 'danger', 'info'];
 
 const meta = {
-  title: 'Superfícies/AzuosToneCard',
+  title: 'Cards/AzuosToneCard',
   component: AzuosToneCard,
   args: { data: { label: 'Vencidos' }, ui: { tone: 'danger' }, children: 'Conteúdo do card' },
 } satisfies Meta<typeof AzuosToneCard>;

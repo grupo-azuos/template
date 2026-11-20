@@ -36,7 +36,7 @@ export function AzuosIdentityOverview({
   if (state?.error) return <OverviewError message={state.error} actions={actions} />;
   if (state?.isLoading || !data.person)
     return (
-      <p role="status" aria-label="Carregando o perfil" className="p-6 text-muted-foreground">
+      <p role="status" aria-label="Carregando o perfil" className="text-muted-foreground p-6">
         Carregando seu perfil…
       </p>
     );
@@ -92,28 +92,25 @@ export function AzuosIdentityHeader({
   children?: ReactNode;
 }) {
   return (
-    <section
-      aria-label="Identidade"
-      className="rounded-surface border border-border bg-card p-5 shadow-xs"
-    >
+    <section aria-label="Identidade" className="rounded-surface bg-card shadow-card p-5">
       <div className="flex flex-wrap items-center gap-4">
         {avatar ?? (
           <AzuosPersonAvatar name={person.name} avatarUrl={person.avatarUrl} ui={{ size: 'xl' }} />
         )}
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-base font-semibold text-foreground">{person.name}</h2>
+          <h2 className="text-foreground truncate text-base font-semibold">{person.name}</h2>
           <div className="flex flex-wrap items-center gap-2">
-            <p className="min-w-0 truncate text-sm text-muted-foreground">{person.email}</p>
+            <p className="text-muted-foreground min-w-0 truncate text-sm">{person.email}</p>
             {emailAction}
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {details
               .filter(([label]) => ['Cargo', 'Departamento', 'Setor'].includes(label))
               .map(([, value]) => value)
               .join(' · ')}
           </p>
         </div>
-        <span className="shrink-0 rounded-chip bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+        <span className="rounded-chip bg-primary text-primary-foreground shrink-0 px-2 py-0.5 text-xs font-semibold">
           {person.roleLabel}
         </span>
         {aside}
@@ -159,7 +156,7 @@ function AccountLink({ url }: { url?: string | null }) {
   if (!url) return null;
   return (
     <a
-      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary underline underline-offset-4 dark:text-info"
+      className="text-primary dark:text-info mt-4 inline-flex items-center gap-2 text-sm font-semibold underline underline-offset-4"
       href={url}
     >
       <Settings className="size-4" aria-hidden="true" />

@@ -39,26 +39,26 @@ export class AzuosAppErrorBoundary extends Component<
     if (!error) return this.props.children;
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink-100 p-6">
+      <div className="bg-ink-100 flex min-h-screen items-center justify-center p-6">
         <div
           role="alert"
           className={cn(
-            'border border-border bg-card text-destructive',
-            'w-full max-w-lg rounded-surface p-6 shadow-xl',
+            'bg-card shadow-card text-destructive',
+            'rounded-surface w-full max-w-lg p-6 shadow-xl',
           )}
         >
-          <h1 className="text-lg font-bold text-destructive">A tela não carregou</h1>
-          <p className="mt-2 text-sm text-ink-700">
+          <h1 className="text-destructive text-lg font-bold">A tela não carregou</h1>
+          <p className="text-ink-700 mt-2 text-sm">
             O sistema encontrou um erro ao montar esta página. Nada do que você fez foi perdido —
             esta tela simplesmente não chegou a abrir.
           </p>
-          <pre className="mt-4 overflow-x-auto rounded-box bg-ink-100 p-3 text-xs text-ink-900">
+          <pre className="rounded-box bg-ink-100 text-ink-900 mt-4 overflow-x-auto p-3 text-xs">
             {error.message}
           </pre>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-4 control-md rounded-control bg-primary text-sm font-semibold text-primary-foreground"
+            className="control-md rounded-control bg-primary text-primary-foreground mt-4 text-sm font-semibold"
           >
             Recarregar
           </button>

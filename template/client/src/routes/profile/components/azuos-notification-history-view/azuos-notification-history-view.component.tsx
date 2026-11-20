@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from '../../../../lib/components/azuos-dialog/azuos-dialog';
 import { AzuosEmptyState } from '../../../../lib/components/azuos-empty-state/azuos-empty-state.component';
+import { AzuosErrorState } from '../../../../lib/components/azuos-error-state/azuos-error-state.component';
 import { AzuosFilterField } from '../../../../lib/components/azuos-filter-field/azuos-filter-field.component';
 import { Input } from '../../../../lib/components/azuos-input/azuos-input';
 import { AzuosNotificationCard } from '../../../../lib/components/azuos-notification-card/azuos-notification-card.component';
@@ -90,17 +91,21 @@ export function AzuosNotificationHistoryView({
             <HistoryFilters data={data} state={state} actions={actions} />
             <HistoryList data={data} state={state} actions={actions} />
           </div>
-          <div className="border-border border-t px-6 py-3">
-            <AzuosPaginationBar
-              data={{
-                ...data.pagination,
-                noun: ['notificação', 'notificações'],
-                gender: 'feminine',
-              }}
-              state={{ isLoading: state.isFetching }}
-              actions={{ onPageChange: actions.onPageChange }}
-            />
-          </div>
+          {/* Sem lista (falha ou nada no recorte) não há página para trocar: a barra diria "1–20 de
+              312" em cima de uma tela vazia. */}
+          {state.error || data.items.length === 0 ? null : (
+            <div className="border-border border-t px-6 py-3">
+              <AzuosPaginationBar
+                data={{
+                  ...data.pagination,
+                  noun: ['notificação', 'notificações'],
+                  gender: 'feminine',
+                }}
+                state={{ isLoading: state.isFetching }}
+                actions={{ onPageChange: actions.onPageChange }}
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
@@ -235,9 +240,7 @@ function NotificationList({
 }) {
   if (state.error) {
     return (
-      <p role="alert" className="text-hue-red text-sm font-medium">
-        {state.error}
-      </p>
+      <AzuosErrorState data={{ title: 'Não consegui ler o histórico', message: state.error }} />
     );
   }
   if (state.isLoading) return <p className="text-ink-500 text-sm">Carregando o histórico…</p>;

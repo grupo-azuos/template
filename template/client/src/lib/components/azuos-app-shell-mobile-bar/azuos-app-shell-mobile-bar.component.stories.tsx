@@ -32,7 +32,14 @@ const meta = {
   title: 'Navegação e estrutura/AzuosAppShellMobileBar',
   component: AzuosAppShellMobileBar,
   decorators: [withRouter],
-  parameters: { layout: 'fullscreen' },
+  /* A barra só existe abaixo de 768px (`md:hidden`): na página Docs, larga, ela sumia. Cada
+     variação vira um quadro de CELULAR de verdade (um iframe de 390 × 700, ver `docs.css`), onde
+     a barra aparece embaixo e o "Menu" abre a gaveta dentro do quadro. */
+  parameters: {
+    layout: 'fullscreen',
+    fullBleed: true,
+    docs: { story: { inline: false, iframeHeight: 700 } },
+  },
   globals: { viewport: { value: 'mobile1', isRotated: false } },
   args: {
     data: {
@@ -65,10 +72,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** O ☰ aberto: o menu inteiro na gaveta de baixo. */
-export const MenuOpen: Story = {
-  args: { state: { activeKey: 'tasks', isMenuOpen: true } },
-};
+/** Toque em "Menu": a gaveta de baixo abre com o menu inteiro; arrastar para baixo ou tocar fora fecha. */
+export const MenuOpen: Story = {};
 
 /** Com partes: a troca de parte fica no topo da gaveta. */
 export const WithAreas: Story = {

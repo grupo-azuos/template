@@ -67,7 +67,7 @@ export function rangeLabelOf(data: AzuosPaginationBarProps['data']): string {
 }
 
 const STEP_CLASS =
-  'border-border/70 bg-card hover:bg-muted/50 text-foreground rounded-control control-sm inline-flex cursor-pointer items-center gap-1 border font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50';
+  'bg-muted hover:bg-accent text-foreground rounded-button control-sm inline-flex cursor-pointer items-center gap-1 border font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50';
 
 export function AzuosPaginationBar({ data, state, ui, actions }: AzuosPaginationBarProps) {
   const pageCount = pageCountOf(data.total, data.pageSize);
@@ -78,7 +78,7 @@ export function AzuosPaginationBar({ data, state, ui, actions }: AzuosPagination
     /* Empilha no celular: os três blocos lado a lado a 360px espremem o texto do meio. */
     <div
       className={cn(
-        'flex flex-col items-center justify-between gap-2 pt-3 text-xs text-muted-foreground sm:flex-row',
+        'text-muted-foreground flex flex-col items-center justify-between gap-2 pt-3 text-xs sm:flex-row',
         ui?.className,
       )}
     >

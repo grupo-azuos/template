@@ -38,21 +38,27 @@ export function AzuosCollapsible({ data, ui, state, actions, children }: AzuosCo
       open={isOpen}
       disabled={state?.isDisabled}
       onOpenChange={handleOpenChange}
-      className={cn('rounded-box border border-border bg-card', ui?.className)}
+      className={cn('rounded-box bg-card shadow-card', ui?.className)}
     >
-      <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-ink-900 disabled:cursor-not-allowed disabled:opacity-60">
+      <CollapsibleTrigger className="text-foreground rounded-box hover:bg-hover-veil flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60">
         <span className="break-words">{data.title}</span>
         <ChevronDown
           className={cn(
-            'size-4 shrink-0 text-ink-500 transition-transform',
+            'text-muted-foreground size-4 shrink-0 transition-transform duration-300 ease-out',
             isOpen && 'rotate-180',
           )}
           aria-hidden="true"
         />
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="border-t border-border/60 px-4 py-3 text-sm text-ink-700">
-        {children}
+      {/* ABRIR E FECHAR ANIMADOS: a caixa desliza na altura do conteúdo (a altura vem do Radix,
+          `--radix-collapsible-content-height`) e o texto entra subindo e aparecendo. O respiro
+          mora no filho, porque padding na caixa que anima a altura dá um tranco no fim. Quem
+          pediu menos movimento vê abrir na hora (`motion-safe`). */}
+      <CollapsibleContent className="data-[state=open]:motion-safe:animate-collapsible-down data-[state=closed]:motion-safe:animate-collapsible-up overflow-hidden">
+        <div className="border-border text-foreground/85 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-1 border-t px-4 py-3 text-sm motion-safe:duration-300">
+          {children}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

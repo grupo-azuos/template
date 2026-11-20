@@ -60,8 +60,9 @@ describe("brand/no-pure-black-white", () => {
 		const found = rulesFor("<div class=\"bg-black\"></div>\n<style>.a { color: white; border-color: #fff; }</style>");
 		assert.equal(found.filter((r) => r === "brand/no-pure-black-white").length, 3);
 	});
-	it("applies inside token files too", () => {
-		assert.ok(rulesFor(":root { --background: #000000; }", "src/tokens.css").includes("brand/no-pure-black-white"));
+	/* Padrão Apple: o card claro é branco, e o branco existe como VALOR de token. */
+	it("allows black and white only as token values, inside token files", () => {
+		assert.ok(!rulesFor(":root { --card: #ffffff; }", "src/tokens.css").includes("brand/no-pure-black-white"));
 	});
 });
 describe("brand/tokens-only", () => {
@@ -247,6 +248,46 @@ describe("casos de borda", () => {
 			hint: "Dica."
 		}]);
 		assert.equal(text, "✕ src/x.svelte:3  [a/b] Erro.\n    Lei: Dica.\n! src/x.svelte:4  [c/d] Aviso.\n    Lei: Dica.");
+	});
+});
+
+describe("padrão Apple", () => {
+	it("card-without-border: recusa card com borda em volta, aceita sombra e divisória", () => {
+		const bad = rulesFor('<div className="rounded-surface border border-border bg-card p-4" />', "src/x.tsx");
+		assert.ok(bad.includes("apple/card-without-border"));
+
+		const good = rulesFor('<div className="rounded-surface bg-card p-4 shadow-card" />', "src/x.tsx");
+		assert.ok(!good.includes("apple/card-without-border"));
+
+		const divider = rulesFor('<header className="border-b border-border bg-card" />', "src/x.tsx");
+		assert.ok(!divider.includes("apple/card-without-border"));
+
+		const dropzone = rulesFor('<div className="border-2 border-dashed border-border bg-card" />', "src/x.tsx");
+		assert.ok(!dropzone.includes("apple/card-without-border"));
+	});
+
+	it("sentence-case-labels: avisa rótulo em caixa alta espaçada", () => {
+		const bad = rulesFor('<p className="text-xs font-semibold tracking-wider uppercase">Total</p>', "src/x.tsx");
+		assert.ok(bad.includes("apple/sentence-case-labels"));
+
+		const good = rulesFor('<p className="text-sm font-medium text-muted-foreground">Total</p>', "src/x.tsx");
+		assert.ok(!good.includes("apple/sentence-case-labels"));
+	});
+
+	it("hover-never-covers: recusa painel que sobe por cima do card no hover", () => {
+		const bad = rulesFor('<div className="absolute bottom-0 translate-y-full group-hover:translate-y-0" />', "src/x.tsx");
+		assert.ok(bad.includes("apple/hover-never-covers"));
+
+		const good = rulesFor('<div className="transition-transform motion-safe:hover:-translate-y-0.5" />', "src/x.tsx");
+		assert.ok(!good.includes("apple/hover-never-covers"));
+	});
+
+	it("no-pure-black-white: o branco do card Apple pode ser VALOR no tokens.css, nunca na tela", () => {
+		const token = rulesFor(":root { --card: #ffffff; }", "src/lib/theme/tokens.css");
+		assert.ok(!token.includes("brand/no-pure-black-white"));
+
+		const screen = rulesFor('<div style={{ color: "#ffffff" }} />', "src/x.tsx");
+		assert.ok(screen.includes("brand/no-pure-black-white"));
 	});
 });
 

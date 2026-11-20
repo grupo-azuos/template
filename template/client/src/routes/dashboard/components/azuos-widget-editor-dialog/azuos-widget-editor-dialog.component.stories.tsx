@@ -36,7 +36,7 @@ const FILTERS: [SavedFilter, SavedFilter] = [
 ];
 
 const meta = {
-  title: 'Components/AzuosWidgetEditorDialog',
+  title: 'Dashboard/AzuosWidgetEditorDialog',
   component: AzuosWidgetEditorDialog,
   args: {
     data: {

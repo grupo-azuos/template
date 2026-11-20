@@ -1,0 +1,15 @@
+// O Storybook do template, público, num Worker da Cloudflare só de arquivos estáticos (sem código):
+// `npm run storybook:deploy` monta o `storybook-static/` e envia. O domínio é ligado pelo próprio
+// deploy (custom domain), sem registro de DNS feito à mão.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "azuos-storybook",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./storybook-static",
+    "not_found_handling": "404-page",
+  },
+  "routes": [{ "pattern": "storybook.core.grupoazuos.com.br", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+}

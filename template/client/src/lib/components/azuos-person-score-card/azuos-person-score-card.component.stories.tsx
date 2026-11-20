@@ -4,7 +4,7 @@ import { BellOff, CalendarX, CircleHelp, UserX } from 'lucide-react';
 import { AzuosPersonScoreCard } from './azuos-person-score-card.component';
 
 const meta = {
-  title: 'Gráficos e números/AzuosPersonScoreCard',
+  title: 'Cards/AzuosPersonScoreCard',
   component: AzuosPersonScoreCard,
   decorators: [
     (Story) => (

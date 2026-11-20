@@ -1,7 +1,8 @@
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { type KeyboardEvent, useId, useState } from 'react';
 
 import { cn } from '../../utils/cn.util';
+import { searchKey } from '../../utils/company-search.util';
 import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
 import { AzuosCheckboxField } from '../azuos-checkbox-field/azuos-checkbox-field.component';
 import { AzuosPersonAvatar } from '../azuos-person-avatar/azuos-person-avatar.component';
@@ -18,6 +19,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
  * O rótulo do botão resume a escolha: nada marcado mostra o `placeholder` ("Todos os regimes"), um
  * ou dois mostram os nomes e três ou mais viram contagem ("3 regimes") — a partir daí os nomes não
  * cabem no botão. O leitor de tela recebe a lista inteira no `aria-label`, seja qual for o resumo.
+ *
+ * O painel abre com a BUSCA no topo, já com o cursor nela: em lista de pessoas ou de catálogo,
+ * digitar "ana" é mais rápido que rolar. A busca ignora acento e maiúscula ("joao" acha "João"),
+ * filtra só a lista — o que já foi marcado continua marcado — e volta vazia ao fechar.
  *
  * `onChange` devolve a lista NA ORDEM DAS OPÇÕES, e não na ordem em que foram marcadas: a mesma
  * escolha vira sempre a mesma lista, o que faz a URL e o cache da consulta serem os mesmos.
@@ -64,8 +69,25 @@ export function summarizeSelection(input: AzuosMultiSelectFieldProps['data']): s
   return `${labels.length} ${input.noun}`;
 }
 
+/** As opções que batem com a busca, sem acento nem maiúscula. Busca vazia mostra todas. */
+export function filterOptions(
+  options: AzuosMultiSelectFieldOption[],
+  query: string,
+): AzuosMultiSelectFieldOption[] {
+  const needle = searchKey(query);
+  if (!needle) return options;
+
+  return options.filter((option) => searchKey(option.label).includes(needle));
+}
+
 export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSelectFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const visible = filterOptions(data.options, query);
+  const changeOpen = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) setQuery('');
+  };
   const fieldId = useId();
   const labels = selectedLabels(data.values, data.options);
   const fullLabel = labels.length === 0 ? data.placeholder : labels.join(', ');
@@ -80,15 +102,15 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={changeOpen}>
       <PopoverTrigger
         type="button"
         disabled={state?.isDisabled}
         aria-label={`${ariaLabel}: ${fullLabel}`}
         title={fullLabel}
         className={cn(
-          'flex control-lg w-full min-w-40 items-center justify-between gap-2 rounded-control border border-input bg-muted px-3 text-sm whitespace-nowrap text-foreground outline-none',
-          'focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          'control-lg rounded-control border-input bg-muted text-foreground flex w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm whitespace-nowrap outline-none',
+          'focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
           ui?.className,
         )}
       >
@@ -96,23 +118,30 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
           <SelectedFaces data={{ values: data.values, options: data.options }} />
           <span className="min-w-0 truncate">{summarizeSelection(data)}</span>
         </span>
-        <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <ChevronDown className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
       </PopoverTrigger>
 
       <PopoverContent
-        align="start"
-        className="w-72 min-w-64 overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
+        sideOffset={6}
+        align="center"
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(14rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
       >
+        <MultiSelectSearch data={{ query, ariaLabel }} actions={{ onQueryChange: setQuery }} />
+        {visible.length === 0 ? (
+          <p className="text-muted-foreground px-4 py-6 text-center text-sm">
+            Nada encontrado para «{query.trim()}».
+          </p>
+        ) : null}
         <ul
           role="group"
           aria-label={ariaLabel}
           onKeyDown={moveFocusWithArrows}
-          className="max-h-72 overflow-y-auto p-2"
+          className={cn('max-h-72 overflow-y-auto p-2', visible.length === 0 && 'hidden')}
         >
-          {data.options.map((option) => (
+          {visible.map((option) => (
             <li
               key={option.value}
-              className="flex items-center gap-2 rounded-box px-2 hover:bg-accent"
+              className="rounded-box hover:bg-accent flex items-center gap-2 px-2"
             >
               <PersonFace data={{ option }} />
               <AzuosCheckboxField
@@ -127,7 +156,7 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
             </li>
           ))}
         </ul>
-        <div className="flex justify-end border-t border-border px-2 py-1.5">
+        <div className="border-border flex justify-end border-t px-2 py-1.5">
           <AzuosActionButton
             data={{ label: 'Limpar' }}
             ui={{ variant: 'ghost', size: 'sm' }}
@@ -138,6 +167,44 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
       </PopoverContent>
     </Popover>
   );
+}
+
+/** A busca no topo do painel: abre com o cursor nela, e a seta para baixo leva à lista. */
+function MultiSelectSearch({
+  data,
+  actions,
+}: {
+  data: { query: string; ariaLabel: string };
+  actions: { onQueryChange: (query: string) => void };
+}) {
+  return (
+    <div className="border-border relative border-b p-2">
+      <Search
+        className="text-muted-foreground pointer-events-none absolute top-1/2 left-4.5 size-4 -translate-y-1/2"
+        aria-hidden="true"
+      />
+      <input
+        type="search"
+        autoFocus
+        value={data.query}
+        onChange={(event) => actions.onQueryChange(event.target.value)}
+        onKeyDown={focusListOnArrowDown}
+        placeholder="Pesquisar…"
+        aria-label={`Pesquisar em ${data.ariaLabel}`}
+        className="control-md rounded-control bg-muted text-foreground placeholder:text-muted-foreground focus-visible:ring-ring/50 w-full pr-3 pl-8 text-sm outline-none focus-visible:ring-[3px]"
+      />
+    </div>
+  );
+}
+
+/** Seta para baixo na busca leva o foco para a primeira caixa da lista. */
+function focusListOnArrowDown(event: KeyboardEvent<HTMLInputElement>): void {
+  if (event.key !== 'ArrowDown') return;
+  const list = event.currentTarget.closest('[data-radix-popper-content-wrapper], [role="dialog"]');
+  const first = list?.querySelector<HTMLInputElement>('ul input, ul button');
+  if (!first) return;
+  event.preventDefault();
+  first.focus();
 }
 
 /**
@@ -175,13 +242,13 @@ function SelectedFaces({
   if (people.length === 0) return null;
 
   return (
-    <span aria-hidden="true" className="flex shrink-0 -space-x-1.5">
+    <span aria-hidden="true" className="flex shrink-0 -space-x-1">
       {people.map((option) => (
         <AzuosPersonAvatar
           key={option.value}
           name={option.personName ?? option.label}
           avatarUrl={option.avatarUrl}
-          ui={{ size: 'sm', className: 'ring-background ring-2' }}
+          ui={{ size: 'sm', className: 'ring-muted ring-2' }}
         />
       ))}
     </span>

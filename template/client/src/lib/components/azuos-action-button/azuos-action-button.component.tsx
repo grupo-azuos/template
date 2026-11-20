@@ -22,14 +22,17 @@ import { Button } from '../ui/button';
  * requisições, e a segunda voltaria como "não encontrado" de algo que acabou de dar certo.
  */
 export const azuosActionButton = tv({
-  base: 'rounded-control align-middle font-semibold shadow-xs transition-all',
+  base: 'rounded-button max-w-full min-w-0 align-middle font-semibold shadow-xs transition-all',
   variants: {
     variant: {
       primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-      secondary: 'border border-border bg-card text-foreground hover:bg-accent/50',
+      secondary: 'bg-muted text-foreground hover:bg-accent',
       ghost:
-        'border border-transparent bg-transparent text-foreground/80 shadow-none hover:bg-accent hover:text-foreground',
+        'text-foreground/80 hover:bg-accent hover:text-foreground border border-transparent bg-transparent shadow-none',
       danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+      /* O perigo discreto, para a lixeira de uma linha: vermelho claro parado, cheio no hover. */
+      'danger-soft':
+        'bg-destructive-soft text-destructive hover:bg-destructive hover:text-destructive-foreground shadow-none',
     },
     size: {
       sm: 'control-sm',
@@ -48,7 +51,7 @@ export const azuosActionButton = tv({
   defaultVariants: { variant: 'primary', size: 'md', isIconOnly: false },
 });
 
-export type AzuosActionButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type AzuosActionButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-soft';
 
 export type AzuosActionButtonSize = 'sm' | 'md' | 'lg';
 
@@ -97,7 +100,8 @@ export function AzuosActionButton({ data, ui, state, actions }: AzuosActionButto
       className={buttonClassName(ui)}
     >
       <ButtonIcon data={{ Icon }} state={{ isBusy }} />
-      {label}
+      {/* Rótulo longo numa coluna estreita: corta com "…" em vez de estourar a coluna. */}
+      {label ? <span className="min-w-0 truncate">{label}</span> : null}
     </Button>
   );
 }

@@ -6,6 +6,7 @@ import {
   isLightColor,
   normalizeHexColor,
 } from './company-color.util';
+import { themeColor } from './theme-color.util';
 
 describe('isHexColor', () => {
   it('accepts a six digit hex color in any case', () => {
@@ -30,7 +31,7 @@ describe('normalizeHexColor', () => {
 describe('isLightColor', () => {
   it('keeps white text on every dark palette color, and dark text on the group yellow', () => {
     for (const color of COMPANY_COLOR_PALETTE) {
-      expect(isLightColor(color)).toBe(color === '#ffdc00');
+      expect(isLightColor(color)).toBe(color === themeColor('--warning'));
     }
   });
 

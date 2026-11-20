@@ -31,8 +31,8 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
     selector: '[aria-pressed="true"]',
     indicatorClass:
       ui.variant === 'prominent'
-        ? 'rounded-control bg-primary'
-        : 'rounded-control bg-card shadow-xs',
+        ? 'rounded-full bg-primary'
+        : 'rounded-full bg-segment-selected shadow-xs',
     attributes: ['aria-pressed'],
   });
 
@@ -42,7 +42,9 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'flex flex-wrap gap-1 rounded-surface bg-mantle p-1',
+        /* O trilho tem o tamanho das opções (padrão Apple), e não a largura da tela: uma pílula
+           esticada com metade vazia parecia um campo. Quando não cabe (celular), rola de lado. */
+        'bg-muted inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-full p-1',
         ui.variant === 'prominent' && 'w-full gap-2 bg-transparent p-0 sm:w-auto',
         ui.className,
       )}
@@ -61,16 +63,16 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
               actions.onChange(option.value);
             }}
             className={cn(
-              'rounded-control px-3 py-1.5 text-sm transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
+              'shrink-0 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
               isActive
-                ? 'font-bold text-primary'
-                : 'font-semibold text-muted-foreground hover:bg-card/60 hover:text-foreground',
+                ? 'text-foreground font-semibold'
+                : 'text-muted-foreground hover:bg-hover-veil hover:text-foreground font-medium',
               ui.variant === 'prominent' &&
-                'control-lg flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-none',
+                'control-lg focus-visible:outline-primary flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 sm:flex-none',
               ui.variant === 'prominent' &&
                 (isActive
                   ? 'text-primary-foreground shadow-none'
-                  : 'bg-primary/10 text-ink-900 shadow-none hover:bg-primary/20 hover:text-ink-900'),
+                  : 'bg-primary/10 text-ink-900 hover:bg-primary/20 hover:text-ink-900 shadow-none'),
             )}
           >
             {option.label}

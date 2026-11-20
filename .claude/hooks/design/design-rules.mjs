@@ -77,10 +77,13 @@ const noPureBlackWhite = {
 	id: "brand/no-pure-black-white",
 	law: "Marca",
 	severity: "error",
-	description: "Preto puro e branco puro são proibidos pela marca.",
-	hint: "Use os tokens: `foreground`/`background` (ou `primary-foreground`) já são os tons quase-preto e quase-branco da marca.",
+	description: "Preto e branco escritos na tela são proibidos: eles moram no `tokens.css`.",
+	hint: "Use os tokens: `bg-card` (branco no claro), `text-foreground`, `text-on-hue`, `text-primary-foreground`. O branco puro do padrão Apple só existe como VALOR de token.",
 	enabled: (c) => c.brandRules.noPureBlackWhite,
 	check: (file) => {
+		/* Padrão Apple: o card claro É branco. Branco e preto só podem ser escritos no próprio
+		   `tokens.css`, como valor de token; a tela sempre usa o nome do token. */
+		if (file.isTokenFile) return [];
 		const patterns = [
 			/#(?:000|fff|000000|ffffff)(?:f|ff)?\b/gi,
 			/\brgba?\(\s*(?:0\s*,\s*0\s*,\s*0|255\s*,\s*255\s*,\s*255)\b/gi,
@@ -691,7 +694,77 @@ const teslerInputType = {
 	})
 };
 /* ------------------------------------------------------------------ motor */
+
+/* ------------------------------------------------------------------ padrão Apple */
+/**
+ * CARD SEM BORDA. No padrão Apple o que separa o card do fundo é o fio de 1px e a sombra difusa
+ * do `--elevation-card` (`shadow-card`), nunca uma borda desenhada. Borda fica para divisória
+ * (`border-b`, `divide-y`) e para o tracejado de "solte aqui".
+ */
+const appleCardWithoutBorder = {
+	id: "apple/card-without-border",
+	law: "Marca",
+	severity: "error",
+	description: "Card ou painel com borda em volta: no padrão Apple o card não tem borda.",
+	hint: "Troque `border border-border bg-card` por `bg-card shadow-card` (ou use `AzuosCardSurface`/`AzuosPanelCard`). Divisória interna (`border-b`, `divide-y`) pode.",
+	enabled: (c) => c.brandRules?.appleCardWithoutBorder ?? true,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		const found = [];
+		for (const m of matches(file.code, /(["'`])([^"'`]*)\1/g)) {
+			const classes = m[2];
+			if (!/\bbg-(?:card|popover)\b/.test(classes)) continue;
+			if (!/(?:^|\s)border(?:-[0-9])?(?=\s|$)/.test(classes)) continue;
+			if (/\bborder-(?:dashed|transparent)\b/.test(classes)) continue;
+			found.push({ index: m.index, message: "Card com borda em volta: use `shadow-card` no lugar da borda." });
+		}
+		return found;
+	}
+};
+/**
+ * RÓTULO EM CAIXA NORMAL. O padrão Apple escreve rótulo e título como frase ("Alvarás vencidos"),
+ * em cinza de apoio; CAIXA ALTA espaçada é do visual antigo. Aviso, não erro: sigla e selo curto
+ * em maiúsculas ainda aparecem.
+ */
+const appleSentenceCase = {
+	id: "apple/sentence-case-labels",
+	law: "Marca",
+	severity: "warning",
+	description: "Rótulo em CAIXA ALTA espaçada: no padrão Apple o rótulo é escrito como frase.",
+	hint: "Troque `uppercase tracking-wider text-xs font-semibold` por `text-sm font-medium text-muted-foreground`.",
+	enabled: (c) => c.brandRules?.appleSentenceCase ?? true,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		return [...matches(file.code, /(["'`])([^"'`]*\buppercase\b[^"'`]*\btracking-(?:wide|wider|widest)\b[^"'`]*|[^"'`]*\btracking-(?:wide|wider|widest)\b[^"'`]*\buppercase\b[^"'`]*)\1/g)].map((m) => ({
+			index: m.index,
+			message: "Rótulo em caixa alta espaçada."
+		}));
+	}
+};
+/**
+ * HOVER QUE COBRE CONTEÚDO. No padrão Apple o hover destaca (sobe, sombra, véu neutro), nunca
+ * esconde: nada pode deslizar por cima do card (`translate-y-full` que vira `translate-y-0`).
+ */
+const appleHoverNeverCovers = {
+	id: "apple/hover-never-covers",
+	law: "Marca",
+	severity: "error",
+	description: "Painel que desliza por cima do conteúdo no hover: o hover não pode esconder informação.",
+	hint: "Mostre a ação num lugar reservado (uma seta no rodapé, um botão que já existe) ou use o menu de 3 pontinhos.",
+	enabled: (c) => c.brandRules?.appleHoverNeverCovers ?? true,
+	check: (file) => {
+		if (file.isTokenFile) return [];
+		return [...matches(file.code, /\btranslate-y-full\b[^"'`]*\bgroup-hover(?:\/[a-z]+)?:translate-y-0\b/g)].map((m) => ({
+			index: m.index,
+			message: "O hover desliza por cima do conteúdo."
+		}));
+	}
+};
+
 export const RULES = [
+	appleCardWithoutBorder,
+	appleSentenceCase,
+	appleHoverNeverCovers,
 	noPureBlackWhite,
 	tokensOnly,
 	readableYellowText,

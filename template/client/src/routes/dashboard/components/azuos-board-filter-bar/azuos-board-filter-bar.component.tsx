@@ -64,9 +64,9 @@ export function AzuosBoardFilterBar({ data, state, actions }: AzuosBoardFilterBa
   return (
     <section
       aria-label="Filtros do painel"
-      className="flex flex-wrap items-end gap-3 rounded-surface border border-border bg-card p-4"
+      className="rounded-surface bg-card shadow-card flex flex-wrap items-end gap-3 p-4"
     >
-      <span className="flex items-center gap-2 self-center text-sm font-semibold text-ink-700">
+      <span className="text-ink-700 flex items-center gap-2 self-center text-sm font-semibold">
         <Filter className="size-4" aria-hidden="true" />
         Filtros
       </span>
@@ -96,7 +96,7 @@ export function AzuosBoardFilterBar({ data, state, actions }: AzuosBoardFilterBa
           ))
         : null}
       {isEditing && data.filters.length === 0 ? (
-        <p className="self-center text-xs text-ink-500">
+        <p className="text-ink-500 self-center text-xs">
           Ponha um filtro para quem vê recortar todos os blocos de uma vez.
         </p>
       ) : null}
@@ -278,8 +278,7 @@ function PeriodControl({
           }}
           ui={{ ariaLabel: data.label, className: 'w-full' }}
           actions={{
-            onChange: (value) =>
-              actions.onChange({ period: windowOfPreset(value, todayIso()) }),
+            onChange: (value) => actions.onChange({ period: windowOfPreset(value, todayIso()) }),
           }}
         />
       </AzuosFilterField>
@@ -302,7 +301,7 @@ function PeriodControl({
         />
       ) : null}
       {data.value ? (
-        <p className="flex items-center gap-1 pb-2.5 text-xs text-ink-500">
+        <p className="text-ink-500 flex items-center gap-1 pb-2.5 text-xs">
           <CalendarRange className="size-3.5" aria-hidden="true" />
           {windowLabel(data.value)}
         </p>

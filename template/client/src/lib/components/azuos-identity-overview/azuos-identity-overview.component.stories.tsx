@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import { AzuosIdentityOverview } from './azuos-identity-overview.component';
 const meta = {
-  title: 'Components/AzuosIdentityOverview',
+  title: 'Navegação e estrutura/AzuosIdentityOverview',
   component: AzuosIdentityOverview,
   args: {
     data: {

@@ -5,7 +5,7 @@ import { EMPTY_HISTORY_FILTER } from '../../../../lib/view-models/use-history.mo
 import { AzuosHistoryView } from './azuos-history-view.component';
 
 const meta = {
-  title: 'Composers/AzuosHistoryView',
+  title: 'Telas/AzuosHistoryView',
   component: AzuosHistoryView,
   args: {
     data: {

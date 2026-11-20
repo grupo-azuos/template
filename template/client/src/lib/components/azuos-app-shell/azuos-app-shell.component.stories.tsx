@@ -41,9 +41,9 @@ const meta = {
   title: 'Navegação e estrutura/AzuosAppShell',
   component: AzuosAppShell,
   decorators: [withRouter],
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', fullBleed: true },
   args: {
-    children: <div className="p-8 text-sm text-ink-700">Conteúdo da rota entra aqui.</div>,
+    children: <div className="text-ink-700 p-8 text-sm">Conteúdo da rota entra aqui.</div>,
     data: {
       user: { name: 'Ana Souza', role: 'Administradora' },
       areas: [],

@@ -52,7 +52,7 @@ describe('AzuosTable', () => {
     const surface = container.querySelector('[data-slot="table-surface"]');
 
     expect(surface?.className).toContain('rounded-surface');
-    expect(surface?.className).toContain('border');
+    expect(surface?.className).toContain('shadow-card');
   });
 
   it('shows the footer when there is one', () => {

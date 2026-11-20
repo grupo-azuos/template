@@ -107,20 +107,21 @@ function MonthPickerControl({
           className={cn(
             FIELD_CONTROL_CLASS,
             'flex items-center gap-2 text-left',
-            'outline-none hover:bg-accent/40 focus-visible:ring-[3px] focus-visible:ring-ring/50',
+            'hover:bg-accent/40 focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-60',
-            hasError ? 'border-border bg-destructive-soft' : 'border-input',
+            hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
             data.value ? 'text-foreground' : 'text-ink-500',
           )}
         >
-          <CalendarRange className="size-4 shrink-0 text-ink-500" aria-hidden="true" />
+          <CalendarRange className="text-ink-500 size-4 shrink-0" aria-hidden="true" />
           <span className="truncate capitalize">{triggerLabel(data.value, ui?.placeholder)}</span>
         </button>
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-auto rounded-surface border-border bg-card p-3 shadow-xl"
-        align="start"
+        sideOffset={6}
+        className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-3 shadow-xl ring-1"
+        align="center"
       >
         <YearHeader data={{ year }} actions={{ onYearChange: setYear }} />
         <MonthGrid data={{ year, selected: data.value }} actions={{ onPick: handlePick }} />
@@ -165,7 +166,7 @@ function YearHeader({
       </YearButton>
 
       {/* `aria-live` para o leitor de tela anunciar a troca de ano sem reler a grade inteira. */}
-      <span aria-live="polite" className="text-sm font-semibold text-ink-700 tabular-nums">
+      <span aria-live="polite" className="text-ink-700 text-sm font-semibold tabular-nums">
         {data.year}
       </span>
 
@@ -193,7 +194,7 @@ function YearButton({
       type="button"
       onClick={actions.onClick}
       aria-label={ui.label}
-      className="rounded-control p-1.5 text-ink-500 transition-colors hover:bg-accent hover:text-ink-900"
+      className="rounded-control text-ink-500 hover:bg-accent hover:text-ink-900 p-1.5 transition-colors"
     >
       {children}
     </button>
@@ -234,10 +235,10 @@ function MonthGrid({
 
 function monthClassName(state: { isSelected: boolean; isCurrent: boolean }): string {
   return cn(
-    'rounded-control px-2 py-2 text-sm capitalize transition-colors hover:bg-accent focus-visible:ring-ring',
+    'rounded-control hover:bg-accent focus-visible:ring-ring px-2 py-2 text-sm capitalize transition-colors',
     'focus-visible:ring-2 focus-visible:outline-none',
-    state.isCurrent && !state.isSelected && 'font-bold text-brand-blue-800',
-    state.isSelected && 'bg-primary font-bold text-primary-foreground hover:bg-primary',
+    state.isCurrent && !state.isSelected && 'text-brand-blue-800 font-bold',
+    state.isSelected && 'bg-primary text-primary-foreground hover:bg-primary font-bold',
   );
 }
 
@@ -260,11 +261,11 @@ function PickerFooter({
   actions: { onPick: (monthIso: string) => void };
 }) {
   return (
-    <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
+    <div className="border-border mt-2 flex items-center justify-between border-t pt-2">
       <button
         type="button"
         onClick={() => actions.onPick(monthOfIso(todayIso()))}
-        className="text-xs font-semibold text-brand-blue-800 hover:underline dark:text-foreground"
+        className="text-brand-blue-800 dark:text-foreground text-xs font-semibold hover:underline"
       >
         Este mês
       </button>
@@ -273,7 +274,7 @@ function PickerFooter({
         <button
           type="button"
           onClick={() => actions.onPick('')}
-          className="text-xs font-medium text-ink-500 hover:text-ink-900 hover:underline"
+          className="text-ink-500 hover:text-ink-900 text-xs font-medium hover:underline"
         >
           Limpar
         </button>

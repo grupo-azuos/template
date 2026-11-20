@@ -8,13 +8,11 @@ import { cn } from '../../utils/cn.util';
  * A SUPERFÍCIE de todo card do grupo — o andar de baixo dos quatro formatos (card de painel,
  * filtro pequeno, filtro grande com ícone e card de conteúdo).
  *
- * - Fundo: sempre a superfície da marca (`bg-card`), com a borda neutra. Cor de card entra só como
- *   sotaque, em quem usa esta superfície: bolinha do ícone, número, marca d'água
- *   (`lib/utils/card-tone.util.ts`).
- * - Cor: card com tom (`ui.isHoverColored` + `ui.hoverTone`) fica TINGIDO o tempo todo — o tom a
- *   16%. Card sem tom fica na superfície e ganha só o véu neutro (`--hover-veil`) no hover.
- * - Sem animação: o card não sobe, a sombra não cresce, a marca d'água não aumenta. O hover é só
- *   a troca de cor, na hora.
+ * - Fundo: a superfície (`bg-card`) SEM borda; o que separa o card do fundo é o fio de 1px e a
+ *   sombra difusa do `--elevation-card` (padrão Apple). A cor entra no ícone cheio do assunto
+ *   (`lib/utils/card-tone.util.ts`), nunca no fundo do card.
+ * - Hover: clicável, o card sobe 2px e a sombra cresce; o véu neutro (`--hover-veil`), ou no tom
+ *   com `ui.isHoverColored`, aparece por cima. Nada aparece cobrindo o conteúdo.
  * - Marca d'água: `ui.mark` desenha o ícone grande no canto, no sotaque de `ui.markTone`, como no
  *   hero card. Fica atrás do texto.
  * - Escolhido: o azul claro da marca (`bg-card-selected`) com texto branco. Quem está dentro lê o
@@ -47,25 +45,22 @@ function washColorOf(ui: AzuosCardSurfaceProps['ui']): string {
   return 'var(--hover-veil)';
 }
 
-/** O véu sempre à vista (card com tom) ou só no hover (card neutro). */
-function washClassOf(ui: AzuosCardSurfaceProps['ui']): string {
-  const isTinted = Boolean(ui?.isHoverColored && ui.hoverTone);
-
-  return cn(
-    'pointer-events-none absolute inset-0 -z-10',
-    isTinted ? 'bg-(--card-veil)' : 'group-hover/card:bg-(--card-veil)',
-  );
+/** O véu aparece só no hover: neutro, ou no tom do card com `ui.isHoverColored`. */
+function washClassOf(): string {
+  return cn('pointer-events-none absolute inset-0 -z-10', 'group-hover/card:bg-(--card-veil)');
 }
 
-/** A casca: superfície da marca, ou o azul claro do escolhido. Parada no hover: sem subir. */
+/**
+ * A casca no padrão Apple: superfície sem borda, com o fio de 1px e a sombra difusa do
+ * `--elevation-card`. Clicável, ela sobe 2px e a sombra cresce no hover — sem cobrir nada.
+ */
 function surfaceClassOf(props: { isSelected: boolean; isClickable: boolean; className?: string }) {
   return cn(
-    'group/card relative isolate overflow-hidden rounded-surface shadow-card',
+    'group/card rounded-surface shadow-card relative isolate overflow-hidden',
     /* A borda NEUTRA separa o card do fundo da página, que no claro é quase do mesmo branco. */
-    props.isSelected
-      ? 'border border-transparent bg-card-selected text-on-card-selected'
-      : 'border border-border bg-card text-card-foreground',
-    props.isClickable && 'cursor-pointer',
+    props.isSelected ? 'bg-card-selected text-on-card-selected' : 'bg-card text-card-foreground',
+    props.isClickable &&
+      'hover:shadow-card-hover cursor-pointer transition-[transform,box-shadow] duration-200 motion-safe:hover:-translate-y-0.5',
     props.isSelected && props.isClickable && 'hover:bg-card-selected-hover',
     props.className,
   );
@@ -97,7 +92,7 @@ export function AzuosCardSurface({ data, ui, state, actions, children }: AzuosCa
       <span
         aria-hidden="true"
         data-slot="card-wash"
-        className={washClassOf(ui)}
+        className={washClassOf()}
         style={{ '--card-veil': washColorOf(ui) } as CSSProperties}
       />
       <CardMark ui={ui} />
@@ -126,7 +121,7 @@ function CardClickTarget({
       aria-pressed={state.isSelected}
       disabled={state.isDisabled}
       onClick={actions.onClick}
-      className="absolute inset-0 z-10 cursor-pointer rounded-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default"
+      className="rounded-surface focus-visible:ring-ring absolute inset-0 z-10 cursor-pointer focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
     />
   );
 }
@@ -141,7 +136,7 @@ function CardMark({ ui }: { ui: AzuosCardSurfaceProps['ui'] }) {
       aria-hidden="true"
       data-slot="card-mark"
       className={cn(
-        'pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31 group-data-[selected=true]/card:text-on-card-selected',
+        'group-data-[selected=true]/card:text-on-card-selected pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31',
         cardToneClasses(ui.markTone).text,
       )}
     >

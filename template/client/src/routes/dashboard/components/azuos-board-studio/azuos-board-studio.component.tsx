@@ -92,10 +92,16 @@ export function AzuosBoardStudio({ data, state, actions }: AzuosBoardStudioProps
         </>
       }
     >
-      <div className="grid min-h-full lg:grid-cols-[minmax(0,1fr)_21rem]">
-        <section aria-label="O painel" className="min-w-0 bg-mantle p-6">
+      {/* Duas colunas da altura da tela, cada uma rolando sozinha: o tabuleiro rola e a paleta de
+          blocos fica PARADA e inteira ao lado (antes ela era "grudenta" com altura chutada e
+          acabava antes do rodapé, deixando um vão). No celular, uma embaixo da outra. */}
+      <div className="grid min-h-full lg:h-full lg:grid-cols-[minmax(0,1fr)_21rem]">
+        <section
+          aria-label="O painel"
+          className="bg-mantle min-w-0 p-6 lg:min-h-0 lg:overflow-y-auto"
+        >
           {state.error ? (
-            <p role="alert" className="mb-4 rounded-box bg-card p-3 text-sm text-hue-red">
+            <p role="alert" className="rounded-box bg-card text-hue-red mb-4 p-3 text-sm">
               {state.error}
             </p>
           ) : null}
@@ -133,7 +139,7 @@ export function AzuosBoardStudio({ data, state, actions }: AzuosBoardStudioProps
           />
         </section>
         {/* A lateral fica parada enquanto o painel rola, com a rolagem própria dos tipos. */}
-        <aside className="flex flex-col gap-5 border-l border-border bg-card p-5 lg:sticky lg:top-0 lg:max-h-[calc(100dvh-9.5rem)] lg:self-start lg:overflow-y-auto">
+        <aside className="border-border bg-card flex flex-col gap-5 border-l p-5 lg:min-h-0 lg:overflow-y-auto">
           <AzuosActionButton
             data={{ label: 'Montar filtros' }}
             ui={{ variant: 'secondary', size: 'lg', icon: ListFilter }}
@@ -167,14 +173,14 @@ function KindPalette({
 
   return (
     <div>
-      <h3 className="flex items-center gap-2 text-sm font-bold text-ink-900">
+      <h3 className="text-ink-900 flex items-center gap-2 text-sm font-bold">
         <LayoutDashboard className="size-4" aria-hidden="true" />
         Blocos
-        <span className="ml-auto rounded-chip bg-muted px-2 py-0.5 text-xs font-medium text-ink-700">
+        <span className="rounded-chip bg-muted text-ink-700 ml-auto px-2 py-0.5 text-xs font-medium">
           {used} de {MAX_BOARD_WEIGHT} pontos
         </span>
       </h3>
-      <p className="mt-0.5 text-xs text-ink-500">{paletteHint(left)}</p>
+      <p className="text-ink-500 mt-0.5 text-xs">{paletteHint(left)}</p>
       <KindGroup
         data={{ title: 'Mais usados', kinds: MAIN_KINDS, layout: data.layout, left }}
         state={state}
@@ -208,7 +214,7 @@ function KindGroup({
 }) {
   return (
     <section aria-label={data.title} className="mt-4">
-      <p className="mb-1.5 text-xs font-semibold tracking-wider text-ink-500 uppercase">
+      <p className="text-ink-500 mb-1.5 text-xs font-semibold tracking-wider uppercase">
         {data.title}
       </p>
       <ul className="flex flex-col gap-1.5">
@@ -234,22 +240,22 @@ function KindGroup({
                 }}
                 onClick={() => actions.onNewWidget(kind, bottomPlace(data.layout, kind))}
                 className={cn(
-                  'group flex min-h-12 w-full cursor-grab items-center gap-3 rounded-box border border-border bg-background px-2.5 py-2 text-left transition-colors active:cursor-grabbing',
-                  'hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+                  'group rounded-box border-border bg-background flex min-h-12 w-full cursor-grab items-center gap-3 border px-2.5 py-2 text-left transition-colors active:cursor-grabbing',
+                  'hover:bg-muted focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                 )}
               >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-primary-soft text-primary">
+                <span className="rounded-control bg-primary-soft text-primary flex size-9 shrink-0 items-center justify-center">
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-ink-900">{look.short}</span>
-                  <span className="block text-xs text-ink-500">
+                  <span className="text-ink-900 block text-sm font-semibold">{look.short}</span>
+                  <span className="text-ink-500 block text-xs">
                     {size.w} × {size.h} casas · {weightLabel(weight)}
                   </span>
                 </span>
                 <GripVertical
-                  className="size-4 text-ink-500 group-disabled:hidden"
+                  className="text-ink-500 size-4 group-disabled:hidden"
                   aria-hidden="true"
                 />
               </button>
@@ -277,7 +283,7 @@ export function attachDragGhost(
   const ghost = document.createElement('div');
   ghost.textContent = `${label} · ${size.w} × ${size.h}`;
   ghost.className =
-    'fixed -top-[999px] left-0 flex items-center justify-center rounded-box border border-border bg-card px-2 text-center text-xs font-semibold text-ink-900 shadow-card';
+    'fixed -top-[999px] left-0 flex items-center justify-center rounded-box bg-card px-2 text-center text-xs font-semibold text-ink-900 shadow-card';
   ghost.style.width = `${size.w * GHOST_CELL.width}px`;
   ghost.style.height = `${size.h * GHOST_CELL.height}px`;
   document.body.append(ghost);

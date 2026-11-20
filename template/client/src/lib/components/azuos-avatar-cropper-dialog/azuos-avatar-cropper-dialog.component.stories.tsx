@@ -1,5 +1,9 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 
+import { Camera } from 'lucide-react';
+import { type ComponentProps, useState } from 'react';
+
+import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
 import { AzuosAvatarCropperDialog } from './azuos-avatar-cropper-dialog.component';
 
 /* Uma "foto" desenhada em SVG: retrato 3:4, rosto acima do centro — o caso em que o quadrado
@@ -12,14 +16,50 @@ const LANDSCAPE =
 
 const noop = () => undefined;
 
+type DialogProps = ComponentProps<typeof AzuosAvatarCropperDialog>;
+
+/**
+ * Como na tela "Meu perfil": o editor começa FECHADO, "Trocar foto" o abre e "Cancelar", o X ou
+ * "Usar esta foto" o fecham. Os estados (enviando, falha) valem enquanto ele está aberto.
+ */
+function CropperDemo(props: DialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const close = () => setIsOpen(false);
+
+  return (
+    <div className="flex min-h-40 items-center justify-center">
+      <AzuosActionButton
+        data={{ label: 'Trocar foto' }}
+        ui={{ icon: Camera, variant: 'secondary' }}
+        actions={{ onClick: () => setIsOpen(true) }}
+      />
+      <AzuosAvatarCropperDialog
+        {...props}
+        state={{ ...props.state, isOpen }}
+        actions={{
+          onCancel: () => {
+            close();
+            props.actions.onCancel();
+          },
+          onConfirm: (selection) => {
+            close();
+            props.actions.onConfirm(selection);
+          },
+        }}
+      />
+    </div>
+  );
+}
+
 const meta = {
   title: 'Diálogos/AzuosAvatarCropperDialog',
   component: AzuosAvatarCropperDialog,
   args: {
     data: { imageUrl: PORTRAIT },
-    state: { isOpen: true },
+    state: { isOpen: false },
     actions: { onConfirm: noop, onCancel: noop },
   },
+  render: (args) => <CropperDemo {...args} />,
 } satisfies Meta<typeof AzuosAvatarCropperDialog>;
 
 export default meta;
@@ -46,8 +86,4 @@ export const UploadFailed: Story = {
       error: 'Não consegui salvar a foto agora. Tente de novo em instantes.',
     },
   },
-};
-
-export const Closed: Story = {
-  args: { state: { isOpen: false } },
 };

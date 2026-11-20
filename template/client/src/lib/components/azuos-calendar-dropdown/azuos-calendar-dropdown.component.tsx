@@ -64,7 +64,7 @@ export function AzuosCalendarDropdown({
   };
 
   return (
-    <div className="relative" onBlur={closeWhenFocusLeaves}>
+    <div className="relative inline-block" onBlur={closeWhenFocusLeaves}>
       <button
         type="button"
         disabled={disabled}
@@ -73,10 +73,10 @@ export function AzuosCalendarDropdown({
         aria-controls={listId}
         aria-label={`${name}: ${selected?.label ?? ''}`}
         onClick={() => setIsOpen((current) => !current)}
-        className="inline-flex control-sm cursor-pointer items-center gap-1 rounded-control border border-input bg-card text-sm font-medium text-foreground transition-colors outline-none hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="control-sm rounded-control bg-muted text-foreground hover:bg-accent/60 focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {selected?.label}
-        <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
+        <ChevronDown className="text-muted-foreground size-3.5" aria-hidden="true" />
       </button>
 
       {isOpen ? (
@@ -84,7 +84,7 @@ export function AzuosCalendarDropdown({
           id={listId}
           role="listbox"
           aria-label={name}
-          className="absolute top-full left-0 z-20 mt-1 flex max-h-56 min-w-full flex-col gap-0.5 overflow-y-auto rounded-box border border-border bg-card p-1 shadow-xl"
+          className="rounded-box bg-popover ring-foreground/8 absolute top-full left-1/2 z-20 mt-1.5 flex max-h-56 w-max min-w-full -translate-x-1/2 flex-col gap-0.5 overflow-y-auto p-1 shadow-xl ring-1"
         >
           {items.map((option) => {
             const isSelected = option.value === selected?.value;
@@ -99,9 +99,9 @@ export function AzuosCalendarDropdown({
                 disabled={option.disabled}
                 onClick={() => choose(option.value)}
                 className={cn(
-                  'control-sm shrink-0 cursor-pointer rounded-chip text-left text-sm whitespace-nowrap text-foreground transition-colors outline-none hover:bg-accent',
+                  'control-sm rounded-chip text-foreground hover:bg-accent shrink-0 cursor-pointer text-left text-sm whitespace-nowrap transition-colors outline-none',
                   'focus-visible:bg-accent disabled:cursor-not-allowed disabled:opacity-40',
-                  isSelected && 'bg-primary font-semibold text-primary-foreground hover:bg-primary',
+                  isSelected && 'bg-primary text-primary-foreground hover:bg-primary font-semibold',
                 )}
               >
                 {option.label}

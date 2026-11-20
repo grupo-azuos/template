@@ -164,7 +164,8 @@ describe('AzuosDashboardHeroCard', () => {
   });
 
   // feliz
-  it('shows each stat as a dashboard card, with the number in the accent of its tone', () => {
+  /* Padrão Apple: o número fica na cor do texto, igual em todos os tons. */
+  it('shows each stat as a dashboard card, with the number in the text colour', () => {
     render(
       <AzuosDashboardHeroCard
         data={{
@@ -179,9 +180,9 @@ describe('AzuosDashboardHeroCard', () => {
     );
 
     expect(screen.getByRole('group', { name: 'Perigo' })).toHaveClass('bg-card');
-    expect(screen.getByText('1')).toHaveClass('text-hue-red');
-    expect(screen.getByText('7')).toHaveClass('text-hue-plum');
-    expect(screen.getByText('6')).toHaveClass('text-hue-slate');
+    for (const value of ['1', '7', '6']) {
+      expect(screen.getByText(value)).toHaveClass('text-foreground');
+    }
   });
 
   // triste

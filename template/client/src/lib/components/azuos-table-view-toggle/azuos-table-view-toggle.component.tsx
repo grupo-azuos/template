@@ -35,7 +35,7 @@ export function AzuosTableViewToggle() {
   /* O preenchimento do formato escolhido desliza até o outro na troca. */
   const ref = useSlidingIndicator<HTMLDivElement>({
     selector: '[aria-pressed="true"]',
-    indicatorClass: 'rounded-box bg-primary',
+    indicatorClass: 'rounded-full bg-primary',
     attributes: ['aria-pressed'],
   });
 
@@ -44,7 +44,7 @@ export function AzuosTableViewToggle() {
       ref={ref}
       role="group"
       aria-label="Formato da lista"
-      className="hidden items-center gap-0.5 rounded-control border border-border bg-card p-0.5 shadow-xs xl:inline-flex"
+      className="bg-muted hidden w-fit items-center gap-0.5 rounded-full p-0.5 xl:inline-flex"
     >
       <AzuosActionButton
         data={{ label: 'Ver em tabela' }}
@@ -54,7 +54,7 @@ export function AzuosTableViewToggle() {
           icon: Table,
           isIconOnly: true,
           /* Filho de uma moldura `rounded-control`: o raio de dentro é menor que o de fora. */
-          className: cn('rounded-box shadow-none', !tableView.forceCards && ACTIVE),
+          className: cn('rounded-full shadow-none', !tableView.forceCards && ACTIVE),
         }}
         state={{ isPressed: !tableView.forceCards }}
         actions={{ onClick: () => choose(false) }}
@@ -66,7 +66,7 @@ export function AzuosTableViewToggle() {
           size: 'sm',
           icon: LayoutGrid,
           isIconOnly: true,
-          className: cn('rounded-box shadow-none', tableView.forceCards && ACTIVE),
+          className: cn('rounded-full shadow-none', tableView.forceCards && ACTIVE),
         }}
         state={{ isPressed: tableView.forceCards }}
         actions={{ onClick: () => choose(true) }}

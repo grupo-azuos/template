@@ -128,8 +128,8 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           disabled={state?.isDisabled}
           title={selectedOption?.label}
           className={cn(
-            'flex control-lg w-full max-w-full min-w-40 items-center justify-between gap-2 rounded-control border border-input bg-muted px-3 text-sm text-foreground shadow-xs transition-[color,box-shadow] outline-none',
-            'focus-visible:ring-[3px] focus-visible:ring-ring/50',
+            'control-lg rounded-control border-input bg-muted text-foreground flex w-full max-w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
+            'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-50',
             texts.className,
           )}
@@ -143,8 +143,9 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           comprido e nasce mais larga que o diálogo em volta, vazando pelos dois lados; sem o piso
           (`min-w-64`), sob um gatilho estreito a lista cortava cada opção no meio. */}
       <PopoverContent
-        align="start"
-        className="w-(--radix-popover-trigger-width) min-w-64 overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
+        sideOffset={6}
+        align="center"
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(14rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
       >
         {/* O filtro é o do próprio `cmdk`, por pontuação de semelhança — então "ana s" ainda acha
             "Ana Souza", o que um `includes` não faria —, só que sem acento: "goias" acha Goiás. */}
@@ -216,7 +217,7 @@ function OptionLead({ data }: { data: { option?: AzuosComboboxFieldOption } }) {
   const Icon = option?.icon;
   if (!Icon) return null;
 
-  return <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />;
+  return <Icon className="text-muted-foreground size-3.5 shrink-0" aria-hidden="true" />;
 }
 
 /** Uma opção da lista. O "visto" marca a escolhida; `truncate` corta o nome, não a tela. */
