@@ -71,59 +71,42 @@ const optionTrack = tv({
   variants: {
     layout: {
       filter: 'inline-flex flex-wrap',
-      form: 'grid w-full',
+      /* Deitadas lado a lado, cada pastilha cresce pelo tamanho do texto: a mais longa ganha mais
+         espaço, em vez de três colunas iguais que cortavam a maior. */
+      form: 'flex w-full',
     },
-    /* Só vale na grade do formulário: uma coluna por opção. */
+    /* O número de opções do formulário (até 3); as pastilhas dividem a linha pelo texto. */
     columns: { 1: '', 2: '', 3: '' },
   },
-  compoundVariants: [
-    { layout: 'form', columns: 1, class: 'grid-cols-1' },
-    { layout: 'form', columns: 2, class: 'grid-cols-2' },
-    { layout: 'form', columns: 3, class: 'grid-cols-3' },
-  ],
   defaultVariants: { layout: 'filter', columns: 3 },
 });
 
 /**
- * A PASTILHA. Preenche a altura do trilho (que é quem tem os 40px de campo), e o raio é `box`, um
- * degrau abaixo do `control` do trilho: filho menor que o pai.
- *
- * A cor só entra quando a pastilha está ESCOLHIDA, e aí é a do tom.
+ * A PASTILHA, no segmentado do padrão Apple: pílula dentro do trilho em pílula, texto numa linha
+ * só (cortado com "…" quando a coluna aperta, nunca quebrado em duas), e a ESCOLHIDA em branco por
+ * cima do trilho, com sombra. A cor do status fica só no ícone ou na bolinha — pastilha cheia de
+ * verde ou vermelho gritava mais que o resto do formulário.
  */
 const optionPill = tv({
-  base: 'rounded-box inline-flex cursor-pointer items-center gap-1.5 border px-3 py-1 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-60',
+  base: 'inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-60',
   variants: {
     layout: {
       filter: '',
-      /* Na grade o texto fica centrado na coluna. Sem altura mínima própria: a pastilha preenche o
-         trilho, e é o trilho que tem os 40px. */
-      form: 'justify-center text-center',
+      /* Na grade a pastilha centra o texto na coluna e preenche o trilho, que tem os 40px. */
+      form: 'flex-auto justify-center px-2.5',
     },
     isSelected: {
-      true: 'font-semibold shadow-xs',
-      false: 'text-muted-foreground hover:bg-card/70 hover:text-foreground border-transparent',
+      true: 'bg-segment-selected text-foreground font-semibold shadow-sm',
+      false: 'text-muted-foreground hover:bg-hover-veil hover:text-foreground',
     },
     tone: { neutral: '', info: '', success: '', warning: '', danger: '', brand: '' },
   },
   compoundVariants: [
-    { isSelected: true, tone: 'neutral', class: 'border-foreground bg-foreground text-background' },
-    { isSelected: true, tone: 'info', class: 'bg-info text-info-foreground' },
-    {
-      isSelected: true,
-      tone: 'success',
-      class: 'bg-success text-success-foreground',
-    },
-    {
-      isSelected: true,
-      tone: 'warning',
-      class: 'bg-warning text-warning-foreground',
-    },
-    {
-      isSelected: true,
-      tone: 'danger',
-      class: 'bg-destructive text-destructive-foreground',
-    },
-    { isSelected: true, tone: 'brand', class: 'bg-primary text-primary-foreground' },
+    { isSelected: true, tone: 'info', class: '[&_svg]:text-info' },
+    { isSelected: true, tone: 'success', class: '[&_svg]:text-success' },
+    { isSelected: true, tone: 'warning', class: '[&_svg]:text-warning-ink' },
+    { isSelected: true, tone: 'danger', class: '[&_svg]:text-destructive' },
+    { isSelected: true, tone: 'brand', class: '[&_svg]:text-primary' },
   ],
   defaultVariants: { layout: 'filter', isSelected: false, tone: 'neutral' },
 });
@@ -354,6 +337,7 @@ function OptionPill({
       type="button"
       disabled={state.isDisabled}
       aria-pressed={state.isSelected}
+      title={option.label}
       onClick={actions.onSelect}
       className={optionPill({
         layout: ui.layout,
@@ -361,8 +345,8 @@ function OptionPill({
         tone: option.tone,
       })}
     >
-      <OptionLead data={{ option }} state={{ isToneHidden: state.isSelected }} />
-      {option.label}
+      <OptionLead data={{ option }} />
+      <span className="min-w-0 truncate">{option.label}</span>
     </button>
   );
 }

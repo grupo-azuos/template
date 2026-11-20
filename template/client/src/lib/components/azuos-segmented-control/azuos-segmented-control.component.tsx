@@ -32,7 +32,7 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
     indicatorClass:
       ui.variant === 'prominent'
         ? 'rounded-full bg-primary'
-        : 'rounded-full bg-card shadow-xs',
+        : 'rounded-full bg-segment-selected shadow-xs',
     attributes: ['aria-pressed'],
   });
 
@@ -42,7 +42,7 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'flex flex-wrap gap-1 rounded-full bg-muted p-1',
+        'bg-muted flex flex-wrap gap-1 rounded-full p-1',
         ui.variant === 'prominent' && 'w-full gap-2 bg-transparent p-0 sm:w-auto',
         ui.className,
       )}
@@ -63,14 +63,14 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
             className={cn(
               'rounded-full px-3 py-1.5 text-sm transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
               isActive
-                ? 'font-bold text-primary'
-                : 'font-semibold text-muted-foreground hover:bg-card/60 hover:text-foreground',
+                ? 'text-primary font-bold'
+                : 'text-muted-foreground hover:bg-card/60 hover:text-foreground font-semibold',
               ui.variant === 'prominent' &&
-                'control-lg flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-none',
+                'control-lg focus-visible:outline-primary flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 sm:flex-none',
               ui.variant === 'prominent' &&
                 (isActive
                   ? 'text-primary-foreground shadow-none'
-                  : 'bg-primary/10 text-ink-900 shadow-none hover:bg-primary/20 hover:text-ink-900'),
+                  : 'bg-primary/10 text-ink-900 hover:bg-primary/20 hover:text-ink-900 shadow-none'),
             )}
           >
             {option.label}

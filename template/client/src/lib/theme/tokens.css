@@ -248,6 +248,9 @@
   --hue-slate: #8e8e93;
   --hue-copper: #5856d6;
   --on-hue: #ffffff;
+  /* A opção escolhida de um segmentado (pílula por cima do trilho cinza): branca no claro, um
+     cinza MAIS CLARO que o trilho no escuro — como no iOS; o card escuro sumiria no trilho. */
+  --segment-selected: var(--card);
   --card-selected: #007aff;
   --card-selected-hover: #0a84ff;
   --on-card-selected: #ffffff;
@@ -382,6 +385,7 @@
   --elevation-button: 0 1px 2px rgb(0 0 0 / 0.3);
   --elevation-card-hover:
     0 0 0 1px color-mix(in oklch, var(--foreground) 12%, transparent), 0 16px 40px rgb(0 0 0 / 0.5);
+  --segment-selected: #48484c;
   --card-selected: #0a84ff;
   --card-selected-hover: #409cff;
   --hover-veil: color-mix(in srgb, var(--foreground) 7%, transparent);
@@ -511,6 +515,7 @@
   --radius-chip: var(--shape-chip);
   --radius-badge: var(--shape-badge);
   --radius-icon: var(--shape-icon);
+  --color-segment-selected: var(--segment-selected);
   --radius-surface: var(--shape-card);
   --radius-box: var(--shape-control);
 

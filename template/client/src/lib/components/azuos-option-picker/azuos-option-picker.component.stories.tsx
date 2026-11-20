@@ -48,7 +48,7 @@ export const InAForm: Story = {
     ui: { ariaLabel: 'Situação', fullWidth: true },
   },
   render: (args) => (
-    <div className="w-72">
+    <div className="w-96">
       <AzuosOptionPicker {...args} />
     </div>
   ),
