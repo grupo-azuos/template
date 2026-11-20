@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { Paperclip } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
 
-import { AzuosFileLinks } from './azuos-file-links.component';
+import { AzuosFileLinks, fileKindOf } from './azuos-file-links.component';
 
 const FILE = {
   fileName: 'Atestado médico.pdf',
@@ -23,7 +23,7 @@ describe('AzuosFileLinks', () => {
   });
 
   // feliz
-  it('downloads the file with its original name from the icon beside it', () => {
+  it('downloads the file with its original name from the pill beside it', () => {
     render(<AzuosFileLinks data={FILE} />);
     const download = screen.getByRole('link', { name: 'Baixar Atestado médico.pdf' });
 
@@ -54,5 +54,24 @@ describe('AzuosFileLinks', () => {
     for (const link of screen.getAllByRole('link')) {
       expect(link.getAttribute('rel')).toContain('noreferrer');
     }
+  });
+
+  // feliz
+  it('shows the file row with the kind, size and both actions in the card layout', () => {
+    const { container } = render(
+      <AzuosFileLinks data={{ ...FILE, sizeLabel: '182 KB' }} ui={{ layout: 'card' }} />,
+    );
+
+    expect(container.querySelector('[data-slot="file-card"]')).toBeInTheDocument();
+    expect(screen.getByText('PDF · 182 KB')).toBeInTheDocument();
+    expect(container.querySelector('.bg-hue-red')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: `Abrir ${FILE.fileName}` })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: `Baixar ${FILE.fileName}` })).toBeInTheDocument();
+  });
+
+  // triste
+  it('falls back to a plain file icon for an unknown extension', () => {
+    expect(fileKindOf('fotos.zip').label).toBe('Arquivo');
+    expect(fileKindOf('planilha.XLSX').label).toBe('Planilha');
   });
 });
