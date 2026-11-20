@@ -83,6 +83,9 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
   padding lateral e canto (`rounded-control`), o véu nunca cola no texto.
 - Hover é neutro. Cor no hover só com `ui.isHoverColored` do card, e só o véu leve no tom.
 - Foco: o anel suave (`focus-visible:ring-[3px] focus-visible:ring-ring/50`), nunca borda colorida.
+- **Tudo que abre e fecha anima** — bloco que expande, menu, diálogo, folha: a caixa desliza na
+  altura do conteúdo (`animate-collapsible-down/up`, `animate-in`/`animate-out`), a seta gira e o
+  conteúdo entra aparecendo. Nada surge ou some de uma vez.
 - Todo movimento respeita `motion-safe:`/`prefers-reduced-motion`.
 
 ## 7. Campos e botões
