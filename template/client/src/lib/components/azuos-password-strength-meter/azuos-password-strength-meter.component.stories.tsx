@@ -44,7 +44,7 @@ export const Strong: Story = {
 export const InNarrowColumn: Story = {
   args: { data: { strength: toPasswordStrength('abacaxi-2026') } },
   render: (args) => (
-    <div className="border-ink-300 w-64 border border-dashed p-2">
+    <div className="w-64 border border-dashed border-ink-300 p-2">
       <AzuosPasswordStrengthMeter {...args} />
     </div>
   ),

@@ -2,11 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type * as EchartsUtil from '../../utils/echarts.util';
-import {
-  AzuosSankeyChart,
-  sankeyOption,
-} from './azuos-sankey-chart.component';
-
+import { AzuosSankeyChart, sankeyOption } from './azuos-sankey-chart.component';
 
 /* Um ECharts de mentira, como no teste do `AzuosEchart`: o desenho em si é do ECharts; o que este
    componente decide é QUAL clique vira seleção e com que nome. */
@@ -25,7 +21,9 @@ vi.mock('../../utils/echarts.util', async (importOriginal) => ({
 /** O que o ECharts chamaria num clique no desenho. */
 async function chartClick(): Promise<(params: unknown) => void> {
   await waitFor(() => expect(fakeChart.on).toHaveBeenCalledWith('click', expect.any(Function)));
-  const call = [...fakeChart.on.mock.calls].reverse().find((entry: unknown[]) => entry[0] === 'click');
+  const call = [...fakeChart.on.mock.calls]
+    .reverse()
+    .find((entry: unknown[]) => entry[0] === 'click');
 
   return call?.[1] as (params: unknown) => void;
 }
@@ -59,9 +57,18 @@ describe('AzuosSankeyChart', () => {
   /* O nó é achado pelo `id`, e o que aparece é o `label`: o mesmo nome pode existir em duas colunas
      sem os dois virarem um nó só. */
   it('keys the nodes by id and writes the label', () => {
-    const series = (sankeyOption(DATA, THEME).series as { data: { name: string }[]; label: { formatter: (p: unknown) => string } }[])[0]!;
+    const series = (
+      sankeyOption(DATA, THEME).series as {
+        data: { name: string }[];
+        label: { formatter: (p: unknown) => string };
+      }[]
+    )[0]!;
 
-    expect(series.data.map((node) => node.name)).toEqual(['type:BOMBEIRO', 'owner:N/A', 'stage:Parado']);
+    expect(series.data.map((node) => node.name)).toEqual([
+      'type:BOMBEIRO',
+      'owner:N/A',
+      'stage:Parado',
+    ]);
     expect(series.label.formatter({ name: 'owner:N/A' })).toBe('N/A');
   });
 
@@ -95,9 +102,9 @@ describe('sankeyOption balloons', () => {
       series: [{ label: { formatter: Formatter } }];
     };
 
-    expect(option.tooltip.formatter({ dataType: 'node', name: 'stage:Parado', value: 5, data: {} })).toBe(
-      '<b>Parado</b><br/>5 alvarás',
-    );
+    expect(
+      option.tooltip.formatter({ dataType: 'node', name: 'stage:Parado', value: 5, data: {} }),
+    ).toBe('<b>Parado</b><br/>5 alvarás');
     expect(option.series[0].label.formatter({ name: 'stage:Parado' })).toBe('Parado');
   });
 

@@ -22,6 +22,7 @@
     "format": "npm run format -w @template/shared && npm run format -w server && npm run format -w client",
     "typecheck": "npm run typecheck -w @template/shared && npm run typecheck -w server && npm run typecheck -w client && tsc -p scripts",
     "storybook": "npm run storybook -w client",
+    "storybook:deploy": "npm run storybook:deploy -w client",
     "check:design": "node ../.claude/hooks/design/check-design.mjs",
     "check:design:test": "node --test \"../.claude/hooks/design/*.test.mjs\"",
     "api:docs": "npm run docs -w server",
@@ -32,6 +33,7 @@
     "db:reset": "npm run build -w @template/shared && tsx scripts/seed/seed-all.ts --reset",
     "seed:all": "npm run build -w @template/shared && tsx scripts/seed/seed-all.ts",
     "seed:tasks": "npm run build -w @template/shared && tsx scripts/seed/tasks/seed-tasks.ts",
+    "seed:history": "npm run build -w @template/shared && tsx scripts/seed/history/seed-history.ts",
     "prepare": "cd .. && husky template/.husky && node template/scripts/git/setup-git.mjs"
   },
   "devDependencies": {

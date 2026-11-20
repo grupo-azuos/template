@@ -19,8 +19,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
  */
 export type AzuosTooltipProps = {
   data: { content: ReactNode };
-  ui?: { side?: 'top' | 'right' | 'bottom' | 'left'; className?: string };
-  state?: { isDisabled?: boolean };
+  /** `align`: onde o balão encosta no gatilho — `start` deixa o texto cortado começar alinhado. */
+  ui?: {
+    side?: 'top' | 'right' | 'bottom' | 'left';
+    align?: 'start' | 'center' | 'end';
+    className?: string;
+  };
+  /**
+   * `isOpen`: a dica aberta POR COMANDO, e não pelo mouse — para quando a tela precisa apontar
+   * para um elemento (o "Li e entendi" de quem tentou sair sem confirmar). Sem ele, o de sempre.
+   */
+  state?: { isDisabled?: boolean; isOpen?: boolean };
   /** O elemento que dispara a dica. */
   children: ReactElement;
 };
@@ -33,15 +42,19 @@ export function AzuosTooltip({ data, ui, state, children }: AzuosTooltipProps) {
 
   return (
     <TooltipProvider delayDuration={OPEN_DELAY_MS}>
-      <Tooltip>
+      <Tooltip open={state?.isOpen}>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent
-          side={ui?.side ?? 'top'}
-          className={ui?.className ?? 'max-w-xs break-words'}
-        >
-          {data.content}
-        </TooltipContent>
+        <TooltipContent {...placementOf(ui)}>{data.content}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
+}
+
+/** Onde o balão abre e a largura dele, com os padrões de sempre. */
+function placementOf(ui: AzuosTooltipProps['ui']) {
+  return {
+    side: ui?.side ?? 'top',
+    align: ui?.align ?? 'center',
+    className: ui?.className ?? 'max-w-xs break-words',
+  };
 }

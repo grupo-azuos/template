@@ -19,8 +19,44 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** "Abrir" em texto e o baixar no ícone ao lado — o par das listas de anexos da ficha. */
+/** As duas pílulas cinza, "Abrir" e "Baixar" — o par das linhas de tabela e de lista. */
 export const Default: Story = {};
+
+/** A linha do arquivo inteira: ícone do tipo, nome, tipo e tamanho, e as pílulas à direita. */
+export const Card: Story = {
+  args: {
+    data: {
+      fileName: 'Protocolo_94888.pdf',
+      viewUrl: '#abrir',
+      downloadUrl: '#baixar',
+      sizeLabel: '182 KB',
+    },
+    ui: { layout: 'card', className: 'max-w-xl' },
+  },
+};
+
+/** Cada tipo com o seu ícone e o seu tom: PDF, planilha, imagem, documento e outro. */
+export const CardFileKinds: Story = {
+  render: () => (
+    <div className="flex max-w-xl flex-col gap-3">
+      {(
+        [
+          { fileName: 'Alvará sanitário.pdf', sizeLabel: '182 KB' },
+          { fileName: 'Honorários de novembro.xlsx', sizeLabel: '48 KB' },
+          { fileName: 'print 18-11-2026 17h47.png', sizeLabel: '207 KB' },
+          { fileName: 'Contrato social.docx', sizeLabel: '96 KB' },
+          { fileName: 'Vistoria - fotos.zip', sizeLabel: '4,1 MB' },
+        ] as const
+      ).map(({ fileName, sizeLabel }) => (
+        <AzuosFileLinks
+          key={fileName}
+          data={{ fileName, sizeLabel, viewUrl: '#abrir', downloadUrl: '#baixar' }}
+          ui={{ layout: 'card' }}
+        />
+      ))}
+    </div>
+  ),
+};
 
 /** O texto de abrir é o nome do arquivo, com o clipe — como no feedback. */
 export const FileNameAsLabel: Story = {
@@ -35,7 +71,7 @@ export const FileNameAsLabel: Story = {
   },
 };
 
-/** Caso limite: nome comprido numa coluna estreita encurta com reticências, sem empurrar o ícone. */
+/** Caso limite: nome comprido numa coluna estreita encurta com reticências, sem empurrar o baixar. */
 export const LongFileName: Story = {
   args: {
     data: {
@@ -44,6 +80,19 @@ export const LongFileName: Story = {
       downloadUrl: '#baixar',
       openLabel: 'Termo de rescisão do contrato de trabalho assinado pelas duas partes.pdf',
     },
-    ui: { openIcon: Paperclip, className: 'w-56' },
+    ui: { openIcon: Paperclip, className: 'w-64' },
+  },
+};
+
+/** Caso limite: o `card` com nome comprido numa coluna estreita — o nome corta, as pílulas descem. */
+export const CardLongFileNameNarrow: Story = {
+  args: {
+    data: {
+      fileName: 'Termo de rescisão do contrato de trabalho assinado pelas duas partes.pdf',
+      viewUrl: '#abrir',
+      downloadUrl: '#baixar',
+      sizeLabel: '1,2 MB',
+    },
+    ui: { layout: 'card', className: 'w-80' },
   },
 };

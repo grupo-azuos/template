@@ -238,8 +238,9 @@ function CalendarButton({
         </PopoverTrigger>
 
         <PopoverContent
-          align="end"
-          className="rounded-surface border-border bg-card w-auto p-0 shadow-xl"
+          sideOffset={6}
+          align="center"
+          className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-0 shadow-xl ring-1"
         >
           <AzuosDateStepper
             data={{ value: data.value, min: data.min, max: data.max }}

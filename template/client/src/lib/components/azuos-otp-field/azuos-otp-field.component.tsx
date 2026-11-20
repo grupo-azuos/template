@@ -151,8 +151,8 @@ export function AzuosOtpField({ data, ui, state, actions }: AzuosOtpFieldProps) 
               'focus:ring-brand-blue-800/20 focus:ring-2 focus:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-60',
               hasError
-                ? 'border-border bg-destructive-soft text-destructive'
-                : 'border-input bg-muted text-foreground',
+                ? 'bg-destructive-soft text-destructive border-transparent'
+                : 'bg-muted text-foreground border-transparent',
             )}
           />
         ))}

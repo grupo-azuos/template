@@ -28,7 +28,7 @@ export function AzuosSectionTitle({ data, ui, adornment }: AzuosSectionTitleProp
     <div className={cn('flex items-start gap-3', ui.className)}>
       <span
         className={cn(
-          'rounded-chip flex size-9 shrink-0 items-center justify-center',
+          'flex size-9 shrink-0 items-center justify-center rounded-chip',
           isDanger ? cardToneClasses('danger').dot : cardToneClasses('brand').dot,
         )}
       >
@@ -44,7 +44,7 @@ export function AzuosSectionTitle({ data, ui, adornment }: AzuosSectionTitleProp
           {data.title}
           {adornment}
         </h2>
-        {data.description ? <p className="text-ink-500 mt-1 text-sm">{data.description}</p> : null}
+        {data.description ? <p className="mt-1 text-sm text-ink-500">{data.description}</p> : null}
       </div>
     </div>
   );

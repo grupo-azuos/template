@@ -1,4 +1,4 @@
-import { type UserRole } from '@template/shared/schemas/user.schema';
+import { hasRoleAtLeast, type UserRole } from '@template/shared/schemas/user.schema';
 
 /**
  * QUEM PODE O QUÊ — num lugar só.
@@ -20,14 +20,12 @@ import { type UserRole } from '@template/shared/schemas/user.schema';
 
 /** Quem está identificado enxerga o cadastro inteiro. */
 export function canRead(role: UserRole | null | undefined): boolean {
-  if (!role) return false;
-
-  return role === 'admin' || role === 'editor' || role === 'viewer';
+  return hasRoleAtLeast(role, 'user');
 }
 
-/** `viewer` é somente leitura. */
+/** `user` (Consulta) é somente leitura; do gestor para cima, edita. */
 export function canEdit(role: UserRole | null | undefined): boolean {
-  return role === 'admin' || role === 'editor';
+  return hasRoleAtLeast(role, 'manager');
 }
 
 export function isAdmin(role: UserRole | null | undefined): boolean {

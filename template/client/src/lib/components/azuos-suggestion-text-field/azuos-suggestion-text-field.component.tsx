@@ -121,7 +121,7 @@ export function AzuosSuggestionTextField({
             /* Espaço à direita para a seta que abre a lista não cair sobre o texto. */
             'pr-9',
             'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
-            error ? 'border-border bg-destructive-soft' : 'border-input',
+            error ? 'bg-destructive-soft border-transparent' : 'border-transparent',
           )}
         />
 
@@ -177,7 +177,7 @@ function OptionList({
     <div
       id={data.id}
       role="listbox"
-      className="border-ink-300 bg-card rounded-box absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto border p-1 shadow-xl"
+      className="rounded-box bg-popover ring-foreground/8 absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto p-1 shadow-xl ring-1"
     >
       {data.options.length === 0 ? (
         <p className="text-ink-500 px-2 py-2 text-sm">{data.emptyMessage}</p>
@@ -195,7 +195,7 @@ function OptionList({
               actions.onPick(option);
             }}
             className={cn(
-              'text-ink-900 rounded-chip cursor-pointer px-2 py-1.5 text-sm break-words',
+              'rounded-chip text-ink-900 cursor-pointer px-2 py-1.5 text-sm break-words',
               index === state.activeIndex && 'bg-accent',
               comparable(option) === selectedKey && 'font-semibold',
             )}

@@ -4,8 +4,9 @@ import {
   taskSchema,
   updateTaskSchema,
 } from '@template/shared/schemas/task.schema';
-import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+
+import { createZodDto } from '../../../lib/http/zod-dto';
 
 /**
  * Os DTOs nascem dos MESMOS schemas Zod que a web importa. É o que garante que a validação

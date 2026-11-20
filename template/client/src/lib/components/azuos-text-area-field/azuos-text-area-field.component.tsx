@@ -96,9 +96,9 @@ function textAreaClassName(hasError: boolean): string {
        do `AzuosActionButton`. A altura não entra: aqui ela é o número de linhas, e um campo
        multilinha com 40px fixos não caberia texto nenhum. */
     'rounded-control',
-    'bg-card text-foreground w-full resize-y border px-3 py-2.5 text-sm transition-colors',
+    'bg-muted text-foreground w-full resize-y border px-3 py-2.5 text-sm transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
-    hasError ? 'border-border bg-destructive-soft' : 'border-input',
+    hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
   );
 }
 

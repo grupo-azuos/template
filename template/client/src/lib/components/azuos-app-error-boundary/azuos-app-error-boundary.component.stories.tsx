@@ -10,7 +10,7 @@ function Bomb(): never {
 const meta = {
   title: 'Estados da tela/AzuosAppErrorBoundary',
   component: AzuosAppErrorBoundary,
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', fullBleed: true },
 } satisfies Meta<typeof AzuosAppErrorBoundary>;
 
 export default meta;

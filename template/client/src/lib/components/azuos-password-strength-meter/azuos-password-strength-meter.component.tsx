@@ -57,7 +57,7 @@ export function AzuosPasswordStrengthMeter({ data, ui }: AzuosPasswordStrengthMe
           ))}
         </div>
 
-        <p className="text-ink-500 w-20 text-right text-xs font-medium">
+        <p className="w-20 text-right text-xs font-medium text-ink-500">
           <span className="sr-only">Força da senha: </span>
           {STRENGTH_LABELS[level]}
         </p>

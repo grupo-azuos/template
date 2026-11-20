@@ -65,7 +65,7 @@ export const LongErrorInNarrowColumn: Story = {
     state: { error: 'Explique o que precisa ser feito para que outra pessoa consiga continuar' },
   },
   render: (args) => (
-    <div className="border-ink-300 w-56 border border-dashed p-2">
+    <div className="w-56 border border-dashed border-ink-300 p-2">
       <AzuosTextAreaField {...args} />
     </div>
   ),

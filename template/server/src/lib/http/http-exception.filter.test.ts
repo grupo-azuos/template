@@ -58,7 +58,7 @@ describe('HttpExceptionFilter', () => {
     expect(bodySent(json).details).toBeUndefined();
   });
 
-  it('reads the per-field errors of nestjs-zod and swaps its English message for ours', () => {
+  it('reads the per-field errors of the ZodValidationPipe and swaps its English message for ours', () => {
     const { host, json } = hostFor('/api/tasks');
     const validation = new BadRequestException({
       message: 'Validation failed',

@@ -18,7 +18,12 @@ describe('AzuosColorSwatchField', () => {
   });
 
   it('marks the palette color that is selected', () => {
-    render(<AzuosColorSwatchField data={{ value: PURPLE.toUpperCase() }} actions={{ onChange: vi.fn() }} />);
+    render(
+      <AzuosColorSwatchField
+        data={{ value: PURPLE.toUpperCase() }}
+        actions={{ onChange: vi.fn() }}
+      />,
+    );
 
     expect(screen.getByRole('radio', { name: `Cor ${PURPLE}` })).toHaveAttribute(
       'aria-checked',

@@ -16,7 +16,7 @@ const MANY = Array.from({ length: 10 }, (_, index) => ({
   label: 'Departamento ' + (index + 1),
 }));
 
-describe('AzuosOptionPicker com poucas opções', () => {
+describe('AzuosOptionPicker with few options', () => {
   // feliz
   it('draws a pill per option, so the person compares without opening anything', () => {
     render(
@@ -94,7 +94,7 @@ describe('AzuosOptionPicker com poucas opções', () => {
   });
 });
 
-describe('AzuosOptionPicker com muitas opções', () => {
+describe('AzuosOptionPicker with many options', () => {
   // feliz
   /* Acima do limite, pastilha lado a lado viraria uma parede de botões: vira a lista com busca. */
   it('becomes a single button that opens a list', () => {

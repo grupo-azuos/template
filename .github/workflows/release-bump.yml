@@ -1,0 +1,41 @@
+# A tag `vX.Y.Z` na main vira a versão do app em todo lugar: package.json, package-lock.json e o
+# Build do Komodo (`.komodo/komodo.toml`). O commit de bump vai para a main e para a develop, pelo bot.
+#
+# Para lançar: git tag v1.2.3 origin/main && git push origin v1.2.3
+name: Release/Bump
+
+on:
+  push:
+    tags: ["v*.*.*", "prod/v*.*.*"]
+
+permissions:
+  contents: write
+
+# Duas tags seguidas não escrevem nas branches ao mesmo tempo.
+concurrency:
+  group: release-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: A tag precisa estar na main
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
+            echo "::error::A tag ${GITHUB_REF_NAME} não aponta para um commit da main."
+            exit 1
+          }
+
+      - name: Versão em todo lugar, na main e na develop
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          node scripts/release-bump.mjs "$RELEASE_TAG"

@@ -145,6 +145,9 @@ Antes de começar uma tarefa, veja se há skill para ela em `.claude/skills/` e 
 | Erro de ambiente, porta ocupada, instalação                                | `troubleshoot`                                    | `/socorro`           |
 | Login, usuários, senha, dados em outro PC, servidor, internet              | `mvp-limits`                                      | `/limites-do-mvp`    |
 | Erro estrutural grande, bloqueio de arquivo de estrutura                   | `support`                                         | `/suporte`           |
+| **Qualquer campo de escolher** (select, combobox, pessoa, várias pessoas)  | `select-standard`                                 | —                    |
+| Dashboard, gráfico, bloco, "mostrar no painel", fonte de dados             | `dashboard-standard`                              | —                    |
+| **Qualquer escrita** (cadastrar, alterar, arquivar); "quem mudou isso?"    | `history-standard`                                | —                    |
 
 A pessoa pode chamar pelo nome em inglês (`/troubleshoot`) ou pelo atalho em português
 (`/socorro`); os dois fazem o mesmo. `/help` não serve de atalho: é comando nativo do Claude Code.
@@ -218,6 +221,12 @@ use o navegador em http://localhost:5009.
 - Criar tela de login, cadastro de usuário, senha, sessão, tabela de usuários, ou instalar
   biblioteca de autenticação. Mexer em `lib/auth`, `user.schema.ts` ou nos cabeçalhos
   `x-forwarded-user-*`. Isso é do auth-forward, e não é assunto deste repositório.
+  **Única exceção, decidida por quem administra:** o recebimento de avisos da shared-api
+  (`POST /api/v1/shared-events`). É uma rota de MÁQUINA, sem pessoa: o middleware de
+  `lib/auth` a dispensa da identidade encaminhada (como `/api/health`), e o gateway a leva
+  direto ao app. No MVP nenhuma rota atende esse caminho (responde 404). Ela só é implementada
+  na promoção para produção (skill `production-standard`), com o token de máquina conferido por
+  `jose`. Nenhuma outra rota pode usar essa dispensa, e `jose` não serve para login de pessoa.
 - `npm install --force` ou `--legacy-peer-deps`.
 - Editar arquivo em `lib/components/ui/` ou `lib/hooks/ui/` (envolva num `azuos-*`),
   `routeTree.gen.ts` ou `server/drizzle/meta/`.
@@ -261,10 +270,12 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
 
 ## REGRAS DE UI DO GRUPO — ABSOLUTAS
 
-- **Borda colorida é proibida em qualquer componente** (faixa lateral/topo, contorno no tom,
-  barra colorida, anel de seleção). Cor de card vem do FUNDO: `AzuosToneCard` (`static` só
-  colorido; `interactive` com o hover-fill do Chamados); selecionado = fundo na cor cheia. Ficam
-  só a borda neutra, o anel de foco e os spinners.
+- **Padrão Apple, um só visual** (regras completas em `.claude/rules/design-governance.md`):
+  card **sem borda** sobre o fundo cinza, separado pelo fio de 1px e pela sombra difusa
+  (`shadow-card`); cantos grandes; botões e chips em pílula; fonte do sistema. A cor do assunto
+  fica no **ícone cheio** (`rounded-icon`), no status e no gráfico — nunca no fundo do card, na
+  borda ou no número. Hover destaca (sobe, sombra, véu neutro) e **nunca cobre informação**.
+  Borda colorida é proibida; borda só como divisória.
 - **Nunca `<select>` nativo**: sempre o combobox/seletor do projeto.
 - **Ações duplas em arquivos (Download + Abrir via hyperlink)**: sempre que houver função de
   arquivo, o sistema deve fornecer duas ações: download (`download={fileName}`) e abrir via
@@ -274,6 +285,26 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
   `AzuosAttachmentPicker`) deve obrigatoriamente aceitar colar arquivos via `Ctrl+V` (captura
   direta de imagens/prints e arquivos do clipboard).
 - Checado no hook e no CI (`check:design`). Exceção só pelo suporte (Central de Chamados).
+
+## CAMPOS DE ESCOLHA, DASHBOARD E HISTÓRICO — PADRÃO DO GRUPO
+
+- **Campo de escolher — pergunte antes** (skill `select-standard`): é pessoa? várias? quantas
+  opções? dá para cadastrar ali mesmo? A régua decide, nesta ordem: **pessoa** →
+  `AzuosPersonPickerField` (sempre, com foto, guarda o id; sem outra opção); **várias pessoas** →
+  `AzuosPersonMultiPickerField`; **cadastrar ali mesmo** → combobox com "Cadastrar «termo»";
+  **mais de 10 opções** → combobox com busca; **até 10** → seletor simples. Opção de pessoa
+  montada à mão é recusada no CI (regra `person-field`).
+- **Dashboard** (skill `dashboard-standard`): todo sistema tem, primeiro no menu. O projeto muda
+  só as fontes (`dashboard-sources.ts`, `widget-sources.ts`) e o painel padrão
+  (`default-boards.ts`). O motor e **os gráficos são do suporte** — nem outro administrador
+  mexe: trava no Claude e no git (`protected-structure.txt`).
+- **Histórico** (skill `history-standard`): todo sistema tem a tabela, a API e a tela Histórico,
+  último no menu, exatamente neste padrão. Toda escrita grava uma linha. O projeto muda só o
+  vocabulário em `history.schema.ts`.
+- Faltar a tela, o módulo ou a entrada no menu do Dashboard ou do Histórico reprova o CI (regra
+  `standard-screens`).
+- **Biblioteca nova para algo que outro sistema já resolveu**: use a mesma, na mesma versão
+  (`docs/approved-libraries.md`).
 
 ## Promoção para produção
 

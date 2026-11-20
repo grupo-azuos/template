@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introdução/Bem-vindo" />
+
+# Azuos · Design System
+
+Este é o catálogo dos componentes do **template** do Grupo Azuos — a base de onde nascem todos os
+sistemas. Tudo o que aparece aqui é o que os sistemas usam de verdade: se um componente muda aqui,
+ele muda em todos.
+
+O visual é um só, o **padrão Apple**: superfícies limpas, sem borda, cantos grandes, sombra
+difusa, botões em pílula, a fonte do sistema e a cor de cada assunto num ícone cheio. Ele só
+troca entre **claro** e **escuro (grafite)** — use o botão **Tema** na barra de cima para ver os
+dois.
+
+## Como usar este catálogo
+
+- **Introdução e Fundamentos** explicam as regras: cores, forma, tipografia e como organizar uma
+  tela. Leia antes de montar uma tela nova.
+- Cada **família** do menu (Ações, Formulários, Cards…) reúne os componentes de um mesmo tipo.
+- A aba **Docs** de cada componente começa pelo que importa para escolher: **para que serve,
+  quando usar e quando não usar** (e o que usar no lugar). Depois vêm o exemplo, as props, como
+  ele funciona por dentro e todas as variações.
+- A aba **Accessibility** mostra o contraste e o foco: a equipe usa o sistema no teclado o dia
+  inteiro.
+
+## Onde mais isto aparece
+
+- O app **Marca** (brand) mostra a identidade, os documentos e leva para este catálogo.
+- As regras completas estão em `.claude/rules/design-governance.md` do template, e o
+  `npm run check:design` confere o que dá para conferir no código.
+
+## Quero um componente que não existe
+
+Componente novo e dependência visual nova só entram no **template** (nunca direto num sistema).
+Siga a skill `ui-component`: prefixo `azuos-`, props em `data`, `ui`, `state`, `actions`, uma
+story com as variações e o texto dele em `.storybook/component-docs.ts`.

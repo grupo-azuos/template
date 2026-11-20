@@ -52,7 +52,7 @@ describe('AzuosTable', () => {
     const surface = container.querySelector('[data-slot="table-surface"]');
 
     expect(surface?.className).toContain('rounded-surface');
-    expect(surface?.className).toContain('border');
+    expect(surface?.className).toContain('shadow-card');
   });
 
   it('shows the footer when there is one', () => {
@@ -84,5 +84,13 @@ describe('AzuosTable', () => {
     const cell = screen.getByRole('button', { name: 'Editar' }).closest('td');
 
     expect(cell?.className).toContain('[&:has(button)]:whitespace-nowrap');
+  });
+
+  it('hovers a row with the same veil as the cards', () => {
+    renderTable();
+
+    expect(screen.getByRole('cell', { name: 'Revisar contrato' }).closest('tr')).toHaveClass(
+      'hover:bg-hover-veil',
+    );
   });
 });

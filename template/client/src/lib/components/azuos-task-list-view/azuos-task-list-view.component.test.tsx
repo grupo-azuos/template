@@ -125,7 +125,7 @@ describe('AzuosTaskListView', () => {
     expect(screen.getByText(/Mostrando só as primeiras 1/)).toBeInTheDocument();
   });
 
-  it('contém títulos longos sem espaços sem estourar o card e preserva botões', () => {
+  it('contains long titles without spaces without overflowing the card, keeping buttons', () => {
     const longTitle = 'Tarefa'.repeat(30);
     renderView({
       data: {

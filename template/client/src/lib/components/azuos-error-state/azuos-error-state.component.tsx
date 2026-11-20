@@ -29,7 +29,7 @@ export function AzuosErrorState({ data, ui, state, actions }: AzuosErrorStatePro
     <div
       role="alert"
       className={cn(
-        cn('rounded-box flex gap-3', 'bg-card text-destructive border border-border'),
+        cn('rounded-box flex gap-3', 'bg-card shadow-card text-destructive'),
         isInline ? 'items-center px-3 py-2' : 'items-start p-4',
         ui?.className,
       )}
@@ -72,7 +72,7 @@ function RetryButton({
       type="button"
       onClick={actions.onRetry}
       disabled={state.isRetrying}
-      className="control-sm rounded-control border-border bg-card text-destructive hover:bg-destructive-soft inline-flex shrink-0 items-center gap-1.5 border text-xs font-semibold disabled:opacity-60"
+      className="control-sm rounded-button bg-destructive-soft text-destructive hover:bg-destructive-soft inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold disabled:opacity-60"
     >
       <RotateCw className={cn('size-3.5', state.isRetrying && 'animate-spin')} aria-hidden="true" />
       Tentar de novo

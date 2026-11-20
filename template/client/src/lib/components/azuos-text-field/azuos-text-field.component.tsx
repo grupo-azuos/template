@@ -11,9 +11,10 @@ import { cn } from '../../utils/cn.util';
  * certo e reenvia o mesmo erro.
  *
  * `date` entra aqui, e não num componente separado, porque só o `type` do `input` muda — rótulo,
- * erro e acessibilidade são exatamente os mesmos.
+ * erro e acessibilidade são exatamente os mesmos. `month` (`AAAA-MM`) entra pelo mesmo motivo: é o
+ * mês de uma declaração de faturamento, e o navegador já traz o seletor de mês e ano.
  */
-export type AzuosTextFieldType = 'text' | 'email' | 'password' | 'date' | 'tel';
+export type AzuosTextFieldType = 'text' | 'email' | 'password' | 'date' | 'month' | 'tel';
 
 export type AzuosTextFieldProps = {
   data: {
@@ -154,7 +155,7 @@ function inputClassName({
     'bg-muted text-foreground w-full border text-sm transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
-    hasError ? 'border-border bg-destructive-soft' : 'border-input',
+    hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
   );
 }
 

@@ -109,7 +109,7 @@ function MonthPickerControl({
             'flex items-center gap-2 text-left',
             'hover:bg-accent/40 focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-60',
-            hasError ? 'border-border bg-destructive-soft' : 'border-input',
+            hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
             data.value ? 'text-foreground' : 'text-ink-500',
           )}
         >
@@ -118,7 +118,11 @@ function MonthPickerControl({
         </button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-auto p-3" align="start">
+      <PopoverContent
+        sideOffset={6}
+        className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-3 shadow-xl ring-1"
+        align="center"
+      >
         <YearHeader data={{ year }} actions={{ onYearChange: setYear }} />
         <MonthGrid data={{ year, selected: data.value }} actions={{ onPick: handlePick }} />
         <PickerFooter state={{ hasValue: Boolean(data.value) }} actions={{ onPick: handlePick }} />
@@ -190,7 +194,7 @@ function YearButton({
       type="button"
       onClick={actions.onClick}
       aria-label={ui.label}
-      className="text-ink-500 hover:bg-accent hover:text-ink-900 rounded-control p-1.5 transition-colors"
+      className="rounded-control text-ink-500 hover:bg-accent hover:text-ink-900 p-1.5 transition-colors"
     >
       {children}
     </button>
@@ -231,7 +235,7 @@ function MonthGrid({
 
 function monthClassName(state: { isSelected: boolean; isCurrent: boolean }): string {
   return cn(
-    'hover:bg-accent focus-visible:ring-ring rounded-control px-2 py-2 text-sm capitalize transition-colors',
+    'rounded-control hover:bg-accent focus-visible:ring-ring px-2 py-2 text-sm capitalize transition-colors',
     'focus-visible:ring-2 focus-visible:outline-none',
     state.isCurrent && !state.isSelected && 'text-brand-blue-800 font-bold',
     state.isSelected && 'bg-primary text-primary-foreground hover:bg-primary font-bold',

@@ -13,7 +13,11 @@ function renderField(overrides: Partial<AzuosCreatableComboboxFieldProps> = {}) 
   render(
     <AzuosCreatableComboboxField
       data={{ value: '', options: ['Goiás', 'Goiânia'] }}
-      ui={{ ariaLabel: 'Cidade', placeholder: 'Selecione...', searchPlaceholder: 'Buscar cidade...' }}
+      ui={{
+        ariaLabel: 'Cidade',
+        placeholder: 'Selecione...',
+        searchPlaceholder: 'Buscar cidade...',
+      }}
       actions={actions}
       {...overrides}
     />,
@@ -58,7 +62,11 @@ describe('buildComboboxItems', () => {
   });
 
   it('collapses repeated spaces in the name it offers to create', () => {
-    const items = buildComboboxItems({ term: ' Aparecida   de Goiânia ', options: [], hasValue: false });
+    const items = buildComboboxItems({
+      term: ' Aparecida   de Goiânia ',
+      options: [],
+      hasValue: false,
+    });
 
     expect(items).toEqual([{ kind: 'create', label: 'Aparecida de Goiânia' }]);
   });
@@ -67,9 +75,9 @@ describe('buildComboboxItems', () => {
     expect(
       buildComboboxItems({ term: '', options: [], hasValue: true, clearLabel: 'Sem cidade' }),
     ).toEqual([{ kind: 'clear', label: 'Sem cidade' }]);
-    expect(buildComboboxItems({ term: '', options: [], hasValue: false, clearLabel: 'Sem cidade' })).toEqual(
-      [],
-    );
+    expect(
+      buildComboboxItems({ term: '', options: [], hasValue: false, clearLabel: 'Sem cidade' }),
+    ).toEqual([]);
   });
 });
 

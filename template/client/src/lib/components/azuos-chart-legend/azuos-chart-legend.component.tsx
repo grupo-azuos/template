@@ -22,7 +22,7 @@ export function AzuosChartLegend({ data, ui }: AzuosChartLegendProps) {
   return (
     <ul className={cn('flex flex-wrap gap-x-4 gap-y-1', ui?.className)}>
       {data.series.map((series) => (
-        <li key={series.key} className="text-muted-foreground flex items-center gap-1.5 text-xs">
+        <li key={series.key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span
             className="size-2.5 shrink-0 rounded-full"
             style={{ background: series.color }}

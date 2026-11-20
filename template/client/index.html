@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +12,25 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Template · Grupo Azuos</title>
+    <script>
+      // O cookie do grupo vence a preferência antiga, antes da primeira pintura.
+      (() => {
+        let theme = 'light';
+        try {
+          const cookie = document.cookie
+            .split(';')
+            .map((part) => part.trim())
+            .find((part) => part.startsWith('azuos-theme='))
+            ?.slice(12);
+          const saved =
+            cookie === 'light' || cookie === 'dark' ? cookie : localStorage.getItem('azuos-theme');
+          if (saved === 'light' || saved === 'dark') theme = saved;
+        } catch {
+          /* Sem armazenamento, fica no tema claro padrão. */
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

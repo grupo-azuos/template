@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { useSlidingIndicator } from './use-sliding-indicator';
 
@@ -33,12 +33,55 @@ describe('useSlidingIndicator', () => {
     expect(container.querySelector('nav')).toHaveClass('relative', 'isolate');
   });
 
+  it('discounts the container border so the highlight sits exactly behind the item', () => {
+    const rect = (left: number, top: number) => ({ left, top, width: 32, height: 32 }) as DOMRect;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.tagName === 'NAV' ? rect(100, 50) : rect(103, 53);
+    });
+    vi.spyOn(HTMLElement.prototype, 'clientLeft', 'get').mockReturnValue(1);
+    vi.spyOn(HTMLElement.prototype, 'clientTop', 'get').mockReturnValue(1);
+
+    const { container } = render(<Menu active="a" />);
+    const indicator = container.querySelector<HTMLElement>('[data-slot="sliding-indicator"]');
+
+    expect(indicator?.style.transform).toContain('translate(2px, 2px)');
+    vi.restoreAllMocks();
+  });
+
   it('keeps a single highlight when the active item changes', () => {
     const { container, rerender } = render(<Menu active="a" />);
 
     rerender(<Menu active="b" />);
 
     expect(container.querySelectorAll('[data-slot="sliding-indicator"]')).toHaveLength(1);
+  });
+
+  // triste
+  /* REGRESSÃO: sem ativo na lista (a tela aberta é de outra parte do menu), o destaque ficava
+     invisível mas do tamanho e na altura do ativo antigo, e esticava o menu com uma rolagem. */
+  it('shrinks the highlight to nothing at the top when the list has no active item', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return (
+        this.tagName === 'NAV'
+          ? { left: 0, top: 0, width: 200, height: 80 }
+          : { left: 0, top: 600, width: 200, height: 40 }
+      ) as DOMRect;
+    });
+    const { container, rerender } = render(<Menu active="b" />);
+    const indicator = container.querySelector<HTMLElement>('[data-slot="sliding-indicator"]');
+    expect(indicator?.style.height).toBe('40px');
+
+    rerender(<Menu active="nenhum" />);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(indicator?.style.height).toBe('0px');
+    expect(indicator?.style.width).toBe('0px');
+    expect(indicator?.style.opacity).toBe('0');
+    vi.restoreAllMocks();
   });
 
   // triste

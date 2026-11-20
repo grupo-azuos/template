@@ -47,7 +47,15 @@ export const WithPhoto: Story = {
 export const MissingFields: Story = {
   args: {
     data: {
-      person: { ...person, jobTitle: null, department: null, phone: null, birthDateLabel: null, bio: null, systems: undefined },
+      person: {
+        ...person,
+        jobTitle: null,
+        department: null,
+        phone: null,
+        birthDateLabel: null,
+        bio: null,
+        systems: undefined,
+      },
       accountUrl: 'https://admin-console.grupoazuos.com.br/profile',
       theme: 'dark',
     },

@@ -67,7 +67,7 @@ export function rangeLabelOf(data: AzuosPaginationBarProps['data']): string {
 }
 
 const STEP_CLASS =
-  'border-border/70 bg-card hover:bg-muted/50 text-foreground rounded-control control-sm inline-flex cursor-pointer items-center gap-1 border font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50';
+  'bg-muted hover:bg-accent text-foreground rounded-button control-sm inline-flex cursor-pointer items-center gap-1 border font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50';
 
 export function AzuosPaginationBar({ data, state, ui, actions }: AzuosPaginationBarProps) {
   const pageCount = pageCountOf(data.total, data.pageSize);

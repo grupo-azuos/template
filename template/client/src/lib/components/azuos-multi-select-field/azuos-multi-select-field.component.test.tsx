@@ -1,8 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
   AzuosMultiSelectField,
+  filterOptions,
   summarizeSelection,
   targetIndex,
 } from './azuos-multi-select-field.component';
@@ -120,5 +122,38 @@ describe('AzuosMultiSelectField with people', () => {
     render(<AzuosMultiSelectField data={DATA} actions={{ onChange: vi.fn() }} />);
 
     expect(document.querySelector('[data-slot="avatar"]')).toBeNull();
+  });
+
+  // feliz
+  it('filters the options by the search, ignoring accents and case, keeping what was chosen', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <AzuosMultiSelectField
+        data={{
+          values: ['joao'],
+          options: [
+            { value: 'joao', label: 'João Lima' },
+            { value: 'ana', label: 'Ana Souza' },
+          ],
+          placeholder: 'Escolha as pessoas',
+          noun: 'pessoas',
+        }}
+        ui={{ ariaLabel: 'Pessoas' }}
+        actions={{ onChange }}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Pessoas/ }));
+    await user.type(screen.getByRole('searchbox', { name: 'Pesquisar em Pessoas' }), 'joao');
+
+    expect(screen.getByRole('checkbox', { name: 'João Lima' })).toBeChecked();
+    expect(screen.queryByRole('checkbox', { name: 'Ana Souza' })).not.toBeInTheDocument();
+  });
+
+  // triste
+  it('says nothing was found when the search matches no option', () => {
+    expect(filterOptions([{ value: 'a', label: 'Ana' }], 'zé')).toEqual([]);
+    expect(filterOptions([{ value: 'a', label: 'Ana' }], '  ')).toHaveLength(1);
   });
 });

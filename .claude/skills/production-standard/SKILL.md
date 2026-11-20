@@ -46,6 +46,32 @@ SQLite + better-sqlite3 são só do MVP local. Para promover:
 6. `production.json` só muda depois da promoção implementada e testada. O contrato reprova SQLite
    fora do MVP e a API recusa subir o MVP SQLite com `NODE_ENV=production`.
 
+## 3.1 Avisos da shared-api (`POST /api/v1/shared-events`)
+
+O mesmo caminho em todo sistema da casa. O gateway e o middleware já o deixam passar sem pessoa;
+no MVP ele responde 404, que a shared-api entende como "ainda não recebe" e tenta de hora em
+hora. O sistema só recebe quando o administrador libera o app `shared-api` nele, no admin-console,
+marcando os contextos (`geral` vem marcado; `empresas`, `municipios`…).
+
+Implementar a rota é tudo ou nada. A referência é o Paralegal (`modules/shared-events` e
+`lib/shared-api/shared-event-token.verifier.ts`); o `production-contract` reprova o que faltar:
+
+1. **Token:** `jose` com o JWKS do admin-console (`/api/oauth2/jwks`), só EdDSA, `iss` = origem
+   do admin-console, `aud` = `SYSTEM_AUDIENCE` (`'system:<slug do app>'`, fixo no código),
+   `sub` e `client_id` = `app:shared-api`, idade máxima 5 min. Qualquer falha é 401, sem dizer
+   qual parte errou. Sem `ADMIN_CONSOLE_URL`, recusa tudo.
+2. **Guard:** `@UseGuards(SharedEventTokenGuard)` no `@Post()`. A rota não tem `user`.
+3. **Lote:** `{ after, lastPosition, events[] }`, com o schema Zod de `shared/` (cada evento:
+   `id`, `position`, `type`, `context`, `entity {kind, id}`, `changed`, `occurredAt`). Todo
+   evento fica dentro da janela `after < position <= lastPosition`.
+4. **Nada se perde:** se `after` é maior que o marcador gravado, busca o que faltou
+   (`GET /api/v1/events?after=<marcador>`, token `app:shared-api`) ANTES de gravar. Gravar os
+   eventos (`onConflictDoNothing` pelo `id`) e mover o marcador (`greatest`, nunca para trás)
+   é UMA transação. O 202 só sai depois do commit — é ele que move o marcador do lado de lá.
+5. **Ao subir**, com os jobs ligados, busca o que ficou para trás.
+6. **O aviso não faz nada sozinho:** o que pede alguém aparece numa tela, e resolver só marca
+   quem e quando. Nada se apaga.
+
 ## 4. Imagem e runtime
 
 - Build pelo Rspack (server) e Rsbuild (client); a imagem leva só o pacote, as migrations e o

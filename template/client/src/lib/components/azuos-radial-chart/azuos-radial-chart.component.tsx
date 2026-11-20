@@ -77,14 +77,16 @@ function RadialCenter({ data }: { data: AzuosRadialChartProps['data'] }) {
     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
       {/* Menor no celular: três medidores lado a lado numa tela de 360px não comportam o número
           grande sem ele encostar no arco. */}
-      <span className="text-foreground text-lg leading-tight font-bold tabular-nums sm:text-2xl">
+      <span className="text-lg leading-tight font-bold text-foreground tabular-nums sm:text-2xl">
         {data.display ?? data.value.toLocaleString('pt-BR')}
       </span>
-      <span className="text-muted-foreground max-w-[70%] truncate text-xs tracking-wide uppercase">
+      <span className="max-w-[70%] truncate text-xs tracking-wide text-muted-foreground uppercase">
         {data.label}
       </span>
       {data.hint ? (
-        <span className="text-muted-foreground mt-0.5 max-w-[70%] truncate text-xs">{data.hint}</span>
+        <span className="mt-0.5 max-w-[70%] truncate text-xs text-muted-foreground">
+          {data.hint}
+        </span>
       ) : null}
     </div>
   );
@@ -99,7 +101,11 @@ function radialLookOf(ui: AzuosRadialChartProps['ui']) {
  * é ela que faz o arco ser lido como "quanto de quanto". A escala é fixa em 0–100: sem isso, 20%
  * desenharia igual a 80%.
  */
-export function radialOption(percent: number, color: string, theme: Pick<ChartTheme, 'track'>): ChartOption {
+export function radialOption(
+  percent: number,
+  color: string,
+  theme: Pick<ChartTheme, 'track'>,
+): ChartOption {
   return {
     series: [
       {
@@ -110,7 +116,12 @@ export function radialOption(percent: number, color: string, theme: Pick<ChartTh
         max: 100,
         radius: '100%',
         pointer: { show: false },
-        progress: { show: true, roundCap: true, width: 12, itemStyle: { color: resolveColor(color) } },
+        progress: {
+          show: true,
+          roundCap: true,
+          width: 12,
+          itemStyle: { color: resolveColor(color) },
+        },
         axisLine: { roundCap: true, lineStyle: { width: 12, color: [[1, theme.track]] } },
         axisTick: { show: false },
         splitLine: { show: false },

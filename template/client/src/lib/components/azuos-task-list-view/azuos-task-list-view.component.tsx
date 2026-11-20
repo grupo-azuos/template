@@ -186,7 +186,7 @@ function TaskListBody({ data, state, actions }: AzuosTaskListViewProps) {
       </div>
 
       {state.isTruncated ? (
-        <p className="text-warning text-xs">
+        <p className="text-warning-ink text-xs">
           Mostrando só as primeiras {data.tasks.length}. Use a busca para achar as outras.
         </p>
       ) : null}
@@ -214,12 +214,12 @@ function TaskItem({
   const canEdit = state.canEdit ?? true;
 
   return (
-    <li className="border-border bg-card rounded-surface flex flex-col justify-between gap-3 border p-4 sm:flex-row sm:items-start">
+    <li className="bg-card shadow-card rounded-surface flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-start">
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <p
             className={cn(
-              'text-foreground min-w-0 font-semibold break-words [overflow-wrap:anywhere]',
+              'text-foreground min-w-0 font-semibold [overflow-wrap:anywhere] break-words',
               isDone && 'text-muted-foreground line-through',
             )}
           >
@@ -231,7 +231,7 @@ function TaskItem({
           />
         </div>
         {task.description ? (
-          <p className="text-muted-foreground mt-1 text-sm break-words [overflow-wrap:anywhere] whitespace-pre-line">
+          <p className="text-muted-foreground mt-1 text-sm [overflow-wrap:anywhere] break-words whitespace-pre-line">
             {task.description}
           </p>
         ) : null}
@@ -282,7 +282,7 @@ function TaskListSkeleton() {
   return (
     <div className="flex flex-col gap-2" aria-busy="true" aria-label="Carregando tarefas">
       {Array.from({ length: 4 }, (_, index) => (
-        <div key={index} className="border-border bg-card rounded-surface border p-4">
+        <div key={index} className="bg-card shadow-card rounded-surface p-4">
           <Skeleton className="h-4 w-2/3" />
           <Skeleton className="mt-2 h-3 w-1/3" />
         </div>

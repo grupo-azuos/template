@@ -19,8 +19,8 @@ const THEME = {
   font: 'Inter',
   success: '#047857',
   info: '#1d4ed8',
-  warning: '#b45309',
-  danger: '#dc2626',
+  warning: '#ffdc00',
+  danger: '#e11d48',
 };
 
 describe('echarts.util', () => {

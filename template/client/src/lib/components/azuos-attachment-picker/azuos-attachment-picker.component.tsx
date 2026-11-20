@@ -175,10 +175,7 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
   };
 
   return (
-    <div
-      className={cn('relative flex flex-col gap-2', ui?.className)}
-      onPaste={handlePaste}
-    >
+    <div className={cn('relative flex flex-col gap-2', ui?.className)} onPaste={handlePaste}>
       <label
         htmlFor="azuos-attachments"
         aria-label="Escolher arquivos"
@@ -193,7 +190,7 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          'border-input hover:bg-muted control-lg rounded-control flex cursor-pointer items-center justify-between border border-dashed px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'control-lg rounded-control border-input hover:bg-muted focus-visible:ring-ring flex cursor-pointer items-center justify-between border border-dashed px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
           isDragOver && 'border-ring bg-muted',
           isDisabled && 'pointer-events-none opacity-60',
         )}
@@ -225,7 +222,7 @@ export function AzuosAttachmentPicker({ data, ui, state, actions }: AzuosAttachm
       ) : null}
 
       {data.files.length > 0 ? (
-        <ul className="rounded-box divide-border border-border divide-y border">
+        <ul className="divide-border rounded-box bg-card shadow-card divide-y overflow-hidden">
           {data.files.map((file, index) => (
             /* A chave leva a POSIÇÃO junto com a identidade. A recusa acima já barra o mesmo arquivo
                duas vezes, mas chave repetida derruba a tela inteira — e nenhuma lista de anexos vale

@@ -9,6 +9,11 @@ import { type ApiErrorBody } from './api-error.type';
  */
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
+/** O endereço completo de uma rota da API — para o que não passa pelo `fetch`, como o SSE. */
+export function apiUrl(path: string): string {
+  return `${BASE_URL}${path}`;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly details: { field: string; message: string }[];
@@ -22,7 +27,7 @@ export class ApiError extends Error {
 }
 
 export type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined | null>;
   signal?: AbortSignal;

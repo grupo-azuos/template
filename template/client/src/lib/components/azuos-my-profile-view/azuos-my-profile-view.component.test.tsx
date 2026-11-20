@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { Lock } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AzuosMyProfileView, type AzuosMyProfileViewProps } from './azuos-my-profile-view.component';
+import {
+  AzuosMyProfileView,
+  type AzuosMyProfileViewProps,
+} from './azuos-my-profile-view.component';
 
 const person = {
   name: 'Ana Souza',
@@ -62,7 +65,10 @@ describe('AzuosMyProfileView', () => {
   it('lists the systems the person opens, each with the role there', () => {
     renderView();
 
-    expect(screen.getByRole('link', { name: 'Paralegal' })).toHaveAttribute('href', 'https://paralegal.test');
+    expect(screen.getByRole('link', { name: 'Paralegal' })).toHaveAttribute(
+      'href',
+      'https://paralegal.test',
+    );
     expect(screen.getByText('Usuário')).toBeInTheDocument();
   });
 
@@ -79,7 +85,9 @@ describe('AzuosMyProfileView', () => {
       slots: {
         bannerAside: <button type="button">Trocar foto</button>,
         personal: <form aria-label="Editar dados pessoais" />,
-        extraSections: [{ id: 'profile-password', label: 'Senha', icon: Lock, content: <p>Senha aqui</p> }],
+        extraSections: [
+          { id: 'profile-password', label: 'Senha', icon: Lock, content: <p>Senha aqui</p> },
+        ],
       },
     });
 
@@ -87,13 +95,18 @@ describe('AzuosMyProfileView', () => {
     expect(screen.queryByText('Data de nascimento')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Trocar foto' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Editar no Admin Console' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Senha' })).toHaveAttribute('href', '#profile-password');
+    expect(screen.getByRole('link', { name: 'Senha' })).toHaveAttribute(
+      'href',
+      '#profile-password',
+    );
     expect(screen.getByText('Senha aqui')).toBeInTheDocument();
   });
 
   // triste
   it('says when the systems could not be read', () => {
-    renderView({ data: { person: { ...person, systems: undefined }, accountUrl: null, theme: 'light' } });
+    renderView({
+      data: { person: { ...person, systems: undefined }, accountUrl: null, theme: 'light' },
+    });
 
     expect(screen.getByText('Não consegui ver seus sistemas agora.')).toBeInTheDocument();
   });
@@ -108,7 +121,10 @@ describe('AzuosMyProfileView', () => {
     renderView({ data: { person, accountUrl: null, theme: 'dark' } });
 
     expect(screen.queryByRole('link', { name: 'Editar no Admin Console' })).not.toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: 'Tema escuro' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('switch', { name: 'Tema escuro' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
   });
 
   it('shows the skeleton while loading', () => {

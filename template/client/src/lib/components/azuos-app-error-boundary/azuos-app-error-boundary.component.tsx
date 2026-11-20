@@ -43,7 +43,7 @@ export class AzuosAppErrorBoundary extends Component<
         <div
           role="alert"
           className={cn(
-            'bg-card text-destructive border border-border',
+            'bg-card shadow-card text-destructive',
             'rounded-surface w-full max-w-lg p-6 shadow-xl',
           )}
         >
@@ -52,13 +52,13 @@ export class AzuosAppErrorBoundary extends Component<
             O sistema encontrou um erro ao montar esta página. Nada do que você fez foi perdido —
             esta tela simplesmente não chegou a abrir.
           </p>
-          <pre className="bg-ink-100 text-ink-900 rounded-box mt-4 overflow-x-auto p-3 text-xs">
+          <pre className="rounded-box bg-ink-100 text-ink-900 mt-4 overflow-x-auto p-3 text-xs">
             {error.message}
           </pre>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="bg-primary text-primary-foreground control-md rounded-control mt-4 text-sm font-semibold"
+            className="control-md rounded-control bg-primary text-primary-foreground mt-4 text-sm font-semibold"
           >
             Recarregar
           </button>

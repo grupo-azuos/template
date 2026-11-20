@@ -67,63 +67,46 @@ const PILL_MAX_OPTIONS = { filter: 6, form: 3 } as const;
  * `min-h`, e não `h`: no celular as opções quebram em mais de uma linha.
  */
 const optionTrack = tv({
-  base: 'rounded-control border-border/70 bg-muted/50 min-h-(--control-lg) items-stretch gap-1 border p-1',
+  base: 'bg-muted min-h-(--control-lg) items-stretch gap-1 rounded-full p-1',
   variants: {
     layout: {
       filter: 'inline-flex flex-wrap',
-      form: 'grid w-full',
+      /* Deitadas lado a lado, cada pastilha cresce pelo tamanho do texto: a mais longa ganha mais
+         espaço, em vez de três colunas iguais que cortavam a maior. */
+      form: 'flex w-full',
     },
-    /* Só vale na grade do formulário: uma coluna por opção. */
+    /* O número de opções do formulário (até 3); as pastilhas dividem a linha pelo texto. */
     columns: { 1: '', 2: '', 3: '' },
   },
-  compoundVariants: [
-    { layout: 'form', columns: 1, class: 'grid-cols-1' },
-    { layout: 'form', columns: 2, class: 'grid-cols-2' },
-    { layout: 'form', columns: 3, class: 'grid-cols-3' },
-  ],
   defaultVariants: { layout: 'filter', columns: 3 },
 });
 
 /**
- * A PASTILHA. Preenche a altura do trilho (que é quem tem os 40px de campo), e o raio é `box`, um
- * degrau abaixo do `control` do trilho: filho menor que o pai.
- *
- * A cor só entra quando a pastilha está ESCOLHIDA, e aí é a do tom.
+ * A PASTILHA, no segmentado do padrão Apple: pílula dentro do trilho em pílula, texto numa linha
+ * só (cortado com "…" quando a coluna aperta, nunca quebrado em duas), e a ESCOLHIDA em branco por
+ * cima do trilho, com sombra. A cor do status fica só no ícone ou na bolinha — pastilha cheia de
+ * verde ou vermelho gritava mais que o resto do formulário.
  */
 const optionPill = tv({
-  base: 'rounded-box inline-flex cursor-pointer items-center gap-1.5 border px-3 py-1 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-60',
+  base: 'inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-60',
   variants: {
     layout: {
       filter: '',
-      /* Na grade o texto fica centrado na coluna. Sem altura mínima própria: a pastilha preenche o
-         trilho, e é o trilho que tem os 40px. */
-      form: 'justify-center text-center',
+      /* Na grade a pastilha centra o texto na coluna e preenche o trilho, que tem os 40px. */
+      form: 'flex-auto justify-center px-2.5',
     },
     isSelected: {
-      true: 'font-semibold shadow-xs',
-      false: 'hover:bg-card/70 hover:text-foreground text-muted-foreground border-transparent',
+      true: 'bg-segment-selected text-foreground font-semibold shadow-sm',
+      false: 'text-muted-foreground hover:bg-hover-veil hover:text-foreground',
     },
     tone: { neutral: '', info: '', success: '', warning: '', danger: '', brand: '' },
   },
   compoundVariants: [
-    { isSelected: true, tone: 'neutral', class: 'border-foreground bg-foreground text-background' },
-    { isSelected: true, tone: 'info', class: 'bg-info text-info-foreground' },
-    {
-      isSelected: true,
-      tone: 'success',
-      class: 'bg-success text-success-foreground',
-    },
-    {
-      isSelected: true,
-      tone: 'warning',
-      class: 'bg-warning text-warning-foreground',
-    },
-    {
-      isSelected: true,
-      tone: 'danger',
-      class: 'bg-destructive text-destructive-foreground',
-    },
-    { isSelected: true, tone: 'brand', class: 'bg-primary text-primary-foreground' },
+    { isSelected: true, tone: 'info', class: '[&_svg]:text-info' },
+    { isSelected: true, tone: 'success', class: '[&_svg]:text-success' },
+    { isSelected: true, tone: 'warning', class: '[&_svg]:text-warning-ink' },
+    { isSelected: true, tone: 'danger', class: '[&_svg]:text-destructive' },
+    { isSelected: true, tone: 'brand', class: '[&_svg]:text-primary' },
   ],
   defaultVariants: { layout: 'filter', isSelected: false, tone: 'neutral' },
 });
@@ -195,8 +178,9 @@ export function AzuosOptionPicker({ data, ui, state, actions }: AzuosOptionPicke
           estreito (e o balão parecia solto, fora do lugar). O teto impede que uma opção de nome
           comprido estique o balão pela tela — a opção é cortada, não a tela. */}
       <PopoverContent
-        className="w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-popover-trigger-width))] p-0"
-        align="start"
+        sideOffset={6}
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-popover-trigger-width) overflow-hidden border-transparent p-0 shadow-xl ring-1"
+        align="center"
       >
         <OptionSearch data={{ query }} actions={{ onQueryChange: setQuery }} />
         <OptionList data={{ options, query, value: data.value }} actions={{ onSelect: select }} />
@@ -229,7 +213,7 @@ function PickerTrigger({
       aria-label={ui?.ariaLabel}
       className={cn(
         'control-lg',
-        'rounded-control border-border/70 bg-card text-foreground hover:bg-muted/40 inline-flex w-full min-w-40 cursor-pointer items-center justify-between gap-2 border text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+        'rounded-control bg-muted text-foreground hover:bg-muted/40 inline-flex w-full min-w-40 cursor-pointer items-center justify-between gap-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
         ui?.fullWidth ? 'sm:w-full' : 'sm:w-auto sm:min-w-[180px]',
         ui?.className,
       )}
@@ -360,8 +344,8 @@ function OptionPill({
         tone: option.tone,
       })}
     >
-      <OptionLead data={{ option }} state={{ isToneHidden: state.isSelected }} />
-      {option.label}
+      <OptionLead data={{ option }} />
+      <span className="min-w-0 truncate">{option.label}</span>
     </button>
   );
 }
@@ -388,7 +372,7 @@ function OptionSearch({
         className={cn(
           /* A busca do balão é um controle como os outros: degrau `sm` da régua. */
           'control-sm rounded-control',
-          'border-border/60 bg-muted/30 text-foreground w-full border pr-2 pl-7 text-xs outline-none',
+          'rounded-control bg-muted text-foreground w-full pr-2 pl-7 text-xs outline-none',
         )}
       />
     </div>

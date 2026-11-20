@@ -16,7 +16,7 @@ function withShell(Story: () => React.JSX.Element) {
     routeTree: createRootRoute({
       component: () => (
         <SidebarProvider>
-          <div className="bg-sidebar text-sidebar-foreground w-64 p-2">
+          <div className="w-64 bg-sidebar p-2 text-sidebar-foreground">
             <SidebarMenu>
               <Story />
             </SidebarMenu>

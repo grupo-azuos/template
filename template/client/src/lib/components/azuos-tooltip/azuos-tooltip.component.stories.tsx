@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 
-import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
+import { Button } from '../azuos-button/azuos-button';
 import { AzuosTooltip } from './azuos-tooltip.component';
 
 const meta = {
@@ -15,7 +15,10 @@ const meta = {
   ],
   args: {
     data: { content: 'O texto inteiro, que a tela cortou.' },
-    children: <AzuosActionButton data={{ label: 'Passe o mouse' }} ui={{ variant: 'secondary' }} />,
+    /* O gatilho é o `Button` de `azuos-button`, que repassa os eventos do Radix (a regra da casa
+       para gatilho de dica, menu ou popover). O `AzuosActionButton` não repassa: a dica não abria
+       e só aparecia a dica nativa do navegador. */
+    children: <Button variant="secondary">Passe o mouse</Button>,
   },
 } satisfies Meta<typeof AzuosTooltip>;
 
@@ -35,6 +38,9 @@ export const LongText: Story = {
     },
   },
 };
+
+/** Aberta por comando, sem o mouse: a tela aponta para o elemento. */
+export const OpenOnCommand: Story = { args: { state: { isOpen: true } } };
 
 export const Disabled: Story = { args: { state: { isDisabled: true } } };
 

@@ -96,10 +96,13 @@ export function runArchitectureScan(root, updateBaseline = false) {
 
 	const covered = new Set(scanRoots.map((p) => join(root, p)));
 	const sourceFiles = [...covered].flatMap((p) => collectTextFiles(p, accepts));
+	/* Os módulos da API entram só pelo NOME (`*.module.ts`): a regra `standard-screens` confere que
+	   Dashboard e Histórico existem dos dois lados; o resto das regras é só do client. */
+	const modules = collectTextFiles(join(root, "template/server/src/modules"), (p) => /\.module\.ts$/.test(p));
 	const docs = collectDocumentation(join(root, "template"), covered, accepts);
 	const rootDocs = collectTextFiles(join(root, "docs"), accepts);
 
-	const files = [...new Set([...sourceFiles, ...docs, ...rootDocs])].map((full) => ({
+	const files = [...new Set([...sourceFiles, ...modules, ...docs, ...rootDocs])].map((full) => ({
 		path: relative(root, full).split("\\").join("/"),
 		content: readFileSync(full, "utf8")
 	}));

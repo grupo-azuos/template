@@ -2,7 +2,12 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { Button } from './button';
-import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText, buttonGroupVariants } from './button-group';
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+  ButtonGroupText,
+  buttonGroupVariants,
+} from './button-group';
 
 describe('ButtonGroup', () => {
   // feliz
@@ -36,7 +41,10 @@ describe('ButtonGroup', () => {
       </ButtonGroup>,
     );
 
-    expect(screen.getByRole('group', { name: 'Ações' })).toHaveAttribute('data-orientation', 'vertical');
+    expect(screen.getByRole('group', { name: 'Ações' })).toHaveAttribute(
+      'data-orientation',
+      'vertical',
+    );
     expect(screen.getByText('Buscar').tagName).toBe('LABEL');
   });
 

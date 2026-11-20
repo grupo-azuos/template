@@ -11,14 +11,23 @@ import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.co
  * Ícone de lua quando está escuro, sol quando está claro: o ícone mostra o tema DE AGORA, não para
  * onde o clique leva. É a mesma leitura de um interruptor — ele mostra o estado, não o destino.
  */
-export function AzuosThemeToggle() {
+export function AzuosThemeToggle({ ui }: { ui?: { variant?: 'sidebar' | 'surface' } } = {}) {
   const { theme, actions } = useTheme();
   const isDark = theme === 'dark';
 
   return (
     <AzuosActionButton
       data={{ label: isDark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro' }}
-      ui={{ variant: 'ghost', size: 'sm', icon: isDark ? Moon : Sun, isIconOnly: true }}
+      ui={{
+        variant: 'ghost',
+        size: 'sm',
+        icon: isDark ? Moon : Sun,
+        isIconOnly: true,
+        className:
+          ui?.variant === 'sidebar'
+            ? 'text-brand-yellow-400 hover:text-brand-yellow-300 hover:bg-sidebar-accent'
+            : 'text-primary dark:text-info hover:text-primary hover:bg-primary/10',
+      }}
       actions={{ onClick: actions.onToggle }}
     />
   );

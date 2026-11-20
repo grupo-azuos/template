@@ -28,7 +28,7 @@ export const Disabled: Story = {
 export const LongLabelInNarrowColumn: Story = {
   args: { data: { label: 'Criar minha conta no sistema' } },
   render: (args) => (
-    <div className="border-ink-300 w-48 border border-dashed p-2">
+    <div className="w-48 border border-dashed border-ink-300 p-2">
       <AzuosSubmitButton {...args} />
     </div>
   ),

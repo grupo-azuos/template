@@ -278,7 +278,7 @@ function AnswerChip({
       type="button"
       onClick={actions.onClick}
       aria-label={`${data.label}: ${data.value}. Trocar`}
-      className="control-sm rounded-control border-border bg-muted/50 text-ink-700 hover:bg-accent focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-xs transition-colors outline-none focus-visible:ring-[3px]"
+      className="control-sm bg-muted text-ink-700 hover:bg-accent focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 rounded-full text-xs transition-colors outline-none focus-visible:ring-[3px]"
     >
       <span className="text-ink-500">{data.label}:</span>
       <span className="text-ink-900 font-semibold">{data.value}</span>

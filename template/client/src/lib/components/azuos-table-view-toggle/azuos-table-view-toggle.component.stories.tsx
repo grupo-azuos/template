@@ -23,8 +23,8 @@ export const Default: Story = {};
  */
 export const HiddenOnNarrowScreens: Story = {
   render: () => (
-    <div className="border-ink-300 flex flex-col gap-2 border border-dashed p-3">
-      <p className="text-ink-500 text-xs">
+    <div className="flex flex-col gap-2 border border-dashed border-ink-300 p-3">
+      <p className="text-xs text-ink-500">
         Acima de 1280px o controle aparece; abaixo, não há o que escolher.
       </p>
       <AzuosTableViewToggle />

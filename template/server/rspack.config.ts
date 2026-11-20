@@ -1,5 +1,6 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, resolve } from 'node:path';
 
 import { defineConfig } from '@rspack/cli';
 import { rspack } from '@rspack/core';
@@ -16,22 +17,57 @@ import { rspack } from '@rspack/core';
    promoção o banco é PostgreSQL pelo `pg`, que é JavaScript puro e entra no pacote. */
 const NATIVE_MODULES = ['better-sqlite3'];
 
-/* Pacotes que o Nest e o `pg` tentam carregar só se estiverem instalados. Sem eles no projeto, o
-   `require` precisa falhar em runtime como antes, e não quebrar o build. */
-const OPTIONAL_MODULES = [
+/* Pacotes que o Nest e o `pg` tentam carregar só se estiverem instalados (com ou sem subcaminho,
+   com ou sem `.js`). Sem eles no projeto, o carregamento precisa falhar em runtime como antes, e não
+   quebrar o build. */
+const OPTIONAL_PACKAGES = [
   '@nestjs/microservices',
-  '@nestjs/microservices/microservices-module',
-  '@nestjs/websockets/socket-module',
+  '@nestjs/websockets',
+  /* O adaptador padrão do WebSocket; quem usa WebSocket aqui escolhe o `@nestjs/platform-ws`. */
+  '@nestjs/platform-socket.io',
+  '@nestjs/platform-node',
   '@fastify/static',
   'class-transformer',
-  'class-transformer/storage',
   'class-validator',
   'pg-native',
   /* ESM puro, carregado pelo Nest só no `FileTypeValidator`, que o projeto não usa. */
   'file-type',
 ];
+/* O que o projeto declara em `dependencies` nunca é opcional: um app com WebSocket usa o
+   `@nestjs/websockets`, e ignorá-lo tiraria os gateways do pacote sem erro nenhum no build. */
+const DEPENDENCIES = Object.keys(
+  JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8')).dependencies ?? {},
+);
+const isOptional = (resource: string): boolean =>
+  OPTIONAL_PACKAGES.some(
+    (name) =>
+      !DEPENDENCIES.includes(name) && (resource === name || resource.startsWith(`${name}/`)),
+  );
 
 const MIGRATE_CLI = './src/lib/db/migrate.cli.ts';
+
+/* Arquivos que o código lê do disco (fontes, logos): os mesmos `assets` do `nest-cli.json` vão para
+   `dist/<caminho>`, onde `serverAsset()` (`lib/config/server-root.ts`) os acha no container. */
+const NEST_ASSETS: { include: string }[] =
+  JSON.parse(readFileSync(resolve(__dirname, 'nest-cli.json'), 'utf8')).compilerOptions?.assets ??
+  [];
+
+/* O Swagger 12 serve a interface (CSS, JS, ícones) da pasta que o `swagger-ui-dist/absolute-path.js`
+   devolve. Sem `node_modules` na imagem, os arquivos vão para `dist/swagger-ui` e esse arquivo é
+   carregado de lá em runtime: devolve a própria pasta, e só ela é servida em `/docs` (se ele
+   entrasse no pacote, devolveria `dist/` e o Swagger serviria o código do server). */
+const SWAGGER_UI_DIR = 'swagger-ui';
+const SWAGGER_UI_FILES = [
+  'absolute-path.js',
+  'swagger-ui.css',
+  'swagger-ui-bundle.js',
+  'swagger-ui-standalone-preset.js',
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'LICENSE',
+  'NOTICE',
+];
+const SWAGGER_UI_DIST = dirname(createRequire(__filename).resolve('swagger-ui-dist/package.json'));
 
 export default defineConfig({
   context: __dirname,
@@ -60,9 +96,16 @@ export default defineConfig({
     },
     extensionAlias: { '.js': ['.ts', '.js'] },
   },
-  externals: NATIVE_MODULES,
+  externals: [
+    ...NATIVE_MODULES,
+    { 'swagger-ui-dist/absolute-path.js': `./${SWAGGER_UI_DIR}/absolute-path.js` },
+  ],
   externalsType: 'commonjs',
   module: {
+    /* Os pacotes ESM do Nest 12 (Swagger, serve-static) carregam outros por
+       `createRequire(import.meta.url)`: assim eles entram no pacote, em vez de procurar
+       `node_modules` em runtime — que não existe na imagem. */
+    parser: { javascript: { createRequire: true } },
     rules: [
       {
         test: /\.ts$/,
@@ -81,8 +124,24 @@ export default defineConfig({
     ],
   },
   plugins: [
+    new rspack.CopyRspackPlugin({
+      patterns: SWAGGER_UI_FILES.map((file) => ({
+        from: resolve(SWAGGER_UI_DIST, file),
+        to: `${SWAGGER_UI_DIR}/${file}`,
+      })),
+    }),
+    ...(NEST_ASSETS.length > 0
+      ? [
+          new rspack.CopyRspackPlugin({
+            patterns: NEST_ASSETS.map(({ include }) => ({
+              from: include,
+              context: resolve(__dirname, 'src'),
+            })),
+          }),
+        ]
+      : []),
     new rspack.IgnorePlugin({
-      checkResource: (resource) => OPTIONAL_MODULES.includes(resource),
+      checkResource: isOptional,
     }),
   ],
   optimization: {

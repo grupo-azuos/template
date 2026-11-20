@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { type ComponentProps } from 'react';
 
-import { type NavTarget } from '../../navigation/app-shell-navigation';
+import { type NavTarget, SHELL_LINK_ACTIVE_OPTIONS } from '../../navigation/app-shell-navigation';
 
 /**
  * O link de um atalho da casca padrão: rota interna vira `Link` do router, endereço de fora
@@ -15,7 +15,9 @@ export type AzuosAppShellTargetLinkProps = Omit<ComponentProps<'a'>, 'href' | 't
 };
 
 export function AzuosAppShellTargetLink({ data, ...props }: AzuosAppShellTargetLinkProps) {
-  if ('to' in data.target) return <Link {...props} to={data.target.to} />;
+  if ('to' in data.target) {
+    return <Link {...props} to={data.target.to} activeOptions={SHELL_LINK_ACTIVE_OPTIONS} />;
+  }
 
   const opensInNewTab = Boolean(data.target.opensInNewTab);
 

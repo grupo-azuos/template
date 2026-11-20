@@ -29,7 +29,7 @@ const LABELS = [
 
 export const Default: Story = {
   args: {
-    ui: { ariaLabel: 'Resumo por status', itemClassName: 'basis-1/2 md:basis-1/3 xl:basis-1/6' },
+    ui: { ariaLabel: 'Resumo por status' },
   },
   render: (args) => (
     <AzuosCarousel {...args}>

@@ -6,6 +6,7 @@ reports/
 .vite/
 .tanstack/
 storybook-static/
+.wrangler/
 playwright-report/
 blob-report/
 test-results/

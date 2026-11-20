@@ -78,7 +78,7 @@ export function AzuosProgressRing({ data, ui }: AzuosProgressRingProps) {
           )}
         />
       </svg>
-      <span className="text-ink-900 absolute text-xs font-bold tabular-nums">
+      <span className="absolute text-xs font-bold text-ink-900 tabular-nums">
         {data.total === 0 ? '—' : `${clamped}%`}
       </span>
     </div>

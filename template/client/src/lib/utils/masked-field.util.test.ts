@@ -83,7 +83,8 @@ describe('applyMaskedInput', () => {
     const keepTwo = (value: string) => value.slice(0, 2);
 
     expect(
-      applyMaskedInput({ value: '12345', selectionStart: 0 }, digitsOnly, keepTwo, 'end').selectionStart,
+      applyMaskedInput({ value: '12345', selectionStart: 0 }, digitsOnly, keepTwo, 'end')
+        .selectionStart,
     ).toBe(0);
   });
 });

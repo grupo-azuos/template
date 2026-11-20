@@ -638,3 +638,52 @@ test('native-select: lets the calendar with its own list and a comment about sel
 
   assert.deepEqual(run('native-select', files), []);
 });
+
+const APP = SRC.replace(/client\/src$/, '');
+
+/** Um sistema com as duas telas padrão inteiras: tela, módulo da API e menu. */
+function standardProject(overrides = {}) {
+  return project({
+    [`${APP}client/src/routes/dashboard/index.tsx`]: 'export const Route = {};',
+    [`${APP}client/src/routes/history/index.tsx`]: 'export const Route = {};',
+    [`${APP}server/src/modules/dashboard-boards/dashboard-boards.module.ts`]: 'export class M {}',
+    [`${APP}server/src/modules/history/history.module.ts`]: 'export class M {}',
+    [`${SRC}/lib/navigation/navigation.ts`]: "items: [{ to: '/dashboard' }, { to: '/history' }]",
+    ...overrides,
+  });
+}
+
+test('standard-screens: lets a system with Dashboard and History in full through', () => {
+  assert.deepEqual(run('standard-screens', standardProject()), []);
+});
+
+test('standard-screens: refuses a system without the History module or menu entry', () => {
+  const files = standardProject({
+    [`${SRC}/lib/navigation/navigation.ts`]: "items: [{ to: '/dashboard' }]",
+  }).filter((file) => !file.path.endsWith('history/history.module.ts'));
+
+  assert.deepEqual(
+    run('standard-screens', files).map((violation) => violation.detail),
+    ['Histórico sem o módulo da API', 'Histórico sem a entrada no menu'],
+  );
+});
+
+test('person-field: refuses a person option with a photo built by hand on a screen', () => {
+  const files = project({
+    [`${SRC}/routes/tasks/components/azuos-x/azuos-x.component.tsx`]:
+      'options={people.map((p) => ({ value: p.id, label: p.name, personName: p.name }))}',
+  });
+
+  assert.equal(run('person-field', files).length, 1);
+});
+
+test('person-field: lets the person pickers themselves and comments through', () => {
+  const files = project({
+    [`${SRC}/lib/components/azuos-person-picker-field/azuos-person-picker-field.component.tsx`]:
+      'personName: person.name,',
+    [`${SRC}/routes/tasks/components/azuos-x/azuos-x.component.tsx`]:
+      ' * Não monte `personName:` à mão: use o AzuosPersonPickerField.',
+  });
+
+  assert.deepEqual(run('person-field', files), []);
+});

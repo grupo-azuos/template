@@ -7,7 +7,7 @@ import { AzuosZuzu } from './azuos-zuzu.component';
  * nada aqui", enquanto a mesma tela em branco é lida como "quebrou".
  */
 const meta = {
-  title: 'Primitives/AzuosZuzu',
+  title: 'Mascote/AzuosZuzu',
   component: AzuosZuzu,
   parameters: { layout: 'centered' },
 } satisfies Meta<typeof AzuosZuzu>;
@@ -38,7 +38,7 @@ export const Poses: Story = {
       ).map((pose) => (
         <figure key={pose} className="flex flex-col items-center gap-1">
           <AzuosZuzu data={{ pose }} ui={{ size: 72 }} />
-          <figcaption className="text-ink-500 text-xs">{pose}</figcaption>
+          <figcaption className="text-xs text-ink-500">{pose}</figcaption>
         </figure>
       ))}
     </div>

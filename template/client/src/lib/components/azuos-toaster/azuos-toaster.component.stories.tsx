@@ -9,7 +9,7 @@ function Playground({ message, isError = false }: { message: string; isError?: b
     <div className="flex flex-col items-start gap-3">
       <button
         type="button"
-        className="control-md rounded-control bg-primary text-primary-foreground px-4 text-sm"
+        className="control-md rounded-control bg-primary px-4 text-sm text-primary-foreground"
         onClick={() => (isError ? toast.error(message) : toast(message))}
       >
         Mostrar aviso
@@ -20,7 +20,7 @@ function Playground({ message, isError = false }: { message: string; isError?: b
 }
 
 const meta = {
-  title: 'Components/AzuosToaster',
+  title: 'Notificações/AzuosToaster',
   component: AzuosToaster,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof AzuosToaster>;

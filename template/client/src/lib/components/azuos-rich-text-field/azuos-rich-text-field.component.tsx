@@ -71,7 +71,7 @@ export const FIELD_CONTROL_CLASS =
 export const CHOICE_FILL_CLASS = 'dark:bg-input/30 dark:hover:bg-input/50';
 
 /** O recusado vence o véu: sem isto, no escuro o vermelho claro some debaixo dele. */
-export const CHOICE_ERROR_CLASS = 'border-border bg-destructive-soft dark:bg-destructive-soft';
+export const CHOICE_ERROR_CLASS = 'border-transparent bg-destructive-soft';
 
 export type AzuosRichTextFieldType = 'text' | 'email' | 'password' | 'date' | 'month' | 'tel';
 
@@ -208,7 +208,7 @@ function FieldIcon({
       onClick={actions.onSubmit}
       className={cn(
         place,
-        'hover:text-ink-700 focus-visible:ring-brand-blue-700 rounded-chip cursor-pointer focus-visible:ring-2 focus-visible:outline-none',
+        'rounded-chip hover:text-ink-700 focus-visible:ring-brand-blue-700 cursor-pointer focus-visible:ring-2 focus-visible:outline-none',
       )}
     >
       <Icon aria-hidden="true" className="size-4" />
@@ -293,7 +293,7 @@ function inputClassName({
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
     hasIcon && 'pl-9',
-    hasError ? 'border-border bg-destructive-soft' : 'border-input',
+    hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
   );
 }
 
@@ -337,7 +337,7 @@ export function FieldError({ data }: { data: { id: string; message: string } }) 
 const HINT_TONES: Record<AzuosRichTextFieldHint['tone'], string> = {
   neutral: 'text-ink-500',
   calculated: 'text-brand-blue-800 dark:text-foreground',
-  error: 'text-warning',
+  error: 'text-warning-ink',
 };
 
 /**

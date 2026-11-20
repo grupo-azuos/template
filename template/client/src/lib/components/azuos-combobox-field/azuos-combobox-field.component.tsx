@@ -1,3 +1,4 @@
+import { defaultFilter } from 'cmdk';
 import { Check, ChevronsUpDown, type LucideIcon, Plus } from 'lucide-react';
 import { useState } from 'react';
 
@@ -141,10 +142,14 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
       {/* A LARGURA DA LISTA É A DO GATILHO, com um piso. Sem amarrar, ela se estica até o nome mais
           comprido e nasce mais larga que o diálogo em volta, vazando pelos dois lados; sem o piso
           (`min-w-64`), sob um gatilho estreito a lista cortava cada opção no meio. */}
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-64 p-0">
+      <PopoverContent
+        sideOffset={6}
+        align="center"
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(14rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
+      >
         {/* O filtro é o do próprio `cmdk`, por pontuação de semelhança — então "ana s" ainda acha
-            "Ana Souza", o que um `includes` não faria. */}
-        <Command>
+            "Ana Souza", o que um `includes` não faria —, só que sem acento: "goias" acha Goiás. */}
+        <Command filter={accentFreeFilter} className="rounded-surface bg-card">
           <CommandInput value={term} onValueChange={setTerm} placeholder={texts.search} />
           <CommandList>
             <CommandEmpty>{texts.empty}</CommandEmpty>
@@ -228,7 +233,7 @@ function OptionRow({
   const { option } = data;
 
   return (
-    <CommandItem value={option.label} onSelect={actions.onSelect}>
+    <CommandItem value={option.label} onSelect={actions.onSelect} className="rounded-chip">
       <Check
         className={cn('size-4 shrink-0', !state.isSelected && 'opacity-0')}
         aria-hidden="true"
@@ -253,11 +258,25 @@ function CreateRow({
   actions: { onSelect: () => void };
 }) {
   return (
-    <CommandItem value={data.term} onSelect={actions.onSelect}>
+    <CommandItem value={data.term} onSelect={actions.onSelect} className="rounded-chip">
       <Plus className="size-4 shrink-0" aria-hidden="true" />
       <span className="truncate">
         {ui.label} “{data.term}”
       </span>
     </CommandItem>
+  );
+}
+
+/** Tira os acentos: quem digita rápido escreve "goias", e a lista tem "Goiás". */
+function withoutAccents(value: string): string {
+  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+}
+
+/** A pontuação de semelhança do `cmdk`, comparando os dois lados sem acento. */
+function accentFreeFilter(value: string, search: string, keywords?: string[]): number {
+  return defaultFilter(
+    withoutAccents(value),
+    withoutAccents(search),
+    keywords?.map(withoutAccents),
   );
 }

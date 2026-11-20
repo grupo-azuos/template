@@ -64,7 +64,7 @@ export function AzuosCalendarDropdown({
   };
 
   return (
-    <div className="relative" onBlur={closeWhenFocusLeaves}>
+    <div className="relative inline-block" onBlur={closeWhenFocusLeaves}>
       <button
         type="button"
         disabled={disabled}
@@ -73,7 +73,7 @@ export function AzuosCalendarDropdown({
         aria-controls={listId}
         aria-label={`${name}: ${selected?.label ?? ''}`}
         onClick={() => setIsOpen((current) => !current)}
-        className="control-sm rounded-control border-input bg-card text-foreground hover:bg-accent/60 focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 border text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60"
+        className="control-sm rounded-control bg-muted text-foreground hover:bg-accent/60 focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {selected?.label}
         <ChevronDown className="text-muted-foreground size-3.5" aria-hidden="true" />
@@ -84,7 +84,7 @@ export function AzuosCalendarDropdown({
           id={listId}
           role="listbox"
           aria-label={name}
-          className="rounded-box border-border bg-card absolute top-full left-0 z-20 mt-1 flex max-h-56 min-w-full flex-col gap-0.5 overflow-y-auto border p-1 shadow-xl"
+          className="rounded-box bg-popover ring-foreground/8 absolute top-full left-1/2 z-20 mt-1.5 flex max-h-56 w-max min-w-full -translate-x-1/2 flex-col gap-0.5 overflow-y-auto p-1 shadow-xl ring-1"
         >
           {items.map((option) => {
             const isSelected = option.value === selected?.value;

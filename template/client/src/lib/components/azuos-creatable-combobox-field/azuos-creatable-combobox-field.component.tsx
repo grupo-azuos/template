@@ -138,7 +138,11 @@ export function AzuosCreatableComboboxField({
     <Popover open={isOpen} onOpenChange={changeOpen} modal>
       <ComboboxTrigger data={{ value: data.value, listId }} ui={ui} state={{ ...state, isOpen }} />
 
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-64 p-0">
+      <PopoverContent
+        sideOffset={6}
+        align="center"
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(14rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
+      >
         <ComboboxSearch
           data={{
             term,

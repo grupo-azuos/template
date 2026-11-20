@@ -5,8 +5,8 @@ description: Gera ou corrige o deploy no Komodo de um app do Grupo Azuos — `.k
 
 # Deploy no Komodo (padrão do template)
 
-As regras estão em `.claude/rules/infra.md` e o `scripts/production-contract.mjs` reprova o que
-foge delas. Esta skill é o passo a passo.
+As regras estão em `.claude/rules/infra.md` e o `scripts/infra-contract.mjs` reprova o que foge
+delas. Esta skill é o passo a passo.
 
 O deploy é **igual em todos os apps**: copie o `.komodo/komodo.toml` e o `docker/` do template e
 troque só o que é do app. Se um app precisa de algo diferente, mude o template primeiro.
@@ -29,7 +29,7 @@ troque só o que é do app. Se um app precisa de algo diferente, mude o template
 | Branch             | `develop`                                 | `main`                                    |
 | Servidor do Repo   | `homo`                                    | `core`                                    |
 | Builder            | `homo`                                    | `prod`                                    |
-| Swarm              | `homo`                                    | `core-prod`                               |
+| Swarm              | `homo`                                    | `core`                                    |
 | Token do Infisical | `INFISICAL_HOMO_TOKEN`                    | `INFISICAL_PROD_TOKEN`                    |
 | Tags               | `context:apps`, `env:homo`, `server:homo` | `context:apps`, `env:prod`, `server:core` |
 
@@ -82,7 +82,7 @@ Nada de `deploy.sh`, `build.sh` ou `on_pull`: Repo, Build, Stack e Procedure faz
 ## Conferir antes do commit
 
 ```sh
-node scripts/production-contract.mjs
-node --test scripts/production-contract.test.mjs
-shellcheck -s sh template/docker/*.sh && shfmt -i 2 -ci -bn -d template/docker/*.sh
+node scripts/infra-contract.mjs
+node --test scripts/infra-contract.test.mjs
+shellcheck -s sh <app>/docker/*.sh && shfmt -i 2 -ci -bn -d <app>/docker/*.sh
 ```

@@ -57,7 +57,7 @@ export const ManySectionsInNarrowColumn: Story = {
     ui: { ariaLabel: 'Seções da tarefa' },
   },
   render: (args) => (
-    <div className="border-ink-300 w-72 border border-dashed p-2">
+    <div className="w-72 border border-dashed border-ink-300 p-2">
       <AzuosNavigationMenu {...args} />
     </div>
   ),

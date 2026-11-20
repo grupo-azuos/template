@@ -108,7 +108,9 @@ export function AzuosMaskedTextField({ data, ui, state, actions }: AzuosMaskedTe
         className={cn(
           'control-lg rounded-control text-foreground w-full border text-sm tabular-nums transition-colors',
           'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
-          hasError ? 'border-border bg-destructive-soft' : 'border-input bg-muted text-foreground',
+          hasError
+            ? 'bg-destructive-soft border-transparent'
+            : 'bg-muted text-foreground border-transparent',
         )}
       />
       {hasError ? (

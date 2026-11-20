@@ -9,7 +9,7 @@ function Bomb(): never {
 
 describe('AzuosAppErrorBoundary', () => {
   // feliz
-  it('desenha o conteúdo normalmente quando nada quebra', () => {
+  it('draws the content normally when nothing breaks', () => {
     render(
       <AzuosAppErrorBoundary>
         <div>Conteúdo normal</div>
@@ -22,7 +22,7 @@ describe('AzuosAppErrorBoundary', () => {
   /* Sem a boundary, um erro de render esvazia o `#root` e a tela fica em branco — sem
      mensagem, sem o que relatar. É o pior resultado possível, e é o que este teste prova
      que não acontece mais. */
-  it('captura o erro de render e mostra o motivo, em vez de esvaziar a tela', () => {
+  it('catches the render error and shows the reason instead of blanking the screen', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(

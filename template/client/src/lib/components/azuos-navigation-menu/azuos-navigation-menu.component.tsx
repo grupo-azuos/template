@@ -40,7 +40,7 @@ export function AzuosNavigationMenu({ data, ui }: AzuosNavigationMenuProps) {
               active={item.isActive}
               aria-current={item.isActive ? 'page' : undefined}
               className={cn(
-                'control-md rounded-control flex-row items-center text-sm font-medium',
+                'control-md flex-row items-center rounded-control text-sm font-medium',
                 item.isActive ? 'bg-ink-100 text-ink-900' : 'text-ink-700 hover:text-ink-900',
               )}
             >

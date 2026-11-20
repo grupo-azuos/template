@@ -65,7 +65,7 @@ export const LongLabelInNarrowColumn: Story = {
     },
   },
   render: (args) => (
-    <div className="border-ink-300 w-56 border border-dashed p-2">
+    <div className="w-56 border border-dashed border-ink-300 p-2">
       <AzuosBreadcrumb {...args} />
     </div>
   ),

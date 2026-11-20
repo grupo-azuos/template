@@ -21,3 +21,13 @@ export function findPackageJson(from: string): string {
 
 /** A pasta `server/`, a mesma no fonte e no pacote. */
 export const SERVER_ROOT = dirname(findPackageJson(__dirname));
+
+/**
+ * Arquivo que o server lê do disco (fonte, logo), pelo caminho dentro de `src/`. Empacotado, ele vem
+ * do `dist/` (copiado pelo Rspack a partir dos `assets` do `nest-cli.json`); pelo fonte, do `src/`.
+ */
+export function serverAsset(path: string): string {
+  const built = join(SERVER_ROOT, 'dist', path);
+
+  return existsSync(built) ? built : join(SERVER_ROOT, 'src', path);
+}

@@ -84,7 +84,7 @@ function resolveBox(ui: AzuosEchartProps['ui']): ChartBox {
 function ChartLoading({ box }: { box: ChartBox }) {
   return (
     <div
-      className={cn('bg-muted rounded-box w-full animate-pulse', box.heightClass, box.className)}
+      className={cn('w-full animate-pulse rounded-box bg-muted', box.heightClass, box.className)}
       aria-busy="true"
     />
   );
@@ -94,7 +94,7 @@ function ChartEmpty({ box }: { box: ChartBox }) {
   return (
     <p
       className={cn(
-        'text-muted-foreground flex w-full items-center justify-center text-xs',
+        'flex w-full items-center justify-center text-xs text-muted-foreground',
         box.heightClass,
         box.className,
       )}

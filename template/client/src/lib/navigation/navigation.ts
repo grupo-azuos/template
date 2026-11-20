@@ -1,4 +1,4 @@
-import { ListChecks } from 'lucide-react';
+import { History, LayoutDashboard, ListChecks } from 'lucide-react';
 
 import { type AppShellNavigation } from './app-shell-navigation';
 
@@ -15,7 +15,13 @@ import { type AppShellNavigation } from './app-shell-navigation';
  */
 export const NAVIGATION: AppShellNavigation = {
   areas: [],
-  items: [{ key: 'tasks', label: 'Tarefas', to: '/tasks', icon: ListChecks }],
+  items: [
+    /* Padrão de todo sistema do grupo (regra `dashboard-standard`): fica sempre em primeiro. */
+    { key: 'dashboard', label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+    { key: 'tasks', label: 'Tarefas', to: '/tasks', icon: ListChecks },
+    /* Padrão de todo sistema do grupo (regra `history-standard`): fica sempre por último. */
+    { key: 'history', label: 'Histórico', to: '/history', icon: History },
+  ],
   actions: [],
   profile: { to: '/profile' },
 };

@@ -28,14 +28,14 @@ describe('AzuosPersonAvatar', () => {
   });
 
   // feliz
-  it('mostra as iniciais quando não há foto', () => {
+  it('shows initials without a photo', () => {
     render(<AzuosPersonAvatar name="Rafael Camargo" />);
 
     expect(screen.getByText('RC')).toBeInTheDocument();
   });
 
   // feliz
-  it('usa a foto quando avatarUrl vem preenchido', async () => {
+  it('uses the photo when avatarUrl is filled', async () => {
     vi.stubGlobal('Image', InstantLoadImage);
 
     const { container } = render(
@@ -47,14 +47,14 @@ describe('AzuosPersonAvatar', () => {
   });
 
   /* Duas iniciais bastam; nome com vários sobrenomes não pode virar mais que isso. */
-  it('corta as iniciais em duas letras mesmo com nome composto', () => {
+  it('cuts initials to two letters even for compound names', () => {
     render(<AzuosPersonAvatar name="Maria Fernanda Albuquerque Nascimento" />);
 
     expect(screen.getByText('MF')).toBeInTheDocument();
   });
 
   // triste
-  it('nome de uma palavra só gera uma iniciais só', () => {
+  it('gives a one-word name a single initial', () => {
     render(<AzuosPersonAvatar name="Bia" />);
 
     expect(screen.getByText('B')).toBeInTheDocument();

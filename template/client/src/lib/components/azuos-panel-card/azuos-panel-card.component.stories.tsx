@@ -4,7 +4,7 @@ import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.co
 import { AzuosPanelCard } from './azuos-panel-card.component';
 
 const meta = {
-  title: 'Conteúdo e marcadores/AzuosPanelCard',
+  title: 'Cards/AzuosPanelCard',
   component: AzuosPanelCard,
 } satisfies Meta<typeof AzuosPanelCard>;
 

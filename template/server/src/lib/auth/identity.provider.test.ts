@@ -11,7 +11,7 @@ const complete = {
   [FORWARDED_IDENTITY_HEADERS.id]: 'auth-forward|42',
   [FORWARDED_IDENTITY_HEADERS.email]: 'ana@empresa.com.br',
   [FORWARDED_IDENTITY_HEADERS.name]: 'Ana',
-  [FORWARDED_IDENTITY_HEADERS.role]: 'editor',
+  [FORWARDED_IDENTITY_HEADERS.role]: 'manager',
 };
 
 describe('readForwardedIdentity', () => {
@@ -21,18 +21,25 @@ describe('readForwardedIdentity', () => {
       id: 'auth-forward|42',
       email: 'ana@empresa.com.br',
       name: 'Ana',
-      role: 'editor',
+      role: 'manager',
     });
   });
 
-  it.each([
-    ['manager', 'editor'],
-    ['user', 'viewer'],
-    ['admin', 'admin'],
-  ])('maps admin-console role %s to %s', (incoming, expected) => {
+  /* Os papéis do admin-console chegam como são — sem tradução, e os cinco valem. */
+  it.each(['user', 'manager', 'operations_manager', 'owner', 'admin'])(
+    'keeps the admin-console role %s as it came',
+    (incoming) => {
+      expect(
+        readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: incoming })?.role,
+      ).toBe(incoming);
+    },
+  );
+
+  // triste: o vocabulário antigo deixou de existir.
+  it('refuses the old internal roles', () => {
     expect(
-      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: incoming })?.role,
-    ).toBe(expected);
+      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: 'editor' }),
+    ).toBeNull();
   });
 
   it('trims spaces around the value', () => {
@@ -42,9 +49,9 @@ describe('readForwardedIdentity', () => {
   });
 
   it('uses the first value of a repeated header', () => {
-    const repeated = { ...complete, [FORWARDED_IDENTITY_HEADERS.role]: ['editor', 'admin'] };
+    const repeated = { ...complete, [FORWARDED_IDENTITY_HEADERS.role]: ['manager', 'admin'] };
 
-    expect(readForwardedIdentity(repeated)?.role).toBe('editor');
+    expect(readForwardedIdentity(repeated)?.role).toBe('manager');
   });
 
   /* Sem nenhum cabeçalho é o caso NORMAL no MVP: não há auth-forward ainda, e quem chama cai
@@ -67,7 +74,7 @@ describe('readForwardedIdentity', () => {
 
   it('returns null when the role does not exist in the system', () => {
     expect(
-      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: 'owner' }),
+      readForwardedIdentity({ ...complete, [FORWARDED_IDENTITY_HEADERS.role]: 'superuser' }),
     ).toBeNull();
   });
 

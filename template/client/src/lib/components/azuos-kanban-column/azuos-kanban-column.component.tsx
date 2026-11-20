@@ -20,7 +20,7 @@ export type AzuosKanbanColumnTone = 'neutral' | 'info' | 'warning' | 'brand' | '
 export type AzuosKanbanColumnProps = {
   data: { title: string; count: number };
   ui?: { tone?: AzuosKanbanColumnTone; addLabel?: string; className?: string };
-  actions?: { onDropItem?: (id: number) => void; onAdd?: () => void };
+  actions?: { onDropItem?: (id: string) => void; onAdd?: () => void };
   children?: ReactNode;
 };
 
@@ -42,7 +42,7 @@ export function AzuosKanbanColumn({ data, ui, actions, children }: AzuosKanbanCo
     <section
       aria-label={data.title}
       className={cn(
-        'bg-mantle rounded-surface flex w-72 shrink-0 flex-col sm:w-80',
+        'flex w-72 shrink-0 flex-col rounded-surface bg-mantle sm:w-80',
         isOver && 'bg-accent',
         ui?.className,
       )}
@@ -61,7 +61,7 @@ export function AzuosKanbanColumn({ data, ui, actions, children }: AzuosKanbanCo
     >
       <header
         className={cn(
-          'rounded-t-surface flex items-center justify-between gap-2 px-4 py-2.5 text-sm font-semibold',
+          'flex items-center justify-between gap-2 rounded-t-surface px-4 py-2.5 text-sm font-semibold',
           TONE_HEADER[ui?.tone ?? 'neutral'],
         )}
       >
@@ -77,7 +77,7 @@ export function AzuosKanbanColumn({ data, ui, actions, children }: AzuosKanbanCo
           <button
             type="button"
             onClick={actions.onAdd}
-            className="border-input text-ink-500 hover:bg-accent hover:text-foreground rounded-control control-md flex items-center justify-center gap-1.5 border-2 border-dashed text-sm font-medium transition-colors"
+            className="flex control-md items-center justify-center gap-1.5 rounded-control border-2 border-dashed border-input text-sm font-medium text-ink-500 transition-colors hover:bg-accent hover:text-foreground"
           >
             <Plus aria-hidden="true" className="size-4" />
             {ui?.addLabel ?? 'Adicionar'}

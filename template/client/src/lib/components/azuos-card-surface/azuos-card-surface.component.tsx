@@ -1,19 +1,18 @@
 import { type LucideIcon } from 'lucide-react';
 import { type CSSProperties, type ReactNode } from 'react';
 
-import { useCardWash, WASH_SIZE } from '../../motion/use-card-wash';
-import { type AzuosCardTone, cardToneClasses } from '../../utils/card-tone.util';
+import { type AzuosCardTone, cardToneClasses, cardToneVeilOf } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
  * A SUPERFÍCIE de todo card do grupo — o andar de baixo dos quatro formatos (card de painel,
  * filtro pequeno, filtro grande com ícone e card de conteúdo).
  *
- * - Fundo: sempre a superfície da marca (`bg-card`), com a borda neutra. Cor de card entra só como
- *   sotaque, em quem usa esta superfície: bolinha do ícone, número, marca d'água
- *   (`lib/utils/card-tone.util.ts`).
- * - Hover: a mancha do GSAP (`lib/motion/use-card-wash.ts`) entra a partir do mouse. Neutra por
- *   padrão; colorida só quando a tela pede, com `ui.isHoverColored` + `ui.hoverTone`.
+ * - Fundo: a superfície (`bg-card`) SEM borda; o que separa o card do fundo é o fio de 1px e a
+ *   sombra difusa do `--elevation-card` (padrão Apple). A cor entra no ícone cheio do assunto
+ *   (`lib/utils/card-tone.util.ts`), nunca no fundo do card.
+ * - Hover: clicável, o card sobe 2px e a sombra cresce; o véu neutro (`--hover-veil`), ou no tom
+ *   com `ui.isHoverColored`, aparece por cima. Nada aparece cobrindo o conteúdo.
  * - Marca d'água: `ui.mark` desenha o ícone grande no canto, no sotaque de `ui.markTone`, como no
  *   hero card. Fica atrás do texto.
  * - Escolhido: o azul claro da marca (`bg-card-selected`) com texto branco. Quem está dentro lê o
@@ -26,7 +25,7 @@ export type AzuosCardSurfaceProps = {
   data?: { label?: string };
   ui?: {
     className?: string;
-    /** O hover pinta a mancha na cor de `hoverTone`. Sem a flag, a mancha é neutra. */
+    /** O card fica tingido, o tempo todo, na cor de `hoverTone`. Sem a flag, só o véu neutro no hover. */
     isHoverColored?: boolean;
     hoverTone?: AzuosCardTone;
     /** O ícone grande no canto, como marca d'água. */
@@ -39,38 +38,29 @@ export type AzuosCardSurfaceProps = {
   children: ReactNode;
 };
 
-/** A cor da mancha: o sotaque com transparência, ou um véu neutro do texto do tema. */
+/** A cor do véu: o sotaque a 16%, ou o véu neutro do tema — o mesmo das linhas de lista. */
 function washColorOf(ui: AzuosCardSurfaceProps['ui']): string {
-  if (ui?.isHoverColored && ui.hoverTone) {
-    return `color-mix(in srgb, ${cardToneClasses(ui.hoverTone).color} 16%, transparent)`;
-  }
+  if (ui?.isHoverColored && ui.hoverTone) return cardToneVeilOf(ui.hoverTone);
 
-  return 'color-mix(in srgb, var(--foreground) 6%, transparent)';
+  return 'var(--hover-veil)';
 }
 
-/** A mancha do hover: começa encolhida pelo `transform`, o mesmo que o GSAP anima. */
-function washStyleOf(ui: AzuosCardSurfaceProps['ui']): CSSProperties {
-  /* A classe `scale-0` do Tailwind usa a propriedade `scale`, que se multiplica ao `transform` e
-     prendia a mancha em zero; por isso o encolhido vem aqui, no `transform`. */
-  return {
-    width: WASH_SIZE,
-    height: WASH_SIZE,
-    marginLeft: -WASH_SIZE / 2,
-    marginTop: -WASH_SIZE / 2,
-    backgroundColor: washColorOf(ui),
-    transform: 'scale(0)',
-  };
+/** O véu aparece só no hover: neutro, ou no tom do card com `ui.isHoverColored`. */
+function washClassOf(): string {
+  return cn('pointer-events-none absolute inset-0 -z-10', 'group-hover/card:bg-(--card-veil)');
 }
 
-/** A casca: superfície da marca, ou o azul claro do escolhido; sobe no hover quando é clicável. */
+/**
+ * A casca no padrão Apple: superfície sem borda, com o fio de 1px e a sombra difusa do
+ * `--elevation-card`. Clicável, ela sobe 2px e a sombra cresce no hover — sem cobrir nada.
+ */
 function surfaceClassOf(props: { isSelected: boolean; isClickable: boolean; className?: string }) {
   return cn(
-    'group/card rounded-surface shadow-card relative isolate overflow-hidden transition-[box-shadow,transform,background-color] duration-150',
+    'group/card rounded-surface shadow-card relative isolate overflow-hidden',
     /* A borda NEUTRA separa o card do fundo da página, que no claro é quase do mesmo branco. */
-    props.isSelected
-      ? 'bg-card-selected text-on-card-selected border border-transparent'
-      : 'bg-card text-card-foreground border-border border',
-    props.isClickable && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl',
+    props.isSelected ? 'bg-card-selected text-on-card-selected' : 'bg-card text-card-foreground',
+    props.isClickable &&
+      'hover:shadow-card-hover cursor-pointer transition-[transform,box-shadow] duration-200 motion-safe:hover:-translate-y-0.5',
     props.isSelected && props.isClickable && 'hover:bg-card-selected-hover',
     props.className,
   );
@@ -88,7 +78,6 @@ function flagsOf(props: Pick<AzuosCardSurfaceProps, 'state' | 'actions'>) {
 }
 
 export function AzuosCardSurface({ data, ui, state, actions, children }: AzuosCardSurfaceProps) {
-  const { washRef, handlers } = useCardWash();
   const flags = flagsOf({ state, actions });
 
   return (
@@ -98,14 +87,13 @@ export function AzuosCardSurface({ data, ui, state, actions, children }: AzuosCa
       data-slot="azuos-card-surface"
       data-selected={flags.isSelected ? 'true' : undefined}
       className={surfaceClassOf({ ...flags, className: ui?.className })}
-      {...handlers}
     >
+      {/* O véu cobre o card inteiro: sempre no card com tom, só no hover no neutro. */}
       <span
-        ref={washRef}
         aria-hidden="true"
         data-slot="card-wash"
-        className="pointer-events-none absolute top-0 left-0 -z-10 rounded-full"
-        style={washStyleOf(ui)}
+        className={washClassOf()}
+        style={{ '--card-veil': washColorOf(ui) } as CSSProperties}
       />
       <CardMark ui={ui} />
       <CardClickTarget data={data} state={flags} actions={actions} />
@@ -148,7 +136,7 @@ function CardMark({ ui }: { ui: AzuosCardSurfaceProps['ui'] }) {
       aria-hidden="true"
       data-slot="card-mark"
       className={cn(
-        'pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31 transition-transform duration-200 group-hover/card:scale-105 group-data-[selected=true]/card:text-on-card-selected',
+        'group-data-[selected=true]/card:text-on-card-selected pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31',
         cardToneClasses(ui.markTone).text,
       )}
     >

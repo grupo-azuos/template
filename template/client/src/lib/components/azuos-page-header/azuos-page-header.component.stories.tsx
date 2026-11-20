@@ -1,3 +1,4 @@
+import { BellRing } from 'lucide-react';
 import { type Meta, type StoryObj } from '@storybook/react';
 import { Download, Plus } from 'lucide-react';
 
@@ -53,4 +54,12 @@ export const LongTextOnNarrowScreen: Story = {
       <AzuosPageHeader {...args} />
     </div>
   ),
+};
+
+/** Tela de trabalho: o ícone do item do menu ao lado do título. */
+export const WithIcon: Story = {
+  args: {
+    data: { title: 'Avisos do Cadastro', description: 'O que mudou no cadastro de empresas.' },
+    ui: { icon: BellRing },
+  },
 };

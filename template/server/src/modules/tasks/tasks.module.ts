@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { HistoryModule } from '../history/history.module';
 import { TasksController } from './controller/tasks.controller';
 import { TasksRepository } from './repository/tasks.repository';
 import { TasksService } from './service/tasks.service';
@@ -9,6 +10,7 @@ import { TasksService } from './service/tasks.service';
  * Módulo novo precisa ser registrado em `app.module.ts`.
  */
 @Module({
+  imports: [HistoryModule],
   controllers: [TasksController],
   providers: [TasksService, TasksRepository],
   exports: [TasksService],

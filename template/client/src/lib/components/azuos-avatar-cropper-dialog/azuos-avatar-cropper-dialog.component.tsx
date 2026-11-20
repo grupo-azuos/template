@@ -101,7 +101,7 @@ function CropEditor({
     <div className="flex flex-col gap-4">
       {/* Mais baixo no celular: 288px de recorte mais o cabeçalho, o zoom e os botões não
           cabem numa tela de 640px de altura sem empurrar "Salvar" para fora da dobra. */}
-      <div className="bg-backdrop rounded-box relative h-56 w-full overflow-hidden sm:h-72">
+      <div className="rounded-box bg-backdrop relative h-56 w-full overflow-hidden sm:h-72">
         <Cropper
           image={data.imageUrl}
           crop={crop}
@@ -133,7 +133,7 @@ function CropEditor({
           data={{
             label: 'Girar para a esquerda',
           }}
-          ui={{ icon: RotateCcw, size: 'sm' }}
+          ui={{ icon: RotateCcw, size: 'sm', variant: 'secondary' }}
           state={{ isDisabled: state.isSaving }}
           actions={{ onClick: () => setRotation((current) => normalizeRotation(current - 90)) }}
         />
@@ -141,7 +141,7 @@ function CropEditor({
           data={{
             label: 'Girar para a direita',
           }}
-          ui={{ icon: RotateCw, size: 'sm' }}
+          ui={{ icon: RotateCw, size: 'sm', variant: 'secondary' }}
           state={{ isDisabled: state.isSaving }}
           actions={{ onClick: () => setRotation((current) => normalizeRotation(current + 90)) }}
         />
@@ -154,6 +154,7 @@ function CropEditor({
       <DialogFooter>
         <AzuosActionButton
           data={{ label: 'Cancelar' }}
+          ui={{ variant: 'secondary' }}
           state={{ isDisabled: state.isSaving }}
           actions={{ onClick: actions.onCancel }}
         />

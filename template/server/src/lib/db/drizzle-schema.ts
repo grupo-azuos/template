@@ -1,3 +1,6 @@
+import { dashboardBoards, savedFilters } from './schema/dashboard-boards.schema';
+import { history } from './schema/history.schema';
+import { notifications, notificationSettings } from './schema/notifications.schema';
 import { tasks } from './schema/tasks.schema';
 
 /**
@@ -12,6 +15,11 @@ import { tasks } from './schema/tasks.schema';
  */
 export const drizzleSchema = {
   tasks,
+  notifications,
+  notificationSettings,
+  history,
+  dashboardBoards,
+  savedFilters,
 };
 
 export type DrizzleSchema = typeof drizzleSchema;

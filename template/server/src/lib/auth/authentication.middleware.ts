@@ -17,12 +17,21 @@ import { type RequestUser } from './request-user.type';
  * para sempre. Enquanto não há provedor, a identidade é a pessoa fixa do mock; quando houver,
  * ela vem dos cabeçalhos. Não passar nunca foi opção.
  */
+/** O caminho onde a shared-api entrega avisos — o mesmo em todo sistema da casa. */
+export const SHARED_EVENTS_PATH = '/api/v1/shared-events';
+
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
   use(request: Request, _response: Response, next: NextFunction): void {
     const path = request.originalUrl?.split('?')[0];
     if (request.method === 'GET' && ['/api/health', '/api/health/ready'].includes(path ?? ''))
       return next();
+    /* A ÚNICA OUTRA dispensa, decidida por quem administra (ver CLAUDE.md): a entrega de avisos
+       da shared-api. Quem chega aqui é uma MÁQUINA, sem pessoa — e sai daqui SEM `user`. No MVP
+       nenhuma rota atende esse caminho, e a resposta é 404 ("ainda não recebe", para a
+       shared-api tentar de novo mais tarde). Ao promover, a rota entra com o guard do token de
+       máquina (skill `production-standard`); sem ele válido, ela responde 401 e não grava nada. */
+    if (request.method === 'POST' && path === SHARED_EVENTS_PATH) return next();
     const identity = readForwardedIdentity(request.headers);
 
     if (identity) {

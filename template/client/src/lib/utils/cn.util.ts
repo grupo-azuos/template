@@ -22,7 +22,9 @@ const HORIZONTAL_PADDING = ['px', 'ps', 'pe', 'pl', 'pr'] as const;
 
 const mergeClasses = extendTailwindMerge<'control' | 'control-icon'>({
   extend: {
-    theme: { radius: ['surface', 'control', 'box', 'chip'] },
+    theme: {
+      radius: ['surface', 'control', 'box', 'chip', 'button', 'card', 'dialog', 'badge', 'icon'],
+    },
     classGroups: {
       control: [{ control: ['sm', 'md', 'lg'] }],
       'control-icon': [{ 'control-icon': ['sm', 'md', 'lg'] }],

@@ -74,6 +74,14 @@ export type AzuosAppShellProps = {
     /** Contador ao lado do item, pela `key`. Zero não desenha selo. */
     badges?: Partial<Record<string, number>>;
   };
+  ui?: {
+    /**
+     * O sininho das notificações. No computador fica no rodapé da barra, SEMPRE logo acima da
+     * foto do perfil; no celular, no topo do conteúdo. Recebe onde vai morar para ajustar o
+     * botão e o lado em que a lista abre.
+     */
+    notifications?: (placement: AppShellNotificationPlacement) => ReactNode;
+  };
   state?: {
     activeKey?: string;
     activeArea?: string;
@@ -92,12 +100,16 @@ export type AzuosAppShellProps = {
 
 type ShellParts = Omit<AzuosAppShellProps, 'children'>;
 
+export type AppShellNotificationPlacement = 'rail' | 'sidebar' | 'header';
+
 /* Duas colunas: o trilho tem a largura da barra recolhida, e o painel, a de sempre. */
 /* Trilho (ícone + a folga do `inset`, que ele ocupa por inteiro) + painel de 16rem. */
-const TWO_COLUMN_WIDTH = { '--sidebar-width': 'calc(var(--sidebar-width-icon) + 1rem + 2px + 16rem)' } as CSSProperties;
+const TWO_COLUMN_WIDTH = {
+  '--sidebar-width': 'calc(var(--sidebar-width-icon) + 1rem + 2px + 16rem)',
+} as CSSProperties;
 const RAIL_WIDTH = 'w-[calc(var(--sidebar-width-icon)+1rem+2px)]!';
 
-export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellProps) {
+export function AzuosAppShell({ children, data, ui, state, actions }: AzuosAppShellProps) {
   const twoColumn = isTwoColumn(data.areas);
 
   return (
@@ -110,7 +122,7 @@ export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellP
       className="h-svh overflow-clip"
       style={twoColumn ? TWO_COLUMN_WIDTH : undefined}
     >
-      <ShellFrame data={data} state={state} actions={actions} twoColumn={twoColumn}>
+      <ShellFrame data={data} ui={ui} state={state} actions={actions} twoColumn={twoColumn}>
         {children}
       </ShellFrame>
     </SidebarProvider>
@@ -121,6 +133,7 @@ export function AzuosAppShell({ children, data, state, actions }: AzuosAppShellP
 function ShellFrame({
   children,
   data,
+  ui,
   state,
   actions,
   twoColumn,
@@ -130,17 +143,24 @@ function ShellFrame({
   return (
     <>
       {isMobile ? null : twoColumn ? (
-        <TwoColumnSidebar data={data} state={state} actions={actions} />
+        <TwoColumnSidebar data={data} ui={ui} state={state} actions={actions} />
       ) : (
-        <OneColumnSidebar data={data} state={state} actions={actions} />
+        <OneColumnSidebar data={data} ui={ui} state={state} actions={actions} />
       )}
 
       {/* O painel também corta sem rolar: ver o comentário da moldura, em `AzuosAppShell`. */}
       <SidebarInset className="border-sidebar-border bg-background min-w-0 overflow-clip md:border">
         {/* O gatilho vive no conteúdo: dentro da barra ele sumiria junto com o que colapsa.
             No celular não há barra lateral — o menu é a barra de baixo. */}
-        <header className="hidden h-12 shrink-0 items-center gap-2 px-4 md:flex">
-          <SidebarTrigger aria-label="Recolher ou expandir o menu" className="size-9" />
+        <header className="flex h-12 shrink-0 items-center gap-2 px-4">
+          <SidebarTrigger
+            aria-label="Recolher ou expandir o menu"
+            className="hidden size-9 md:inline-flex"
+          />
+          {/* No celular não há barra lateral: o sininho sobe para o topo do conteúdo. */}
+          {isMobile && ui?.notifications ? (
+            <div className="ml-auto flex items-center">{ui.notifications('header')}</div>
+          ) : null}
         </header>
 
         <PageTransition pageKey={state?.pageKey}>{children}</PageTransition>
@@ -151,7 +171,7 @@ function ShellFrame({
   );
 }
 
-function OneColumnSidebar({ data, state, actions }: ShellParts) {
+function OneColumnSidebar({ data, ui, state, actions }: ShellParts) {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
@@ -177,9 +197,16 @@ function OneColumnSidebar({ data, state, actions }: ShellParts) {
         {/* O AzuosZuzu debruçado na beirada, e embaixo dela quem está usando e o Sair. */}
         <ZuzuLedge />
         <SidebarMenu className="gap-1">
+          {/* O sininho é sempre o item logo acima do perfil. */}
+          {ui?.notifications ? (
+            <SidebarMenuItem>{ui.notifications('sidebar')}</SidebarMenuItem>
+          ) : null}
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip={data.user.name} className={ICON_SAFE}>
-              <AzuosAppShellTargetLink data={{ target: data.profile }} aria-label="Abrir meu perfil">
+              <AzuosAppShellTargetLink
+                data={{ target: data.profile }}
+                aria-label="Abrir meu perfil"
+              >
                 <AzuosAppShellAvatar data={data.user} />
                 <span className="grid flex-1 text-left leading-tight">
                   <span className="truncate text-sm font-semibold">{data.user.name}</span>
@@ -212,7 +239,7 @@ function OneColumnSidebar({ data, state, actions }: ShellParts) {
   );
 }
 
-function TwoColumnSidebar({ data, state, actions }: ShellParts) {
+function TwoColumnSidebar({ data, ui, state, actions }: ShellParts) {
   const activeArea = data.areas.find((area) => area.key === state?.activeArea) ?? data.areas[0];
 
   return (
@@ -228,24 +255,31 @@ function TwoColumnSidebar({ data, state, actions }: ShellParts) {
       <Sidebar
         collapsible="none"
         aria-label="Partes do sistema"
-        /* O trilho num azul mais escuro que o painel: é o primeiro nível (a parte), e o painel o
-           segundo (a tela). A diferença de cor já separa as colunas — sem linha divisória. */
-        className={cn(RAIL_WIDTH, 'bg-brand-blue-900!')}
+        /* O trilho na cor PRÓPRIA dele (`--sidebar-rail`, azul-marinho bem mais fundo que o
+           painel): é o primeiro nível (a parte), e o painel o segundo (a tela). A diferença de
+           cor separa as colunas — sem linha divisória. */
+        className={cn(RAIL_WIDTH, 'bg-sidebar-rail!')}
       >
         <SidebarHeader className="items-center px-0 pt-3">
           {/* A logo como ícone de app: um ladrilho de canto arredondado no azul do painel. */}
-          <div className="bg-sidebar rounded-box flex size-10 items-center justify-center">
+          <div className="rounded-box bg-sidebar flex size-10 items-center justify-center">
             <AzuosBrandMark ui={{ size: 'sm', variant: 'icon' }} />
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="items-center gap-1 px-0 py-2">
+        {/* O trilho não rola inteiro: as partes ficam paradas em cima, e só os itens da parte
+            (recolhida) rolam no meio, entre dois divisores — o sininho e o perfil ficam sempre
+            à vista embaixo, como na lista de notificações. */}
+        <SidebarContent className="items-center gap-1 overflow-hidden px-0 py-2">
           <AreaRail data={{ areas: data.areas, activeKey: activeArea?.key }} actions={actions} />
 
           {/* Recolhida, o painel some: os itens da parte escolhida descem para o trilho. */}
-          <div className="hidden flex-col items-center gap-1 group-data-[collapsible=icon]:flex">
-            <SidebarSeparator className="my-1 h-px w-6" />
-            <nav aria-label="Menu principal" className="flex flex-col items-center gap-1">
+          <div className="hidden min-h-0 w-full flex-1 flex-col items-center group-data-[collapsible=icon]:flex">
+            <SidebarSeparator className="my-1 h-px w-6 shrink-0" />
+            <nav
+              aria-label="Menu principal"
+              className={cn('flex min-h-0 w-full flex-1 flex-col items-center gap-1', RAIL_SCROLL)}
+            >
               {data.items.map((item) => (
                 <RailHint key={item.key} label={item.label}>
                   <AzuosAppShellTargetLink
@@ -253,7 +287,7 @@ function TwoColumnSidebar({ data, state, actions }: ShellParts) {
                     aria-label={item.label}
                     aria-current={state?.activeKey === item.key ? 'page' : undefined}
                     data-active={state?.activeKey === item.key}
-                    className={RAIL_BUTTON}
+                    className={cn(RAIL_BUTTON, 'shrink-0')}
                   >
                     <item.icon aria-hidden="true" />
                   </AzuosAppShellTargetLink>
@@ -263,6 +297,7 @@ function TwoColumnSidebar({ data, state, actions }: ShellParts) {
           </div>
         </SidebarContent>
 
+        <SidebarSeparator className="mx-auto my-1 h-px w-6" />
         <SidebarFooter className="items-center gap-1 px-0">
           {data.actions.map((action) => (
             <RailHint key={action.key} label={action.label}>
@@ -275,6 +310,9 @@ function TwoColumnSidebar({ data, state, actions }: ShellParts) {
               </AzuosAppShellTargetLink>
             </RailHint>
           ))}
+
+          {/* O sininho é sempre o item logo acima do perfil. */}
+          {ui?.notifications ? ui.notifications('rail') : null}
 
           <RailHint label={data.user.name}>
             <AzuosAppShellTargetLink
@@ -303,8 +341,9 @@ function TwoColumnSidebar({ data, state, actions }: ShellParts) {
       {/* Sem logo no painel: a marca já está no trilho (o "S" no ladrilho), e o painel começa
           direto no nome da parte. */}
       <Sidebar collapsible="none" className="hidden min-w-0 flex-1 pt-3 pb-2 md:flex">
-
-        <SidebarContent>
+        {/* Só a lista de telas rola, e só na vertical; o Zuzu e o nome ficam presos embaixo,
+            sem divisor — o divisor é o do trilho, acima do sininho. */}
+        <SidebarContent className={NAV_SCROLL}>
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs font-semibold tracking-wider uppercase">
               {activeArea?.label}
@@ -361,7 +400,10 @@ function ShortcutsGroup({ data }: { data: { actions: ShellParts['data']['actions
                   <span className="flex min-w-0 flex-1 items-center gap-1.5">
                     <span className="truncate">{action.label}</span>
                     {'opensInNewTab' in action && action.opensInNewTab ? (
-                      <ArrowUpRight aria-hidden="true" className="text-sidebar-foreground/60 size-3.5 shrink-0" />
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="text-sidebar-foreground/60 size-3.5 shrink-0"
+                      />
                     ) : null}
                   </span>
                 </AzuosAppShellTargetLink>
@@ -374,10 +416,25 @@ function ShortcutsGroup({ data }: { data: { actions: ShellParts['data']['actions
   );
 }
 
+/**
+ * A rolagem da lista de itens: só na vertical (a de lado aparecia por um selo que passava da
+ * borda), fina, e contida — chegar ao fim não rola a página por trás.
+ */
+const NAV_SCROLL =
+  'overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:var(--sidebar-border)_transparent]';
+
+/**
+ * A rolagem do trilho recolhido: rola, mas sem a barra. O trilho tem a largura de um ícone, e a
+ * barra comia o lado direito — os ícones saíam do centro e ficavam tortos em relação ao resto.
+ */
+const RAIL_SCROLL =
+  'overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
+
 const ICON_SAFE =
   'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span:last-child]:hidden';
 
-const RAIL_BUTTON =
+/** O botão do trilho — exportado para o sininho ter a mesma cara dos outros itens. */
+export const RAIL_BUTTON =
   'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-sidebar-ring data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground rounded-box flex size-9 shrink-0 items-center justify-center outline-hidden transition-colors focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-5';
 
 /* A parte escolhida é a única em amarelo, com o ícone no azul mais escuro — branco sobre o
@@ -401,7 +458,12 @@ function AreaRail({
   });
 
   return (
-    <div ref={railRef} role="group" aria-label="Partes" className="flex flex-col items-center gap-1">
+    <div
+      ref={railRef}
+      role="group"
+      aria-label="Partes"
+      className="flex flex-col items-center gap-1"
+    >
       {data.areas.map((area) => (
         <RailHint key={area.key} label={area.label}>
           <button
@@ -469,7 +531,10 @@ function SignOutError({ state }: { state: ShellParts['state'] }) {
   if (!state?.signOutError) return null;
 
   return (
-    <p role="alert" className="text-sidebar-foreground px-2 text-xs group-data-[collapsible=icon]:sr-only">
+    <p
+      role="alert"
+      className="text-sidebar-foreground px-2 text-xs group-data-[collapsible=icon]:sr-only"
+    >
       {state.signOutError}
     </p>
   );
@@ -487,7 +552,12 @@ function PageTransition({ pageKey, children }: { pageKey?: string; children: Rea
   useGSAP(
     () => {
       if (pageKey === undefined || prefersReducedMotion()) return;
-      gsap.from(pageRef.current, { opacity: 0, duration: 0.2, ease: 'power2.out', clearProps: 'opacity' });
+      gsap.from(pageRef.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.out',
+        clearProps: 'opacity',
+      });
     },
     { dependencies: [pageKey] },
   );
@@ -498,7 +568,8 @@ function PageTransition({ pageKey, children }: { pageKey?: string; children: Rea
       ref={pageRef}
       className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pt-1.5 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0"
     >
-      {children}
+      {/* Toda tela cabe nesta moldura: inteira até Full HD, centralizada acima disso. */}
+      <div className="page-frame">{children}</div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Fuel, Plane, Sparkles, Ticket, Utensils } from 'lucide-react';
 import { AzuosHeroCard } from './azuos-hero-card.component';
 
 const meta = {
-  title: 'Superfícies/AzuosHeroCard',
+  title: 'Cards/AzuosHeroCard',
   component: AzuosHeroCard,
   parameters: {
     layout: 'padded',

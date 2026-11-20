@@ -44,8 +44,11 @@ export function useSlidingIndicator<T extends HTMLElement>(
     function snap(isAnimated: boolean) {
       tween?.kill();
       const target = targetOf(node as HTMLElement, selector);
+      /* Sem ativo na lista (a tela aberta é de outra parte do menu), o destaque some E encolhe no
+         topo: só invisível, ele ficava do tamanho e na altura do ativo antigo — e, lá embaixo,
+         esticava a lista e deixava uma barra de rolagem num menu curto. */
       if (!target) {
-        gsap.set(indicator, { opacity: 0 });
+        gsap.set(indicator, { opacity: 0, x: 0, y: 0, width: 0, height: 0 });
         return;
       }
       if (!isAnimated || prefersReducedMotion()) {
@@ -63,8 +66,16 @@ export function useSlidingIndicator<T extends HTMLElement>(
     /* O ativo pode nascer um quadro depois (rota resolvida, fonte carregada): um re-snap cobre. */
     const frame = requestAnimationFrame(() => snap(false));
     const mutations = new MutationObserver(() => snap(true));
-    mutations.observe(node, { attributes: true, subtree: true, attributeFilter: attributes.split(',') });
-    const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => snap(false));
+    /* `childList`: trocar a parte do menu troca a LISTA inteira, e os itens novos nascem sem
+       mudar atributo nenhum — sem isto, o destaque ficava onde estava. */
+    mutations.observe(node, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeFilter: attributes.split(','),
+    });
+    const resize =
+      typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => snap(false));
     resize?.observe(node);
 
     return () => {
@@ -83,12 +94,19 @@ function createIndicator(indicatorClass: string): HTMLDivElement {
   const indicator = document.createElement('div');
   indicator.setAttribute('aria-hidden', 'true');
   indicator.dataset.slot = 'sliding-indicator';
-  indicator.className = cn('pointer-events-none absolute top-0 left-0 -z-10 opacity-0', indicatorClass);
+  indicator.className = cn(
+    'pointer-events-none absolute top-0 left-0 -z-10 opacity-0',
+    indicatorClass,
+  );
 
   return indicator;
 }
 
-/** Onde o destaque tem de estar: a caixa do item ativo, relativa ao container. */
+/**
+ * Onde o destaque tem de estar: a caixa do item ativo, relativa ao container. O `absolute` conta
+ * a partir de DENTRO da borda do container, e o `getBoundingClientRect` de FORA dela — sem descontar
+ * a borda (`clientLeft`/`clientTop`), o destaque ficava 1px à direita e abaixo do ícone.
+ */
 function targetOf(node: HTMLElement, selector: string) {
   const active = node.querySelector<HTMLElement>(selector);
   if (!active) return null;
@@ -98,8 +116,8 @@ function targetOf(node: HTMLElement, selector: string) {
 
   return {
     opacity: 1,
-    x: rect.left - box.left,
-    y: rect.top - box.top,
+    x: rect.left - box.left - node.clientLeft,
+    y: rect.top - box.top - node.clientTop,
     width: rect.width,
     height: rect.height,
   };

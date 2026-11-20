@@ -41,7 +41,7 @@ const meta = {
   title: 'Navegação e estrutura/AzuosAppShell',
   component: AzuosAppShell,
   decorators: [withRouter],
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', fullBleed: true },
   args: {
     children: <div className="text-ink-700 p-8 text-sm">Conteúdo da rota entra aqui.</div>,
     data: {
@@ -49,8 +49,20 @@ const meta = {
       areas: [],
       items,
       actions: [
-        { key: 'support', label: 'Abrir chamado', icon: LifeBuoy, href: '/support', opensInNewTab: true },
-        { key: 'verify', label: 'Validar documento', icon: FileCheck, href: '/verify', opensInNewTab: true },
+        {
+          key: 'support',
+          label: 'Abrir chamado',
+          icon: LifeBuoy,
+          href: '/support',
+          opensInNewTab: true,
+        },
+        {
+          key: 'verify',
+          label: 'Validar documento',
+          icon: FileCheck,
+          href: '/verify',
+          opensInNewTab: true,
+        },
       ],
       profile: { to: '/profile' },
       badges: { schedule: 3 },

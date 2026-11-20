@@ -30,7 +30,7 @@ export function AzuosBreadcrumb({ data, ui }: AzuosBreadcrumbProps) {
 
   return (
     <Breadcrumb aria-label="Você está em" className={ui?.className}>
-      <BreadcrumbList className="text-ink-500 text-sm">
+      <BreadcrumbList className="text-sm text-ink-500">
         {data.items.map((item, index) => {
           const isLast = index === data.items.length - 1;
 
@@ -54,13 +54,13 @@ function BreadcrumbEntryLabel({ data }: { data: { item: AzuosBreadcrumbEntry; is
 
   if (isLast) {
     return (
-      <BreadcrumbPage className="text-ink-900 font-medium break-words">{item.label}</BreadcrumbPage>
+      <BreadcrumbPage className="font-medium break-words text-ink-900">{item.label}</BreadcrumbPage>
     );
   }
 
   if (item.href) {
     return (
-      <BreadcrumbLink href={item.href} className="hover:text-ink-900 break-words">
+      <BreadcrumbLink href={item.href} className="break-words hover:text-ink-900">
         {item.label}
       </BreadcrumbLink>
     );

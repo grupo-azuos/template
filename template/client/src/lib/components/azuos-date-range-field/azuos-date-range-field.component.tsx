@@ -93,10 +93,10 @@ function triggerClassName(state: { hasError: boolean; hasValue: boolean }): stri
     /* O degrau `lg` da régua de medidas (`lib/theme/tokens.css`): este campo divide fileira com os
        outros filtros e tem de ter a altura e o canto deles. */
     'control-lg rounded-control',
-    'bg-card hover:bg-accent/40 flex w-full cursor-pointer items-center gap-2.5 border text-left text-sm transition-colors outline-none',
+    'bg-muted hover:bg-accent flex w-full cursor-pointer items-center gap-2.5 border text-left text-sm transition-colors outline-none',
     'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
     'disabled:cursor-not-allowed disabled:opacity-60',
-    state.hasError ? 'border-border bg-destructive-soft' : 'border-input',
+    state.hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
     state.hasValue ? 'text-foreground' : 'text-muted-foreground',
   );
 }
@@ -158,8 +158,9 @@ export function AzuosDateRangeField({ data, ui, state, actions }: AzuosDateRange
         </PopoverTrigger>
 
         <PopoverContent
-          align="start"
-          className="rounded-surface border-border bg-card w-auto max-w-[calc(100vw-2rem)] overflow-x-auto p-0 shadow-xl"
+          sideOffset={6}
+          align="center"
+          className="rounded-surface bg-popover ring-foreground/8 w-auto max-w-[calc(100vw-2rem)] overflow-x-auto border-transparent p-0 shadow-xl ring-1"
         >
           <RangePanel
             data={{ value: data.value, min: data.min, max: data.max }}
@@ -312,7 +313,7 @@ function EdgeInput({
         /* Ao sair, o campo volta a mostrar a data que está valendo: texto pela metade some, em
            vez de ficar parecendo uma data aceita. */
         onBlur={() => setDraft(null)}
-        className="control-lg rounded-control bg-muted text-foreground border-input placeholder:text-ink-500 focus-visible:ring-ring/50 w-full min-w-0 border text-sm outline-none focus-visible:ring-[3px]"
+        className="control-lg rounded-control border-input bg-muted text-foreground placeholder:text-ink-500 focus-visible:ring-ring/50 w-full min-w-0 border text-sm outline-none focus-visible:ring-[3px]"
       />
     </div>
   );

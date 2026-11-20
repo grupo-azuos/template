@@ -73,14 +73,14 @@ describe('Tasks API (e2e)', () => {
     expect(response.body.details).toContainEqual({ field: 'title', message: 'Informe o título' });
   });
 
-  /* Escalada de privilégio: o papel que chega pelo cabeçalho manda, e viewer não escreve. */
-  it('refuses a viewer with 403', async () => {
+  /* Escalada de privilégio: o papel que chega pelo cabeçalho manda, e quem só consulta não escreve. */
+  it('refuses a read-only user with 403', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/tasks')
       .set('x-forwarded-user-id', '9')
       .set('x-forwarded-user-email', 'bia@empresa.com.br')
       .set('x-forwarded-user-name', 'Bia')
-      .set('x-forwarded-user-role', 'viewer')
+      .set('x-forwarded-user-role', 'user')
       .send({ title: 'Não deveria entrar' })
       .expect(403);
   });

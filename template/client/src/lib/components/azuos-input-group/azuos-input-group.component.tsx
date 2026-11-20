@@ -54,7 +54,7 @@ export function AzuosInputGroup({
 
   return (
     <div className={cn('flex flex-col gap-1.5', ui?.className)}>
-      <label htmlFor={inputId} className="text-ink-700 text-sm font-medium">
+      <label htmlFor={inputId} className="text-sm font-medium text-ink-700">
         {data.label}
       </label>
 
@@ -87,7 +87,7 @@ export function AzuosInputGroup({
       </InputGroup>
 
       {hasError ? (
-        <p id={errorId} role="alert" className="text-destructive text-xs font-medium">
+        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
           {error}
         </p>
       ) : null}

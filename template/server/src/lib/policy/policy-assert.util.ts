@@ -1,5 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import { type UserRole } from '@template/shared/schemas/user.schema';
+import { canManageNotifications, type UserRole } from '@template/shared/schemas/user.schema';
 
 import { canDelete, canEdit, canRead, canRemoveOwnRecord, isAdmin } from './access.policy';
 
@@ -32,6 +32,13 @@ export function assertCanDelete(role: UserRole | null | undefined, what: string)
   if (canDelete(role)) return;
 
   throw new ForbiddenException(`Excluir ${what} é uma ação de administrador.`);
+}
+
+/** O que o sistema notifica vale para a equipe inteira: quem escolhe é o administrador. */
+export function assertCanManageNotifications(role: UserRole | null | undefined): void {
+  if (role && canManageNotifications(role)) return;
+
+  throw new ForbiddenException('Escolher o que o sistema notifica é uma ação de administrador.');
 }
 
 export function assertIsAdmin(role: UserRole | null | undefined, what: string): void {

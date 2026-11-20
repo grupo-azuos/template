@@ -40,7 +40,7 @@ describe('AzuosMaskedTextField', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('A CIN usa os 11 números do CPF');
   });
   // feliz
-  it('põe a pontuação enquanto se digita ou cola', () => {
+  it('adds punctuation while typing or pasting', () => {
     render(<Controlled mask="cpf" />);
     const input = screen.getByLabelText('Campo');
 
@@ -51,7 +51,7 @@ describe('AzuosMaskedTextField', () => {
   });
 
   // feliz
-  it('dinheiro se digita da direita para a esquerda', () => {
+  it('types money right to left', () => {
     render(<Controlled mask="money" />);
     const input = screen.getByLabelText('Campo');
 
@@ -61,7 +61,7 @@ describe('AzuosMaskedTextField', () => {
   });
 
   // triste
-  it('incompleto só vira erro quando a pessoa sai do campo', () => {
+  it('flags an incomplete value only when the person leaves the field', () => {
     render(<Controlled mask="cep" />);
     const input = screen.getByLabelText('Campo');
 
@@ -73,7 +73,7 @@ describe('AzuosMaskedTextField', () => {
   });
 
   // triste
-  it('CPF completo e errado avisa na hora', () => {
+  it('warns at once about a complete but wrong CPF', () => {
     render(<Controlled mask="cpf" />);
 
     fireEvent.change(screen.getByLabelText('Campo'), { target: { value: '52998224724' } });
@@ -82,7 +82,7 @@ describe('AzuosMaskedTextField', () => {
   });
 
   // triste
-  it('o erro de quem usa o campo ganha do erro de formato', () => {
+  it('lets the caller error beat the format error', () => {
     const onChange = vi.fn();
     render(
       <AzuosMaskedTextField

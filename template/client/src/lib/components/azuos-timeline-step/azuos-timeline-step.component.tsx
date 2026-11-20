@@ -28,7 +28,7 @@ export type AzuosTimelineStepProps = {
 };
 
 const ICON_TONE_CLASSES = {
-  neutral: 'border-border bg-card text-foreground',
+  neutral: 'border-transparent bg-muted text-foreground',
   brand: cardToneClasses('brand').dot,
   success: cardToneClasses('success').dot,
   danger: cardToneClasses('danger').dot,

@@ -1,0 +1,116 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { createElement, type ReactNode } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ApiError } from '../api/http-client';
+import { ALL_SEVERITY_NOTIFICATIONS } from '../utils/notification-fixture.util';
+import { useNotificationHistoryModel } from './use-notification-history.model';
+
+const navigate = vi.fn();
+vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
+vi.mock('../api/notifications.api', () => ({
+  notificationsApi: { page: vi.fn(), markRead: vi.fn(), markAllRead: vi.fn() },
+}));
+
+const { notificationsApi } = await import('../api/notifications.api');
+
+function wrapper({ children }: { children: ReactNode }) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+  return createElement(QueryClientProvider, { client }, children);
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(notificationsApi.page).mockResolvedValue({
+    items: ALL_SEVERITY_NOTIFICATIONS,
+    total: 64,
+    page: 1,
+    pageSize: 20,
+  });
+});
+
+describe('useNotificationHistoryModel', () => {
+  // feliz
+  it('starts with only the latest five, and does not ask for the full list yet', async () => {
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+    await waitFor(() => expect(result.current.data.recent.items).toHaveLength(4));
+
+    expect(result.current.state.isExpanded).toBe(false);
+    expect(result.current.data.recent.total).toBe(64);
+    expect(notificationsApi.page).toHaveBeenCalledTimes(1);
+    expect(notificationsApi.page).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, pageSize: 5, status: 'all' }),
+    );
+  });
+
+  // feliz
+  it('opens straight to the full list when the bell asks for it', async () => {
+    const { result } = renderHook(() => useNotificationHistoryModel({ startExpanded: true }), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.data.items).toHaveLength(4));
+
+    expect(result.current.state.isExpanded).toBe(true);
+    expect(result.current.data.pagination.pageSize).toBe(20);
+  });
+
+  // triste
+  it('drops the filters and the page when the dialog closes', () => {
+    const { result } = renderHook(() => useNotificationHistoryModel({ startExpanded: true }), {
+      wrapper,
+    });
+    act(() => result.current.actions.onFiltersChange({ severity: 'urgent' }));
+    act(() => result.current.actions.onPageChange(2));
+
+    act(() => result.current.actions.onCollapse());
+
+    expect(result.current.state.isExpanded).toBe(false);
+    expect(result.current.state.hasFilters).toBe(false);
+    expect(result.current.data.pagination.page).toBe(1);
+  });
+
+  // feliz
+  it('fetches paged, and filtering goes back to the first page', async () => {
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+    act(() => result.current.actions.onExpand());
+    await waitFor(() => expect(result.current.data.items).toHaveLength(4));
+    expect(result.current.data.pagination.total).toBe(64);
+
+    act(() => result.current.actions.onPageChange(3));
+    act(() => result.current.actions.onFiltersChange({ severity: 'urgent' }));
+
+    await waitFor(() =>
+      expect(notificationsApi.page).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 1, severity: 'urgent', pageSize: 20 }),
+      ),
+    );
+    expect(result.current.state.hasFilters).toBe(true);
+    act(() => result.current.actions.onClearFilters());
+    expect(result.current.state.hasFilters).toBe(false);
+  });
+
+  // feliz
+  it('marks read and goes to the subject on open; marking all reaches the server', async () => {
+    vi.mocked(notificationsApi.markRead).mockResolvedValue({} as never);
+    vi.mocked(notificationsApi.markAllRead).mockResolvedValue({ updated: 4 });
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+    await waitFor(() => expect(result.current.data.recent.items).toHaveLength(4));
+
+    act(() => result.current.actions.onOpen(ALL_SEVERITY_NOTIFICATIONS[0]!));
+    act(() => result.current.actions.onMarkAllRead());
+
+    await waitFor(() => expect(notificationsApi.markAllRead).toHaveBeenCalled());
+    expect(notificationsApi.markRead).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith({ to: '/tasks' });
+  });
+
+  // triste
+  it('shows a fetch failure with its reason', async () => {
+    vi.mocked(notificationsApi.page).mockRejectedValue(new ApiError(503, 'fora do ar'));
+    const { result } = renderHook(() => useNotificationHistoryModel(), { wrapper });
+
+    await waitFor(() => expect(result.current.state.error).toBe('fora do ar'));
+  });
+});

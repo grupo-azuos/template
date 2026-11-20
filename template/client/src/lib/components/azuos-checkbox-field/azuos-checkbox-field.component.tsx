@@ -24,34 +24,44 @@ export function AzuosCheckboxField({ data, ui, state, actions }: AzuosCheckboxFi
   const descriptionId = `${inputId}-description`;
   const isDisabled = state?.isDisabled === true;
 
+  /* A caixinha e o rótulo numa linha só, CENTRADOS um no outro; a descrição embaixo, alinhada
+     ao rótulo (e não à caixinha). Antes a caixinha ia pelo topo do texto e a altura era fixa
+     (`control-md`) mesmo com descrição — o visto ficava torto em relação ao rótulo. A régua de
+     altura vale para o campo sozinho; com descrição, ele cresce o que precisa. */
   return (
-    <div className={cn('control-md flex items-start gap-2 py-2', ui?.className)}>
-      <Checkbox
-        id={inputId}
-        name={data.name}
-        checked={data.isChecked}
-        disabled={isDisabled}
-        aria-describedby={data.description ? descriptionId : undefined}
-        onCheckedChange={(checked) => actions?.onChange?.(checked === true)}
-        className="bg-muted mt-0.5"
-      />
-      <div className="min-w-0">
+    <div
+      className={cn(
+        'flex flex-col justify-center gap-0.5',
+        data.description ? 'py-2' : 'control-md',
+        ui?.className,
+      )}
+    >
+      <div className="flex min-h-5 items-center gap-2">
+        <Checkbox
+          id={inputId}
+          name={data.name}
+          checked={data.isChecked}
+          disabled={isDisabled}
+          aria-describedby={data.description ? descriptionId : undefined}
+          onCheckedChange={(checked) => actions?.onChange?.(checked === true)}
+          className="bg-muted shrink-0"
+        />
         <label
           htmlFor={inputId}
           className={cn(
-            'text-foreground cursor-pointer text-sm break-words',
+            'text-foreground min-w-0 cursor-pointer text-sm leading-5 break-words',
             ui?.isLabelHidden && 'sr-only',
             isDisabled && 'text-muted-foreground cursor-not-allowed',
           )}
         >
           {data.label}
         </label>
-        {data.description ? (
-          <p id={descriptionId} className="text-muted-foreground text-xs">
-            {data.description}
-          </p>
-        ) : null}
       </div>
+      {data.description ? (
+        <p id={descriptionId} className="text-muted-foreground pl-6 text-xs">
+          {data.description}
+        </p>
+      ) : null}
     </div>
   );
 }

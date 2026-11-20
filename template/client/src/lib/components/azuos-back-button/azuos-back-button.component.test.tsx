@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { AzuosBackButton } from './azuos-back-button.component';
 
 describe('AzuosBackButton', () => {
-  it('renderiza com texto padrão "Voltar para [destination]" quando destination é informado', () => {
+  it('renders the default "Voltar para [destination]" text when destination is given', () => {
     render(<AzuosBackButton data={{ destination: 'empresas' }} />);
 
     expect(screen.getByRole('button', { name: /voltar para empresas/i })).toBeInTheDocument();
   });
 
   // feliz
-  it('tem o desenho do voltar do paralegal: texto azul, sem negrito, sublinhado no hover', () => {
+  it('has the paralegal back look: blue text, not bold, underlined on hover', () => {
     render(<AzuosBackButton data={{ destination: 'empresas' }} />);
 
     const button = screen.getByRole('button', { name: /voltar para empresas/i });
@@ -20,26 +20,26 @@ describe('AzuosBackButton', () => {
     expect(button.querySelector('svg')).toHaveClass('size-3.5');
   });
 
-  it('renderiza com label customizado quando fornecido explicitamente', () => {
+  it('renders a custom label when given explicitly', () => {
     render(<AzuosBackButton data={{ label: 'Retornar ao início' }} />);
 
     expect(screen.getByRole('button', { name: /retornar ao início/i })).toBeInTheDocument();
   });
 
-  it('renderiza fallback "Voltar" quando nem label nem destination são fornecidos', () => {
+  it('renders the "Voltar" fallback without label or destination', () => {
     render(<AzuosBackButton data={{}} />);
 
     expect(screen.getByRole('button', { name: 'Voltar' })).toBeInTheDocument();
   });
 
-  it('renderiza como link <a> quando to é informado', () => {
+  it('renders as an <a> link when to is given', () => {
     render(<AzuosBackButton data={{ destination: 'empresas', to: '/companies' }} />);
 
     const link = screen.getByRole('link', { name: /voltar para empresas/i });
     expect(link).toHaveAttribute('href', '/companies');
   });
 
-  it('executa actions.onClick quando acionado', () => {
+  it('runs actions.onClick when pressed', () => {
     const handleClick = vi.fn();
     render(
       <AzuosBackButton data={{ destination: 'empresas' }} actions={{ onClick: handleClick }} />,
@@ -49,7 +49,7 @@ describe('AzuosBackButton', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('chama window.history.back() quando nenhum to nem onClick são fornecidos', () => {
+  it('calls window.history.back() without to or onClick', () => {
     const backSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
     render(<AzuosBackButton data={{ destination: 'empresas' }} />);
 
@@ -58,7 +58,7 @@ describe('AzuosBackButton', () => {
     backSpy.mockRestore();
   });
 
-  it('respeita estado desabilitado (disabled)', () => {
+  it('respects the disabled state', () => {
     const handleClick = vi.fn();
     render(
       <AzuosBackButton
@@ -78,7 +78,13 @@ describe('AzuosBackButton', () => {
   it('swallows the click while disabled, so the page does not go back', () => {
     const onClick = vi.fn();
     const back = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
-    render(<AzuosBackButton data={{ destination: 'empresas' }} state={{ isDisabled: true }} actions={{ onClick }} />);
+    render(
+      <AzuosBackButton
+        data={{ destination: 'empresas' }}
+        state={{ isDisabled: true }}
+        actions={{ onClick }}
+      />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /voltar para empresas/i }));
 

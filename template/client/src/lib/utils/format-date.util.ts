@@ -8,6 +8,7 @@
  */
 const DATE_TIME = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 const DATE_ONLY = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' });
+const TIME_ONLY = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
 /** Para o DIA de calendário: formatado em UTC, o mesmo fuso em que ele foi lido (ver abaixo). */
 const CALENDAR_DAY = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'UTC' });
 
@@ -48,6 +49,13 @@ export function formatDate(iso: string | null | undefined): string {
   const isCalendarDay = typeof iso === 'string' && CALENDAR_DATE.test(iso.trim());
 
   return (isCalendarDay ? CALENDAR_DAY : DATE_ONLY).format(date);
+}
+
+/** Só a hora ("14:05") — para o que aconteceu hoje, como "Salvo às 14:05". */
+export function formatTime(iso: string | null | undefined): string {
+  const date = parse(iso);
+
+  return date ? TIME_ONLY.format(date) : '—';
 }
 
 function parse(iso: string | null | undefined): Date | null {

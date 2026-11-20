@@ -11,7 +11,7 @@ const meta = {
   component: AzuosBrandMark,
   decorators: [
     (Story) => (
-      <div className="bg-sidebar inline-flex items-center p-4">
+      <div className="inline-flex items-center bg-sidebar p-4">
         <Story />
       </div>
     ),

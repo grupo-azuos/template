@@ -1,3 +1,4 @@
+import { seedHistory } from './history/seed-history';
 import { deleteDatabaseFile, openSeedDatabase, report } from './seed.util';
 import { seedTasks } from './tasks/seed-tasks';
 
@@ -21,6 +22,8 @@ async function main(): Promise<void> {
 
   try {
     report('tarefas', await seedTasks(db));
+    /* Depois das tarefas: o movimento de exemplo fala delas. */
+    report('histórico', await seedHistory(db));
   } finally {
     close();
   }

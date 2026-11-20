@@ -173,7 +173,7 @@ function HistoryRow({
           </div>
         ) : null}
 
-        <p className="rounded-box border-border bg-muted text-foreground border px-3.5 py-2.5 text-sm whitespace-pre-line">
+        <p className="rounded-box bg-muted text-foreground px-3.5 py-2.5 text-sm whitespace-pre-line">
           {entry.description}
         </p>
 

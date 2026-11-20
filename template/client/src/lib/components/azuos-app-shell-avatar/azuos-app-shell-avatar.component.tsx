@@ -16,7 +16,7 @@ export function AzuosAppShellAvatar({ data, ui }: AzuosAppShellAvatarProps) {
   return (
     <span
       className={cn(
-        'bg-brand-yellow-400 text-brand-blue-900 relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold',
+        'relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-yellow-400 text-xs font-bold text-brand-blue-900',
         ui?.className,
       )}
     >

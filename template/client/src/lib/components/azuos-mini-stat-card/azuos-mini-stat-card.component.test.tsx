@@ -6,11 +6,15 @@ import { AzuosMiniStatCard } from './azuos-mini-stat-card.component';
 
 describe('AzuosMiniStatCard', () => {
   // feliz
-  it('shows the label and the number in the accent of its status', () => {
-    render(<AzuosMiniStatCard data={{ label: 'Concluído', value: 9 }} ui={{ tone: 'green' }} />);
+  /* Padrão Apple: a cor do status fica na bolinha; o número segue a cor do texto. */
+  it('shows the label, the status dot in its accent and the number in the text colour', () => {
+    const { container } = render(
+      <AzuosMiniStatCard data={{ label: 'Concluído', value: 9 }} ui={{ tone: 'green' }} />,
+    );
 
     expect(screen.getByText('Concluído')).toBeInTheDocument();
-    expect(screen.getByText('9')).toHaveClass('text-hue-green');
+    expect(screen.getByText('9')).toHaveClass('text-foreground');
+    expect(container.querySelector('.bg-hue-green')).toBeInTheDocument();
   });
 
   it('filters when clicked and turns light blue when selected', async () => {
@@ -18,7 +22,7 @@ describe('AzuosMiniStatCard', () => {
     render(
       <AzuosMiniStatCard
         data={{ label: 'Aguardando', value: 6 }}
-        ui={{ tone: 'amber' }}
+        ui={{ tone: 'yellow' }}
         state={{ isSelected: true }}
         actions={{ onClick }}
       />,
@@ -31,8 +35,8 @@ describe('AzuosMiniStatCard', () => {
 
   // triste
   it('falls back to the slate accent without a tone', () => {
-    render(<AzuosMiniStatCard data={{ label: 'Sem status', value: 0 }} />);
+    const { container } = render(<AzuosMiniStatCard data={{ label: 'Sem status', value: 0 }} />);
 
-    expect(screen.getByText('0')).toHaveClass('text-hue-slate');
+    expect(container.querySelector('.bg-hue-slate')).toBeInTheDocument();
   });
 });

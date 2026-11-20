@@ -1,6 +1,8 @@
 import { type Meta, type StoryObj } from '@storybook/react';
+import { Trash2 } from 'lucide-react';
 import { fn } from 'storybook/test';
 
+import { OpenButtonDemo } from '../../../../.storybook/open-button-demo';
 import { AzuosConfirmDialog } from './azuos-confirm-dialog.component';
 
 const meta = {
@@ -16,6 +18,26 @@ const meta = {
     state: { isOpen: true },
     actions: { onConfirm: fn(), onCancel: fn() },
   },
+  render: (args) => (
+    <OpenButtonDemo label="Excluir tarefa" icon={Trash2}>
+      {(isOpen, close) => (
+        <AzuosConfirmDialog
+          {...args}
+          state={{ ...args.state, isOpen }}
+          actions={{
+            onConfirm: () => {
+              close();
+              args.actions.onConfirm();
+            },
+            onCancel: () => {
+              close();
+              args.actions.onCancel();
+            },
+          }}
+        />
+      )}
+    </OpenButtonDemo>
+  ),
 } satisfies Meta<typeof AzuosConfirmDialog>;
 
 export default meta;

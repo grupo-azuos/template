@@ -5,12 +5,16 @@ import { join } from 'node:path';
 import { Module } from '@nestjs/common';
 import { APP_PIPE } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ZodValidationPipe } from 'nestjs-zod';
 
 import { AuthModule } from './lib/auth/auth.module';
 import { AppConfigModule } from './lib/config/app-config.module';
 import { DbModule } from './lib/db/db.module';
+import { DashboardBoardsModule } from './modules/dashboard-boards/dashboard-boards.module';
+import { HistoryModule } from './modules/history/history.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { UsersModule } from './modules/users/users.module';
+import { ZodValidationPipe } from './lib/http/zod-validation.pipe';
 
 /**
  * Serve o build do client — sem Nginx, sem container à parte. Atrás do Traefik, esta
@@ -39,7 +43,11 @@ const CLIENT_DIST = join(__dirname, '..', '..', 'client', 'dist');
        linha o token `DB` não existe em lugar nenhum, e todo repository falha na injeção. */
     DbModule,
     AuthModule,
+    HistoryModule,
     TasksModule,
+    NotificationsModule,
+    UsersModule,
+    DashboardBoardsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }],

@@ -53,7 +53,7 @@ export function AzuosFormComboboxField({ data, ui, state, actions }: AzuosFormCo
           ...resolveListTexts(ui),
           ariaLabel: data.label ?? ui?.ariaLabel,
           describedBy: message ? messageId : undefined,
-          className: cn(error !== null && 'border-border bg-destructive-soft'),
+          className: cn(error !== null && 'bg-destructive-soft border-transparent'),
         }}
         state={{ isDisabled: state?.isDisabled, isInvalid: error !== null }}
         actions={{

@@ -80,14 +80,21 @@ export function stackedBarOption(
       data: data.categories.map((category) => category.label),
       axisTick: { show: false },
       axisLine: { show: false },
-      axisLabel: { color: theme.foreground, fontSize: 11, formatter: (label: string) => shortenLabel(label, 20) },
+      axisLabel: {
+        color: theme.foreground,
+        fontSize: 11,
+        formatter: (label: string) => shortenLabel(label, 20),
+      },
     },
     series: data.series.map((series, index) => ({
       type: 'bar' as const,
       name: series.label,
       stack: 'total',
       barMaxWidth: 16,
-      itemStyle: { color: resolveColor(series.color), borderRadius: index === last ? [0, 6, 6, 0] : 0 },
+      itemStyle: {
+        color: resolveColor(series.color),
+        borderRadius: index === last ? [0, 6, 6, 0] : 0,
+      },
       /* O total só na ÚLTIMA série, no fim da linha inteira: o número de cada pedaço fica no balão. */
       label:
         index === last
@@ -98,7 +105,14 @@ export function stackedBarOption(
               fontSize: 11,
               fontWeight: 600,
               formatter: (params: unknown) =>
-                formatCount(totalOf(data.categories[(params as { dataIndex: number }).dataIndex] ?? { label: '', values: {} })),
+                formatCount(
+                  totalOf(
+                    data.categories[(params as { dataIndex: number }).dataIndex] ?? {
+                      label: '',
+                      values: {},
+                    },
+                  ),
+                ),
             }
           : undefined,
       data: data.categories.map((category) => category.values[series.key] ?? 0),

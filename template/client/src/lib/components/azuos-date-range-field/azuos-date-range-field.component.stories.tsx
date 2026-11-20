@@ -26,7 +26,7 @@ function StatefulDateRangeField(args: AzuosDateRangeFieldProps) {
           },
         }}
       />
-      <p className="text-ink-500 text-xs">
+      <p className="text-xs text-ink-500">
         Valor entregue: {value.from ?? 'nenhum'} → {value.to ?? 'nenhum'}
       </p>
     </div>

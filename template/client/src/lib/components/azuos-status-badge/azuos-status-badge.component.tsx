@@ -33,27 +33,32 @@ export type AzuosStatusBadgeProps = {
   };
 };
 
-/* O selo segue os cards: fundo neutro, texto no sotaque do tom (`lib/utils/card-tone.util.ts`). */
+/* O selo no padrão Apple: FUNDO CLARO DO TOM com o texto no tom — o mesmo par em todos, inclusive
+   no amarelo (fundo amarelo bem claro, texto escuro no claro e amarelo no escuro, pelo `-ink`).
+   Selo amarelo cheio gritava mais que o resto da linha. */
 const TONE_CLASSES: Record<AzuosStatusBadgeTone, string> = {
-  neutral: cn('bg-muted', cardToneClasses('neutral').text),
-  info: cn('bg-muted', cardToneClasses('info').text),
-  success: cn('bg-muted', cardToneClasses('success').text),
-  warning: cn('bg-muted', cardToneClasses('warning').text),
-  danger: cn('bg-muted', cardToneClasses('danger').text),
-  brand: cn('bg-muted', cardToneClasses('brand').text),
+  neutral: 'bg-muted text-muted-foreground',
+  info: 'bg-info-soft text-info',
+  success: 'bg-success-soft text-success',
+  warning: 'bg-warning-soft text-warning-ink',
+  danger: 'bg-destructive-soft text-destructive',
+  brand: 'bg-primary-soft text-primary',
 };
 
 export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
   /* Situação vazia não é uma situação: um selo cinza escrito "—" faria parecer que alguém
      respondeu algo. Linha que ninguém tocou fica sem selo. */
   if (!data.label) {
-    return <span className={cn('text-ink-500 text-xs', ui?.className)}>Não preenchido</span>;
+    return (
+      <span className={cn('text-muted-foreground text-xs', ui?.className)}>Não preenchido</span>
+    );
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full text-xs font-semibold whitespace-nowrap',
+        /* `max-w-full`: numa coluna estreita o selo encolhe e corta o texto, nunca estoura. */
+        'inline-flex max-w-full min-w-0 items-center gap-1 rounded-full text-xs font-semibold whitespace-nowrap',
         ui?.size === 'sm' ? 'px-2 py-0.5' : 'px-2.5 py-1',
         resolveToneClass(ui),
         ui?.className,
@@ -61,7 +66,7 @@ export function AzuosStatusBadge({ data, ui }: AzuosStatusBadgeProps) {
     >
       <BadgeIcon icon={ui?.icon} />
       {/* O texto num `span` próprio: com `max-w-*` em `ui.className`, o selo corta com reticências
-          em vez de empurrar a coluna — quem precisa do texto inteiro o mostra num tooltip. */}
+          em vez de empurrar a coluna — quem precisa do texto inteiro o mostra no `AzuosTooltip`. */}
       <span className="min-w-0 truncate">{data.label}</span>
     </span>
   );

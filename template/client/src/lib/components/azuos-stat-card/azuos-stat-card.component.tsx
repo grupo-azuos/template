@@ -36,7 +36,7 @@ export type AzuosStatCardProps = {
     icon?: LucideIcon;
     /** Uma cor que a PESSOA escolheu (`#rrggbb`): vira o sotaque mais próximo e vence o tom. */
     color?: string | null;
-    /** O hover pinta a mancha no sotaque do card, em vez do véu neutro. */
+    /** O hover pinta o véu no sotaque do card, em vez do véu neutro. */
     isHoverColored?: boolean;
   };
   state?: {
@@ -54,7 +54,8 @@ export const STAT_TONE_BADGE: Record<AzuosCardSemanticTone, string> = {
   neutral: cn('bg-muted', cardToneClasses('neutral').text),
   default: cn('bg-muted', cardToneClasses('default').text),
   success: cn('bg-muted', cardToneClasses('success').text),
-  warning: cn('bg-muted', cardToneClasses('warning').text),
+  /* Amarelo em letra pequena não se lê no cinza: a pastilha é o amarelo cheio, letra escura. */
+  warning: 'bg-warning text-warning-foreground',
   danger: cn('bg-muted', cardToneClasses('danger').text),
   info: cn('bg-muted', cardToneClasses('info').text),
 };
@@ -89,24 +90,20 @@ export function AzuosStatCard({ data, ui, state, actions }: AzuosStatCardProps) 
       {state?.isLoading ? (
         <Skeleton className="mt-1 h-8 w-20" />
       ) : (
-        <StatCardValue data={data} ui={ui} tone={tone} />
+        <StatCardValue data={data} ui={ui} />
       )}
     </AzuosCardSurface>
   );
 }
 
 /** O número no sotaque, e a ressalva ao lado dele. No escolhido, tudo branco. */
-function StatCardValue({
-  data,
-  ui,
-  tone,
-}: Pick<AzuosStatCardProps, 'data' | 'ui'> & { tone: AzuosCardTone }) {
+/** O número fica na cor do texto (padrão Apple): a cor do assunto mora no ícone, não no dado. */
+function StatCardValue({ data, ui }: Pick<AzuosStatCardProps, 'data' | 'ui'>) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       <p
         className={cn(
-          'font-bold tabular-nums group-data-[selected=true]/card:text-on-card-selected',
-          cardToneClasses(tone).text,
+          'text-foreground group-data-[selected=true]/card:text-on-card-selected font-bold tabular-nums',
           ui?.size === 'lg' ? 'text-4xl' : 'text-3xl tracking-tight',
         )}
       >
@@ -134,7 +131,9 @@ function StatCardLabel({
 }) {
   const Icon = ui?.icon;
   const label = (
-    <p className="text-xs leading-none font-semibold tracking-wider uppercase">{data.label}</p>
+    <p className="text-muted-foreground group-data-[selected=true]/card:text-on-card-selected text-sm leading-tight font-medium">
+      {data.label}
+    </p>
   );
 
   if (!Icon) return <div className="mb-1.5">{label}</div>;
@@ -143,7 +142,7 @@ function StatCardLabel({
     <div className="mb-3 flex items-center gap-2.5">
       <span
         className={cn(
-          'rounded-chip inline-flex size-9 shrink-0 items-center justify-center',
+          'rounded-icon inline-flex size-10 shrink-0 items-center justify-center shadow-xs',
           'group-data-[selected=true]/card:bg-on-card-selected group-data-[selected=true]/card:text-card-selected',
           cardToneClasses(tone).dot,
         )}

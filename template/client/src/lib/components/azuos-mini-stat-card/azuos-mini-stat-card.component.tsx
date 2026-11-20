@@ -6,7 +6,7 @@ import { AzuosCardSurface } from '../azuos-card-surface/azuos-card-surface.compo
  * O FILTRO PEQUENO: uma fileira de contagens por status (o painel tem uma), cada uma clicável.
  *
  * Superfície da marca (`AzuosCardSurface`), bolinha e número no sotaque do status. Escolhido = o
- * azul claro da marca com texto branco. O hover é a mancha do GSAP; colorida com
+ * azul claro da marca com texto branco. O hover é o véu da superfície; no tom com
  * `ui.isHoverColored`.
  */
 export type AzuosMiniStatCardProps = {
@@ -30,11 +30,11 @@ export function AzuosMiniStatCard({ data, ui, state, actions }: AzuosMiniStatCar
       state={state}
       actions={actions}
     >
-      <div className="flex min-w-0 items-center gap-2 text-xs leading-tight font-semibold tracking-wide uppercase">
+      <div className="text-muted-foreground flex min-w-0 items-center gap-2 text-sm leading-tight font-medium">
         <span
           aria-hidden="true"
           className={cn(
-            'size-2.5 shrink-0 rounded-full group-data-[selected=true]/card:bg-on-card-selected',
+            'group-data-[selected=true]/card:bg-on-card-selected size-2.5 shrink-0 rounded-full',
             tone.swatch,
           )}
         />
@@ -44,8 +44,8 @@ export function AzuosMiniStatCard({ data, ui, state, actions }: AzuosMiniStatCar
       </div>
       <div
         className={cn(
-          'mt-1 text-xl leading-tight font-bold tabular-nums group-data-[selected=true]/card:text-on-card-selected',
-          tone.text,
+          'group-data-[selected=true]/card:text-on-card-selected mt-1 text-xl leading-tight font-bold tabular-nums',
+          'text-foreground',
         )}
       >
         {data.value}

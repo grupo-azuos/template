@@ -7,7 +7,9 @@ import {
   type AzuosInfiniteScrollFooterProps,
 } from './azuos-infinite-scroll-footer.component';
 
-function makeProps(overrides: Partial<AzuosInfiniteScrollFooterProps> = {}): AzuosInfiniteScrollFooterProps {
+function makeProps(
+  overrides: Partial<AzuosInfiniteScrollFooterProps> = {},
+): AzuosInfiniteScrollFooterProps {
   return {
     data: { loaded: 50, totalItems: 566 },
     ui: { itemNoun: { singular: 'empresa', plural: 'empresas' } },
@@ -46,7 +48,10 @@ describe('AzuosInfiniteScrollFooter', () => {
   it('says the list ended, instead of offering a page that does not exist', () => {
     render(
       <AzuosInfiniteScrollFooter
-        {...makeProps({ data: { loaded: 566, totalItems: 566 }, state: { isLoading: false, hasMore: false } })}
+        {...makeProps({
+          data: { loaded: 566, totalItems: 566 },
+          state: { isLoading: false, hasMore: false },
+        })}
       />,
     );
 
@@ -57,7 +62,9 @@ describe('AzuosInfiniteScrollFooter', () => {
   /* Rolagem rápida dispara o sentinela várias vezes; o botão travado é a outra metade da
      mesma trava. */
   it('does not ask for the same page twice while it is on the way', () => {
-    render(<AzuosInfiniteScrollFooter {...makeProps({ state: { isLoading: true, hasMore: true } })} />);
+    render(
+      <AzuosInfiniteScrollFooter {...makeProps({ state: { isLoading: true, hasMore: true } })} />,
+    );
 
     expect(screen.getByRole('button', { name: /carregando/i })).toBeDisabled();
   });
@@ -65,7 +72,10 @@ describe('AzuosInfiniteScrollFooter', () => {
   it('counts in the singular when there is one item', () => {
     render(
       <AzuosInfiniteScrollFooter
-        {...makeProps({ data: { loaded: 1, totalItems: 1 }, state: { isLoading: false, hasMore: false } })}
+        {...makeProps({
+          data: { loaded: 1, totalItems: 1 },
+          state: { isLoading: false, hasMore: false },
+        })}
       />,
     );
 

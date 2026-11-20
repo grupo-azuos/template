@@ -36,19 +36,25 @@ describe('InputGroup', () => {
     expect(addon()).toHaveAttribute('data-align', 'inline-start');
   });
 
-  it.each(['inline-end', 'block-start', 'block-end'] as const)('aligns the addon at the %s', (align) => {
-    render(
-      <InputGroup>
-        <InputGroupTextarea aria-label="Texto" />
-        <InputGroupAddon align={align}>
-          <InputGroupButton size="icon-xs" aria-label="Enviar" />
-        </InputGroupAddon>
-      </InputGroup>,
-    );
+  it.each(['inline-end', 'block-start', 'block-end'] as const)(
+    'aligns the addon at the %s',
+    (align) => {
+      render(
+        <InputGroup>
+          <InputGroupTextarea aria-label="Texto" />
+          <InputGroupAddon align={align}>
+            <InputGroupButton size="icon-xs" aria-label="Enviar" />
+          </InputGroupAddon>
+        </InputGroup>,
+      );
 
-    expect(addon()).toHaveAttribute('data-align', align);
-    expect(screen.getByRole('button', { name: 'Enviar' })).toHaveAttribute('data-size', 'icon-xs');
-  });
+      expect(addon()).toHaveAttribute('data-align', align);
+      expect(screen.getByRole('button', { name: 'Enviar' })).toHaveAttribute(
+        'data-size',
+        'icon-xs',
+      );
+    },
+  );
 
   // triste
   /* Clicar no botão dentro do adendo é o clique do botão, não um pedido para focar o campo. */

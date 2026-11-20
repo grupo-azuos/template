@@ -26,9 +26,12 @@ describe('AzuosKanbanColumn', () => {
     const onDropItem = vi.fn();
     render(<AzuosKanbanColumn data={{ title: 'Deploy', count: 0 }} actions={{ onDropItem }} />);
 
-    fireEvent.drop(screen.getByRole('region', { name: 'Deploy' }), dropEvent('7'));
+    fireEvent.drop(
+      screen.getByRole('region', { name: 'Deploy' }),
+      dropEvent('00000000-0000-8000-8000-000000000007'),
+    );
 
-    expect(onDropItem).toHaveBeenCalledWith(7);
+    expect(onDropItem).toHaveBeenCalledWith('00000000-0000-8000-8000-000000000007');
   });
 
   it('offers the add button with the label of the screen', () => {

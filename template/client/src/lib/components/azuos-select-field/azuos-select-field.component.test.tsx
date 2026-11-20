@@ -12,7 +12,7 @@ const owners = [
 
 describe('AzuosSelectField', () => {
   // feliz
-  it('mostra o rótulo da opção selecionada', () => {
+  it('shows the selected option label', () => {
     render(
       <AzuosSelectField
         data={{ value: 'Ana', options: owners }}
@@ -30,7 +30,7 @@ describe('AzuosSelectField', () => {
      resolve. `fireEvent` dispara o evento direto, sem essa checagem de geometria. */
 
   // feliz
-  it('escolher uma opção chama onChange com o valor dela', async () => {
+  it('calls onChange with the chosen option value', async () => {
     const onChange = vi.fn();
 
     render(
@@ -48,7 +48,7 @@ describe('AzuosSelectField', () => {
   });
 
   // triste
-  it('escolher a opção vazia devolve string vazia, não o sentinel interno', async () => {
+  it('returns an empty string for the empty option, not the internal sentinel', async () => {
     const onChange = vi.fn();
 
     render(
@@ -66,7 +66,7 @@ describe('AzuosSelectField', () => {
   });
 
   // triste
-  it('desabilitado não abre o menu', async () => {
+  it('does not open the menu while disabled', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
 

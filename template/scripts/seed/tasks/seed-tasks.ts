@@ -23,6 +23,7 @@ export async function seedTasks(db: Database): Promise<number> {
         description: sql`excluded.description`,
         status: sql`excluded.status`,
         createdBy: sql`excluded.created_by`,
+        createdAt: sql`excluded.created_at`,
         updatedAt: null,
         updatedBy: null,
       },
