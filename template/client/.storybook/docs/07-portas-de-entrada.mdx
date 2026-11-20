@@ -9,19 +9,24 @@ os componentes de feature **não os importam direto**: usam a "porta de entrada"
 reexporta o primitivo e é o único lugar onde uma variante própria pode entrar. Elas não têm
 story própria porque o visual delas aparece nos componentes que as usam.
 
-| Porta            | O que é                    | Quando usar                                            | Prefira, quando der                                  |
-| ---------------- | -------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
-| `azuos-badge`    | Selo pequeno               | Marcador sem significado de status                     | `AzuosStatusBadge` para situação                     |
-| `azuos-button`   | O botão do shadcn (pílula) | Gatilho de menu ou popover, que precisa repassar `ref` | `AzuosActionButton` e `AzuosSubmitButton`            |
-| `azuos-calendar` | Calendário                 | A agenda do dashboard                                  | `AzuosDateField` e `AzuosDateRangeField`             |
-| `azuos-card`     | Card cru do shadcn         | Quase nunca                                            | `AzuosPanelCard` e os formatos de Cards              |
-| `azuos-checkbox` | Caixa de marcar sem rótulo | Seleção em linha de tabela                             | `AzuosCheckboxField`                                 |
-| `azuos-dialog`   | Diálogo                    | Montar um diálogo de feature                           | `AzuosResponsiveDialogContent`, `AzuosConfirmDialog` |
-| `azuos-input`    | Campo cru                  | Dentro de componentes compostos                        | `AzuosTextField`                                     |
-| `azuos-label`    | Rótulo                     | Acompanhar o `azuos-input`                             | Os campos `Azuos*Field`, que já trazem               |
-| `azuos-popover`  | Balão flutuante            | Conteúdo que abre ao clicar                            | `AzuosTooltip` para dica                             |
-| `azuos-sheet`    | Painel lateral             | Detalhe que abre ao lado da lista                      | `AzuosExpandableScreen` para editor grande           |
-| `azuos-skeleton` | Esqueleto de carregamento  | Lugar de dado que ainda vem                            | `AzuosLoadingState` quando não há forma              |
+<table>
+  <thead>
+    <tr><th>Porta</th><th>O que é</th><th>Quando usar</th><th>Prefira, quando der</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>azuos-badge</code></td><td>Selo pequeno</td><td>Marcador sem significado de status</td><td><code>AzuosStatusBadge</code> para situação</td></tr>
+    <tr><td><code>azuos-button</code></td><td>O botão do shadcn (pílula)</td><td>Gatilho de menu ou popover, que precisa repassar <code>ref</code></td><td><code>AzuosActionButton</code> e <code>AzuosSubmitButton</code></td></tr>
+    <tr><td><code>azuos-calendar</code></td><td>Calendário</td><td>A agenda do dashboard</td><td><code>AzuosDateField</code> e <code>AzuosDateRangeField</code></td></tr>
+    <tr><td><code>azuos-card</code></td><td>Card cru do shadcn</td><td>Quase nunca</td><td><code>AzuosPanelCard</code> e os formatos de Cards</td></tr>
+    <tr><td><code>azuos-checkbox</code></td><td>Caixa de marcar sem rótulo</td><td>Seleção em linha de tabela</td><td><code>AzuosCheckboxField</code></td></tr>
+    <tr><td><code>azuos-dialog</code></td><td>Diálogo</td><td>Montar um diálogo de feature</td><td><code>AzuosResponsiveDialogContent</code>, <code>AzuosConfirmDialog</code></td></tr>
+    <tr><td><code>azuos-input</code></td><td>Campo cru</td><td>Dentro de componentes compostos</td><td><code>AzuosTextField</code></td></tr>
+    <tr><td><code>azuos-label</code></td><td>Rótulo</td><td>Acompanhar o <code>azuos-input</code></td><td>Os campos <code>Azuos*Field</code>, que já trazem</td></tr>
+    <tr><td><code>azuos-popover</code></td><td>Balão flutuante</td><td>Conteúdo que abre ao clicar</td><td><code>AzuosTooltip</code> para dica</td></tr>
+    <tr><td><code>azuos-sheet</code></td><td>Painel lateral</td><td>Detalhe que abre ao lado da lista</td><td><code>AzuosExpandableScreen</code> para editor grande</td></tr>
+    <tr><td><code>azuos-skeleton</code></td><td>Esqueleto de carregamento</td><td>Lugar de dado que ainda vem</td><td><code>AzuosLoadingState</code> quando não há forma</td></tr>
+  </tbody>
+</table>
 
 ## A regra
 
