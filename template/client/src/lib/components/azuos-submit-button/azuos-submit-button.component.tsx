@@ -29,7 +29,7 @@ export function AzuosSubmitButton({ data, ui, state }: AzuosSubmitButtonProps) {
         /* O degrau `md` da régua de medidas (`lib/theme/tokens.css`) — o mesmo do
            `AzuosActionButton`, que é quem fica ao lado dele no rodapé do diálogo. Com a altura
            vindo só do padding, dava 4px a mais que o "Cancelar" ao lado. */
-        'control-md rounded-control',
+        'control-md rounded-button',
         'inline-flex w-full items-center justify-center gap-2 sm:w-auto',
         'bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-colors',
         'hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60',

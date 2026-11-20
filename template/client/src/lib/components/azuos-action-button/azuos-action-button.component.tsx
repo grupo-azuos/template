@@ -22,7 +22,7 @@ import { Button } from '../ui/button';
  * requisições, e a segunda voltaria como "não encontrado" de algo que acabou de dar certo.
  */
 export const azuosActionButton = tv({
-  base: 'rounded-control align-middle font-semibold shadow-xs transition-all',
+  base: 'max-w-full min-w-0 rounded-button align-middle font-semibold shadow-xs transition-all',
   variants: {
     variant: {
       primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -92,12 +92,13 @@ export function AzuosActionButton({ data, ui, state, actions }: AzuosActionButto
       aria-busy={isBusy}
       aria-pressed={state?.isPressed}
       aria-label={accessibleName}
-      title={accessibleName}
+      title={accessibleName ?? label ?? undefined}
       onClick={actions?.onClick}
       className={buttonClassName(ui)}
     >
       <ButtonIcon data={{ Icon }} state={{ isBusy }} />
-      {label}
+      {/* Rótulo longo numa coluna estreita: corta com "…" e o texto inteiro fica no `title`. */}
+      {label ? <span className="min-w-0 truncate">{label}</span> : null}
     </Button>
   );
 }

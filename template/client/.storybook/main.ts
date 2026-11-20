@@ -20,6 +20,8 @@ const config: StorybookConfig = {
   /* A pasta `public` do Storybook leva a logo e o ícone da aba (os do sistema ficam com o app). */
   staticDirs: ['./public'],
   core: { disableTelemetry: true },
+  /* Sem o quadro "Get started" do Storybook: o começo deste catálogo é a página Introdução. */
+  features: { sidebarOnboardingChecklist: false, menuOnboardingChecklist: false },
   typescript: { reactDocgen: 'react-docgen-typescript' },
   /* O ícone da aba do navegador: a arara da Azuos, no lugar do ícone do Storybook. */
   managerHead: (head) => `${head ?? ''}

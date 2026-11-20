@@ -36,3 +36,21 @@
   line-height: 1.6;
   color: var(--foreground);
 }
+
+/* O texto do bloco segue os tokens, por cima da tipografia da página Docs (que pinta parágrafo e
+   lista com a cor dela). */
+.sbdocs .azuos-doc-guide p,
+.sbdocs .azuos-doc-guide li {
+  color: var(--foreground);
+}
+
+.sbdocs .azuos-doc-guide h3 {
+  color: var(--muted-foreground);
+}
+
+.sbdocs .azuos-doc-guide code {
+  border: 0;
+  border-radius: 6px;
+  background: var(--muted);
+  color: var(--foreground);
+}

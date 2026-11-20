@@ -31,8 +31,8 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
     selector: '[aria-pressed="true"]',
     indicatorClass:
       ui.variant === 'prominent'
-        ? 'rounded-control bg-primary'
-        : 'rounded-control bg-card shadow-xs',
+        ? 'rounded-full bg-primary'
+        : 'rounded-full bg-card shadow-xs',
     attributes: ['aria-pressed'],
   });
 
@@ -42,7 +42,7 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'flex flex-wrap gap-1 rounded-surface bg-mantle p-1',
+        'flex flex-wrap gap-1 rounded-full bg-muted p-1',
         ui.variant === 'prominent' && 'w-full gap-2 bg-transparent p-0 sm:w-auto',
         ui.className,
       )}
@@ -61,7 +61,7 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
               actions.onChange(option.value);
             }}
             className={cn(
-              'rounded-control px-3 py-1.5 text-sm transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
+              'rounded-full px-3 py-1.5 text-sm transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
               isActive
                 ? 'font-bold text-primary'
                 : 'font-semibold text-muted-foreground hover:bg-card/60 hover:text-foreground',

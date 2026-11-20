@@ -31,9 +31,12 @@ export type AzuosButtonGroupProps = {
 };
 
 export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupProps) {
+  /* Deitado, é a pílula do padrão Apple. Em pé, a pílula vira um losango esticado: o trilho
+     ganha o canto de campo e as opções ocupam a largura toda, alinhadas à esquerda. */
+  const isVertical = ui.orientation === 'vertical';
   const ref = useSlidingIndicator<HTMLDivElement>({
     selector: '[aria-pressed="true"]',
-    indicatorClass: 'rounded-control bg-primary shadow-xs',
+    indicatorClass: cn(isVertical ? 'rounded-control' : 'rounded-full', 'bg-primary shadow-xs'),
     attributes: ['aria-pressed'],
   });
 
@@ -43,8 +46,8 @@ export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupP
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'bg-muted inline-flex w-fit gap-1 rounded-full p-1',
-        ui.orientation === 'vertical' && 'flex-col',
+        'bg-muted inline-flex w-fit gap-1 p-1',
+        isVertical ? 'rounded-box min-w-40 flex-col' : 'rounded-full',
         ui.className,
       )}
     >
@@ -59,7 +62,8 @@ export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupP
             disabled={state?.isDisabled}
             /* O hover do não escolhido é o véu NEUTRO: um azul claro ali parecia escolhido. */
             className={cn(
-              'control-sm rounded-control px-3 text-sm font-medium whitespace-nowrap transition-colors duration-200',
+              'control-sm px-3 text-sm font-medium whitespace-nowrap transition-colors duration-200',
+              isVertical ? 'rounded-control w-full text-left' : 'rounded-full',
               'focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-60',
               isSelected
