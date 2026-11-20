@@ -1,4 +1,5 @@
 import { type Meta, type StoryObj } from '@storybook/react';
+import { type ComponentProps, useState } from 'react';
 import { fn } from 'storybook/test';
 
 import { ALL_SEVERITY_NOTIFICATIONS } from '../../../../lib/utils/notification-fixture.util';
@@ -29,6 +30,35 @@ const DATA = {
   pagination: { page: 1, pageSize: 20, total: 312 },
 };
 
+type ViewProps = ComponentProps<typeof AzuosNotificationHistoryView>;
+
+/**
+ * Como no perfil: a seção mostra as recentes, e o diálogo com a lista inteira só abre quando a
+ * pessoa clica em "Ver todas" — e fecha pelo X ou pelo Esc. As variações descrevem o que aparece
+ * DENTRO do diálogo (várias páginas, filtro vazio, falha); abra para ver.
+ */
+function HistoryDemo(props: ViewProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <AzuosNotificationHistoryView
+      {...props}
+      state={{ ...props.state, isExpanded }}
+      actions={{
+        ...props.actions,
+        onExpand: () => {
+          setIsExpanded(true);
+          props.actions.onExpand();
+        },
+        onCollapse: () => {
+          setIsExpanded(false);
+          props.actions.onCollapse();
+        },
+      }}
+    />
+  );
+}
+
 const meta = {
   title: 'Notificações/AzuosNotificationHistoryView',
   component: AzuosNotificationHistoryView,
@@ -45,6 +75,7 @@ const meta = {
       onMarkAllRead: fn(),
     },
   },
+  render: (args) => <HistoryDemo {...args} />,
 } satisfies Meta<typeof AzuosNotificationHistoryView>;
 
 export default meta;
@@ -54,7 +85,7 @@ type Story = StoryObj<typeof meta>;
 /* A seção do perfil: as mais recentes e o "Ver todas". */
 export const Default: Story = {};
 
-/* O diálogo aberto, com a lista inteira, os filtros e as páginas. */
+/* Clique em "Ver todas": o diálogo com a lista inteira, os filtros e as páginas. */
 export const AllInDialog: Story = { args: { state: { ...STATE, isExpanded: true } } };
 
 export const ManyPages: Story = {
@@ -85,6 +116,7 @@ export const Empty: Story = {
   args: { data: { ...DATA, recent: { items: [], total: 0 } } },
 };
 
+/* Clique em "Ver todas": a falha aparece no lugar da lista, sem barra de páginas. */
 export const Failed: Story = {
-  args: { state: { ...STATE, isExpanded: true, error: 'Não consegui ler o histórico.' } },
+  args: { state: { ...STATE, isExpanded: true, error: 'O servidor não respondeu a tempo. Tente de novo em instantes.' } },
 };
