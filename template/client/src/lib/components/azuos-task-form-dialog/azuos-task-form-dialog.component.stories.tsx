@@ -1,6 +1,8 @@
 import { type Meta, type StoryObj } from '@storybook/react';
+import { Plus } from 'lucide-react';
 import { fn } from 'storybook/test';
 
+import { OpenButtonDemo } from '../../../../.storybook/open-button-demo';
 import { AzuosTaskFormDialog } from './azuos-task-form-dialog.component';
 
 const emptyFields = {
@@ -17,6 +19,23 @@ const meta = {
     state: { isOpen: true },
     actions: { onChange: fn(), onBlur: fn(), onSubmit: fn(), onClose: fn() },
   },
+  render: (args) => (
+    <OpenButtonDemo label="Nova tarefa" icon={Plus}>
+      {(isOpen, close) => (
+        <AzuosTaskFormDialog
+          {...args}
+          state={{ ...args.state, isOpen }}
+          actions={{
+            ...args.actions,
+            onClose: () => {
+              close();
+              args.actions.onClose();
+            },
+          }}
+        />
+      )}
+    </OpenButtonDemo>
+  ),
 } satisfies Meta<typeof AzuosTaskFormDialog>;
 
 export default meta;

@@ -1,10 +1,12 @@
 import { type Meta, type StoryObj } from '@storybook/react';
+import { Bell } from 'lucide-react';
 import { fn } from 'storybook/test';
 
 import {
   ALL_SEVERITY_NOTIFICATIONS,
   notificationFixture,
 } from '../../utils/notification-fixture.util';
+import { OpenButtonDemo } from '../../../../.storybook/open-button-demo';
 import { AzuosNotificationDialog } from './azuos-notification-dialog.component';
 
 const meta = {
@@ -16,6 +18,23 @@ const meta = {
     state: { isOpen: true },
     actions: { onOpen: fn(), onMarkRead: fn(), onClose: fn() },
   },
+  render: (args) => (
+    <OpenButtonDemo label="Ver notificações" icon={Bell}>
+      {(isOpen, close) => (
+        <AzuosNotificationDialog
+          {...args}
+          state={{ ...args.state, isOpen }}
+          actions={{
+            ...args.actions,
+            onClose: () => {
+              close();
+              args.actions.onClose();
+            },
+          }}
+        />
+      )}
+    </OpenButtonDemo>
+  ),
 } satisfies Meta<typeof AzuosNotificationDialog>;
 
 export default meta;
