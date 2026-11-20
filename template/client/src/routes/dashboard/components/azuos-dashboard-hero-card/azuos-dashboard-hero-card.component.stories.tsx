@@ -14,7 +14,7 @@ import {
 import { AzuosDashboardHeroCard } from './azuos-dashboard-hero-card.component';
 
 const meta = {
-  title: 'Superfícies/AzuosDashboardHeroCard',
+  title: 'Cards/AzuosDashboardHeroCard',
   component: AzuosDashboardHeroCard,
   parameters: {
     layout: 'padded',

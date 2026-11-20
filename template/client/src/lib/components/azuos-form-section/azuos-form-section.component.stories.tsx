@@ -4,7 +4,7 @@ import { MessageSquare } from 'lucide-react';
 import { AzuosFormSection } from './azuos-form-section.component';
 
 const meta = {
-  title: 'Primitives/AzuosFormSection',
+  title: 'Formulários/AzuosFormSection',
   component: AzuosFormSection,
   args: {
     data: { title: 'Conversas', description: 'Cada comentário é salvo na hora.' },

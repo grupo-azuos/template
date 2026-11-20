@@ -32,7 +32,7 @@ const MINE: SavedFilter = {
 };
 
 const meta = {
-  title: 'Components/AzuosFilterBuilderScreen',
+  title: 'Dashboard/AzuosFilterBuilderScreen',
   component: AzuosFilterBuilderScreen,
   args: {
     data: {

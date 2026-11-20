@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Fundamentos/Portas de entrada do shadcn" />
+
+# Portas de entrada do shadcn
+
+Os componentes de `lib/components/ui/` vêm do CLI do shadcn e são a base do sistema. As telas e
+os componentes de feature **não os importam direto**: usam a "porta de entrada" `azuos-*`, que
+reexporta o primitivo e é o único lugar onde uma variante própria pode entrar. Elas não têm
+story própria porque o visual delas aparece nos componentes que as usam.
+
+| Porta            | O que é                    | Quando usar                                            | Prefira, quando der                                  |
+| ---------------- | -------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
+| `azuos-badge`    | Selo pequeno               | Marcador sem significado de status                     | `AzuosStatusBadge` para situação                     |
+| `azuos-button`   | O botão do shadcn (pílula) | Gatilho de menu ou popover, que precisa repassar `ref` | `AzuosActionButton` e `AzuosSubmitButton`            |
+| `azuos-calendar` | Calendário                 | A agenda do dashboard                                  | `AzuosDateField` e `AzuosDateRangeField`             |
+| `azuos-card`     | Card cru do shadcn         | Quase nunca                                            | `AzuosPanelCard` e os formatos de Cards              |
+| `azuos-checkbox` | Caixa de marcar sem rótulo | Seleção em linha de tabela                             | `AzuosCheckboxField`                                 |
+| `azuos-dialog`   | Diálogo                    | Montar um diálogo de feature                           | `AzuosResponsiveDialogContent`, `AzuosConfirmDialog` |
+| `azuos-input`    | Campo cru                  | Dentro de componentes compostos                        | `AzuosTextField`                                     |
+| `azuos-label`    | Rótulo                     | Acompanhar o `azuos-input`                             | Os campos `Azuos*Field`, que já trazem               |
+| `azuos-popover`  | Balão flutuante            | Conteúdo que abre ao clicar                            | `AzuosTooltip` para dica                             |
+| `azuos-sheet`    | Painel lateral             | Detalhe que abre ao lado da lista                      | `AzuosExpandableScreen` para editor grande           |
+| `azuos-skeleton` | Esqueleto de carregamento  | Lugar de dado que ainda vem                            | `AzuosLoadingState` quando não há forma              |
+
+## A regra
+
+Precisa mudar um primitivo? A mudança entra **na porta de entrada** ou num componente `azuos-*`
+— e, quando é do padrão visual da casa (como o botão em pílula e o menu sem borda), no
+próprio `ui/` do template, por quem administra.

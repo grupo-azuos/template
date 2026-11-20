@@ -4,7 +4,7 @@ import { BellOff, Building2, HeartPulse, Stamp } from 'lucide-react';
 import { AzuosContentStatCard } from './azuos-content-stat-card.component';
 
 const meta = {
-  title: 'Gráficos e números/AzuosContentStatCard',
+  title: 'Cards/AzuosContentStatCard',
   component: AzuosContentStatCard,
   decorators: [
     (Story) => (

@@ -7,7 +7,7 @@ import { AzuosZuzu } from './azuos-zuzu.component';
  * nada aqui", enquanto a mesma tela em branco é lida como "quebrou".
  */
 const meta = {
-  title: 'Primitives/AzuosZuzu',
+  title: 'Mascote/AzuosZuzu',
   component: AzuosZuzu,
   parameters: { layout: 'centered' },
 } satisfies Meta<typeof AzuosZuzu>;

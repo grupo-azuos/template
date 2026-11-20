@@ -11,7 +11,7 @@ import { AzuosBoardCanvas } from './azuos-board-canvas.component';
 const RESULT = widgetResultFixture();
 
 const meta = {
-  title: 'Components/AzuosBoardCanvas',
+  title: 'Dashboard/AzuosBoardCanvas',
   component: AzuosBoardCanvas,
   args: {
     data: {

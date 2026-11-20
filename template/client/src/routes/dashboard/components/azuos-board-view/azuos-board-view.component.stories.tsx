@@ -13,7 +13,7 @@ import { AzuosBoardView } from './azuos-board-view.component';
 const RESULT = widgetResultFixture();
 
 const meta = {
-  title: 'Composers/AzuosBoardView',
+  title: 'Telas/AzuosBoardView',
   component: AzuosBoardView,
   args: {
     data: {

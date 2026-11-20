@@ -11,7 +11,7 @@ const OPTIONS = [
 ];
 
 const meta = {
-  title: 'Components/AzuosCreatableMultiSelectField',
+  title: 'Formulários/AzuosCreatableMultiSelectField',
   component: AzuosCreatableMultiSelectField,
   args: {
     data: { value: ['2'], options: OPTIONS },

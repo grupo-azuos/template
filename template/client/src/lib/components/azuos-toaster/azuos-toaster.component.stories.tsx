@@ -20,7 +20,7 @@ function Playground({ message, isError = false }: { message: string; isError?: b
 }
 
 const meta = {
-  title: 'Components/AzuosToaster',
+  title: 'Notificações/AzuosToaster',
   component: AzuosToaster,
   parameters: { layout: 'padded' },
 } satisfies Meta<typeof AzuosToaster>;

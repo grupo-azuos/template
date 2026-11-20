@@ -11,7 +11,7 @@ import {
 import { AzuosBoardWidget } from './azuos-board-widget.component';
 
 const meta = {
-  title: 'Components/AzuosBoardWidget',
+  title: 'Dashboard/AzuosBoardWidget',
   component: AzuosBoardWidget,
   decorators: [(Story) => <div className="h-80 w-[36rem]">{Story()}</div>],
   args: {

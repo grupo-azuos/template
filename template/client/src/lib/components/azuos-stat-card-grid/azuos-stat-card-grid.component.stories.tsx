@@ -5,7 +5,7 @@ import { AzuosStatCard } from '../azuos-stat-card/azuos-stat-card.component';
 import { AzuosStatCardGrid } from './azuos-stat-card-grid.component';
 
 const meta = {
-  title: 'Gráficos e números/AzuosStatCardGrid',
+  title: 'Cards/AzuosStatCardGrid',
   component: AzuosStatCardGrid,
 } satisfies Meta<typeof AzuosStatCardGrid>;
 

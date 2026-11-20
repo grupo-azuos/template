@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { AzuosCityPickerField } from './azuos-city-picker-field.component';
 
 const meta = {
-  title: 'Primitives/AzuosCityPickerField',
+  title: 'Formulários/AzuosCityPickerField',
   component: AzuosCityPickerField,
   decorators: [
     (Story) => (
