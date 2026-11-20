@@ -59,9 +59,23 @@ function ThemedDocsContainer(props: PropsWithChildren<DocsContainerProps>) {
   return <DocsContainer {...props} theme={DOCS_THEMES[theme]} />;
 }
 
+/**
+ * A história que roda num iframe DENTRO da página Docs (o quadro de celular) não recebe o tema da
+ * barra: ela herda o da página em volta, que é a mesma origem.
+ */
+function parentDocsTheme(): ThemeName | null {
+  if (window.parent === window) return null;
+  try {
+    const theme = window.parent.document.documentElement.dataset.theme;
+    return theme === 'dark' || theme === 'light' ? theme : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Claro ou escuro, pelo botão da barra do Storybook — o mesmo `data-theme` que o app usa. */
 const withTheme: Decorator = (Story, context) => {
-  const theme = themeOf(context.globals);
+  const theme = parentDocsTheme() ?? themeOf(context.globals);
   document.documentElement.dataset.theme = theme;
 
   /* Tela inteira (a casca do app, a tela de erro, a lista de tarefas) vai de ponta a ponta: o

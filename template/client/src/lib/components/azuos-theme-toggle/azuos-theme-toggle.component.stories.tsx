@@ -1,5 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 
+import { AzuosEffectsToggle } from '../azuos-effects-toggle/azuos-effects-toggle.component';
 import { AzuosThemeToggle } from './azuos-theme-toggle.component';
 
 const meta = {
@@ -17,8 +18,10 @@ export const Default: Story = {};
 /** Como ele aparece no canto do menu, ao lado de outro controle discreto. */
 export const InAToolbar: Story = {
   render: () => (
-    <div className="bg-card shadow-card rounded-box flex w-40 items-center justify-end gap-1 p-2">
+    /* O par do canto do menu, num trilho do tamanho dos dois botões. */
+    <div className="bg-muted inline-flex w-fit items-center gap-1 rounded-full p-1">
       <AzuosThemeToggle />
+      <AzuosEffectsToggle />
     </div>
   ),
 };
