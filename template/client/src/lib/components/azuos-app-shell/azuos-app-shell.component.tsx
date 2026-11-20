@@ -255,9 +255,10 @@ function TwoColumnSidebar({ data, ui, state, actions }: ShellParts) {
       <Sidebar
         collapsible="none"
         aria-label="Partes do sistema"
-        /* O trilho num azul mais escuro que o painel: é o primeiro nível (a parte), e o painel o
-           segundo (a tela). A diferença de cor já separa as colunas — sem linha divisória. */
-        className={cn(RAIL_WIDTH, 'bg-brand-blue-900!')}
+        /* O trilho na cor PRÓPRIA dele (`--sidebar-rail`, azul-marinho bem mais fundo que o
+           painel): é o primeiro nível (a parte), e o painel o segundo (a tela). A diferença de
+           cor separa as colunas — sem linha divisória. */
+        className={cn(RAIL_WIDTH, 'bg-sidebar-rail!')}
       >
         <SidebarHeader className="items-center px-0 pt-3">
           {/* A logo como ícone de app: um ladrilho de canto arredondado no azul do painel. */}
