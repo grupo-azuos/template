@@ -277,7 +277,7 @@
   --sidebar: var(--brand-blue-800);
   /* O TRILHO da casca de duas colunas (a coluna estreita de ícones): um azul-marinho bem mais
      fundo que o painel, para as duas colunas se lerem como dois níveis — a parte e a tela. */
-  --sidebar-rail: #0d1b45;
+  --sidebar-rail: #15306f;
   --sidebar-foreground: #e2e8f0;
   --sidebar-primary: var(--brand-blue-600);
   --sidebar-primary-foreground: #f8fafc;
@@ -368,7 +368,7 @@
   /* A barra continua azul, um tom abaixo: encostar no tom do fundo da página apagaria a
      separação entre menu e conteúdo. */
   --sidebar: #16265c;
-  --sidebar-rail: #0a1230;
+  --sidebar-rail: #0f2256;
 
   --hue-blue: #0a84ff;
   --hue-red: #ff453a;
