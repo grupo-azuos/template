@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { X } from 'lucide-react';
-import { type ReactNode, useEffect, useLayoutEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { prefersReducedMotion } from '../../motion/motion.util';
@@ -49,6 +49,16 @@ export function AzuosExpandableScreen({
   children,
 }: AzuosExpandableScreenProps) {
   const panel = useRef<HTMLDivElement>(null);
+  /* FECHAR ANIMADO: quando `isOpen` vira falso, a tela continua montada o tempo de encolher de
+     volta (o contrário da abertura) e só então sai. O "estava aberta" é guardado no próprio
+     estado, comparado durante a renderização — o jeito do React de reagir a uma prop que mudou.
+     Quem pediu menos movimento vê fechar na hora. */
+  const [wasOpen, setWasOpen] = useState(state.isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  if (wasOpen !== state.isOpen) {
+    setWasOpen(state.isOpen);
+    setIsClosing(!state.isOpen && !prefersReducedMotion());
+  }
   /* O fechar mais recente, guardado fora das dependências do efeito: quem usa a tela cria um
      `actions` novo a cada render, e refazer o efeito a cada letra digitada devolvia o foco para a
      tela — o campo perdia o foco depois da primeira letra. */
@@ -90,7 +100,22 @@ export function AzuosExpandableScreen({
     };
   }, [state.isOpen]);
 
-  if (!state.isOpen) return null;
+  useLayoutEffect(() => {
+    if (!isClosing || !panel.current) return;
+    const tween = gsap.to(panel.current, {
+      clipPath: 'inset(18% 22% 18% 22% round 24px)',
+      opacity: 0,
+      duration: 0.24,
+      ease: 'power2.in',
+      onComplete: () => setIsClosing(false),
+    });
+
+    return () => {
+      tween.kill();
+    };
+  }, [isClosing]);
+
+  if (!state.isOpen && !isClosing) return null;
 
   return createPortal(
     <div
@@ -99,13 +124,13 @@ export function AzuosExpandableScreen({
       aria-modal="true"
       aria-label={data.title}
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex flex-col bg-background outline-none"
+      className="bg-background fixed inset-0 z-50 flex flex-col outline-none"
     >
-      <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-4">
+      <header className="border-border flex items-start justify-between gap-4 border-b px-6 py-4">
         <div className="min-w-0">
-          <h2 className="text-xl font-bold text-ink-900">{data.title}</h2>
+          <h2 className="text-ink-900 text-xl font-bold">{data.title}</h2>
           {data.description ? (
-            <p className="mt-0.5 text-sm text-ink-500">{data.description}</p>
+            <p className="text-ink-500 mt-0.5 text-sm">{data.description}</p>
           ) : null}
         </div>
         <AzuosActionButton
@@ -116,7 +141,7 @@ export function AzuosExpandableScreen({
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       {footer ? (
-        <footer className="flex justify-end gap-2 border-t border-border bg-card px-6 py-3">
+        <footer className="border-border bg-card flex justify-end gap-2 border-t px-6 py-3">
           {footer}
         </footer>
       ) : null}
