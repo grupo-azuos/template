@@ -64,8 +64,18 @@ const withTheme: Decorator = (Story, context) => {
   const theme = themeOf(context.globals);
   document.documentElement.dataset.theme = theme;
 
+  /* Tela inteira (a casca do app, a tela de erro, a lista de tarefas) vai de ponta a ponta: o
+     respiro de 24px em volta deslocava o menu lateral e deixava faixas da cor de fundo. */
+  const isFullBleed = context.parameters.fullBleed === true;
+
   return (
-    <div className="bg-background text-foreground p-6 font-sans">
+    <div
+      className={
+        isFullBleed
+          ? 'bg-background text-foreground min-h-screen font-sans'
+          : 'bg-background text-foreground p-6 font-sans'
+      }
+    >
       <Story />
     </div>
   );

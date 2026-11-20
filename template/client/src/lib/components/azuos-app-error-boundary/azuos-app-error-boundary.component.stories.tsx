@@ -10,7 +10,7 @@ function Bomb(): never {
 const meta = {
   title: 'Estados da tela/AzuosAppErrorBoundary',
   component: AzuosAppErrorBoundary,
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', fullBleed: true },
 } satisfies Meta<typeof AzuosAppErrorBoundary>;
 
 export default meta;
@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: <div className="p-8 text-sm text-ink-700">Conteúdo normal, sem erro nenhum.</div>,
+    children: <div className="text-ink-700 p-8 text-sm">Conteúdo normal, sem erro nenhum.</div>,
   },
 };
 

@@ -32,7 +32,7 @@ const meta = {
   title: 'Navegação e estrutura/AzuosAppShellMobileBar',
   component: AzuosAppShellMobileBar,
   decorators: [withRouter],
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', fullBleed: true },
   globals: { viewport: { value: 'mobile1', isRotated: false } },
   args: {
     data: {

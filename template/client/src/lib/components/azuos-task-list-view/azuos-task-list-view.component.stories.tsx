@@ -39,7 +39,7 @@ const idleState = {
 const meta = {
   title: 'Listas e tabelas/AzuosTaskListView',
   component: AzuosTaskListView,
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', fullBleed: true },
   args: {
     data: {
       tasks,
