@@ -195,8 +195,9 @@ export function AzuosOptionPicker({ data, ui, state, actions }: AzuosOptionPicke
           estreito (e o balão parecia solto, fora do lugar). O teto impede que uma opção de nome
           comprido estique o balão pela tela — a opção é cortada, não a tela. */}
       <PopoverContent
-        className="rounded-surface bg-popover ring-foreground/8 w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
-        align="start"
+        sideOffset={6}
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-popover-trigger-width) overflow-hidden border-transparent p-0 shadow-xl ring-1"
+        align="center"
       >
         <OptionSearch data={{ query }} actions={{ onQueryChange: setQuery }} />
         <OptionList data={{ options, query, value: data.value }} actions={{ onSelect: select }} />

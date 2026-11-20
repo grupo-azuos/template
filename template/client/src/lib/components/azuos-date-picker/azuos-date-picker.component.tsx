@@ -118,8 +118,9 @@ export function AzuosDatePicker({ data, ui, state, actions }: AzuosDatePickerPro
         </PopoverTrigger>
 
         <PopoverContent
+          sideOffset={6}
           className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-0 shadow-xl ring-1"
-          align="start"
+          align="center"
         >
           <Calendar
             mode="single"

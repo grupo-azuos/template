@@ -43,7 +43,9 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
 - Borda só existe como **divisória** (`border-b`, `divide-y`) e como **tracejado** de "solte aqui"
   (`border-2 border-dashed`).
 - Menus flutuantes (select, combobox, popover, data): `bg-popover`, sem borda, com o anel de 1px
-  (`ring-1 ring-foreground/8`) e sombra grande.
+  (`ring-1 ring-foreground/8`) e sombra grande. Todo menu abre **centralizado embaixo do botão**
+  que o abriu (`align="center"`), com a **largura do conteúdo** (`w-max`), nunca mais estreito que
+  o botão e no máximo `26rem`. Menu com busca começa em `14rem`, para caber o campo.
 - Proibido: gradiente, vidro (`backdrop-blur`), transparência solta em card
   (`brand/no-gradients-or-glass`, `brand/no-card-opacity`).
 - Todo card é feito sobre `<AzuosCardSurface>` (ou um dos formatos que o usam): `AzuosStatCard`,

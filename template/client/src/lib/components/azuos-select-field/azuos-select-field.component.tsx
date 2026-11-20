@@ -94,8 +94,9 @@ export function AzuosSelectField({ data, ui, state, actions }: AzuosSelectFieldP
           opções. O teste em jsdom não pega isso, porque lá nada tem posição. */}
       <SelectContent
         position="popper"
-        sideOffset={4}
-        className="rounded-surface bg-popover ring-foreground/8 w-auto max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(16rem,var(--radix-select-trigger-width))] border-transparent shadow-xl ring-1"
+        align="center"
+        sideOffset={6}
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-(--radix-select-trigger-width) border-transparent shadow-xl ring-1"
       >
         {data.options.map((option) => (
           <OptionRow key={option.value || EMPTY_VALUE} data={{ option }} />

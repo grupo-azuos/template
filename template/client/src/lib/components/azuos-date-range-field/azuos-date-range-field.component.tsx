@@ -158,7 +158,8 @@ export function AzuosDateRangeField({ data, ui, state, actions }: AzuosDateRange
         </PopoverTrigger>
 
         <PopoverContent
-          align="start"
+          sideOffset={6}
+          align="center"
           className="rounded-surface bg-popover ring-foreground/8 w-auto max-w-[calc(100vw-2rem)] overflow-x-auto border-transparent p-0 shadow-xl ring-1"
         >
           <RangePanel

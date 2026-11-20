@@ -64,7 +64,7 @@ export function AzuosCalendarDropdown({
   };
 
   return (
-    <div className="relative" onBlur={closeWhenFocusLeaves}>
+    <div className="relative inline-block" onBlur={closeWhenFocusLeaves}>
       <button
         type="button"
         disabled={disabled}
@@ -84,7 +84,7 @@ export function AzuosCalendarDropdown({
           id={listId}
           role="listbox"
           aria-label={name}
-          className="rounded-box bg-popover ring-foreground/8 absolute top-full left-0 z-20 mt-1 flex max-h-56 min-w-full flex-col gap-0.5 overflow-y-auto p-1 shadow-xl ring-1"
+          className="rounded-box bg-popover ring-foreground/8 absolute top-full left-1/2 z-20 mt-1.5 flex max-h-56 w-max min-w-full -translate-x-1/2 flex-col gap-0.5 overflow-y-auto p-1 shadow-xl ring-1"
         >
           {items.map((option) => {
             const isSelected = option.value === selected?.value;

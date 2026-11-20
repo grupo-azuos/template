@@ -143,8 +143,9 @@ export function AzuosComboboxField({ data, ui, state, actions }: AzuosComboboxFi
           comprido e nasce mais larga que o diálogo em volta, vazando pelos dois lados; sem o piso
           (`min-w-64`), sob um gatilho estreito a lista cortava cada opção no meio. */}
       <PopoverContent
-        align="start"
-        className="rounded-surface bg-popover ring-foreground/8 w-(--radix-popover-trigger-width) min-w-64 overflow-hidden border-transparent p-0 shadow-xl ring-1"
+        sideOffset={6}
+        align="center"
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(14rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
       >
         {/* O filtro é o do próprio `cmdk`, por pontuação de semelhança — então "ana s" ainda acha
             "Ana Souza", o que um `includes` não faria —, só que sem acento: "goias" acha Goiás. */}

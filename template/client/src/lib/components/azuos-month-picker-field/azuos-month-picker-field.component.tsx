@@ -119,8 +119,9 @@ function MonthPickerControl({
       </PopoverTrigger>
 
       <PopoverContent
+        sideOffset={6}
         className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-3 shadow-xl ring-1"
-        align="start"
+        align="center"
       >
         <YearHeader data={{ year }} actions={{ onYearChange: setYear }} />
         <MonthGrid data={{ year, selected: data.value }} actions={{ onPick: handlePick }} />

@@ -238,7 +238,8 @@ function CalendarButton({
         </PopoverTrigger>
 
         <PopoverContent
-          align="end"
+          sideOffset={6}
+          align="center"
           className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-0 shadow-xl ring-1"
         >
           <AzuosDateStepper

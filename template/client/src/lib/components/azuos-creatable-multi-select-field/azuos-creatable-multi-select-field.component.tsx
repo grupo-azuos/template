@@ -121,8 +121,9 @@ export function AzuosCreatableMultiSelectField({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        align="start"
-        className="rounded-surface bg-popover ring-foreground/8 w-(--radix-popover-trigger-width) min-w-64 overflow-hidden border-transparent p-0 shadow-xl ring-1"
+        sideOffset={6}
+        align="center"
+        className="rounded-surface bg-popover ring-foreground/8 w-max max-w-[min(26rem,calc(100vw-2rem))] min-w-[max(14rem,var(--radix-popover-trigger-width))] overflow-hidden border-transparent p-0 shadow-xl ring-1"
       >
         <Command
           className="rounded-surface bg-card"
