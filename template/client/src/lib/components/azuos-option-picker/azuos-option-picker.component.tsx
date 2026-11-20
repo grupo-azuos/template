@@ -337,7 +337,6 @@ function OptionPill({
       type="button"
       disabled={state.isDisabled}
       aria-pressed={state.isSelected}
-      title={option.label}
       onClick={actions.onSelect}
       className={optionPill({
         layout: ui.layout,

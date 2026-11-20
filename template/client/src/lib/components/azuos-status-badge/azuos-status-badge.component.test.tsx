@@ -21,8 +21,8 @@ describe('AzuosStatusBadge', () => {
       <AzuosStatusBadge data={{ label: 'Concluída' }} ui={{ tone: 'success' }} />,
     );
 
-    expect(container.firstElementChild?.className).toContain('bg-muted');
-    expect(container.firstElementChild?.className).toContain('text-hue-green');
+    expect(container.firstElementChild?.className).toContain('bg-success-soft');
+    expect(container.firstElementChild?.className).toContain('text-success');
   });
 
   it('falls back to neutral when no tone was given, instead of having no color', () => {
@@ -56,7 +56,7 @@ describe('AzuosStatusBadge', () => {
     );
 
     expect(container.firstElementChild?.className).toContain('ml-4');
-    expect(container.firstElementChild?.className).toContain('bg-muted');
+    expect(container.firstElementChild?.className).toContain('bg-success-soft');
   });
 
   // feliz

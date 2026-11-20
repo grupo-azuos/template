@@ -95,12 +95,12 @@ export function AzuosActionButton({ data, ui, state, actions }: AzuosActionButto
       aria-busy={isBusy}
       aria-pressed={state?.isPressed}
       aria-label={accessibleName}
-      title={accessibleName ?? label ?? undefined}
+      title={accessibleName}
       onClick={actions?.onClick}
       className={buttonClassName(ui)}
     >
       <ButtonIcon data={{ Icon }} state={{ isBusy }} />
-      {/* Rótulo longo numa coluna estreita: corta com "…" e o texto inteiro fica no `title`. */}
+      {/* Rótulo longo numa coluna estreita: corta com "…" em vez de estourar a coluna. */}
       {label ? <span className="min-w-0 truncate">{label}</span> : null}
     </Button>
   );
