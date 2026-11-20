@@ -44,7 +44,7 @@ export function AzuosTableViewToggle() {
       ref={ref}
       role="group"
       aria-label="Formato da lista"
-      className="bg-muted hidden items-center gap-0.5 rounded-full p-0.5 xl:inline-flex"
+      className="bg-muted hidden w-fit items-center gap-0.5 rounded-full p-0.5 xl:inline-flex"
     >
       <AzuosActionButton
         data={{ label: 'Ver em tabela' }}
