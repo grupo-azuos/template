@@ -42,7 +42,9 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'bg-muted flex flex-wrap gap-1 rounded-full p-1',
+        /* O trilho tem o tamanho das opções (padrão Apple), e não a largura da tela: uma pílula
+           esticada com metade vazia parecia um campo. Quando não cabe (celular), rola de lado. */
+        'bg-muted inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-full p-1',
         ui.variant === 'prominent' && 'w-full gap-2 bg-transparent p-0 sm:w-auto',
         ui.className,
       )}
@@ -61,10 +63,10 @@ export function AzuosSegmentedControl({ data, ui, state, actions }: AzuosSegment
               actions.onChange(option.value);
             }}
             className={cn(
-              'rounded-full px-3 py-1.5 text-sm transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
+              'shrink-0 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-[color,background-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
               isActive
-                ? 'text-primary font-bold'
-                : 'text-muted-foreground hover:bg-card/60 hover:text-foreground font-semibold',
+                ? 'text-foreground font-semibold'
+                : 'text-muted-foreground hover:bg-hover-veil hover:text-foreground font-medium',
               ui.variant === 'prominent' &&
                 'control-lg focus-visible:outline-primary flex-auto px-5 text-base whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 sm:flex-none',
               ui.variant === 'prominent' &&
