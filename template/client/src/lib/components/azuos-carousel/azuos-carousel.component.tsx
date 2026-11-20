@@ -23,15 +23,22 @@ export type AzuosCarouselProps = {
   ui: {
     /** O nome da faixa para o leitor de tela ("Resumo por status"). */
     ariaLabel: string;
-    /** Quanto cada item ocupa da faixa — `basis-1/2 lg:basis-1/4`, por exemplo. */
+    /**
+     * Quanto cada item ocupa da faixa. Sem ele, cada item tem a largura de um cartão (13rem) e
+     * cabem quantos a FAIXA comportar — responsivo pela largura de onde a faixa está, e não pela
+     * janela (`md:basis-1/3` olhava a janela: numa coluna estreita de tela larga, seis cartões
+     * espremidos). Fração (`basis-1/2`) também acompanha a faixa.
+     */
     itemClassName?: string;
     className?: string;
   };
   children?: ReactNode;
 };
 
-const ARROW_CLASS =
-  'rounded-control static size-(--control-sm) shrink-0 translate-x-0 translate-y-0';
+const ARROW_CLASS = 'rounded-full static size-(--control-sm) shrink-0 translate-x-0 translate-y-0';
+
+/** A largura padrão de um item: a de um cartão de número, com o rótulo inteiro. */
+const ITEM_WIDTH = 'basis-52';
 
 export function AzuosCarousel({ ui, children }: AzuosCarouselProps) {
   return (
@@ -57,7 +64,7 @@ export function AzuosCarousel({ ui, children }: AzuosCarouselProps) {
           {Children.toArray(children).map((child, index) => (
             <CarouselItem
               key={index}
-              className={cn('pointer-events-auto pl-3 last:pr-3', ui.itemClassName)}
+              className={cn('pointer-events-auto pl-3 last:pr-3', ui.itemClassName ?? ITEM_WIDTH)}
             >
               {child}
             </CarouselItem>
