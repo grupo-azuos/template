@@ -40,7 +40,11 @@ export type AzuosCreatableMultiSelectFieldProps = {
 
 /** Sem acento e sem caixa: "alteracao" acha "Alteração". */
 export function optionKey(value: string): string {
-  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim();
 }
 
 /** O termo digitado já é uma opção? Então não se oferece cadastrá-lo de novo. */
@@ -104,8 +108,8 @@ export function AzuosCreatableMultiSelectField({
           aria-label={ui?.ariaLabel}
           disabled={state?.isDisabled}
           className={cn(
-            'flex control-lg w-full max-w-full min-w-40 items-center justify-between gap-2 rounded-control border border-input bg-muted px-3 text-sm text-foreground shadow-xs transition-[color,box-shadow] outline-none',
-            'focus-visible:ring-[3px] focus-visible:ring-ring/50',
+            'control-lg rounded-control border-input bg-muted text-foreground flex w-full max-w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none',
+            'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'disabled:cursor-not-allowed disabled:opacity-50',
             ui?.className,
           )}
@@ -118,7 +122,7 @@ export function AzuosCreatableMultiSelectField({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-(--radix-popover-trigger-width) min-w-64 overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
+        className="rounded-surface bg-popover ring-foreground/8 w-(--radix-popover-trigger-width) min-w-64 overflow-hidden border-transparent p-0 shadow-xl ring-1"
       >
         <Command
           className="rounded-surface bg-card"

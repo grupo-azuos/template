@@ -71,7 +71,7 @@ export const FIELD_CONTROL_CLASS =
 export const CHOICE_FILL_CLASS = 'dark:bg-input/30 dark:hover:bg-input/50';
 
 /** O recusado vence o véu: sem isto, no escuro o vermelho claro some debaixo dele. */
-export const CHOICE_ERROR_CLASS = 'border-border bg-destructive-soft dark:bg-destructive-soft';
+export const CHOICE_ERROR_CLASS = 'border-transparent bg-destructive-soft';
 
 export type AzuosRichTextFieldType = 'text' | 'email' | 'password' | 'date' | 'month' | 'tel';
 
@@ -208,7 +208,7 @@ function FieldIcon({
       onClick={actions.onSubmit}
       className={cn(
         place,
-        'cursor-pointer rounded-chip hover:text-ink-700 focus-visible:ring-2 focus-visible:ring-brand-blue-700 focus-visible:outline-none',
+        'rounded-chip hover:text-ink-700 focus-visible:ring-brand-blue-700 cursor-pointer focus-visible:ring-2 focus-visible:outline-none',
       )}
     >
       <Icon aria-hidden="true" className="size-4" />
@@ -225,7 +225,7 @@ export function FieldLabel({
   state?: { isRequired?: boolean };
 }) {
   return (
-    <label htmlFor={data.htmlFor} className="text-sm font-medium text-ink-700">
+    <label htmlFor={data.htmlFor} className="text-ink-700 text-sm font-medium">
       {data.label}
       {state?.isRequired ? (
         <span className="text-destructive" aria-hidden="true">
@@ -293,7 +293,7 @@ function inputClassName({
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
     hasIcon && 'pl-9',
-    hasError ? 'border-border bg-destructive-soft' : 'border-input',
+    hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
   );
 }
 
@@ -314,7 +314,7 @@ function RevealButton({
       tabIndex={-1}
       onClick={actions.onToggle}
       aria-label={state.isRevealed ? 'Ocultar senha' : 'Mostrar senha'}
-      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-500 hover:text-ink-700"
+      className="text-ink-500 hover:text-ink-700 absolute inset-y-0 right-0 flex w-11 items-center justify-center"
     >
       {state.isRevealed ? (
         <EyeOff className="size-4" aria-hidden />
@@ -328,7 +328,7 @@ function RevealButton({
 /** `role="alert"` para o erro ser anunciado quando aparece, e não só quando alguém voltar ao campo. */
 export function FieldError({ data }: { data: { id: string; message: string } }) {
   return (
-    <p id={data.id} role="alert" className="text-xs font-medium text-destructive">
+    <p id={data.id} role="alert" className="text-destructive text-xs font-medium">
       {data.message}
     </p>
   );

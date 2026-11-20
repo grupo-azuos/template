@@ -41,7 +41,7 @@ export function AzuosTable({
     <div
       data-slot="table-surface"
       className={cn(
-        'w-full overflow-hidden rounded-surface border border-border bg-card shadow-xs',
+        'rounded-surface bg-card shadow-card w-full overflow-hidden',
         containerClassName,
       )}
     >
@@ -52,7 +52,7 @@ export function AzuosTable({
       </Table>
 
       {footer ? (
-        <div className="flex items-center justify-between border-t border-border/80 bg-muted/40 px-6 py-3 text-xs text-ink-500">
+        <div className="border-border text-muted-foreground flex items-center justify-between border-t px-6 py-3 text-xs">
           {footer}
         </div>
       ) : null}
@@ -67,7 +67,7 @@ export function AzuosTableHeader({ className, ...rest }: ComponentProps<typeof T
   return (
     <TableHeader
       className={cn(
-        'border-b border-border/80 bg-muted/70 text-xs font-semibold tracking-widest text-ink-500 uppercase',
+        'border-border text-muted-foreground border-b text-xs font-semibold',
         className,
       )}
       {...rest}
@@ -83,7 +83,7 @@ export function AzuosTableHead({ className, ...rest }: ComponentProps<typeof Tab
   return (
     <TableHead
       className={cn(
-        'h-auto px-6 py-3.5 text-xs font-semibold tracking-widest text-ink-500 uppercase',
+        'text-ink-500 h-auto px-6 py-3.5 text-xs font-semibold tracking-widest uppercase',
         '[&>[role=checkbox]]:translate-y-[2px]',
         className,
       )}
@@ -99,7 +99,7 @@ export function AzuosTableHead({ className, ...rest }: ComponentProps<typeof Tab
 export function AzuosTableRow({ className, ...rest }: ComponentProps<typeof TableRow>) {
   return (
     <TableRow
-      className={cn('border-border/60 last:border-b-0 hover:bg-hover-veil', className)}
+      className={cn('border-border/60 hover:bg-hover-veil last:border-b-0', className)}
       {...rest}
     />
   );
@@ -130,10 +130,7 @@ export function AzuosTableCell({ className, ...rest }: ComponentProps<typeof Tab
 export function AzuosTableFooter({ className, ...rest }: ComponentProps<typeof TableFooter>) {
   return (
     <TableFooter
-      className={cn(
-        'border-border/80 bg-muted/40 px-6 py-3 text-xs font-normal text-ink-500',
-        className,
-      )}
+      className={cn('border-border text-muted-foreground px-6 py-3 text-xs font-normal', className)}
       {...rest}
     />
   );

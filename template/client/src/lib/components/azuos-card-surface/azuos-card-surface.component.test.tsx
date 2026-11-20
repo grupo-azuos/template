@@ -40,19 +40,18 @@ describe('AzuosCardSurface', () => {
     expect(veil()).toContain('--hue-red');
   });
 
-  /* Card com cor fica tingido por padrão, sem esperar o mouse. */
-  it('keeps the tone veil on all the time on a coloured card', () => {
+  /* Padrão Apple: o card nunca fica tingido parado; o véu (no tom, se pedido) só no hover. */
+  it('shows the tone veil only on hover, even on a coloured card', () => {
     const { container } = render(
       <AzuosCardSurface ui={{ hoverTone: 'red', isHoverColored: true }}>x</AzuosCardSurface>,
     );
 
     const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-    expect(wash).toHaveClass('bg-(--card-veil)');
-    expect(wash.className).not.toMatch(/group-hover/);
+    expect(wash).toHaveClass('group-hover/card:bg-(--card-veil)');
   });
 
-  /* Sem animação no hover: o card não sobe, a sombra não cresce, nada transiciona. */
-  it('does not move, grow or animate on hover', () => {
+  /* Clicável, o card sobe 2px e a sombra cresce; a marca d'água e o véu não se mexem. */
+  it('lifts the clickable card on hover, and only the card', () => {
     const { container } = render(
       <AzuosCardSurface
         data={{ label: 'Parado' }}
@@ -63,8 +62,11 @@ describe('AzuosCardSurface', () => {
       </AzuosCardSurface>,
     );
 
+    expect(screen.getByRole('group', { name: 'Parado' })).toHaveClass(
+      'hover:shadow-card-hover',
+      'motion-safe:hover:-translate-y-0.5',
+    );
     const all = [
-      screen.getByRole('group', { name: 'Parado' }),
       container.querySelector('[data-slot="card-wash"]'),
       container.querySelector('[data-slot="card-mark"]'),
     ].map((node) => node?.className ?? '');

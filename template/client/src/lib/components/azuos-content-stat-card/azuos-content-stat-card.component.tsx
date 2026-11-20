@@ -27,7 +27,7 @@ export function AzuosContentStatCard({ data, ui }: AzuosContentStatCardProps) {
         className: cn('h-full gap-1 p-5 pr-24', ui.className),
       }}
     >
-      <p className="text-xs font-semibold tracking-wider text-foreground uppercase">{data.label}</p>
+      <p className="text-muted-foreground text-sm font-medium">{data.label}</p>
       <p
         className={cn(
           'text-3xl font-bold tracking-tight tabular-nums',
@@ -36,7 +36,7 @@ export function AzuosContentStatCard({ data, ui }: AzuosContentStatCardProps) {
       >
         {data.value}
       </p>
-      {data.hint ? <p className="text-xs text-muted-foreground">{data.hint}</p> : null}
+      {data.hint ? <p className="text-muted-foreground text-xs">{data.hint}</p> : null}
     </AzuosContentCard>
   );
 }

@@ -87,8 +87,8 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
         aria-label={`${ariaLabel}: ${fullLabel}`}
         title={fullLabel}
         className={cn(
-          'flex control-lg w-full min-w-40 items-center justify-between gap-2 rounded-control border border-input bg-muted px-3 text-sm whitespace-nowrap text-foreground outline-none',
-          'focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          'control-lg rounded-control border-input bg-muted text-foreground flex w-full min-w-40 items-center justify-between gap-2 border px-3 text-sm whitespace-nowrap outline-none',
+          'focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
           ui?.className,
         )}
       >
@@ -96,12 +96,12 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
           <SelectedFaces data={{ values: data.values, options: data.options }} />
           <span className="min-w-0 truncate">{summarizeSelection(data)}</span>
         </span>
-        <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <ChevronDown className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
       </PopoverTrigger>
 
       <PopoverContent
         align="start"
-        className="w-72 min-w-64 overflow-hidden rounded-surface border-border bg-card p-0 shadow-xl"
+        className="rounded-surface bg-popover ring-foreground/8 w-72 min-w-64 overflow-hidden border-transparent p-0 shadow-xl ring-1"
       >
         <ul
           role="group"
@@ -112,7 +112,7 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
           {data.options.map((option) => (
             <li
               key={option.value}
-              className="flex items-center gap-2 rounded-box px-2 hover:bg-accent"
+              className="rounded-box hover:bg-accent flex items-center gap-2 px-2"
             >
               <PersonFace data={{ option }} />
               <AzuosCheckboxField
@@ -127,7 +127,7 @@ export function AzuosMultiSelectField({ data, ui, state, actions }: AzuosMultiSe
             </li>
           ))}
         </ul>
-        <div className="flex justify-end border-t border-border px-2 py-1.5">
+        <div className="border-border flex justify-end border-t px-2 py-1.5">
           <AzuosActionButton
             data={{ label: 'Limpar' }}
             ui={{ variant: 'ghost', size: 'sm' }}

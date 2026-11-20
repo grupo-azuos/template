@@ -207,15 +207,15 @@ function Banner({
   return (
     <section
       aria-label="Identidade"
-      className="overflow-hidden rounded-surface border border-border bg-card shadow-xs"
+      className="rounded-surface bg-card shadow-card overflow-hidden"
     >
-      <div aria-hidden className="h-20 bg-primary sm:h-24" />
+      <div aria-hidden className="bg-primary h-20 sm:h-24" />
       <div className="flex flex-col gap-5 px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <BigAvatar data={{ name: person.name, avatarUrl: person.avatarUrl }} />
           <div className="flex min-w-0 flex-1 flex-col gap-1 sm:pt-3">
-            <h1 className="text-2xl font-bold break-words text-primary">{person.name}</h1>
-            <p className="flex min-w-0 items-center gap-1.5 text-sm text-ink-500">
+            <h1 className="text-primary text-2xl font-bold break-words">{person.name}</h1>
+            <p className="text-ink-500 flex min-w-0 items-center gap-1.5 text-sm">
               <Mail className="size-4 shrink-0" aria-hidden />
               <span className="break-all">{person.email ?? 'Sem e-mail'}</span>
             </p>
@@ -244,7 +244,7 @@ function BigAvatar({ data }: { data: { name: string; avatarUrl: string | null } 
     <span
       role={data.avatarUrl ? undefined : 'img'}
       aria-label={data.avatarUrl ? undefined : data.name}
-      className="relative -mt-12 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-yellow-400 text-2xl font-bold text-brand-blue-900 ring-4 ring-card"
+      className="bg-brand-yellow-400 text-brand-blue-900 ring-card relative -mt-12 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full text-2xl font-bold ring-4"
     >
       <span aria-hidden={data.avatarUrl ? true : undefined}>{initialsOf(data.name)}</span>
       {data.avatarUrl ? (
@@ -262,7 +262,7 @@ function EditLink({ data }: { data: { href: string } }) {
   return (
     <a
       href={data.href}
-      className="inline-flex shrink-0 items-center gap-2 self-start rounded-control border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted sm:mt-3"
+      className="rounded-button bg-muted text-foreground hover:bg-muted inline-flex shrink-0 items-center gap-2 self-start px-3 py-2 text-sm font-medium transition-colors sm:mt-3"
     >
       <ExternalLink className="size-4" aria-hidden />
       Editar no Admin Console
@@ -272,7 +272,7 @@ function EditLink({ data }: { data: { href: string } }) {
 
 function RoleBadge({ data }: { data: { label: string } }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+    <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold">
       {data.label}
     </span>
   );
@@ -288,12 +288,12 @@ function Fact({
   const Icon = ui.icon;
 
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-box bg-muted p-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-chip bg-primary/10 text-primary">
+    <div className="rounded-box bg-muted flex min-w-0 items-center gap-3 p-3">
+      <span className="rounded-chip bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center">
         <Icon className="size-4" aria-hidden />
       </span>
       <div className="min-w-0">
-        <dt className="text-xs text-ink-500">{data.label}</dt>
+        <dt className="text-ink-500 text-xs">{data.label}</dt>
         <dd
           className={cn(
             'truncate text-sm font-medium',
@@ -314,7 +314,7 @@ function SectionNav({
 }) {
   return (
     <nav aria-label="Seções da página" className="hidden lg:sticky lg:top-6 lg:col-span-3 lg:block">
-      <p className="mb-2 px-3 text-xs font-semibold tracking-wider text-ink-500 uppercase">
+      <p className="text-ink-500 mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
         Nesta página
       </p>
       <ul className="flex flex-col gap-0.5">
@@ -322,7 +322,7 @@ function SectionNav({
           <li key={id}>
             <a
               href={`#${id}`}
-              className="flex items-center gap-2.5 rounded-control px-3 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-muted hover:text-foreground"
+              className="rounded-control text-ink-700 hover:bg-muted hover:text-foreground flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors"
             >
               <Icon className="size-4 shrink-0" aria-hidden />
               {label}
@@ -346,10 +346,10 @@ function Card({
   return (
     <section
       aria-label={data.title}
-      className="flex flex-col gap-4 rounded-surface border border-border bg-card p-4 shadow-xs sm:p-6"
+      className="rounded-surface bg-card shadow-card flex flex-col gap-4 p-4 sm:p-6"
     >
-      <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-        <span className="flex size-8 items-center justify-center rounded-chip bg-primary/10 text-primary">
+      <h2 className="text-foreground flex items-center gap-2 text-base font-semibold">
+        <span className="rounded-chip bg-primary/10 text-primary flex size-8 items-center justify-center">
           <Icon className="size-4" aria-hidden />
         </span>
         {data.title}
@@ -369,7 +369,7 @@ function Field({
 }) {
   return (
     <div className={cn('flex min-w-0 flex-col gap-1', ui?.isWide && 'sm:col-span-2')}>
-      <dt className="text-xs font-medium text-ink-500">{data.label}</dt>
+      <dt className="text-ink-500 text-xs font-medium">{data.label}</dt>
       <dd
         className={cn(
           'text-sm break-words whitespace-pre-line',
@@ -386,10 +386,10 @@ function SystemsCard({ data }: { data: { systems: MyProfileSystem[] | undefined 
   return (
     <section
       aria-label="Sistemas"
-      className="flex flex-col gap-4 rounded-surface border border-border bg-card p-4 shadow-xs sm:p-6"
+      className="rounded-surface bg-card shadow-card flex flex-col gap-4 p-4 sm:p-6"
     >
-      <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-        <span className="flex size-8 items-center justify-center rounded-chip bg-primary/10 text-primary">
+      <h2 className="text-foreground flex items-center gap-2 text-base font-semibold">
+        <span className="rounded-chip bg-primary/10 text-primary flex size-8 items-center justify-center">
           <AppWindow className="size-4" aria-hidden />
         </span>
         Sistemas
@@ -401,19 +401,19 @@ function SystemsCard({ data }: { data: { systems: MyProfileSystem[] | undefined 
 
 function SystemsList({ data }: { data: { systems: MyProfileSystem[] | undefined } }) {
   if (!data.systems) {
-    return <p className="text-sm text-ink-500">Não consegui ver seus sistemas agora.</p>;
+    return <p className="text-ink-500 text-sm">Não consegui ver seus sistemas agora.</p>;
   }
   if (data.systems.length === 0) {
-    return <p className="text-sm text-ink-500">Você ainda não tem acesso a nenhum sistema.</p>;
+    return <p className="text-ink-500 text-sm">Você ainda não tem acesso a nenhum sistema.</p>;
   }
 
   return (
-    <ul className="flex flex-col divide-y divide-border">
+    <ul className="divide-border flex flex-col divide-y">
       {data.systems.map((system) => (
         <li key={system.url} className="flex items-center justify-between gap-3 py-2.5">
           <a
             href={system.url}
-            className="min-w-0 truncate text-sm font-medium text-foreground transition-colors hover:text-primary"
+            className="text-foreground hover:text-primary min-w-0 truncate text-sm font-medium transition-colors"
           >
             {system.name}
           </a>
@@ -437,8 +437,8 @@ function ThemeSwitch({
   return (
     <div className="flex items-center justify-between gap-4 sm:col-span-2">
       <div className="flex min-w-0 flex-col gap-1">
-        <dt className="text-sm font-medium text-foreground">Tema escuro</dt>
-        <dd className="text-xs text-ink-500">
+        <dt className="text-foreground text-sm font-medium">Tema escuro</dt>
+        <dd className="text-ink-500 text-xs">
           Vale para todos os sistemas do grupo neste navegador.
         </dd>
       </div>
@@ -456,7 +456,7 @@ function ThemeSwitch({
       >
         <span
           className={cn(
-            'flex size-5 items-center justify-center rounded-full bg-card text-primary shadow-xs transition-transform',
+            'bg-card text-primary flex size-5 items-center justify-center rounded-full shadow-xs transition-transform',
             isDark ? 'translate-x-6' : 'translate-x-1',
           )}
         >
@@ -477,14 +477,14 @@ function ErrorNotice({
   return (
     <div
       role="alert"
-      className="flex flex-wrap items-center justify-between gap-3 rounded-box border border-border px-4 py-3 text-sm text-destructive"
+      className="rounded-box border-border text-destructive flex flex-wrap items-center justify-between gap-3 border px-4 py-3 text-sm"
     >
       <span>{data.message}</span>
       {actions.onRetry ? (
         <button
           type="button"
           onClick={actions.onRetry}
-          className="rounded-control px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          className="rounded-control hover:bg-muted px-3 py-1.5 text-sm font-medium"
         >
           Tentar de novo
         </button>
@@ -498,19 +498,19 @@ function ProfileSkeleton() {
   return (
     <div role="status" aria-busy="true" className="flex w-full flex-col gap-6 px-4 pb-10 sm:px-6">
       <span className="sr-only">Carregando seu perfil…</span>
-      <div className="overflow-hidden rounded-surface border border-border bg-card shadow-xs">
-        <div className="h-20 animate-pulse bg-muted" />
+      <div className="rounded-surface bg-card shadow-card overflow-hidden">
+        <div className="bg-muted h-20 animate-pulse" />
         <div className="flex flex-col gap-4 p-4 sm:p-6">
-          <div className="-mt-16 size-24 animate-pulse rounded-full bg-muted" />
-          <div className="h-6 w-56 animate-pulse rounded-box bg-muted" />
+          <div className="bg-muted -mt-16 size-24 animate-pulse rounded-full" />
+          <div className="rounded-box bg-muted h-6 w-56 animate-pulse" />
           <div className="grid gap-3 sm:grid-cols-3">
             {[0, 1, 2].map((item) => (
-              <div key={item} className="h-16 animate-pulse rounded-box bg-muted" />
+              <div key={item} className="rounded-box bg-muted h-16 animate-pulse" />
             ))}
           </div>
         </div>
       </div>
-      <div className="h-40 animate-pulse rounded-surface bg-muted" />
+      <div className="rounded-surface bg-muted h-40 animate-pulse" />
     </div>
   );
 }

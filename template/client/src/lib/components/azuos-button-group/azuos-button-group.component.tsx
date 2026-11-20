@@ -43,7 +43,7 @@ export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupP
       role="group"
       aria-label={ui.ariaLabel}
       className={cn(
-        'inline-flex w-fit gap-1 rounded-control border border-border bg-muted p-1',
+        'bg-muted inline-flex w-fit gap-1 rounded-full p-1',
         ui.orientation === 'vertical' && 'flex-col',
         ui.className,
       )}
@@ -60,7 +60,7 @@ export function AzuosButtonGroup({ data, ui, state, actions }: AzuosButtonGroupP
             /* O hover do não escolhido é o véu NEUTRO: um azul claro ali parecia escolhido. */
             className={cn(
               'control-sm rounded-control px-3 text-sm font-medium whitespace-nowrap transition-colors duration-200',
-              'focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+              'focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-60',
               isSelected
                 ? 'text-primary-foreground'

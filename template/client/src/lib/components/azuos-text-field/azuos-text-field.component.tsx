@@ -66,7 +66,7 @@ export function AzuosTextField({ data, ui, state, actions }: AzuosTextFieldProps
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={inputId} className="text-sm font-medium text-ink-700">
+      <label htmlFor={inputId} className="text-ink-700 text-sm font-medium">
         {data.label}
         {data.isRequired ? (
           <span className="text-destructive" aria-hidden="true">
@@ -152,10 +152,10 @@ function inputClassName({
        formulário. Com a altura vindo só do padding, campo de texto, seletor, data e botão nunca
        alinhavam na mesma fileira nem pareciam a mesma família de controle. */
     'control-lg rounded-control',
-    'w-full border bg-muted text-sm text-foreground transition-colors',
+    'bg-muted text-foreground w-full border text-sm transition-colors',
     'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
     isPassword && 'pr-11',
-    hasError ? 'border-border bg-destructive-soft' : 'border-input',
+    hasError ? 'bg-destructive-soft border-transparent' : 'border-transparent',
   );
 }
 
@@ -176,7 +176,7 @@ function RevealButton({
       tabIndex={-1}
       onClick={actions.onToggle}
       aria-label={state.isRevealed ? 'Ocultar senha' : 'Mostrar senha'}
-      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-500 hover:text-ink-700"
+      className="text-ink-500 hover:text-ink-700 absolute inset-y-0 right-0 flex w-11 items-center justify-center"
     >
       {state.isRevealed ? (
         <EyeOff className="size-4" aria-hidden />
@@ -190,7 +190,7 @@ function RevealButton({
 /** `role="alert"` para o erro ser anunciado quando aparece, e não só quando alguém voltar ao campo. */
 function FieldError({ data }: { data: { id: string; message: string } }) {
   return (
-    <p id={data.id} role="alert" className="text-xs font-medium text-destructive">
+    <p id={data.id} role="alert" className="text-destructive text-xs font-medium">
       {data.message}
     </p>
   );

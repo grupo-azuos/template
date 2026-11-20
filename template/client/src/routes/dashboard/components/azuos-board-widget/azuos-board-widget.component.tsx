@@ -88,7 +88,7 @@ export function AzuosBoardWidget({ data, state, actions }: AzuosBoardWidgetProps
       <div className="relative h-full">
         <WidgetBody data={data} />
         {state.isEditing ? (
-          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 rounded-box bg-card p-1 shadow-xs">
+          <div className="rounded-box bg-card absolute top-2 right-2 z-10 flex items-center gap-1 p-1 shadow-xs">
             <EditTools data={data} actions={actions} ui={{ withHandle: true }} />
           </div>
         ) : null}
@@ -105,24 +105,24 @@ export function AzuosBoardWidget({ data, state, actions }: AzuosBoardWidgetProps
     <section
       aria-label={widget.title}
       /* Montando, quem desenha a seleção é o canvas (contorno tracejado e puxadores). */
-      className="flex h-full min-h-0 flex-col rounded-surface border border-border bg-card shadow-card"
+      className="rounded-surface bg-card shadow-card flex h-full min-h-0 flex-col"
     >
       <header
         className={cn(
-          'flex items-start gap-3 border-b border-border px-4 pt-3.5 pb-3',
+          'border-border flex items-start gap-3 border-b px-4 pt-3.5 pb-3',
           state.isEditing && cn(DRAG_HANDLE, 'cursor-grab active:cursor-grabbing'),
         )}
       >
         {state.isEditing ? (
           <DragHandle data={{ title: widget.title }} />
         ) : (
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-box bg-primary-soft text-primary">
+          <span className="rounded-box bg-primary-soft text-primary flex size-10 shrink-0 items-center justify-center">
             <Icon className="size-5" aria-hidden="true" />
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-bold tracking-tight text-ink-900">{widget.title}</h3>
-          <span className="block truncate text-xs text-ink-500">{measureOf(data)}</span>
+          <h3 className="text-ink-900 truncate text-sm font-bold tracking-tight">{widget.title}</h3>
+          <span className="text-ink-500 block truncate text-xs">{measureOf(data)}</span>
           <ScopeChips data={data} />
         </span>
         <span className={cn('flex shrink-0 items-center gap-1', NO_DRAG)}>
@@ -205,8 +205,8 @@ function DragHandle({ data }: { data: { title: string } }) {
       aria-label={`Arrastar ${data.title}`}
       className={cn(
         DRAG_HANDLE,
-        'flex size-10 shrink-0 cursor-grab items-center justify-center rounded-box bg-primary-soft text-primary active:cursor-grabbing',
-        'focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+        'rounded-box bg-primary-soft text-primary flex size-10 shrink-0 cursor-grab items-center justify-center active:cursor-grabbing',
+        'focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
       )}
     >
       <GripVertical className="size-5" aria-hidden="true" />
@@ -232,7 +232,7 @@ function EditTools({
       {/* O peso do bloco na cota do painel, à vista de quem monta — é o que se gasta com ele. */}
       <span
         aria-label={`Peso: ${weightLabel(widgetWeight(widget))}`}
-        className="shrink-0 rounded-chip bg-muted px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-ink-700"
+        className="rounded-chip bg-muted text-ink-700 shrink-0 px-2 py-0.5 text-xs font-semibold whitespace-nowrap"
       >
         {weightLabel(widgetWeight(widget))}
       </span>
@@ -247,7 +247,7 @@ function EditTools({
         ui={{ variant: 'ghost', icon: Settings2, isIconOnly: true }}
         actions={{ onClick: () => actions.onEdit(widget.id) }}
       />
-      <span className="ml-2 border-l border-border pl-2">
+      <span className="border-border ml-2 border-l pl-2">
         {isArmed ? (
           <AzuosActionButton
             data={{ label: 'Remover?' }}
@@ -288,14 +288,14 @@ function KindSwitch({
         <button
           type="button"
           aria-label={`Trocar o gráfico de ${data.title}`}
-          className="flex control-lg items-center gap-1.5 rounded-control border border-border bg-muted text-xs font-semibold text-ink-900 hover:bg-mantle focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="control-lg rounded-control border-border bg-muted text-ink-900 hover:bg-mantle focus-visible:ring-ring/50 flex items-center gap-1.5 border text-xs font-semibold focus-visible:ring-[3px] focus-visible:outline-none"
         >
-          <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
+          <CurrentIcon className="text-primary size-4" aria-hidden="true" />
           <span className="hidden sm:inline">{current.short}</span>
-          <ChevronDown className="size-3.5 text-ink-500" aria-hidden="true" />
+          <ChevronDown className="text-ink-500 size-3.5" aria-hidden="true" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-64 rounded-surface p-2">
+      <PopoverContent align="end" className="rounded-surface w-64 p-2">
         <KindGroup
           data={{ title: 'Mais usados', kinds: MAIN_KINDS, current: data.kind }}
           actions={{ onPick: pick }}
@@ -318,7 +318,7 @@ function KindGroup({
 }) {
   return (
     <div role="radiogroup" aria-label={data.title} className="p-1">
-      <p className="px-1 pb-1 text-xs font-semibold tracking-wider text-ink-500 uppercase">
+      <p className="text-ink-500 px-1 pb-1 text-xs font-semibold tracking-wider uppercase">
         {data.title}
       </p>
       <div className="grid grid-cols-2 gap-1">
@@ -336,7 +336,7 @@ function KindGroup({
               aria-description={weightLabel(WIDGET_WEIGHTS[kind])}
               onClick={() => actions.onPick(kind)}
               className={cn(
-                'flex control-lg items-center gap-2 rounded-control text-left text-xs font-semibold',
+                'control-lg rounded-control flex items-center gap-2 text-left text-xs font-semibold',
                 isChosen ? 'bg-primary text-primary-foreground' : 'text-ink-900 hover:bg-muted',
               )}
             >
@@ -577,11 +577,11 @@ function RingCardBody({
         />
         {state.isLoading ? null : (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl leading-none font-bold text-foreground tabular-nums">
+            <span className="text-foreground text-xl leading-none font-bold tabular-nums">
               {isEmpty ? '—' : formatCount(data.count)}
             </span>
             {isEmpty ? null : (
-              <span className="mt-0.5 text-xs leading-none text-muted-foreground tabular-nums">
+              <span className="text-muted-foreground mt-0.5 text-xs leading-none tabular-nums">
                 de {formatCount(data.total)}
               </span>
             )}
@@ -647,7 +647,7 @@ function WidgetBody({ data }: { data: AzuosBoardWidgetProps['data'] }) {
     return (
       <p
         role="alert"
-        className="flex h-full items-center justify-center rounded-box bg-muted p-4 text-center text-sm font-medium text-hue-red"
+        className="rounded-box bg-muted text-hue-red flex h-full items-center justify-center p-4 text-center text-sm font-medium"
       >
         {result.error}
       </p>
@@ -718,21 +718,21 @@ function StatRow({
 /** A lista ordenada: os grupos do maior para o menor, com a barra do tamanho de cada um. */
 function ListBody({ data }: { data: { slices: { label: string; value: number }[] } }) {
   const max = Math.max(1, ...data.slices.map((slice) => slice.value));
-  if (data.slices.length === 0) return <p className="text-sm text-ink-500">Nada para mostrar.</p>;
+  if (data.slices.length === 0) return <p className="text-ink-500 text-sm">Nada para mostrar.</p>;
 
   return (
     <ol className="flex h-full flex-col gap-2 overflow-y-auto">
       {data.slices.map((slice, index) => (
         <li key={slice.label} className="flex items-center gap-3 text-sm">
-          <span className="w-5 text-right text-xs text-ink-500">{index + 1}º</span>
+          <span className="text-ink-500 w-5 text-right text-xs">{index + 1}º</span>
           <span className="min-w-0 flex-1">
             <span className="flex justify-between gap-2">
-              <span className="truncate text-ink-900">{slice.label}</span>
-              <span className="font-semibold text-ink-900">{slice.value}</span>
+              <span className="text-ink-900 truncate">{slice.label}</span>
+              <span className="text-ink-900 font-semibold">{slice.value}</span>
             </span>
-            <span className="mt-1 block h-1.5 rounded-full bg-muted">
+            <span className="bg-muted mt-1 block h-1.5 rounded-full">
               <span
-                className="block h-1.5 rounded-full bg-primary"
+                className="bg-primary block h-1.5 rounded-full"
                 style={{ width: `${(slice.value / max) * 100}%` }}
               />
             </span>

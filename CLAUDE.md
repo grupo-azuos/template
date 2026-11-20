@@ -270,10 +270,12 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
 
 ## REGRAS DE UI DO GRUPO — ABSOLUTAS
 
-- **Borda colorida é proibida em qualquer componente** (faixa lateral/topo, contorno no tom,
-  barra colorida, anel de seleção). Cor de card vem do FUNDO: `AzuosToneCard` (`static` só
-  colorido; `interactive` com o hover-fill do Chamados); selecionado = fundo na cor cheia. Ficam
-  só a borda neutra, o anel de foco e os spinners.
+- **Padrão Apple, um só visual** (regras completas em `.claude/rules/design-governance.md`):
+  card **sem borda** sobre o fundo cinza, separado pelo fio de 1px e pela sombra difusa
+  (`shadow-card`); cantos grandes; botões e chips em pílula; fonte do sistema. A cor do assunto
+  fica no **ícone cheio** (`rounded-icon`), no status e no gráfico — nunca no fundo do card, na
+  borda ou no número. Hover destaca (sobe, sombra, véu neutro) e **nunca cobre informação**.
+  Borda colorida é proibida; borda só como divisória.
 - **Nunca `<select>` nativo**: sempre o combobox/seletor do projeto.
 - **Ações duplas em arquivos (Download + Abrir via hyperlink)**: sempre que houver função de
   arquivo, o sistema deve fornecer duas ações: download (`download={fileName}`) e abrir via

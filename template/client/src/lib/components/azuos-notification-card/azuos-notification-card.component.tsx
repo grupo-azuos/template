@@ -103,7 +103,7 @@ function FeatureCard({ data, ui, actions }: AzuosNotificationCardProps) {
 
   return (
     <article className={cn('flex flex-col items-center gap-3 text-center', ui?.className)}>
-      <span className={cn('flex size-16 items-center justify-center rounded-full', look.tone.dot)}>
+      <span className={cn('rounded-icon flex size-16 items-center justify-center', look.tone.dot)}>
         <Icon className="size-8" aria-hidden="true" />
       </span>
       <span className="rounded-chip bg-muted text-ink-700 inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold">

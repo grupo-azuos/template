@@ -132,7 +132,7 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
 
   if (data.widgets.length === 0 && !state.isEditing) {
     return (
-      <p className="rounded-surface border border-border bg-card p-8 text-center text-sm text-ink-500">
+      <p className="rounded-surface bg-card shadow-card text-ink-500 p-8 text-center text-sm">
         Este painel ainda não tem blocos.
       </p>
     );
@@ -243,7 +243,7 @@ export function SlotGrid({
       {Array.from({ length: rows * GRID_COLUMNS }, (_, index) => (
         <span
           key={index}
-          className="rounded-surface border border-dashed border-border bg-mantle"
+          className="rounded-surface border-border bg-mantle border border-dashed"
         />
       ))}
     </div>

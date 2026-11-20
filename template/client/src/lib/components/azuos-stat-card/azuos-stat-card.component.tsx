@@ -90,24 +90,20 @@ export function AzuosStatCard({ data, ui, state, actions }: AzuosStatCardProps) 
       {state?.isLoading ? (
         <Skeleton className="mt-1 h-8 w-20" />
       ) : (
-        <StatCardValue data={data} ui={ui} tone={tone} />
+        <StatCardValue data={data} ui={ui} />
       )}
     </AzuosCardSurface>
   );
 }
 
 /** O número no sotaque, e a ressalva ao lado dele. No escolhido, tudo branco. */
-function StatCardValue({
-  data,
-  ui,
-  tone,
-}: Pick<AzuosStatCardProps, 'data' | 'ui'> & { tone: AzuosCardTone }) {
+/** O número fica na cor do texto (padrão Apple): a cor do assunto mora no ícone, não no dado. */
+function StatCardValue({ data, ui }: Pick<AzuosStatCardProps, 'data' | 'ui'>) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       <p
         className={cn(
-          'font-bold tabular-nums group-data-[selected=true]/card:text-on-card-selected',
-          cardToneClasses(tone).text,
+          'text-foreground group-data-[selected=true]/card:text-on-card-selected font-bold tabular-nums',
           ui?.size === 'lg' ? 'text-4xl' : 'text-3xl tracking-tight',
         )}
       >
@@ -115,7 +111,7 @@ function StatCardValue({
       </p>
 
       {data.hint ? (
-        <p className="mt-0.5 text-xs text-muted-foreground group-data-[selected=true]/card:text-on-card-selected">
+        <p className="text-muted-foreground group-data-[selected=true]/card:text-on-card-selected mt-0.5 text-xs">
           {data.hint}
         </p>
       ) : null}
@@ -135,7 +131,9 @@ function StatCardLabel({
 }) {
   const Icon = ui?.icon;
   const label = (
-    <p className="text-xs leading-none font-semibold tracking-wider uppercase">{data.label}</p>
+    <p className="text-muted-foreground group-data-[selected=true]/card:text-on-card-selected text-sm leading-tight font-medium">
+      {data.label}
+    </p>
   );
 
   if (!Icon) return <div className="mb-1.5">{label}</div>;
@@ -144,7 +142,7 @@ function StatCardLabel({
     <div className="mb-3 flex items-center gap-2.5">
       <span
         className={cn(
-          'inline-flex size-9 shrink-0 items-center justify-center rounded-chip',
+          'rounded-icon inline-flex size-10 shrink-0 items-center justify-center shadow-xs',
           'group-data-[selected=true]/card:bg-on-card-selected group-data-[selected=true]/card:text-card-selected',
           cardToneClasses(tone).dot,
         )}

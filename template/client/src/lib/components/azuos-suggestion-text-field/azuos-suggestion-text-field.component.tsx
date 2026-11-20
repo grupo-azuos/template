@@ -121,7 +121,7 @@ export function AzuosSuggestionTextField({
             /* Espaço à direita para a seta que abre a lista não cair sobre o texto. */
             'pr-9',
             'placeholder:text-ink-500 disabled:cursor-not-allowed disabled:opacity-60',
-            error ? 'border-border bg-destructive-soft' : 'border-input',
+            error ? 'bg-destructive-soft border-transparent' : 'border-transparent',
           )}
         />
 
@@ -138,7 +138,7 @@ export function AzuosSuggestionTextField({
             open();
             inputRef.current?.focus();
           }}
-          className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-ink-500 hover:text-ink-700"
+          className="text-ink-500 hover:text-ink-700 absolute inset-y-0 right-0 flex w-9 items-center justify-center"
         >
           <ChevronDown className="size-4" aria-hidden="true" />
         </button>
@@ -177,10 +177,10 @@ function OptionList({
     <div
       id={data.id}
       role="listbox"
-      className="absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-box border border-ink-300 bg-card p-1 shadow-xl"
+      className="rounded-box bg-popover ring-foreground/8 absolute inset-x-0 top-full z-30 mt-1 max-h-56 overflow-y-auto p-1 shadow-xl ring-1"
     >
       {data.options.length === 0 ? (
-        <p className="px-2 py-2 text-sm text-ink-500">{data.emptyMessage}</p>
+        <p className="text-ink-500 px-2 py-2 text-sm">{data.emptyMessage}</p>
       ) : (
         data.options.map((option, index) => (
           <div
@@ -195,7 +195,7 @@ function OptionList({
               actions.onPick(option);
             }}
             className={cn(
-              'cursor-pointer rounded-chip px-2 py-1.5 text-sm break-words text-ink-900',
+              'rounded-chip text-ink-900 cursor-pointer px-2 py-1.5 text-sm break-words',
               index === state.activeIndex && 'bg-accent',
               comparable(option) === selectedKey && 'font-semibold',
             )}

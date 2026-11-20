@@ -36,7 +36,7 @@ export function AzuosFormSelectField({ data, ui, state, actions }: AzuosFormSele
 
   return (
     <div className={cn('flex min-w-40 flex-col gap-1.5', ui?.className)} title={data.hint}>
-      <span className={cn('text-sm font-medium text-ink-700', isLabelHidden && 'sr-only')}>
+      <span className={cn('text-ink-700 text-sm font-medium', isLabelHidden && 'sr-only')}>
         {data.label}
         {/* O `*` é desenho: o leitor de tela já ouve "obrigatório" pelo contexto do formulário. */}
         {state?.isRequired ? (
@@ -49,7 +49,7 @@ export function AzuosFormSelectField({ data, ui, state, actions }: AzuosFormSele
         data={{ value: data.value, options: data.options }}
         ui={{
           ariaLabel: data.label,
-          className: cn('w-full', error !== null && 'border-border bg-destructive-soft'),
+          className: cn('w-full', error !== null && 'bg-destructive-soft border-transparent'),
         }}
         state={{ isDisabled }}
         actions={{ onChange: (value) => actions?.onChange?.(value) }}
@@ -100,7 +100,7 @@ function FieldMessage({
       role={state.isError ? 'alert' : undefined}
       className={cn(
         'text-xs',
-        state.isError ? 'font-medium text-destructive' : 'text-ink-500',
+        state.isError ? 'text-destructive font-medium' : 'text-ink-500',
         ui.isHidden && 'sr-only',
       )}
     >

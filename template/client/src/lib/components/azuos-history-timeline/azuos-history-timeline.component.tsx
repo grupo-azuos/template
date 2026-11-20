@@ -89,12 +89,12 @@ export function AzuosHistoryTimeline({ data, ui, state }: AzuosHistoryTimelinePr
   }
 
   if (state?.isLoading) {
-    return <p className="text-sm text-muted-foreground">Carregando a linha do tempo…</p>;
+    return <p className="text-muted-foreground text-sm">Carregando a linha do tempo…</p>;
   }
 
   if (data.entries.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {ui?.emptyLabel ?? 'Nenhum histórico registrado ainda.'}
       </p>
     );
@@ -130,7 +130,7 @@ function HistoryRow({
       <div className="flex w-3 shrink-0 flex-col items-center" aria-hidden="true">
         <span className={cn('h-0.5 w-px', ui.isFirst ? 'bg-transparent' : 'bg-border')} />
         <span className={cn('my-1 size-3 shrink-0 rounded-full', DOT_TONE_CLASSES[entry.tone])} />
-        {ui.isLast ? null : <span className="w-px flex-1 bg-border" />}
+        {ui.isLast ? null : <span className="bg-border w-px flex-1" />}
       </div>
 
       <div className={cn('flex min-w-0 flex-1 flex-col gap-2', ui.isLast ? 'pb-0' : 'pb-6')}>
@@ -141,11 +141,11 @@ function HistoryRow({
             data={{ label: entry.kindLabel }}
             ui={{ tone: entry.tone, size: 'sm' }}
           />
-          <span className="min-w-0 truncate text-sm leading-6 font-medium text-foreground">
+          <span className="text-foreground min-w-0 truncate text-sm leading-6 font-medium">
             {entry.authorName}
           </span>
           <time
-            className="ml-auto text-xs leading-6 text-muted-foreground tabular-nums"
+            className="text-muted-foreground ml-auto text-xs leading-6 tabular-nums"
             dateTime={entry.createdAt}
           >
             {formatHistoryDateTime(entry.createdAt)}
@@ -153,7 +153,7 @@ function HistoryRow({
         </div>
 
         {entry.meta && entry.meta.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             {entry.meta.map((meta) => {
               const Icon = meta.icon;
 
@@ -162,7 +162,7 @@ function HistoryRow({
                   key={meta.label}
                   className={cn(
                     'inline-flex items-center gap-1',
-                    meta.isStrong && 'font-semibold text-foreground',
+                    meta.isStrong && 'text-foreground font-semibold',
                   )}
                 >
                   <Icon className="size-3" aria-hidden="true" />
@@ -173,7 +173,7 @@ function HistoryRow({
           </div>
         ) : null}
 
-        <p className="rounded-box border border-border bg-muted px-3.5 py-2.5 text-sm whitespace-pre-line text-foreground">
+        <p className="rounded-box bg-muted text-foreground px-3.5 py-2.5 text-sm whitespace-pre-line">
           {entry.description}
         </p>
 

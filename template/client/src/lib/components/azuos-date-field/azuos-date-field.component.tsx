@@ -191,7 +191,7 @@ function FieldLabel({
   return (
     <label
       htmlFor={data.inputId}
-      className={cn('text-sm font-medium text-ink-700', ui.isHidden && 'sr-only')}
+      className={cn('text-ink-700 text-sm font-medium', ui.isHidden && 'sr-only')}
     >
       {data.label}
       {data.isRequired ? (
@@ -207,7 +207,7 @@ function FieldError({ data }: { data: { id: string; message: string | null } }) 
   if (!data.message) return null;
 
   return (
-    <p id={data.id} role="alert" className="text-xs font-medium text-destructive">
+    <p id={data.id} role="alert" className="text-destructive text-xs font-medium">
       {data.message}
     </p>
   );
@@ -239,7 +239,7 @@ function CalendarButton({
 
         <PopoverContent
           align="end"
-          className="w-auto rounded-surface border-border bg-card p-0 shadow-xl"
+          className="rounded-surface bg-popover ring-foreground/8 w-auto border-transparent p-0 shadow-xl ring-1"
         >
           <AzuosDateStepper
             data={{ value: data.value, min: data.min, max: data.max }}

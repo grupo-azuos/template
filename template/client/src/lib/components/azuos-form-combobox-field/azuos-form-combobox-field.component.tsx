@@ -53,7 +53,7 @@ export function AzuosFormComboboxField({ data, ui, state, actions }: AzuosFormCo
           ...resolveListTexts(ui),
           ariaLabel: data.label ?? ui?.ariaLabel,
           describedBy: message ? messageId : undefined,
-          className: cn(error !== null && 'border-border bg-destructive-soft'),
+          className: cn(error !== null && 'bg-destructive-soft border-transparent'),
         }}
         state={{ isDisabled: state?.isDisabled, isInvalid: error !== null }}
         actions={{
@@ -91,7 +91,7 @@ function resolveListTexts(ui: AzuosFormComboboxFieldProps['ui']) {
 /** O `*` é desenho: o leitor de tela ouve "obrigatório" pelo contexto do formulário. */
 function FieldLabel({ data, state }: { data: { label: string }; state: { isRequired?: boolean } }) {
   return (
-    <span className="text-sm font-medium text-ink-700">
+    <span className="text-ink-700 text-sm font-medium">
       {data.label}
       {state.isRequired ? (
         <span className="text-destructive" aria-hidden="true">
@@ -113,7 +113,7 @@ function FieldMessage({
     <p
       id={data.id}
       role={state.isError ? 'alert' : undefined}
-      className={cn('text-xs', state.isError ? 'font-medium text-destructive' : 'text-ink-500')}
+      className={cn('text-xs', state.isError ? 'text-destructive font-medium' : 'text-ink-500')}
     >
       {data.message}
     </p>

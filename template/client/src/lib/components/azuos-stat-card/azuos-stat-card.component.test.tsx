@@ -30,18 +30,26 @@ describe('AzuosStatCard', () => {
     expect(screen.getByText('13/13')).toBeInTheDocument();
   });
 
-  /* O token do tom, e não a paleta crua: cor sólida cheia da marca. */
-  it('sits on the brand surface with the number in the accent of its tone', () => {
-    render(<AzuosStatCard data={{ label: 'Concluídas', value: 74 }} ui={{ tone: 'success' }} />);
+  /* Padrão Apple: o número fica na cor do texto; a cor do assunto mora no ícone cheio. */
+  it('sits on the surface with the number in the text colour and the icon in its tone', () => {
+    render(
+      <AzuosStatCard
+        data={{ label: 'Concluídas', value: 74 }}
+        ui={{ tone: 'success', icon: Building2 }}
+      />,
+    );
+    const card = screen.getByRole('group', { name: 'Concluídas' });
 
-    expect(screen.getByRole('group', { name: 'Concluídas' })).toHaveClass('bg-card');
-    expect(screen.getByText('74')).toHaveClass('text-hue-green');
+    expect(card).toHaveClass('bg-card');
+    expect(screen.getByText('74')).toHaveClass('text-foreground');
+    expect(card.querySelector('svg')?.parentElement).toHaveClass('bg-hue-green');
   });
 
   it('uses the slate accent when no tone was given', () => {
-    render(<AzuosStatCard data={{ label: 'Total', value: 7 }} />);
+    render(<AzuosStatCard data={{ label: 'Total', value: 7 }} ui={{ icon: Building2 }} />);
 
-    expect(screen.getByText('7')).toHaveClass('text-hue-slate');
+    const card = screen.getByRole('group', { name: 'Total' });
+    expect(card.querySelector('svg')?.parentElement).toHaveClass('bg-hue-slate');
   });
 
   it('draws the icon square when it was given an icon with perfect centering', () => {
@@ -53,7 +61,13 @@ describe('AzuosStatCard', () => {
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveClass('size-4.5', 'block');
     const badge = svg?.parentElement;
-    expect(badge).toHaveClass('size-9', 'inline-flex', 'items-center', 'justify-center');
+    expect(badge).toHaveClass(
+      'size-10',
+      'rounded-icon',
+      'inline-flex',
+      'items-center',
+      'justify-center',
+    );
   });
 
   it('becomes a real button when it filters the list, so the keyboard reaches it', async () => {
@@ -148,7 +162,6 @@ describe('AzuosStatCard', () => {
     );
     const card = screen.getByRole('group', { name: /Depositada/ });
 
-    expect(screen.getByText('4')).toHaveClass('text-hue-steel');
     expect(card.querySelector('svg')?.parentElement).toHaveClass('bg-hue-steel');
     expect(card.getAttribute('style')).toBeNull();
   });

@@ -38,20 +38,20 @@ export function AzuosCollapsible({ data, ui, state, actions, children }: AzuosCo
       open={isOpen}
       disabled={state?.isDisabled}
       onOpenChange={handleOpenChange}
-      className={cn('rounded-box border border-border bg-card', ui?.className)}
+      className={cn('rounded-box bg-card shadow-card', ui?.className)}
     >
-      <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-ink-900 disabled:cursor-not-allowed disabled:opacity-60">
+      <CollapsibleTrigger className="text-ink-900 flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60">
         <span className="break-words">{data.title}</span>
         <ChevronDown
           className={cn(
-            'size-4 shrink-0 text-ink-500 transition-transform',
+            'text-ink-500 size-4 shrink-0 transition-transform',
             isOpen && 'rotate-180',
           )}
           aria-hidden="true"
         />
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="border-t border-border/60 px-4 py-3 text-sm text-ink-700">
+      <CollapsibleContent className="border-border/60 text-ink-700 border-t px-4 py-3 text-sm">
         {children}
       </CollapsibleContent>
     </Collapsible>

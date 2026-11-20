@@ -30,11 +30,11 @@ export function AzuosMiniStatCard({ data, ui, state, actions }: AzuosMiniStatCar
       state={state}
       actions={actions}
     >
-      <div className="flex min-w-0 items-center gap-2 text-xs leading-tight font-semibold tracking-wide uppercase">
+      <div className="text-muted-foreground flex min-w-0 items-center gap-2 text-sm leading-tight font-medium">
         <span
           aria-hidden="true"
           className={cn(
-            'size-2.5 shrink-0 rounded-full group-data-[selected=true]/card:bg-on-card-selected',
+            'group-data-[selected=true]/card:bg-on-card-selected size-2.5 shrink-0 rounded-full',
             tone.swatch,
           )}
         />
@@ -44,8 +44,8 @@ export function AzuosMiniStatCard({ data, ui, state, actions }: AzuosMiniStatCar
       </div>
       <div
         className={cn(
-          'mt-1 text-xl leading-tight font-bold tabular-nums group-data-[selected=true]/card:text-on-card-selected',
-          tone.text,
+          'group-data-[selected=true]/card:text-on-card-selected mt-1 text-xl leading-tight font-bold tabular-nums',
+          'text-foreground',
         )}
       >
         {data.value}
