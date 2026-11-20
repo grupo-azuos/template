@@ -92,8 +92,14 @@ export function AzuosBoardStudio({ data, state, actions }: AzuosBoardStudioProps
         </>
       }
     >
-      <div className="grid min-h-full lg:grid-cols-[minmax(0,1fr)_21rem]">
-        <section aria-label="O painel" className="bg-mantle min-w-0 p-6">
+      {/* Duas colunas da altura da tela, cada uma rolando sozinha: o tabuleiro rola e a paleta de
+          blocos fica PARADA e inteira ao lado (antes ela era "grudenta" com altura chutada e
+          acabava antes do rodapé, deixando um vão). No celular, uma embaixo da outra. */}
+      <div className="grid min-h-full lg:h-full lg:grid-cols-[minmax(0,1fr)_21rem]">
+        <section
+          aria-label="O painel"
+          className="bg-mantle min-w-0 p-6 lg:min-h-0 lg:overflow-y-auto"
+        >
           {state.error ? (
             <p role="alert" className="rounded-box bg-card text-hue-red mb-4 p-3 text-sm">
               {state.error}
@@ -133,7 +139,7 @@ export function AzuosBoardStudio({ data, state, actions }: AzuosBoardStudioProps
           />
         </section>
         {/* A lateral fica parada enquanto o painel rola, com a rolagem própria dos tipos. */}
-        <aside className="border-border bg-card flex flex-col gap-5 border-l p-5 lg:sticky lg:top-0 lg:max-h-[calc(100dvh-9.5rem)] lg:self-start lg:overflow-y-auto">
+        <aside className="border-border bg-card flex flex-col gap-5 border-l p-5 lg:min-h-0 lg:overflow-y-auto">
           <AzuosActionButton
             data={{ label: 'Montar filtros' }}
             ui={{ variant: 'secondary', size: 'lg', icon: ListFilter }}
