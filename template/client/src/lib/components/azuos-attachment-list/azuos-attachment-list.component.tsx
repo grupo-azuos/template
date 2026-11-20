@@ -1,6 +1,4 @@
-import { Download, ExternalLink, Trash2 } from 'lucide-react';
-
-import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
+import { AzuosFileLinks } from '../azuos-file-links/azuos-file-links.component';
 import { AzuosErrorState } from '../azuos-error-state/azuos-error-state.component';
 
 /**
@@ -60,64 +58,45 @@ export function AzuosAttachmentList({ data, ui, state, actions }: AzuosAttachmen
     );
   }
 
-  if (state?.isLoading) return <p className="text-sm text-ink-500">Carregando os anexos…</p>;
+  if (state?.isLoading)
+    return <p className="text-muted-foreground text-sm">Carregando os anexos…</p>;
 
   if (data.attachments.length === 0) {
-    return <p className="text-sm text-ink-500">{ui?.emptyLabel ?? 'Nenhum arquivo anexado.'}</p>;
+    return (
+      <p className="text-muted-foreground text-sm">{ui?.emptyLabel ?? 'Nenhum arquivo anexado.'}</p>
+    );
   }
 
+  /* Cada arquivo é a linha de arquivo da casa (`AzuosFileLinks` no formato `card`): o ícone do
+     tipo, o nome, de quem é, as pílulas de abrir e baixar e, quando pode, a lixeira em vermelho.
+     De quem é o arquivo vai ESCRITO na linha: sem isso, a única pista de por que uns têm lixeira
+     e outros não seria a ausência dela — e ausência não explica nada a quem está olhando. */
   return (
-    <ul className="divide-y rounded-box border">
+    <ul className="flex flex-col gap-2">
       {data.attachments.map((attachment) => (
-        <li key={attachment.id} className="flex items-center justify-between gap-3 p-2.5">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm text-ink-900">{attachment.fileName}</p>
-            {/* De quem é o arquivo vai ESCRITO na linha. Sem isso, a única pista de por que uns têm
-                botão de excluir e outros não seria a ausência do botão — e ausência não explica
-                nada a quem está olhando. */}
-            <p className="text-xs text-ink-500">
-              {[attachment.kindLabel, fileSizeOf(attachment.sizeBytes), attachment.originLabel]
+        <li key={attachment.id}>
+          <AzuosFileLinks
+            data={{
+              fileName: attachment.fileName,
+              viewUrl: attachment.viewUrl,
+              downloadUrl: attachment.downloadUrl,
+              detail: [
+                attachment.kindLabel,
+                fileSizeOf(attachment.sizeBytes),
+                attachment.originLabel,
+              ]
                 .filter(Boolean)
-                .join(' · ')}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1">
-            {/*
-              Dois caminhos para o mesmo arquivo, de propósito: ABRIR mostra na tela (quem está
-              atendendo quer olhar a foto sem encher a pasta de downloads) e BAIXAR entrega o
-              arquivo com o nome original (quem vai anexar num processo precisa dele).
-              `rel="noreferrer"` porque o endereço assinado não deve viajar como referência.
-            */}
-            <a
-              className="inline-flex items-center gap-1 rounded-chip px-2 py-1 text-xs text-ink-700 hover:bg-muted"
-              href={attachment.viewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink className="size-3.5" aria-hidden="true" />
-              Abrir
-            </a>
-
-            <a
-              className="inline-flex items-center gap-1 rounded-chip px-2 py-1 text-xs text-ink-700 hover:bg-muted"
-              href={attachment.downloadUrl}
-              download={attachment.fileName}
-              rel="noopener noreferrer"
-            >
-              <Download className="size-3.5" aria-hidden="true" />
-              Baixar
-            </a>
-
-            {attachment.canRemove && actions?.onRemove ? (
-              <AzuosActionButton
-                data={{ label: `Excluir ${attachment.fileName}` }}
-                ui={{ variant: 'ghost', size: 'sm', icon: Trash2, isIconOnly: true }}
-                state={{ isLoading: state?.removingId === attachment.id }}
-                actions={{ onClick: () => actions.onRemove?.(attachment) }}
-              />
-            ) : null}
-          </div>
+                .join(' · '),
+            }}
+            ui={{ layout: 'card' }}
+            state={{ isRemoving: state?.removingId === attachment.id }}
+            actions={{
+              onRemove:
+                attachment.canRemove && actions?.onRemove
+                  ? () => actions.onRemove?.(attachment)
+                  : undefined,
+            }}
+          />
         </li>
       ))}
     </ul>

@@ -6,10 +6,12 @@ import {
   FileSpreadsheet,
   FileText,
   type LucideIcon,
+  Trash2,
 } from 'lucide-react';
 
 import { type AzuosCardTone, cardToneClasses } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
+import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
 
 /**
  * Os dois caminhos para um arquivo anexado: ABRIR mostra numa aba nova (quem está conferindo quer
@@ -22,7 +24,9 @@ import { cn } from '../../utils/cn.util';
  *
  * - `inline` (padrão): só as duas pílulas, para a linha de tabela e de lista.
  * - `card`: a linha do arquivo inteira — o ícone do tipo (PDF vermelho, planilha verde, imagem
- *   roxa), o nome e o tipo embaixo, e as duas pílulas à direita. Para a ficha e o detalhe.
+ *   roxa), o nome e o tipo embaixo, e as duas pílulas à direita. Para a ficha e o detalhe. Com
+ *   `actions.onRemove`, ganha a lixeira no fim, em vermelho (perigo). É a linha do
+ *   `AzuosAttachmentList`.
  *
  * Arquivo que o navegador não sabe mostrar (Word, Excel) acaba baixado pelo abrir também — isso é
  * do navegador, não daqui. `rel="noopener noreferrer"` porque o endereço assinado não deve viajar
@@ -38,6 +42,9 @@ export type AzuosFileLinksProps = {
     openLabel?: string;
     /** O tamanho já escrito ("182 KB"), mostrado no `card` ao lado do tipo. */
     sizeLabel?: string;
+    /** A linha de baixo do `card`, escrita por quem chama ("Documento · 2,3 MB · anexado pelo
+        time"). Sem ela, o tipo pela extensão e o tamanho. */
+    detail?: string;
   };
   ui?: {
     /** `inline`: só as duas pílulas. `card`: a linha do arquivo com ícone, nome e as pílulas. */
@@ -46,6 +53,10 @@ export type AzuosFileLinksProps = {
     openIcon?: LucideIcon;
     className?: string;
   };
+  /** `isRemoving`: a lixeira gira enquanto o arquivo é excluído. */
+  state?: { isRemoving?: boolean };
+  /** Ausente quando quem está olhando não pode excluir: a lixeira nem aparece. */
+  actions?: { onRemove?: () => void };
 };
 
 type FileKind = { icon: LucideIcon; tone: AzuosCardTone; label: string };
@@ -73,8 +84,9 @@ export function fileKindOf(fileName: string): FileKind {
 const PILL =
   'inline-flex control-sm shrink-0 items-center gap-1.5 rounded-button bg-muted px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none';
 
-export function AzuosFileLinks({ data, ui }: AzuosFileLinksProps) {
-  if (ui?.layout === 'card') return <FileCard data={data} ui={ui} />;
+export function AzuosFileLinks({ data, ui, state, actions }: AzuosFileLinksProps) {
+  if (ui?.layout === 'card')
+    return <FileCard data={data} ui={ui} state={state} actions={actions} />;
 
   return <FilePills data={data} ui={ui} className={ui?.className} />;
 }
@@ -116,10 +128,10 @@ function FilePills({
 }
 
 /** A linha do arquivo: o ícone do tipo, o nome e o tipo, e as duas pílulas à direita. */
-function FileCard({ data, ui }: Pick<AzuosFileLinksProps, 'data' | 'ui'>) {
+function FileCard({ data, ui, state, actions }: AzuosFileLinksProps) {
   const kind = fileKindOf(data.fileName);
   const KindIcon = kind.icon;
-  const details = [kind.label, data.sizeLabel].filter(Boolean).join(' · ');
+  const details = data.detail ?? [kind.label, data.sizeLabel].filter(Boolean).join(' · ');
 
   return (
     <div
@@ -143,7 +155,17 @@ function FileCard({ data, ui }: Pick<AzuosFileLinksProps, 'data' | 'ui'>) {
         </span>
         <span className="text-muted-foreground text-xs">{details}</span>
       </span>
-      <FilePills data={{ ...data, openLabel: data.openLabel }} ui={{ openIcon: ui?.openIcon }} />
+      <span className="flex shrink-0 items-center gap-1.5">
+        <FilePills data={data} ui={{ openIcon: ui?.openIcon }} />
+        {actions?.onRemove ? (
+          <AzuosActionButton
+            data={{ label: `Excluir ${data.fileName}` }}
+            ui={{ variant: 'danger-soft', size: 'sm', icon: Trash2, isIconOnly: true }}
+            state={{ isLoading: state?.isRemoving }}
+            actions={{ onClick: actions.onRemove }}
+          />
+        ) : null}
+      </span>
     </div>
   );
 }
