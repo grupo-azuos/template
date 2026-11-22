@@ -17,7 +17,7 @@ describe('AzuosBrandMark', () => {
     render(<AzuosBrandMark ui={{ variant: 'icon', size: 'sm' }} />);
 
     const brand = screen.getByRole('img', { name: 'Grupo Azuos' });
-    expect(brand.getAttribute('src')).toMatch(/azuos-icon|^data:image\/svg/);
+    expect(brand.getAttribute('src')).toBe('https://cdn.grupoazuos.com.br/logo/svg/icon.svg');
     expect(brand).toHaveAttribute('width', '28');
   });
 

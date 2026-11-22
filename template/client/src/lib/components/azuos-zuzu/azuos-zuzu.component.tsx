@@ -2,16 +2,8 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useRef } from 'react';
 
-import zuzuAlerta from './assets/zuzu-alerta.png';
-import zuzuApontando from './assets/zuzu-apontando.png';
-import zuzuDebrucado from './assets/zuzu-debrucado.png';
-import zuzuDormindo from './assets/zuzu-dormindo.png';
-import zuzuFestejando from './assets/zuzu-festejando.png';
-import zuzuIdeia from './assets/zuzu-ideia.png';
-import zuzuJoinha from './assets/zuzu-joinha.png';
-import zuzuLupa from './assets/zuzu-lupa.png';
-import zuzuRelogio from './assets/zuzu-relogio.png';
 import { prefersReducedMotion } from '../../motion/motion.util';
+import { brandAssetUrl } from '../../utils/brand-asset.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -46,16 +38,17 @@ export type AzuosZuzuProps = {
   ui?: { size?: number; className?: string };
 };
 
+/** As poses são arquivos da marca, na CDN do app brand (`zuzu/zuzu-<pose>.png`). */
 const POSES: Record<AzuosZuzuPose, string> = {
-  alert: zuzuAlerta,
-  pointing: zuzuApontando,
-  leaning: zuzuDebrucado,
-  sleeping: zuzuDormindo,
-  celebrating: zuzuFestejando,
-  idea: zuzuIdeia,
-  thumbsup: zuzuJoinha,
-  magnifier: zuzuLupa,
-  clock: zuzuRelogio,
+  alert: brandAssetUrl('zuzu/zuzu-alerta.png'),
+  pointing: brandAssetUrl('zuzu/zuzu-apontando.png'),
+  leaning: brandAssetUrl('zuzu/zuzu-debrucado.png'),
+  sleeping: brandAssetUrl('zuzu/zuzu-dormindo.png'),
+  celebrating: brandAssetUrl('zuzu/zuzu-festejando.png'),
+  idea: brandAssetUrl('zuzu/zuzu-ideia.png'),
+  thumbsup: brandAssetUrl('zuzu/zuzu-joinha.png'),
+  magnifier: brandAssetUrl('zuzu/zuzu-lupa.png'),
+  clock: brandAssetUrl('zuzu/zuzu-relogio.png'),
 };
 
 export function AzuosZuzu({ data, ui }: AzuosZuzuProps) {
