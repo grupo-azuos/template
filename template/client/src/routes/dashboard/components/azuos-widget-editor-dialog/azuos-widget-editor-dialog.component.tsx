@@ -1,4 +1,4 @@
-import { Check, ListFilter, Maximize2, Minimize2, Sparkles } from 'lucide-react';
+import { Check, ListFilter } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
 import { todayIso } from '@template/shared/domain/calendar-date.util';
@@ -29,14 +29,7 @@ import {
 import { AzuosActionButton } from '../../../../lib/components/azuos-action-button/azuos-action-button.component';
 import { AzuosCheckboxField } from '../../../../lib/components/azuos-checkbox-field/azuos-checkbox-field.component';
 import { AzuosDateRangeField } from '../../../../lib/components/azuos-date-range-field/azuos-date-range-field.component';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../../../lib/components/azuos-dialog/azuos-dialog';
+import { AzuosExpandableScreen } from '../../../../lib/components/azuos-expandable-screen/azuos-expandable-screen.component';
 import { AzuosFilterField } from '../../../../lib/components/azuos-filter-field/azuos-filter-field.component';
 import { AzuosSegmentedControl } from '../../../../lib/components/azuos-segmented-control/azuos-segmented-control.component';
 import { AzuosSelectField } from '../../../../lib/components/azuos-select-field/azuos-select-field.component';
@@ -61,10 +54,10 @@ import {
 } from './widget-editor.util';
 
 /**
- * O BLOCO ABERTO PARA EDITAR — no formato do estúdio: à esquerda o título, a grade com os tipos
- * de gráfico e os campos (fonte, agrupar, dividir, período, filtro); à direita a
- * PRÉ-VISUALIZAÇÃO EM TEMPO REAL, com os números de verdade do bloco como ele está agora.
- * Trocar o gráfico ou a fonte acerta o resto sozinho (`fitGroup`), para o formulário nunca
+ * O BLOCO ABERTO PARA EDITAR — no formato do editor de painel do Grafana, numa tela cheia: em
+ * cima a PRÉ-VISUALIZAÇÃO EM TEMPO REAL, com os números de verdade do bloco como ele está agora;
+ * embaixo a consulta (fonte, agrupar, dividir, período, filtro); na lateral o tipo de gráfico e o
+ * título. Trocar o gráfico ou a fonte acerta o resto sozinho (`fitGroup`), para o formulário nunca
  * ficar numa combinação que o servidor recusa.
  *
  * `useState` aqui é estado de formulário; quem guarda no rascunho do painel é o view-model.
@@ -76,7 +69,7 @@ export type AzuosWidgetEditorDialogProps = {
     /** Os números do bloco como está no editor; sem ela, a pré-visualização espera. */
     preview?: WidgetState | null;
   };
-  /** `isHidden`: o montador de filtros está aberto por cima — o diálogo sai da frente sem perder o que foi preenchido. */
+  /** `isHidden`: o montador de filtros está aberto por cima — o editor sai da frente sem perder o que foi preenchido. */
   state?: { isHidden?: boolean };
   actions: {
     onClose: () => void;
@@ -93,49 +86,43 @@ export function AzuosWidgetEditorDialog({ data, state, actions }: AzuosWidgetEdi
   const form = useWidgetDraft(data.editing, actions.onSubmit, actions.onPreviewChange);
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => (open ? undefined : actions.onClose())}>
-      {/* Só a LARGURA cresce: a pré-visualização ganha espaço para o gráfico respirar. O corpo
-          rola sozinho; cabeçalho e rodapé ficam presos (o "Adicionar" sempre à vista). */}
-      <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(96vw,84rem)]">
-        <DialogHeader className="flex-row items-center gap-3 border-b border-border px-6 py-4">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-box bg-primary text-primary-foreground">
-            <Sparkles className="size-5" aria-hidden="true" />
-          </span>
-          <span className="min-w-0">
-            <DialogTitle>{data.editing?.isNew ? 'Novo bloco' : 'Editar bloco'}</DialogTitle>
-            <DialogDescription>
-              Escolha o gráfico, de onde vêm os números e o recorte — e veja o resultado ao lado.
-            </DialogDescription>
-          </span>
-        </DialogHeader>
-        {form.widget ? (
-          <EditorBody
-            data={{
-              widget: form.widget,
-              filters: data.filters,
-              preview: data.preview ?? null,
-              error: form.error,
-              isNew: data.editing?.isNew !== false,
-            }}
-            state={{ isPreviewWide: form.isPreviewWide }}
-            actions={{
-              onChange: form.onChange,
-              onSubmit: form.onSubmit,
-              onClose: actions.onClose,
-              onOpenFilters: actions.onOpenFilters,
-              onTogglePreviewWide: form.onTogglePreviewWide,
-            }}
-          />
-        ) : null}
-      </DialogContent>
-    </Dialog>
+    <AzuosExpandableScreen
+      data={{
+        title: data.editing?.isNew === false ? 'Editar bloco' : 'Novo bloco',
+        description:
+          'O bloco em cima, a consulta embaixo e o tipo de gráfico ao lado — o resultado muda na hora.',
+      }}
+      state={{ isOpen }}
+      actions={{ onClose: actions.onClose }}
+    >
+      {form.widget ? (
+        <EditorBody
+          data={{
+            widget: form.widget,
+            filters: data.filters,
+            preview: data.preview ?? null,
+            error: form.error,
+            isNew: data.editing?.isNew !== false,
+          }}
+          actions={{
+            onChange: form.onChange,
+            onSubmit: form.onSubmit,
+            onClose: actions.onClose,
+            onOpenFilters: actions.onOpenFilters,
+          }}
+        />
+      ) : null}
+    </AzuosExpandableScreen>
   );
 }
 
-/** O formulário e a pré-visualização lado a lado, com o rodapé preso embaixo. */
+/**
+ * O EDITOR DO BLOCO no formato do Grafana: o bloco GRANDE em cima, com os números de agora;
+ * embaixo, a CONSULTA (de onde vêm os números e o recorte); na lateral, as OPÇÕES do gráfico (o
+ * tipo, o título, o calendário). Tudo que muda aparece na hora em cima.
+ */
 function EditorBody({
   data,
-  state,
   actions,
 }: {
   data: {
@@ -145,54 +132,48 @@ function EditorBody({
     error: string | null;
     isNew: boolean;
   };
-  state: { isPreviewWide: boolean };
-  actions: WidgetFormProps['actions'] & {
-    onSubmit: () => void;
-    onClose: () => void;
-    onTogglePreviewWide: () => void;
-  };
+  actions: WidgetFormProps['actions'] & { onSubmit: () => void; onClose: () => void };
 }) {
+  const form = { widget: data.widget, filters: data.filters };
+  const fieldActions = { onChange: actions.onChange, onOpenFilters: actions.onOpenFilters };
+
   return (
     <form
-      className="flex min-h-0 flex-1 flex-col"
+      className="flex h-full min-h-0 flex-col"
       onSubmit={(event) => {
         event.preventDefault();
         actions.onSubmit();
       }}
     >
-      <div
-        className={cn(
-          'grid min-h-0 flex-1 overflow-y-auto',
-          !state.isPreviewWide && 'lg:grid-cols-[minmax(0,1fr)_minmax(24rem,34rem)]',
-        )}
-      >
-        {/* Ampliada, a pré-visualização toma o diálogo inteiro; o formulário só sai da frente —
-            o rascunho mora no diálogo, então nada do preenchido se perde. */}
-        {state.isPreviewWide ? null : (
-          <WidgetForm
-            data={{ widget: data.widget, filters: data.filters }}
-            actions={{ onChange: actions.onChange, onOpenFilters: actions.onOpenFilters }}
-          />
-        )}
-        <Preview
-          data={{ widget: data.widget, preview: data.preview, filters: data.filters }}
-          state={{ isWide: state.isPreviewWide }}
-          actions={{ onToggleWide: actions.onTogglePreviewWide }}
-        />
+      <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="flex min-h-0 flex-col lg:overflow-y-auto">
+          <Preview data={{ widget: data.widget, preview: data.preview, filters: data.filters }} />
+          {/* A CONSULTA: de onde vêm os números, como se agrupam e quais entram na conta. */}
+          <section aria-label="Consulta" className="border-border flex flex-col gap-5 border-t p-5">
+            <QueryFields data={form} actions={fieldActions} />
+          </section>
+        </div>
+        {/* AS OPÇÕES do gráfico, na lateral, como no Grafana: o tipo primeiro, depois o resto. */}
+        <aside
+          aria-label="Opções do gráfico"
+          className="border-border bg-mantle flex flex-col gap-5 border-t p-5 lg:overflow-y-auto lg:border-t-0 lg:border-l"
+        >
+          <ChartOptions data={form} actions={fieldActions} />
+        </aside>
       </div>
-      <DialogFooter className="items-center border-t border-border px-6 py-4">
+      <footer className="border-border bg-card flex items-center justify-end gap-2 border-t px-6 py-3">
         {data.error ? (
-          <p role="alert" className="mr-auto text-sm text-destructive">
+          <p role="alert" className="text-destructive mr-auto text-sm">
             {data.error}
           </p>
         ) : null}
         <AzuosActionButton
-          data={{ label: 'Cancelar' }}
+          data={{ label: 'Descartar' }}
           ui={{ variant: 'ghost' }}
           actions={{ onClick: actions.onClose }}
         />
         <AzuosSubmitButton data={{ label: data.isNew ? 'Adicionar bloco' : 'Aplicar' }} />
-      </DialogFooter>
+      </footer>
     </form>
   );
 }
@@ -209,20 +190,16 @@ function useWidgetDraft(
   const initial = editing ? startOf(editing) : null;
   const [widget, setWidget] = useState<Widget | null>(initial);
   const [error, setError] = useState<string | null>(null);
-  const [isPreviewWide, setIsPreviewWide] = useState(false);
   const [seen, setSeen] = useState(initial);
   if (seen?.id !== initial?.id) {
     setSeen(initial);
     setWidget(initial);
     setError(null);
-    setIsPreviewWide(false);
   }
 
   return {
     widget,
     error,
-    isPreviewWide,
-    onTogglePreviewWide: () => setIsPreviewWide((wide) => !wide),
     onChange: (next: Partial<Widget>) => {
       if (!widget) return;
       const updated = followTitle(widget, fitGroup({ ...widget, ...next }));
@@ -265,16 +242,34 @@ type WidgetFormProps = {
 };
 
 /**
- * Os campos, em três grupos com a mesma grade: cada campo ocupa a coluna inteira dele (nada de
- * caixas de largura solta), e o que é uma linha só — a janela da agenda, "só os meus" — atravessa
- * a grade toda.
+ * A CONSULTA, em grupos com a mesma grade: cada campo ocupa a coluna inteira dele (nada de caixas
+ * de largura solta), e o que é uma linha só — a janela da agenda, "só os meus" — atravessa a
+ * grade toda.
  */
-function WidgetForm({ data, actions }: WidgetFormProps) {
+function QueryFields({ data, actions }: WidgetFormProps) {
+  return (
+    <>
+      <FormGroup data={{ legend: 'Os dados', hint: 'De onde vêm e como se agrupam.' }}>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SourceFields data={data} actions={actions} />
+        </div>
+      </FormGroup>
+      <FormGroup data={{ legend: 'O recorte', hint: 'Quais entram na conta.' }}>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <ScopeFields data={data} actions={actions} />
+        </div>
+      </FormGroup>
+    </>
+  );
+}
+
+/** As OPÇÕES do gráfico: o título e o tipo. */
+function ChartOptions({ data, actions }: WidgetFormProps) {
   const { widget } = data;
   const change = actions.onChange;
 
   return (
-    <div className="flex flex-col gap-5 px-6 py-5">
+    <>
       <FormGroup data={{ legend: 'O gráfico', hint: 'Como os números aparecem.' }}>
         <AzuosTextField
           data={{
@@ -290,17 +285,7 @@ function WidgetForm({ data, actions }: WidgetFormProps) {
           actions={{ onChange: (kind) => change({ kind }) }}
         />
       </FormGroup>
-      <FormGroup data={{ legend: 'Os dados', hint: 'De onde vêm e como se agrupam.' }}>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <SourceFields data={data} actions={actions} />
-        </div>
-      </FormGroup>
-      <FormGroup data={{ legend: 'O recorte', hint: 'Quais entram na conta.' }}>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <ScopeFields data={data} actions={actions} />
-        </div>
-      </FormGroup>
-    </div>
+    </>
   );
 }
 
@@ -319,10 +304,10 @@ function FormGroup({
   children: ReactNode;
 }) {
   return (
-    <fieldset className="flex flex-col gap-4 rounded-surface border border-border p-4">
-      <legend className="px-1 text-sm font-bold text-ink-900">
+    <fieldset className="rounded-surface bg-card shadow-card flex flex-col gap-4 p-4">
+      <legend className="text-ink-900 float-left mb-1 w-full text-sm font-bold">
         {data.legend}
-        <span className="ml-2 text-xs font-normal text-ink-500">{data.hint}</span>
+        <span className="text-ink-500 ml-2 text-xs font-normal">{data.hint}</span>
       </legend>
       {children}
     </fieldset>
@@ -363,8 +348,8 @@ function KindRow({
 }) {
   return (
     <div>
-      <p className="mb-1.5 text-xs font-semibold text-ink-500">{data.title}</p>
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+      <p className="text-ink-500 mb-1.5 text-xs font-semibold">{data.title}</p>
+      <div className="grid grid-cols-3 gap-2">
         {data.kinds.map((kind) => {
           const look = WIDGET_KIND_LOOK[kind];
           const isChosen = kind === data.value;
@@ -380,8 +365,8 @@ function KindRow({
               aria-description={`${WIDGET_KIND_LABELS[kind]} · ${weightLabel(WIDGET_WEIGHTS[kind])}`}
               onClick={() => actions.onChange(kind)}
               className={cn(
-                'flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-box px-2 py-2.5 text-xs font-semibold transition-colors',
-                'focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+                'rounded-box flex min-h-16 flex-col items-center justify-center gap-1.5 px-2 py-2.5 text-xs font-semibold transition-colors',
+                'focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
                 isChosen
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-ink-700 hover:bg-mantle',
@@ -516,7 +501,7 @@ function WindowFields({
           }}
         />
       )}
-      <p className="text-xs text-ink-500">{windowLabel(window)} · só esses dias saem do banco.</p>
+      <p className="text-ink-500 text-xs">{windowLabel(window)} · só esses dias saem do banco.</p>
     </div>
   );
 }
@@ -596,7 +581,7 @@ function ScopeFields({ data, actions }: WidgetFormProps) {
         </AzuosFilterField>
       </div>
       {hasPersonField(widget.source) ? (
-        <div className="border-t border-border pt-4 sm:col-span-full">
+        <div className="border-border border-t pt-4 sm:col-span-full">
           <AzuosCheckboxField
             data={{
               label: 'Só os meus',
@@ -612,21 +597,11 @@ function ScopeFields({ data, actions }: WidgetFormProps) {
   );
 }
 
-/**
- * O bloco desenhado como vai ficar no painel, com os números de agora.
- *
- * "Ampliar" alarga a pré-visualização DENTRO do diálogo, e não numa tela cheia por cima: a tela
- * cheia brigava com o diálogo e com a tela de montar o painel. Assim é o mesmo bloco, com o
- * mesmo rascunho — o que se muda no formulário aparece aqui, e voltar não perde nada.
- */
+/** O bloco desenhado como vai ficar no painel, com os números de agora. */
 function Preview({
   data,
-  state,
-  actions,
 }: {
   data: { widget: Widget; preview: WidgetState | null; filters: SavedFilter[] };
-  state: { isWide: boolean };
-  actions: { onToggleWide: () => void };
 }) {
   const result = data.preview ?? { data: null, isLoading: true, error: null };
   const filterName = data.widget.filterId
@@ -634,23 +609,17 @@ function Preview({
     : null;
 
   return (
-    <aside
+    <section
       aria-label="Pré-visualização em tempo real"
-      className={cn(
-        'flex flex-col gap-3 bg-mantle p-5',
-        !state.isWide && 'border-t border-border lg:border-t-0 lg:border-l',
-      )}
+      className="bg-mantle flex flex-col gap-3 p-5"
     >
-      <PreviewHeader
-        data={{
-          count: result.data
-            ? `${result.data.total} ${DATA_SOURCES[data.widget.source].noun}`
-            : '…',
-        }}
-        state={state}
-        actions={actions}
-      />
-      <div className={previewHeightClass(data.widget.kind, state.isWide)}>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-ink-500 text-xs font-semibold">Pré-visualização em tempo real</p>
+        <span className="rounded-chip bg-card text-ink-700 px-2 py-0.5 text-xs font-semibold">
+          {result.data ? `${result.data.total} ${DATA_SOURCES[data.widget.source].noun}` : '…'}
+        </span>
+      </div>
+      <div className={previewHeightClass(data.widget.kind)}>
         <AzuosBoardWidget
           data={{
             widget: { ...data.widget, title: data.widget.title || 'Sem título' },
@@ -661,7 +630,7 @@ function Preview({
           actions={{ onEdit: () => undefined, onRemove: () => undefined }}
         />
       </div>
-    </aside>
+    </section>
   );
 }
 
@@ -670,44 +639,10 @@ function Preview({
  * (`h-96`) ele ficava gordo, com o anel solto no meio — aqui ele tem a altura de uma linha do
  * painel (140px), a mesma em que vai nascer.
  */
-export function previewHeightClass(kind: Widget['kind'], isWide: boolean): string {
+export function previewHeightClass(kind: Widget['kind']): string {
   if (kind === 'ringCard') return 'h-36';
 
-  return isWide ? 'h-[62vh]' : 'h-96';
-}
-
-/** O rótulo, quantos itens entram e o botão de ampliar/voltar. */
-function PreviewHeader({
-  data,
-  state,
-  actions,
-}: {
-  data: { count: string };
-  state: { isWide: boolean };
-  actions: { onToggleWide: () => void };
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <p className="text-xs font-semibold tracking-wider text-ink-500 uppercase">
-        Pré-visualização em tempo real
-      </p>
-      <span className="flex items-center gap-2">
-        <span className="rounded-chip bg-card px-2 py-0.5 text-xs font-semibold text-ink-700">
-          {data.count}
-        </span>
-        <AzuosActionButton
-          data={{ label: state.isWide ? 'Voltar ao formulário' : 'Ampliar pré-visualização' }}
-          ui={{
-            variant: 'ghost',
-            size: 'sm',
-            icon: state.isWide ? Minimize2 : Maximize2,
-            isIconOnly: true,
-          }}
-          actions={{ onClick: actions.onToggleWide }}
-        />
-      </span>
-    </div>
-  );
+  return 'h-96';
 }
 
 const SOURCE_OPTIONS = DATA_SOURCE_KEYS.map((key) => ({

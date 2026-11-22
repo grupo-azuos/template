@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { drillSearchSchema } from '@template/shared/schemas/board-drill.schema';
 import { type Task } from '@template/shared/schemas/task.schema';
 import { useState } from 'react';
 
+import { AzuosBoardDrillBanner } from '../../lib/components/azuos-board-drill-banner/azuos-board-drill-banner.component';
 import { AzuosConfirmDialog } from '../../lib/components/azuos-confirm-dialog/azuos-confirm-dialog.component';
 import { AzuosTaskFormDialog } from '../../lib/components/azuos-task-form-dialog/azuos-task-form-dialog.component';
 import { AzuosTaskListView } from '../../lib/components/azuos-task-list-view/azuos-task-list-view.component';
@@ -15,17 +17,25 @@ import { useTaskListModel } from '../../lib/view-models/use-task-list.model';
  * ao formulário — e ele não é dado, é qual peça da tela está na frente.
  */
 export const Route = createFileRoute('/tasks/')({
+  /* O recorte de um clique num bloco de Tarefas do painel. Valor torto vira "sem recorte". */
+  validateSearch: drillSearchSchema,
   component: TaskListRoute,
 });
 
 type FormTarget = { task: Task | null } | null;
 
 function TaskListRoute() {
-  const list = useTaskListModel();
+  const list = useTaskListModel(Route.useSearch());
   const [formTarget, setFormTarget] = useState<FormTarget>(null);
 
   return (
     <>
+      {list.data.drillBanner ? (
+        <AzuosBoardDrillBanner
+          data={list.data.drillBanner}
+          actions={{ onClear: list.actions.onClearDrill, onBack: list.actions.onBackToBoard }}
+        />
+      ) : null}
       <AzuosTaskListView
         data={list.data}
         state={list.state}

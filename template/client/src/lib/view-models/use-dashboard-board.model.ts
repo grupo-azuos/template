@@ -5,15 +5,21 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 
 import {
   type Board,
   type BoardFilter,
   boardFilterApplies,
+  BOARD_FILTER_CARD_SOURCES,
+  boardFilterDisplay,
+  type BoardFilterDisplay,
   type BoardFilterKind,
   BOARD_FILTER_KIND_LABELS,
+  type BoardFilterPlace,
   type BoardFilterValues,
+  type BoardFilterWidth,
   boardMatches,
   boardWeight,
   COMPACT_WIDGET_KINDS,
@@ -29,12 +35,14 @@ import {
   type WidgetData,
   type WidgetKind,
   type WidgetQuery,
+  widgetQueryOf,
 } from '@template/shared/schemas/dashboard-board.schema';
 import { hasRoleAtLeast } from '@template/shared/schemas/user.schema';
 
 import { dashboardBoardsApi } from '../api/dashboard-boards.api';
 import { ApiError, readError } from '../api/http-client';
 import { mockAuth } from '../auth/mock-user';
+import { type BoardItem, boardLinkOf } from '../utils/board-link.util';
 import { type PersonOption, usePeopleModel } from './use-people.model';
 
 /**
@@ -64,8 +72,14 @@ export type DashboardBoardModel = {
     /** Os filtros do painel (Pessoa, Período) e o que quem vê escolheu em cada um. */
     boardFilters: BoardFilter[];
     filterValues: BoardFilterValues;
-    /** Quem o filtro "Pessoa" oferece — as pessoas com acesso ao sistema; o filtro guarda o id. */
+    /** Os números dos filtros em "Cards", pelo id do filtro: quantos há em cada opção. */
+    filterCounts: Record<string, FilterCounts>;
+    /** Quem o filtro "Responsável" oferece — as pessoas com acesso ao sistema; o filtro guarda o id. */
     people: PersonOption[];
+    /** Os pontos que o painel já gasta, da cota de `MAX_BOARD_WEIGHT`. */
+    weight: number;
+    /** De quanto em quanto o painel se renova sozinho (uma das `REFRESH_OPTIONS`). */
+    refreshEvery: string;
   };
   state: {
     isLoading: boolean;
@@ -92,22 +106,58 @@ export type DashboardBoardModel = {
     onCloseEditor: () => void;
     onSubmitWidget: (widget: Widget) => void;
     onRemoveWidget: (id: string) => void;
+    /** O "Duplicar" do menu do bloco: uma cópia no fim do painel. */
+    onDuplicateWidget: (id: string) => void;
+    /** Quem vê escolheu de quanto em quanto o painel se renova. */
+    onRefreshEveryChange: (value: string) => void;
     /** O editor avisa a cada mudança, e a pré-visualização busca os números dela. */
     onPreviewChange: (widget: Widget) => void;
     /** Quem vê escolheu um valor num filtro do painel — todos os blocos releem. */
     onFilterValueChange: (patch: Partial<BoardFilterValues>) => void;
+    /** "Limpar filtros": todos os filtros do painel voltam a "todos". */
+    onClearFilterValues: () => void;
     /** Montando: põe um filtro no painel (um de cada tipo) ou tira. */
     onAddBoardFilter: (kind: BoardFilterKind) => void;
     onRemoveBoardFilter: (id: string) => void;
+    /** Montando: o desenho do filtro na barra (lista suspensa, busca, cards). */
+    onBoardFilterDisplayChange: (id: string, display: BoardFilterDisplay) => void;
+    /** Montando: o filtro numa peça ou na linha inteira da barra. */
+    onBoardFilterWidthChange: (id: string, width: BoardFilterWidth) => void;
+    /** Montando: a ordem nova dos filtros na barra. */
+    onBoardFilterPlaceChange: (places: readonly BoardFilterPlaceChange[]) => void;
+    /**
+     * Clicou num item de um bloco (barra, fatia, linha, card): abre a lista da fonte com o
+     * recorte do bloco e o valor clicado.
+     */
+    onOpenItem: (widget: Widget, item: BoardItem) => void;
   };
 };
 
 /** De quanto em quanto os números se renovam sozinhos. */
 export const REFRESH_MS = 5 * 60 * 1000;
 
+/**
+ * O "ATUALIZAR A CADA" do Grafana: quem vê escolhe de quanto em quanto o painel se renova sozinho
+ * — ou desliga. O valor é de quem vê, e não se grava no painel.
+ */
+export const REFRESH_OPTIONS = [
+  { value: 'off', label: 'Desligado' },
+  { value: '60000', label: '1 minuto' },
+  { value: String(REFRESH_MS), label: '5 minutos' },
+  { value: '900000', label: '15 minutos' },
+] as const;
+
+/** O intervalo em milissegundos de uma opção — `false` desliga a renovação sozinha. */
+export function refreshIntervalOf(value: string): number | false {
+  const ms = Number(value);
+
+  return Number.isFinite(ms) && ms > 0 ? ms : false;
+}
+
 type Draft = { widgets: Widget[]; layout: LayoutItem[]; filters: BoardFilter[] };
 
 export function useDashboardBoardModel(): DashboardBoardModel {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isManager = hasRoleAtLeast(mockAuth.getUser().role, 'manager');
   const scopes = visibleScopes(isManager);
@@ -115,6 +165,8 @@ export function useDashboardBoardModel(): DashboardBoardModel {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editing, setEditing] = useState<DashboardBoardModel['data']['editing']>(null);
   const [chosen, setChosen] = useState<BoardFilterValues>(EMPTY_BOARD_FILTER_VALUES);
+  const [refreshEvery, setRefreshEvery] = useState<string>(String(REFRESH_MS));
+  const refetchInterval = refreshIntervalOf(refreshEvery);
   const people = usePeopleModel();
 
   const board = useQuery({
@@ -125,8 +177,9 @@ export function useDashboardBoardModel(): DashboardBoardModel {
   const shown: Draft = draft ?? saved.content;
   /* Valor de um filtro que o painel não tem mais não vale: tirar o filtro solta o recorte. */
   const filterValues = activeValues(shown.filters, chosen);
-  const results = useWidgetResults(shown.widgets, filterValues);
+  const results = useWidgetResults(shown.widgets, filterValues, refetchInterval);
   const preview = useWidgetPreview(editing, filterValues);
+  const filterCounts = useFilterCounts(shown.filters, filterValues, refetchInterval);
   useDashboardStream(queryClient);
 
   const save = useMutation({
@@ -152,7 +205,10 @@ export function useDashboardBoardModel(): DashboardBoardModel {
       updatedAt: saved.updatedAt,
       boardFilters: shown.filters,
       filterValues,
+      filterCounts,
       people: people.people,
+      weight: boardWeight(shown.widgets),
+      refreshEvery,
     },
     state: {
       isLoading: board.isLoading,
@@ -202,14 +258,32 @@ export function useDashboardBoardModel(): DashboardBoardModel {
           widgets: current.widgets.filter((widget) => widget.id !== id),
           layout: current.layout.filter((item) => item.i !== id),
         })),
+      onDuplicateWidget: (id) => {
+        if (boardWeight(shown.widgets) >= MAX_BOARD_WEIGHT) return;
+        edit((current) => duplicateWidget(current, id, newWidgetId()));
+      },
+      onRefreshEveryChange: setRefreshEvery,
       onPreviewChange: preview.onChange,
       onFilterValueChange: (patch) => setChosen((current) => ({ ...current, ...patch })),
+      onClearFilterValues: () => setChosen(EMPTY_BOARD_FILTER_VALUES),
       onAddBoardFilter: (kind) => edit((current) => addBoardFilter(current, kind)),
       onRemoveBoardFilter: (id) =>
         edit((current) => ({
           ...current,
           filters: current.filters.filter((filter) => filter.id !== id),
         })),
+      onBoardFilterDisplayChange: (id, display) =>
+        edit((current) => setBoardFilterDisplay(current, id, display)),
+      onBoardFilterWidthChange: (id, width) =>
+        edit((current) => setBoardFilterWidth(current, id, width)),
+      onBoardFilterPlaceChange: (places) =>
+        edit((current) => setBoardFilterPlaces(current, places)),
+      onOpenItem: (widget, item) => {
+        const link = boardLinkOf(widget, filterValues, item);
+        /* A tela vem do arquivo das fontes do projeto (um texto), e o roteador não a confere aqui:
+           toda tela de destino aceita o recorte (`drillSearchSchema`). */
+        if (link) void navigate(link as never);
+      },
     },
   };
 }
@@ -220,6 +294,48 @@ export function addBoardFilter(current: Draft, kind: BoardFilterKind): Draft {
   const filter = { id: kind, kind, label: BOARD_FILTER_KIND_LABELS[kind] };
 
   return { ...current, filters: [...current.filters, filter] };
+}
+
+/** Troca o desenho de um filtro; o resto do painel fica como está. */
+export function setBoardFilterDisplay(
+  current: Draft,
+  id: string,
+  display: BoardFilterDisplay,
+): Draft {
+  return {
+    ...current,
+    filters: current.filters.map((filter) => (filter.id === id ? { ...filter, display } : filter)),
+  };
+}
+
+/** A largura nova do filtro na barra — normal ou a linha inteira. */
+export function setBoardFilterWidth(current: Draft, id: string, width: BoardFilterWidth): Draft {
+  return {
+    ...current,
+    filters: current.filters.map((filter) => (filter.id === id ? { ...filter, width } : filter)),
+  };
+}
+
+export type BoardFilterPlaceChange = { id: string; place: BoardFilterPlace };
+
+/**
+ * O lugar novo de cada filtro — a ordem da barra. Só muda o lugar: o resto do filtro (nome,
+ * desenho) fica como estava, e um id que o painel não tem é ignorado.
+ */
+export function setBoardFilterPlaces(
+  current: Draft,
+  places: readonly BoardFilterPlaceChange[],
+): Draft {
+  const byId = new Map(places.map((change) => [change.id, change.place]));
+
+  return {
+    ...current,
+    filters: current.filters.map((filter) => {
+      const place = byId.get(filter.id);
+
+      return place ? { ...filter, place } : filter;
+    }),
+  };
 }
 
 /** Só valem os valores dos filtros que o painel tem. */
@@ -250,19 +366,89 @@ function useWidgetPreview(
   return { result: widget ? (results[widget.id] ?? null) : null, onChange: setChanged };
 }
 
+export type FilterCounts = {
+  total: number;
+  series: { key: string; label: string; value: number }[];
+  isLoading: boolean;
+};
+
+/**
+ * A CONTA DE CADA CARD de um filtro em "Cards": a mesma pergunta de um bloco — a fonte agrupada
+ * pelo campo do filtro —, recortada pelos OUTROS filtros do painel. O próprio filtro fica de fora
+ * da conta: com "Concluída" escolhido, os outros cards continuam mostrando quantos há neles, e não
+ * zero.
+ */
+export function filterCountQuery(
+  filter: Pick<BoardFilter, 'kind'>,
+  values: BoardFilterValues,
+): WidgetQuery | null {
+  const card = BOARD_FILTER_CARD_SOURCES[filter.kind];
+  if (!card) return null;
+  const others = { ...values, [filter.kind]: null };
+
+  return {
+    source: card.source,
+    groupBy: card.groupBy,
+    splitBy: null,
+    filterId: null,
+    onlyMine: false,
+    period: 'all',
+    window: null,
+    person: boardFilterApplies('person', card.source) ? others.person : null,
+    boardPeriod: values.period,
+    matches: boardMatches(others, card.source),
+  };
+}
+
+function useFilterCounts(
+  filters: readonly BoardFilter[],
+  values: BoardFilterValues,
+  refetchInterval: number | false,
+): Record<string, FilterCounts> {
+  const asked = filters.flatMap((filter) => {
+    if (boardFilterDisplay(filter) !== 'cards') return [];
+    const query = filterCountQuery(filter, values);
+
+    return query ? [{ id: filter.id, query }] : [];
+  });
+  const queries = useQueries({
+    queries: asked.map(({ query }) => ({
+      queryKey: ['dashboard-board', 'data', query],
+      queryFn: () => dashboardBoardsApi.data(query).then(({ data }) => data.result),
+      refetchInterval,
+    })),
+  });
+
+  return Object.fromEntries(
+    asked.map(({ id }, index) => {
+      const result = queries[index];
+
+      return [
+        id,
+        {
+          total: result?.data?.total ?? 0,
+          series: result?.data?.series ?? [],
+          isLoading: result?.isFetching ?? false,
+        },
+      ];
+    }),
+  );
+}
+
 /** Os números de cada bloco — uma consulta por bloco, em cache pela pergunta, não pelo bloco. */
 function useWidgetResults(
   widgets: Widget[],
   values: BoardFilterValues,
+  refetchInterval: number | false = REFRESH_MS,
 ): Record<string, WidgetState> {
   const queries = useQueries({
     queries: widgets.map((widget) => {
-      const query = queryOf(widget, values);
+      const query = widgetQueryOf(widget, values);
 
       return {
         queryKey: ['dashboard-board', 'data', query],
         queryFn: () => dashboardBoardsApi.data(query).then(({ data }) => data.result),
-        refetchInterval: REFRESH_MS,
+        refetchInterval,
       };
     }),
   });
@@ -319,10 +505,12 @@ export function visibleScopes(isManager: boolean): { value: DashboardScope; labe
  */
 function newWidget(kind: WidgetKind = 'column'): Widget {
   const source = DATA_SOURCE_KEYS[0]!;
-  const category = Object.entries(dimensionsOf(source)).find(([, dimension]) => dimension.kind === 'category');
+  const category = Object.entries(dimensionsOf(source)).find(
+    ([, dimension]) => dimension.kind === 'category',
+  );
 
   return {
-    id: `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    id: newWidgetId(),
     kind,
     title: '',
     source,
@@ -335,27 +523,23 @@ function newWidget(kind: WidgetKind = 'column'): Widget {
   };
 }
 
+/** Um id novo de bloco — do bloco novo e da cópia do "Duplicar". */
+export function newWidgetId(): string {
+  return `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
 /**
- * A pergunta de um bloco — a mesma pergunta em dois blocos usa a mesma consulta em cache. Os
- * filtros do painel entram só onde valem: "Pessoa" num bloco sem pessoa ficaria na chave do
- * cache sem mudar a resposta, e faria o bloco recarregar à toa.
+ * Uma CÓPIA do bloco, no mesmo tamanho, no fim do painel — o "Duplicar" do menu do bloco. O título
+ * ganha "(cópia)", para as duas não se confundirem.
  */
-export function queryOf(
-  widget: Widget,
-  values: BoardFilterValues = EMPTY_BOARD_FILTER_VALUES,
-): WidgetQuery {
-  return {
-    source: widget.source,
-    groupBy: widget.groupBy,
-    splitBy: widget.splitBy,
-    filterId: widget.filterId,
-    onlyMine: widget.onlyMine,
-    period: widget.period,
-    window: widget.window,
-    person: boardFilterApplies('person', widget.source) ? values.person : null,
-    boardPeriod: values.period,
-    matches: boardMatches(values, widget.source),
-  };
+export function duplicateWidget(current: Draft, id: string, copyId: string): Draft {
+  const widget = current.widgets.find((item) => item.id === id);
+  if (!widget) return current;
+  const size = current.layout.find((item) => item.i === id) ?? { w: 2, h: 2 };
+  const bottom = Math.max(0, ...current.layout.map((item) => item.y + item.h));
+  const copy = { ...widget, id: copyId, title: `${widget.title} (cópia)`.slice(0, 60) };
+
+  return upsertWidget(current, copy, { x: 0, y: bottom, w: size.w, h: size.h });
 }
 
 /**

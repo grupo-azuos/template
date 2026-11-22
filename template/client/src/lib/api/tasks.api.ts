@@ -1,3 +1,4 @@
+import { drillParam } from '@template/shared/schemas/board-drill.schema';
 import { type Paginated } from '@template/shared/schemas/pagination.schema';
 import {
   type CreateTaskInput,
@@ -20,6 +21,7 @@ export const tasksApi = {
         pageSize: query.pageSize,
         search: query.search,
         status: query.status,
+        drill: query.drill ? drillParam(query.drill) : undefined,
       },
     }),
 

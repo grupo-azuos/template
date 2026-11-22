@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { type SavedFilter, type Widget } from '@template/shared/schemas/dashboard-board.schema';
@@ -75,34 +75,33 @@ describe('agenda in the editor', () => {
   });
 });
 
-describe('wide preview', () => {
+describe('the full-screen editor', () => {
   // feliz
-  /* Ampliar é DENTRO do diálogo: o formulário sai da frente e volta com o que foi preenchido —
-     o rascunho é o mesmo dos dois lados. */
-  it('widens the preview in the dialog and comes back with the draft kept', () => {
+  /* Como no Grafana: o bloco grande em cima, a consulta embaixo e as opções do gráfico ao lado. */
+  it('shows the preview on top, the query below and the chart options on the side', () => {
     const props = makeProps({ ...WIDGET, title: '' }, true);
     render(<AzuosWidgetEditorDialog {...props} />);
     fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Meu bloco' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ampliar pré-visualização' }));
-    expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Meu bloco' })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Voltar ao formulário' }));
-    expect(screen.getByLabelText('Título')).toHaveValue('Meu bloco');
+    expect(screen.getByRole('dialog', { name: 'Novo bloco' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('region', { name: 'Pré-visualização em tempo real' }),
+    ).toHaveTextContent('Meu bloco');
+    expect(screen.getByRole('region', { name: 'Consulta' })).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Opções do gráfico' })).toContainElement(
+      screen.getByLabelText('Título'),
+    );
   });
 
   // triste
-  it('still submits from the footer while the preview is wide', () => {
+  it('discards without applying', () => {
     const props = makeProps({ ...WIDGET, title: 'Bloco' }, true);
     render(<AzuosWidgetEditorDialog {...props} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ampliar pré-visualização' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Adicionar bloco' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
 
-    expect(props.actions.onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Bloco' }),
-    );
+    expect(props.actions.onClose).toHaveBeenCalled();
+    expect(props.actions.onSubmit).not.toHaveBeenCalled();
   });
 });
 
@@ -156,7 +155,7 @@ describe('AzuosWidgetEditorDialog', () => {
   });
 
   // feliz
-  it('asks for the filter builder, and hides without losing what was filled in', () => {
+  it('asks for the filter builder, and hides without losing what was filled in', async () => {
     const props = makeProps();
     const { rerender } = render(<AzuosWidgetEditorDialog {...props} />);
     fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Rascunho' } });
@@ -164,7 +163,7 @@ describe('AzuosWidgetEditorDialog', () => {
     expect(props.actions.onOpenFilters).toHaveBeenCalled();
 
     rerender(<AzuosWidgetEditorDialog {...props} state={{ isHidden: true }} />);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     rerender(<AzuosWidgetEditorDialog {...props} state={{ isHidden: false }} />);
     expect(screen.getByLabelText(/Título/)).toHaveValue('Rascunho');
   });
@@ -268,7 +267,7 @@ describe('AzuosWidgetEditorDialog', () => {
     );
 
     expect(
-      screen.getByRole('complementary', { name: 'Pré-visualização em tempo real' }),
+      screen.getByRole('region', { name: 'Pré-visualização em tempo real' }),
     ).toHaveTextContent('42 tarefas');
     fireEvent.click(screen.getByRole('radio', { name: 'Rosca' }));
 
@@ -281,7 +280,7 @@ describe('AzuosWidgetEditorDialog', () => {
     render(<AzuosWidgetEditorDialog {...makeProps()} />);
 
     expect(
-      screen.getByRole('complementary', { name: 'Pré-visualização em tempo real' }),
+      screen.getByRole('region', { name: 'Pré-visualização em tempo real' }),
     ).toHaveTextContent('…');
   });
 

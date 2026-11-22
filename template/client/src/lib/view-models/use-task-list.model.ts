@@ -4,12 +4,14 @@ import {
   type TaskProgress,
   type TaskStatus,
 } from '@template/shared/domain/task-status.util';
+import { type BoardDrill } from '@template/shared/schemas/board-drill.schema';
 import { MAX_PAGE_SIZE } from '@template/shared/schemas/pagination.schema';
 import { type Task } from '@template/shared/schemas/task.schema';
 import { useState } from 'react';
 
 import { readError } from '../api/http-client';
 import { tasksApi } from '../api/tasks.api';
+import { type BoardDrillModel, useBoardDrillModel } from './use-board-drill.model';
 
 export type TaskListFilter = {
   search: string;
@@ -25,6 +27,8 @@ export type TaskListModel = {
     filter: TaskListFilter;
     /** A tarefa que está sendo confirmada para exclusão. */
     pendingDelete: Task | null;
+    /** A faixa do recorte do Painel, quando a lista veio de um clique num bloco. */
+    drillBanner: BoardDrillModel['banner'];
   };
   state: {
     isLoading: boolean;
@@ -49,6 +53,9 @@ export type TaskListModel = {
     onAskDelete: (task: Task) => void;
     onCancelDelete: () => void;
     onConfirmDelete: () => void;
+    /** "Limpar recorte": a lista volta aos filtros dela. */
+    onClearDrill: () => void;
+    onBackToBoard: () => void;
   };
 };
 
@@ -63,12 +70,18 @@ export const TASKS_QUERY_KEY = ['tasks'] as const;
  * Abrir o formulário de criar/editar NÃO está aqui: ele tem o próprio view-model
  * (`use-task-form.model.ts`), e a rota compõe os dois.
  */
-export function useTaskListModel(): TaskListModel {
+export function useTaskListModel(link: { drill?: BoardDrill } = {}): TaskListModel {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<TaskListFilter>(EMPTY_FILTER);
   const [pendingDelete, setPendingDelete] = useState<Task | null>(null);
+  /* O recorte de um clique no Painel (`?drill=`): soma ao filtro da lista. */
+  const drill = useBoardDrillModel(link.drill, '/tasks');
 
-  const scope = { search: filter.search.trim() || undefined, status: filter.status || undefined };
+  const scope = {
+    search: filter.search.trim() || undefined,
+    status: filter.status || undefined,
+    drill: drill.drill ?? undefined,
+  };
 
   const list = useQuery({
     queryKey: [...TASKS_QUERY_KEY, 'list', scope],
@@ -92,8 +105,8 @@ export function useTaskListModel(): TaskListModel {
   });
 
   return {
-    data: buildData({ page: list.data, filter, pendingDelete }),
-    state: buildState({ list, toggle, remove, filter }),
+    data: { ...buildData({ page: list.data, filter, pendingDelete }), drillBanner: drill.banner },
+    state: buildState({ list, toggle, remove, filter, hasDrill: drill.drill !== null }),
     actions: {
       onSearchChange: (search) => setFilter((current) => ({ ...current, search })),
       onStatusChange: (status) => setFilter((current) => ({ ...current, status })),
@@ -113,6 +126,8 @@ export function useTaskListModel(): TaskListModel {
         if (!pendingDelete) return;
         remove.mutate(pendingDelete);
       },
+      onClearDrill: drill.onClear,
+      onBackToBoard: drill.onBack,
     },
   };
 }
@@ -128,7 +143,7 @@ function buildData(input: {
   page: TaskPage;
   filter: TaskListFilter;
   pendingDelete: Task | null;
-}): TaskListModel['data'] {
+}): Omit<TaskListModel['data'], 'drillBanner'> {
   const tasks = input.page?.items ?? [];
 
   return {
@@ -155,11 +170,12 @@ function buildState(input: {
   toggle: MutationLike<Task>;
   remove: MutationLike<Task>;
   filter: TaskListFilter;
+  hasDrill: boolean;
 }): TaskListModel['state'] {
   const { toggle, remove } = input;
 
   return {
-    ...buildListState(input.list, input.filter),
+    ...buildListState(input.list, input.filter, input.hasDrill),
     updatingTaskId: toggle.isPending ? (toggle.variables?.id ?? null) : null,
     updateError: readError(toggle.error),
     isDeleting: remove.isPending,
@@ -167,15 +183,21 @@ function buildState(input: {
   };
 }
 
+function hasAnyFilter(filter: TaskListFilter): boolean {
+  return filter.search.trim() !== '' || filter.status !== '';
+}
+
 function buildListState(
   list: ListQueryLike,
   filter: TaskListFilter,
+  /** Com recorte do Painel, a lista vazia é "nada casou", e não "não há tarefas". */
+  hasDrill = false,
 ): Pick<
   TaskListModel['state'],
   'isLoading' | 'isRefetching' | 'isEmpty' | 'isFilteredOut' | 'isTruncated' | 'error'
 > {
   const count = list.data?.items.length ?? 0;
-  const hasFilter = filter.search.trim() !== '' || filter.status !== '';
+  const hasFilter = hasDrill || hasAnyFilter(filter);
   /* Vazio só é vazio DEPOIS que a consulta terminou. Mostrar "nenhuma tarefa" durante o
      carregamento faz a pessoa achar que os dados sumiram — e recarregar. */
   const isSettledEmpty = list.isSuccess && count === 0;

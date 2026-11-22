@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { describe, expect, it, vi } from 'vitest';
 
 import { widgetFixture, widgetResultFixture } from '../../../../lib/utils/dashboard-fixture.util';
-import { DRAG_HANDLE, NO_DRAG } from '../azuos-board-widget/azuos-board-widget.component';
+import { DRAG_HANDLE } from '../azuos-board-widget/azuos-board-widget.component';
 import {
   AzuosBoardCanvas,
   type AzuosBoardCanvasProps,
@@ -58,14 +58,15 @@ describe('AzuosBoardCanvas', () => {
   });
 
   // feliz
-  it('makes the whole header a handle while editing, but not its buttons', () => {
+  it('makes the whole header a handle while editing, with the tools floating above the block', () => {
     render(<AzuosBoardCanvas {...makeProps(true)} />);
     const header = screen.getByRole('heading', { name: 'Por tipo' }).closest('header');
 
     expect(header).toHaveClass(DRAG_HANDLE);
-    expect(
-      screen.getByRole('button', { name: 'Configurar Por tipo' }).closest(`.${NO_DRAG}`),
-    ).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Arrastar Por tipo' })).toHaveClass(DRAG_HANDLE);
+    expect(header).not.toContainElement(
+      screen.getByRole('button', { name: 'Configurar Por tipo' }),
+    );
   });
 
   // feliz
