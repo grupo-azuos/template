@@ -124,7 +124,7 @@ export function AzuosExpandableScreen({
       aria-modal="true"
       aria-label={data.title}
       tabIndex={-1}
-      className="bg-background fixed inset-0 z-50 flex flex-col outline-none"
+      className="bg-background fixed inset-0 z-[45] flex flex-col outline-none"
     >
       <header className="border-border flex items-start justify-between gap-4 border-b px-6 py-4">
         <div className="min-w-0">

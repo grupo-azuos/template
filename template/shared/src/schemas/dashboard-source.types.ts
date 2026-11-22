@@ -26,6 +26,11 @@ export type DataSource = {
   noun: string;
   fields: Record<string, DataField>;
   dimensions: Record<string, DataDimension>;
+  /**
+   * A TELA QUE LISTA esta fonte — para onde o clique num item de um bloco leva, com o recorte. É
+   * a lista das MESMAS linhas que o bloco contou. Sem ela, o bloco é só de leitura.
+   */
+  screen?: string;
 };
 
 /**
@@ -36,3 +41,9 @@ export type BoardFieldFilter = {
   label: string;
   fields: Record<string, string>;
 };
+
+/**
+ * De onde vem o número de cada CARD de um filtro em "Cards": a mesma conta de um bloco — a fonte
+ * agrupada pelo campo do filtro. `groupBy` é uma dimensão da fonte.
+ */
+export type BoardFilterCard = { source: string; groupBy: string };

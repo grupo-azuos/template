@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { type BoardDrill } from '@template/shared/schemas/board-drill.schema';
 import { useState } from 'react';
 
 import {
@@ -12,6 +13,7 @@ import {
 import { DEFAULT_PAGE_SIZE } from '@template/shared/schemas/pagination.schema';
 
 import { historyApi } from '../api/history.api';
+import { type BoardDrillModel, useBoardDrillModel } from './use-board-drill.model';
 import { readError } from '../api/http-client';
 import { type AzuosHistoryEntry } from '../components/azuos-history-timeline/azuos-history-timeline.component';
 import { type AzuosStatusBadgeTone } from '../components/azuos-status-badge/azuos-status-badge.component';
@@ -39,12 +41,17 @@ export type HistoryModel = {
     page: number;
     pageSize: number;
     total: number;
+    /** A faixa do recorte do Painel, quando o histórico veio de um clique num bloco. */
+    drillBanner: BoardDrillModel['banner'];
   };
   state: { isLoading: boolean; isFetching: boolean; error: string | null };
   actions: {
     onFilterChange: (patch: Partial<HistoryFilter>) => void;
     onClearFilters: () => void;
     onPageChange: (page: number) => void;
+    /** "Limpar recorte": o histórico volta aos filtros dele. */
+    onClearDrill: () => void;
+    onBackToBoard: () => void;
   };
 };
 
@@ -57,10 +64,12 @@ export const EMPTY_HISTORY_FILTER: HistoryFilter = {
   to: null,
 };
 
-export function useHistoryModel(): HistoryModel {
+export function useHistoryModel(link: { drill?: BoardDrill } = {}): HistoryModel {
   const [filter, setFilter] = useState<HistoryFilter>(EMPTY_HISTORY_FILTER);
   const [page, setPage] = useState(1);
-  const query = toQuery(filter, page);
+  /* O recorte de um clique no Painel (`?drill=`): soma ao filtro do histórico. */
+  const drill = useBoardDrillModel(link.drill, '/history');
+  const query = { ...toQuery(filter, page), drill: drill.drill ?? undefined };
 
   const list = useQuery({
     queryKey: ['history', query],
@@ -75,6 +84,7 @@ export function useHistoryModel(): HistoryModel {
       page,
       pageSize: DEFAULT_PAGE_SIZE,
       total: list.data?.total ?? 0,
+      drillBanner: drill.banner,
     },
     state: {
       isLoading: list.isLoading,
@@ -91,6 +101,11 @@ export function useHistoryModel(): HistoryModel {
         setPage(1);
       },
       onPageChange: setPage,
+      onClearDrill: () => {
+        setPage(1);
+        drill.onClear();
+      },
+      onBackToBoard: drill.onBack,
     },
   };
 }

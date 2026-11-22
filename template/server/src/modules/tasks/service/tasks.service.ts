@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { type DataSourceKey } from '@template/shared/schemas/dashboard-board.schema';
 import { type Paginated } from '@template/shared/schemas/pagination.schema';
 import {
   type CreateTaskInput,
@@ -6,6 +7,7 @@ import {
   type TaskListQuery,
   type UpdateTaskInput,
 } from '@template/shared/schemas/task.schema';
+import { type SQL } from 'drizzle-orm';
 
 import { type RequestUser } from '../../../lib/auth/request-user.type';
 import { type TaskInsert } from '../../../lib/db/schema/tasks.schema';
@@ -14,6 +16,7 @@ import {
   assertCanEdit,
   assertCanRead,
 } from '../../../lib/policy/policy-assert.util';
+import { BOARD_DRILL, type BoardDrillResolver } from '../../dashboard-boards/board-drill.token';
 import { diffFields } from '../../history/mapper/history.mapper';
 import { HistoryService } from '../../history/service/history.service';
 import { toTask, toTaskInsert, toTaskUpdate } from '../mapper/tasks.mapper';
@@ -26,11 +29,16 @@ const HISTORY_FIELDS = { title: 'Título', description: 'Descrição', status: '
  * Só o que a edição TROUXE entra na comparação. Campo que não veio não mudou — compará-lo com
  * `undefined` faria o histórico dizer que o título foi apagado numa troca de status.
  */
-function sentFields(update: Partial<TaskInsert>): Partial<Record<keyof typeof HISTORY_FIELDS, unknown>> {
+function sentFields(
+  update: Partial<TaskInsert>,
+): Partial<Record<keyof typeof HISTORY_FIELDS, unknown>> {
   const fields = { title: update.title, description: update.description, status: update.status };
 
   return Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== undefined));
 }
+
+/** A fonte do painel que esta lista sabe recortar: a tabela dela, as tarefas. */
+const TASK_DRILL_SOURCES: readonly DataSourceKey[] = ['tasks'];
 
 const NOT_FOUND = 'Tarefa não encontrada. Ela pode ter sido excluída — recarregue a lista.';
 
@@ -46,12 +54,13 @@ export class TasksService {
   constructor(
     private readonly repository: TasksRepository,
     private readonly history: HistoryService,
+    @Optional() @Inject(BOARD_DRILL) private readonly drills?: BoardDrillResolver,
   ) {}
 
   async list(user: RequestUser, query: TaskListQuery): Promise<Paginated<Task>> {
     assertCanRead(user.role, 'as tarefas');
 
-    const page = await this.repository.list(query);
+    const page = await this.repository.list(query, await this.drillOf(user, query));
 
     return {
       items: page.rows.map(toTask),
@@ -59,6 +68,16 @@ export class TasksService {
       page: query.page,
       pageSize: query.pageSize,
     };
+  }
+
+  /** O recorte de um clique no painel em SQL — sem recorte (ou sem o painel), nada. */
+  private async drillOf(
+    user: RequestUser,
+    query: Pick<TaskListQuery, 'drill'>,
+  ): Promise<SQL | undefined> {
+    if (!query.drill || !this.drills) return undefined;
+
+    return this.drills.drillCondition(user, query.drill, TASK_DRILL_SOURCES);
   }
 
   async findById(user: RequestUser, id: number): Promise<Task> {

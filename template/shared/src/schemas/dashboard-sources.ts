@@ -1,6 +1,10 @@
 import { TASK_STATUS_LABELS, TASK_STATUSES } from '../domain/task-status.util';
 import { HISTORY_ACTION_LABELS, historyActionSchema } from './history.schema';
-import { type BoardFieldFilter, type DataSource } from './dashboard-source.types';
+import {
+  type BoardFieldFilter,
+  type BoardFilterCard,
+  type DataSource,
+} from './dashboard-source.types';
 
 /**
  * AS FONTES DE DADOS DO DASHBOARD DESTE SISTEMA — o ÚNICO arquivo do contrato do dashboard que
@@ -14,6 +18,7 @@ export const DATA_SOURCES = {
   tasks: {
     label: 'Tarefas',
     noun: 'tarefas',
+    screen: '/tasks',
     fields: {
       status: {
         label: 'Status',
@@ -35,6 +40,7 @@ export const DATA_SOURCES = {
   activity: {
     label: 'Movimento nas tarefas',
     noun: 'movimentos',
+    screen: '/history',
     fields: {
       action: {
         label: 'O que foi feito',
@@ -61,3 +67,12 @@ export const DATA_SOURCES = {
 export const BOARD_FIELD_FILTERS = {
   taskStatus: { label: 'Status da tarefa', fields: { tasks: 'status' } },
 } as const satisfies Record<string, BoardFieldFilter>;
+
+/**
+ * OS CARDS DOS FILTROS DO PAINEL deste sistema — o filtro mostrado em "Cards" conta cada opção
+ * nesta fonte, agrupada por esta dimensão. Filtro sem entrada aqui não oferece os cards.
+ */
+export const BOARD_FILTER_CARDS = {
+  person: { source: 'tasks', groupBy: 'createdBy' },
+  taskStatus: { source: 'tasks', groupBy: 'status' },
+} as const satisfies Record<string, BoardFilterCard>;

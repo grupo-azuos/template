@@ -51,8 +51,17 @@ export type AzuosEchartProps = {
     scrollHeight?: number;
   };
   state?: { isLoading?: boolean; isEmpty?: boolean };
-  actions?: { onSelect?: (selection: ChartSelection) => void };
+  actions?: {
+    onSelect?: (selection: ChartSelection) => void;
+    /**
+     * O clique em QUALQUER ponto da área do gráfico, como a posição no eixo das categorias — o
+     * gráfico de área não tem símbolo para clicar, e a pessoa clica no dia, não na linha.
+     */
+    onAxisSelect?: (index: number) => void;
+  };
 };
+
+type ChartClicks = Pick<NonNullable<AzuosEchartProps['actions']>, 'onSelect' | 'onAxisSelect'>;
 
 type ChartBox = {
   heightClass: string;
@@ -68,7 +77,7 @@ export function AzuosEchart({ data, ui, state, actions }: AzuosEchartProps) {
 
   if (state?.isEmpty) return <ChartEmpty box={box} />;
 
-  return <ChartBody data={data} box={box} onSelect={actions?.onSelect} />;
+  return <ChartBody data={data} box={box} clicks={actions ?? {}} />;
 }
 
 /** Os padrões da caixa, resolvidos num lugar só — e não numa fila de `??` dentro da view. */
@@ -84,7 +93,7 @@ function resolveBox(ui: AzuosEchartProps['ui']): ChartBox {
 function ChartLoading({ box }: { box: ChartBox }) {
   return (
     <div
-      className={cn('w-full animate-pulse rounded-box bg-muted', box.heightClass, box.className)}
+      className={cn('rounded-box bg-muted w-full animate-pulse', box.heightClass, box.className)}
       aria-busy="true"
     />
   );
@@ -94,7 +103,7 @@ function ChartEmpty({ box }: { box: ChartBox }) {
   return (
     <p
       className={cn(
-        'flex w-full items-center justify-center text-xs text-muted-foreground',
+        'text-muted-foreground flex w-full items-center justify-center text-xs',
         box.heightClass,
         box.className,
       )}
@@ -107,11 +116,11 @@ function ChartEmpty({ box }: { box: ChartBox }) {
 function ChartBody({
   data,
   box,
-  onSelect,
+  clicks,
 }: {
   data: AzuosEchartProps['data'];
   box: ChartBox;
-  onSelect?: (selection: ChartSelection) => void;
+  clicks: ChartClicks;
 }) {
   if (box.scrollHeight === undefined) {
     return (
@@ -119,7 +128,7 @@ function ChartBody({
         option={data.option}
         description={data.description}
         className={cn('w-full', box.heightClass, box.className)}
-        onSelect={onSelect}
+        clicks={clicks}
       />
     );
   }
@@ -131,7 +140,7 @@ function ChartBody({
         description={data.description}
         className="w-full"
         style={{ height: box.scrollHeight }}
-        onSelect={onSelect}
+        clicks={clicks}
       />
     </div>
   );
@@ -145,23 +154,24 @@ function ChartSurface({
   description,
   className,
   style,
-  onSelect,
+  clicks,
 }: {
   option: AzuosEchartProps['data']['option'];
   description: string;
   className: string;
   style?: CSSProperties;
-  onSelect?: (selection: ChartSelection) => void;
+  clicks: ChartClicks;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<EChartsType | null>(null);
-  const selectRef = useRef(onSelect);
+  const clicksRef = useRef(clicks);
   const [isReady, setIsReady] = useState(false);
   const theme = useChartTheme();
+  const isClickable = Boolean(clicks.onSelect || clicks.onAxisSelect);
 
   useEffect(() => {
-    selectRef.current = onSelect;
-  }, [onSelect]);
+    clicksRef.current = clicks;
+  });
 
   useEffect(() => {
     let isDisposed = false;
@@ -179,7 +189,14 @@ function ChartSurface({
         width: box.clientWidth || 600,
         height: box.clientHeight || 300,
       });
-      chart.on('click', (params) => selectRef.current?.(selectionOf(params)));
+      chart.on('click', (params) => clicksRef.current.onSelect?.(selectionOf(params)));
+      /* Só quem pede o clique no eixo ouve a área inteira: nos outros gráficos, um clique fora
+         das barras não é nada. */
+      if (clicksRef.current.onAxisSelect) {
+        chart
+          .getZr()
+          .on('click', (event) => axisClick(chart, event, clicksRef.current.onAxisSelect));
+      }
       chartRef.current = chart;
 
       /* Redesenha UMA vez, quando o tamanho PARA de mudar, e sem animação. Abrir ou fechar o menu
@@ -228,9 +245,22 @@ function ChartSurface({
       aria-label={description}
       data-slot="chart"
       style={style}
-      className={cn(className, onSelect && 'cursor-pointer')}
+      className={cn(className, isClickable && 'cursor-pointer')}
     />
   );
+}
+
+/** O clique na área do gráfico como a posição no eixo das categorias — fora da grade, nada. */
+function axisClick(
+  chart: EChartsType,
+  event: { offsetX: number; offsetY: number },
+  onAxisSelect: ((index: number) => void) | undefined,
+): void {
+  if (!onAxisSelect) return;
+  const point = [event.offsetX, event.offsetY];
+  if (!chart.containPixel({ gridIndex: 0 }, point)) return;
+  const [index] = chart.convertFromPixel({ gridIndex: 0 }, point) as number[];
+  if (index !== undefined && Number.isFinite(index)) onAxisSelect(Math.round(index));
 }
 
 /** O tema do documento, relido quando o `data-theme` troca (o botão de tema claro/escuro). */

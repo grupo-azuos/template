@@ -96,7 +96,7 @@ const optionPill = tv({
       form: 'flex-auto justify-center px-2.5',
     },
     isSelected: {
-      true: 'bg-segment-selected text-foreground font-semibold shadow-sm',
+      true: 'bg-segment-selected text-foreground font-semibold shadow-xs',
       false: 'text-muted-foreground hover:bg-hover-veil hover:text-foreground',
     },
     tone: { neutral: '', info: '', success: '', warning: '', danger: '', brand: '' },

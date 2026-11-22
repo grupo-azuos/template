@@ -1,4 +1,5 @@
 import { type Meta, type StoryObj } from '@storybook/react';
+import { fn } from 'storybook/test';
 
 import { AzuosRadarChart } from './azuos-radar-chart.component';
 
@@ -22,6 +23,15 @@ const SLICES = [
 
 export const Default: Story = {
   args: { data: { slices: SLICES, seriesLabel: 'Tarefas' }, ui: { className: 'w-96' } },
+};
+
+/** Com detalhamento: o nome de cada categoria, na ponta do eixo, abre a lista dela. */
+export const Clickable: Story = {
+  args: {
+    data: { slices: SLICES, seriesLabel: 'Tarefas' },
+    ui: { className: 'w-96' },
+    actions: { onSelect: fn() },
+  },
 };
 
 export const AnotherColour: Story = {

@@ -3,46 +3,57 @@ import { fn } from 'storybook/test';
 
 import { EMPTY_BOARD_FILTER_VALUES } from '@template/shared/schemas/dashboard-board.schema';
 
-import { PEOPLE_FIXTURE } from '../../../../lib/utils/dashboard-fixture.util';
 import { AzuosBoardFilterBar } from './azuos-board-filter-bar.component';
 
+/**
+ * Os filtros do painel no estilo do Grafana: uma barra compacta acima dos blocos, cada filtro uma
+ * peça "Nome | Valor". O Período sai da barra e vira o seletor de tempo do canto de cima.
+ */
 const meta = {
   title: 'Dashboard/AzuosBoardFilterBar',
   component: AzuosBoardFilterBar,
   args: {
     data: {
       filters: [
-        { id: 'pessoa', kind: 'person', label: 'Pessoa' },
+        { id: 'pessoa', kind: 'person', label: 'Responsável' },
         { id: 'periodo', kind: 'period', label: 'Período' },
+        { id: 'taskStatus', kind: 'taskStatus', label: 'Status da tarefa' },
       ],
       values: EMPTY_BOARD_FILTER_VALUES,
-      people: PEOPLE_FIXTURE,
+      people: [
+        { id: 'u-ana', name: 'Ana Souza', photo: null },
+        { id: 'u-bruno', name: 'Bruno Lima', photo: null },
+        { id: 'u-carla', name: 'Carla Dias', photo: null },
+      ],
     },
-    state: { isEditing: false },
-    actions: { onChange: fn(), onAdd: fn(), onRemove: fn() },
+    ui: { part: 'fields' },
+    actions: { onChange: fn(), onClear: fn() },
   },
 } satisfies Meta<typeof AzuosBoardFilterBar>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** A barra acima dos blocos, com os filtros de campo. */
 export const Default: Story = {};
 
+/** O seletor de tempo, no canto de cima do painel. */
+export const TimePicker: Story = { args: { ui: { part: 'period' } } };
+
+/** Com valores escolhidos: o "Limpar filtros" aparece na ponta da barra. */
 export const Chosen: Story = {
   args: {
     data: {
       ...meta.args.data,
-      values: {
-        ...EMPTY_BOARD_FILTER_VALUES,
-        person: 'u-bia',
-        period: { mode: 'relative', direction: 'last', count: 30, unit: 'day' },
-      },
+      values: { ...EMPTY_BOARD_FILTER_VALUES, person: 'u-bruno', taskStatus: 'done' },
     },
   },
 };
 
+/** Datas exatas: as datas abrem logo abaixo do período. */
 export const ExactDates: Story = {
   args: {
+    ui: { part: 'period' },
     data: {
       ...meta.args.data,
       values: {
@@ -53,25 +64,73 @@ export const ExactDates: Story = {
   },
 };
 
-/* Os filtros de campo do sistema (`dashboard-sources.ts`): no template, o status da tarefa. */
-export const FieldFilters: Story = {
+const STATUS_COUNTS = {
+  total: 128,
+  isLoading: false,
+  series: [
+    { key: 'todo', label: 'A fazer', value: 61 },
+    { key: 'doing', label: 'Em andamento', value: 40 },
+    { key: 'done', label: 'Concluída', value: 27 },
+  ],
+};
+
+/** Os cards: a linha inteira, num carrossel, cada opção com quantos há nela. */
+export const Cards: Story = {
   args: {
     data: {
       ...meta.args.data,
-      filters: [{ id: 'taskStatus', kind: 'taskStatus', label: 'Status da tarefa' }],
-      values: { ...EMPTY_BOARD_FILTER_VALUES, taskStatus: 'doing' },
+      filters: [
+        { id: 'pessoa', kind: 'person', label: 'Responsável' },
+        { id: 'status', kind: 'taskStatus', label: 'Status da tarefa', display: 'cards' },
+      ],
+      values: { ...EMPTY_BOARD_FILTER_VALUES, taskStatus: 'done' },
+      counts: { status: STATUS_COUNTS },
     },
   },
 };
 
-export const Building: Story = {
+/** Caso limite: as contagens ainda não chegaram — os cards mostram "…", nunca zero. */
+export const CardsLoading: Story = {
   args: {
-    data: { ...meta.args.data, filters: [{ id: 'periodo', kind: 'period', label: 'Período' }] },
-    state: { isEditing: true },
+    data: { ...Cards.args!.data!, counts: { status: { ...STATUS_COUNTS, isLoading: true } } },
   },
 };
 
-/* Caso limite: montando um painel ainda sem filtro nenhum — só os botões de pôr. */
+/** "Linha inteira": o filtro ocupa a linha da barra sozinho. */
+export const FullWidth: Story = {
+  args: {
+    data: {
+      ...meta.args.data,
+      filters: [
+        { id: 'pessoa', kind: 'person', label: 'Responsável', width: 'full' },
+        { id: 'taskStatus', kind: 'taskStatus', label: 'Status da tarefa' },
+      ],
+    },
+  },
+};
+
+/** Montando: a barra como fica e a lista para ordenar, escolher o desenho e a largura. */
+export const Building: Story = {
+  args: {
+    ui: undefined,
+    state: { isEditing: true, isListOpen: true },
+    actions: {
+      onChange: fn(),
+      onAdd: fn(),
+      onRemove: fn(),
+      onDisplayChange: fn(),
+      onWidthChange: fn(),
+      onPlaceChange: fn(),
+    },
+  },
+};
+
+/** Caso limite: montando um painel ainda sem filtro nenhum — só os botões de pôr. */
 export const BuildingEmpty: Story = {
-  args: { data: { ...meta.args.data, filters: [] }, state: { isEditing: true } },
+  args: {
+    ui: undefined,
+    data: { ...meta.args.data, filters: [] },
+    state: { isEditing: true, isListOpen: true },
+    actions: { onChange: fn(), onAdd: fn() },
+  },
 };

@@ -1,7 +1,7 @@
 import 'react-grid-layout/css/styles.css';
 
 import gsap from 'gsap';
-import { type ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, useLayoutEffect, useRef, useState } from 'react';
 import { GridLayout, type Layout, useContainerWidth } from 'react-grid-layout';
 
 import {
@@ -14,6 +14,7 @@ import {
 import { useDragScrollFollow } from '../../../../lib/hooks/use-drag-scroll-follow/use-drag-scroll-follow';
 import { prefersReducedMotion } from '../../../../lib/motion/motion.util';
 import { cn } from '../../../../lib/utils/cn.util';
+import { type BoardItem } from '../../../../lib/utils/board-link.util';
 import { type WidgetState } from '../../../../lib/view-models/use-dashboard-board.model';
 import {
   AzuosBoardWidget,
@@ -35,13 +36,19 @@ export type AzuosBoardCanvasProps = {
     /** O nome do filtro salvo de cada bloco, pelo id do filtro. */
     filterNames: Record<string, string>;
   };
-  /** `canDrop`: aceita um tipo de bloco arrastado da lateral (montando, e com vaga). */
-  state: { isEditing: boolean; canDrop?: boolean };
+  /**
+   * `canDrop`: aceita um tipo de bloco arrastado (montando, e com vaga). `canEdit`: quem vê pode
+   * montar — o menu de cada bloco oferece editar, duplicar e remover.
+   */
+  state: { isEditing: boolean; canDrop?: boolean; canEdit?: boolean };
   actions: {
     onLayoutChange: (layout: LayoutItem[]) => void;
     onEditWidget: (id: string) => void;
     onRemoveWidget: (id: string) => void;
     onChangeKind?: (id: string, kind: Widget['kind']) => void;
+    onDuplicateWidget?: (id: string) => void;
+    /** Clicou num item de um bloco (barra, fatia, linha, card): abre a lista da fonte. */
+    onOpenItem?: (widget: Widget, item: BoardItem) => void;
     /** Um tipo solto numa casa da grade: o bloco novo nasce ali, naquele tamanho. */
     onDropKind?: (kind: Widget['kind'], place: Omit<LayoutItem, 'i'>) => void;
   };
@@ -68,6 +75,13 @@ const GAP = 16;
  * 11px — com o vão de quem só vê, os puxadores de um bloco caíam em cima do vizinho.
  */
 const EDITING_GAP = 32;
+/**
+ * E os ANDARES se afastam mais: acima de cada bloco flutua a barra de ferramentas dele (40px),
+ * fora do conteúdo — o bloco aparece igual ao do painel, sem nada por cima.
+ */
+const EDITING_ROW_GAP = 80;
+/** O espaço acima do primeiro andar, montando: onde fica a barra dos blocos de cima. */
+const EDITING_TOP = 72;
 const MAX_ROWS_PER_WIDGET = 8;
 /** Andares vazios abaixo do último bloco: espaço visível para onde arrastar o próximo. */
 const SPARE_ROWS = 2;
@@ -128,11 +142,11 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
   const layout = data.layout.map((item) => ({ ...item, maxH: MAX_ROWS_PER_WIDGET }));
   /* Os blocos que já estavam quando o canvas abriu: só os outros pousam com animação. */
   const [firstIds] = useState(() => new Set(data.widgets.map((widget) => widget.id)));
-  const gap = state.isEditing ? EDITING_GAP : GAP;
+  const { gap, rowGap, style } = spacingOf(state.isEditing);
 
   if (data.widgets.length === 0 && !state.isEditing) {
     return (
-      <p className="rounded-surface bg-card shadow-card text-ink-500 p-8 text-center text-sm">
+      <p className="rounded-surface bg-card text-ink-500 shadow-card p-8 text-center text-sm">
         Este painel ainda não tem blocos.
       </p>
     );
@@ -142,9 +156,10 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
     <div
       ref={containerRef}
       className={cn('relative w-full', PLACEHOLDER, LIFTED, state.isEditing && SELECTION)}
+      style={style}
     >
       {mounted && state.isEditing ? (
-        <SlotGrid data={{ layout: data.layout, width }} ui={{ gap }} />
+        <SlotGrid data={{ layout: data.layout, width }} ui={{ gap, rowGap }} />
       ) : null}
       {mounted ? (
         <GridLayout
@@ -153,7 +168,7 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
           gridConfig={{
             cols: GRID_COLUMNS,
             rowHeight: ROW_HEIGHT,
-            margin: [gap, gap],
+            margin: [gap, rowGap],
             containerPadding: [0, 0],
           }}
           dragConfig={{
@@ -189,7 +204,9 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
         >
           {data.widgets.map((widget) => (
             <div key={widget.id} data-widget-id={widget.id}>
-              <Landing state={{ isNew: !firstIds.has(widget.id) }}>
+              {/* Só MONTANDO: trocar de aba (Equipe → Gestor) traz blocos de outro painel, que não
+                  "pousaram" — aparecem. */}
+              <Landing state={{ isNew: state.isEditing && !firstIds.has(widget.id) }}>
                 <AzuosBoardWidget
                   data={{
                     widget,
@@ -198,11 +215,14 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
                       ? (data.filterNames[widget.filterId] ?? null)
                       : null,
                   }}
-                  state={{ isEditing: state.isEditing }}
+                  state={{ isEditing: state.isEditing, canEdit: state.canEdit }}
                   actions={{
                     onEdit: actions.onEditWidget,
                     onRemove: actions.onRemoveWidget,
                     onChangeKind: actions.onChangeKind,
+                    onDuplicate: actions.onDuplicateWidget,
+                    /* Montando, o clique é para arrumar o bloco, não para sair da tela. */
+                    onOpenItem: state.isEditing ? undefined : actions.onOpenItem,
                   }}
                 />
               </Landing>
@@ -215,6 +235,21 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
 }
 
 /**
+ * O espaço entre os blocos: vendo, o vão de sempre; montando, as colunas se afastam (os
+ * puxadores) e os andares mais ainda (a barra de cada bloco flutua acima dele), com folga em cima
+ * para a barra do primeiro andar.
+ */
+function spacingOf(isEditing: boolean): {
+  gap: number;
+  rowGap: number;
+  style: CSSProperties | undefined;
+} {
+  if (!isEditing) return { gap: GAP, rowGap: GAP, style: undefined };
+
+  return { gap: EDITING_GAP, rowGap: EDITING_ROW_GAP, style: { marginTop: EDITING_TOP } };
+}
+
+/**
  * AS CASAS DA GRADE, desenhadas atrás dos blocos enquanto se monta o painel — a pessoa vê onde
  * um bloco pode cair. Só aparece editando.
  */
@@ -223,9 +258,10 @@ export function SlotGrid({
   ui,
 }: {
   data: { layout: LayoutItem[]; width: number };
-  ui?: { gap?: number };
+  ui?: { gap?: number; rowGap?: number };
 }) {
   const gap = ui?.gap ?? GAP;
+  const rowGap = ui?.rowGap ?? gap;
   const rows = slotRows(data.layout);
   const cellWidth = Math.max(0, (data.width - gap * (GRID_COLUMNS - 1)) / GRID_COLUMNS);
 
@@ -237,7 +273,8 @@ export function SlotGrid({
       style={{
         gridTemplateColumns: `repeat(${GRID_COLUMNS}, ${cellWidth}px)`,
         gridAutoRows: `${ROW_HEIGHT}px`,
-        gap: `${gap}px`,
+        columnGap: `${gap}px`,
+        rowGap: `${rowGap}px`,
       }}
     >
       {Array.from({ length: rows * GRID_COLUMNS }, (_, index) => (
@@ -291,7 +328,9 @@ function Landing({ state, children }: { state: { isNew: boolean }; children: Rea
     gsap.fromTo(
       ref.current,
       { scale: 0.92, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.6)', clearProps: 'all' },
+      /* No fim, a animação limpa SÓ o que ela pôs (a escala e a opacidade): limpar tudo apagava
+         junto a posição que a grade deu ao bloco. */
+      { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.6)', clearProps: 'scale,opacity' },
     );
   }, [state.isNew]);
 

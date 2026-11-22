@@ -42,6 +42,11 @@ export type AzuosRadarChartProps = {
     /** A altura da caixa de desenho. @default 'h-72' */
     heightClass?: string;
   };
+  /**
+   * `onSelect`: o clique no NOME de uma categoria (na ponta do eixo) abre o detalhamento dela.
+   * A teia é uma forma só, e não dá para clicar numa ponta dela.
+   */
+  actions?: { onSelect?: (label: string) => void };
 };
 
 /**
@@ -59,18 +64,28 @@ export function shortenAxis(label: string, max = 16): string {
   return label.slice(0, max - 1).trimEnd() + '…';
 }
 
-export function AzuosRadarChart({ data, state, ui }: AzuosRadarChartProps) {
+export function AzuosRadarChart({ data, state, ui, actions }: AzuosRadarChartProps) {
   const color = ui?.color ?? 'var(--chart-1)';
+  const onSelect = actions?.onSelect;
 
   return (
     <div className={ui?.className}>
       <AzuosEchart
         data={{
-          option: (theme) => radarOption(data.slices, data.seriesLabel, color, theme),
+          option: (theme) =>
+            radarOption(data.slices, data.seriesLabel, color, theme, Boolean(onSelect)),
           description: `${data.seriesLabel}: ${data.slices.length} categorias`,
         }}
         ui={{ heightClass: ui?.heightClass ?? 'h-72', emptyLabel: ui?.emptyLabel }}
         state={{ isLoading: state?.isLoading, isEmpty: data.slices.length === 0 }}
+        actions={{
+          onSelect: onSelect
+            ? (selection) => {
+                const label = radarLabelOf(data.slices, selection.name);
+                if (label !== null) onSelect(label);
+              }
+            : undefined,
+        }}
       />
 
       {/* A LISTA PARA LEITOR DE TELA. A teia é uma forma, e forma não se lê em voz alta: sem esta
@@ -80,12 +95,26 @@ export function AzuosRadarChart({ data, state, ui }: AzuosRadarChartProps) {
   );
 }
 
+/**
+ * A categoria de um clique no eixo: o eixo mostra o nome CORTADO (`shortenAxis`), e o detalhamento
+ * precisa do inteiro. Clique na teia (o nome da série) não é categoria nenhuma: nulo.
+ */
+export function radarLabelOf(slices: readonly ChartSlice[], axisName: string): string | null {
+  const slice = slices.find(
+    (item) => item.label === axisName || shortenAxis(item.label) === axisName,
+  );
+
+  return slice?.label ?? null;
+}
+
 /** A teia: grade nos tons do tema, nome de cada categoria no próprio eixo e a forma preenchida. */
 export function radarOption(
   slices: readonly ChartSlice[],
   seriesLabel: string,
   color: string,
   theme: Pick<ChartTheme, 'border' | 'muted'>,
+  /** Os nomes dos eixos respondem ao clique (o detalhamento). @default false */
+  isClickable = false,
 ): ChartOption {
   const top = Math.max(...slices.map((slice) => slice.value), 1);
   const stroke = resolveColor(color);
@@ -93,6 +122,7 @@ export function radarOption(
   return {
     tooltip: { trigger: 'item' },
     radar: {
+      triggerEvent: isClickable,
       radius: '68%',
       indicator: slices.map((slice) => ({ name: shortenAxis(slice.label), max: top })),
       axisName: { color: theme.muted, fontSize: 11 },

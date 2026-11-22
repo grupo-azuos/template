@@ -38,7 +38,7 @@ export function AzuosSliderField({ data, ui, state, actions }: AzuosSliderFieldP
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           aria-label={data.label}
-          className="bg-card ring-foreground/10 block size-5 shrink-0 rounded-full shadow-md ring-1 transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none"
+          className="bg-card ring-foreground/10 block size-5 shrink-0 rounded-full shadow-xs ring-1 transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none"
         />
       </SliderPrimitive.Root>
       {ui?.endIcon}

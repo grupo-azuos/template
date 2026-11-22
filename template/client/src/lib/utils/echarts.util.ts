@@ -169,15 +169,22 @@ export function withChartTheme(option: ChartOption, theme: ChartTheme): ChartOpt
 }
 
 /**
- * O que o clique num gráfico entrega: o nome do item, o tipo dele (`node`/`edge` no fluxo) e, no mapa
- * de calor, a linha e a coluna.
+ * O que o clique num gráfico entrega: o nome do item, o tipo dele (`node`/`edge` no fluxo), no mapa
+ * de calor a linha e a coluna, e nas barras empilhadas ou lado a lado a série (a pilha clicada).
  */
-export type ChartSelection = { name: string; kind?: string; row?: string; column?: string };
+export type ChartSelection = {
+  name: string;
+  kind?: string;
+  row?: string;
+  column?: string;
+  series?: string;
+};
 
 export function selectionOf(params: {
   name?: unknown;
   data?: unknown;
   dataType?: unknown;
+  seriesName?: unknown;
 }): ChartSelection {
   const data = params.data as { row?: unknown; column?: unknown; id?: unknown } | undefined;
   const name = typeof data?.id === 'string' ? data.id : String(params.name ?? '');
@@ -187,6 +194,7 @@ export function selectionOf(params: {
     kind: typeof params.dataType === 'string' ? params.dataType : undefined,
     row: typeof data?.row === 'string' ? data.row : undefined,
     column: typeof data?.column === 'string' ? data.column : undefined,
+    series: typeof params.seriesName === 'string' ? params.seriesName : undefined,
   };
 }
 

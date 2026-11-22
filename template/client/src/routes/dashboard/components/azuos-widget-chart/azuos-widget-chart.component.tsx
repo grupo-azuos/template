@@ -1,7 +1,11 @@
 import { AzuosChartValueList } from '../../../../lib/components/azuos-chart-value-list/azuos-chart-value-list.component';
 import { AzuosEchart } from '../../../../lib/components/azuos-echart/azuos-echart.component';
 import { type ChartSlice } from '../../../../lib/utils/chart-slice.util';
-import { type ChartOption, type ChartTheme } from '../../../../lib/utils/echarts.util';
+import {
+  type ChartOption,
+  type ChartSelection,
+  type ChartTheme,
+} from '../../../../lib/utils/echarts.util';
 import {
   cumulativeOption,
   type GroupedData,
@@ -27,9 +31,11 @@ export type AzuosWidgetChartProps = {
   };
   state?: { isLoading?: boolean };
   ui?: { heightClass?: string };
+  /** `onSelect`: a fatia ou barra clicada (e, nas colunas lado a lado, a série dela). */
+  actions?: { onSelect?: (selection: ChartSelection) => void };
 };
 
-export function AzuosWidgetChart({ data, state, ui }: AzuosWidgetChartProps) {
+export function AzuosWidgetChart({ data, state, ui, actions }: AzuosWidgetChartProps) {
   const { chart, seriesLabel } = data;
   const isEmpty = sizeOf(chart) === 0;
 
@@ -42,6 +48,7 @@ export function AzuosWidgetChart({ data, state, ui }: AzuosWidgetChartProps) {
         }}
         ui={{ heightClass: ui?.heightClass ?? 'h-full min-h-40' }}
         state={{ isLoading: state?.isLoading, isEmpty }}
+        actions={{ onSelect: actions?.onSelect }}
       />
       {'slices' in chart ? <AzuosChartValueList data={{ slices: chart.slices }} /> : null}
     </>
