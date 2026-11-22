@@ -25,11 +25,13 @@ export class HistoryRepository {
   }
 
   /** A página pedida e o total do recorte. `actorId` já vem resolvido (o "me" é quem pede). */
+  /** `drill`: o recorte de um clique no painel, já em SQL — mais uma condição E do filtro. */
   async list(
     query: HistoryQuery,
     actorId: string | null,
+    drill?: SQL,
   ): Promise<{ rows: HistoryRow[]; total: number }> {
-    const where = whereOf(query, actorId);
+    const where = and(whereOf(query, actorId), drill);
     const [rows, [counted]] = await Promise.all([
       runQuery(
         this.db

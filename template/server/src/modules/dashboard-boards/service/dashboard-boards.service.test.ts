@@ -1,5 +1,7 @@
 import { ForbiddenException, UnprocessableEntityException } from '@nestjs/common';
+import { boardDrillSchema } from '@template/shared/schemas/board-drill.schema';
 import { widgetQuerySchema } from '@template/shared/schemas/dashboard-board.schema';
+import { SQLiteSyncDialect } from 'drizzle-orm/sqlite-core';
 import { describe, expect, it, vi } from 'vitest';
 
 import { type RequestUser } from '../../../lib/auth/request-user.type';
@@ -148,10 +150,16 @@ describe('DashboardBoardsService.data', () => {
     });
 
     await expect(
-      service.data(ana, widgetQuerySchema.parse({ source: 'tasks', groupBy: null, filterId: FILTER.id })),
+      service.data(
+        ana,
+        widgetQuerySchema.parse({ source: 'tasks', groupBy: null, filterId: FILTER.id }),
+      ),
     ).rejects.toThrow(UnprocessableEntityException);
     await expect(
-      service.data(ana, widgetQuerySchema.parse({ source: 'tasks', groupBy: 'cor', filterId: null })),
+      service.data(
+        ana,
+        widgetQuerySchema.parse({ source: 'tasks', groupBy: 'cor', filterId: null }),
+      ),
     ).rejects.toThrow(UnprocessableEntityException);
   });
 });
@@ -165,6 +173,33 @@ describe('saved filters', () => {
 
     await expect(service.setFilterArchived(ana, FILTER.id, true)).rejects.toThrow(
       ForbiddenException,
+    );
+  });
+});
+
+describe('the cut of a click on a block', () => {
+  const drill = boardDrillSchema.parse({
+    source: 'tasks',
+    groupBy: 'status',
+    filterId: null,
+    key: 'done',
+  });
+
+  // feliz
+  it('gives the list the same condition that counted the block, plus the clicked item', async () => {
+    const service = makeService({});
+    const condition = await service.drillCondition(ana, drill, ['tasks']);
+    const query = new SQLiteSyncDialect().sqlToQuery(condition);
+
+    expect(query.params).toContain('done');
+  });
+
+  // triste
+  it('refuses a cut of another list', async () => {
+    const service = makeService({});
+
+    await expect(service.drillCondition(ana, drill, ['activity'])).rejects.toThrow(
+      UnprocessableEntityException,
     );
   });
 });

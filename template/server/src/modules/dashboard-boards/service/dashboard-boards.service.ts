@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { todayIso } from '@template/shared/domain/calendar-date.util';
 import { type ArchivedFilter } from '@template/shared/schemas/archive.schema';
+import { type BoardDrill } from '@template/shared/schemas/board-drill.schema';
 import {
   type Board,
   type BoardMatch,
@@ -38,7 +39,7 @@ import {
   type CountedWidget,
   DashboardBoardsRepository,
 } from '../repository/dashboard-boards.repository';
-import { InvalidFilterError } from '../repository/filter-sql.util';
+import { filterToSql, InvalidFilterError } from '../repository/filter-sql.util';
 import { bindViewer, type PersonFields, type PersonKeys } from '../repository/viewer-filter.util';
 import { SOURCE_TABLES, type SourceTable } from '../repository/widget-sources';
 import { defaultBoard } from './default-boards';
@@ -108,30 +109,75 @@ export class DashboardBoardsService {
 
   async data(user: RequestUser, query: WidgetQuery): Promise<WidgetData> {
     const directory = await this.directory(user);
+    const source = SOURCE_TABLES[query.source];
+    const block = await this.blockOf(user, query, directory);
+
+    return translating(async () => {
+      const counted = await this.repository.countBy(source, {
+        ...block,
+        dimension: query.groupBy ? dimensionOf(query.source, query.groupBy) : null,
+        split: query.splitBy ? dimensionOf(query.source, query.splitBy) : null,
+      });
+
+      return toWidgetData(counted, query, labeler(source, directory));
+    });
+  }
+
+  /**
+   * O RECORTE DE UM CLIQUE NUM BLOCO, para a lista da fonte: a mesma condição que contou o bloco,
+   * mais o item clicado — o valor do agrupamento e o da divisão. O número clicado é o total da
+   * lista por construção.
+   */
+  async drillCondition(
+    user: RequestUser,
+    drill: BoardDrill,
+    expected: readonly DataSourceKey[],
+  ): Promise<SQL> {
+    if (!expected.includes(drill.source)) {
+      throw new UnprocessableEntityException('Este recorte do painel é de outra lista.');
+    }
+    const source = SOURCE_TABLES[drill.source];
+    const block = await this.blockOf(user, drill, await this.directory(user));
+
+    return translating(async () => {
+      const dimension = drill.groupBy ? dimensionOf(drill.source, drill.groupBy) : null;
+      const split = drill.splitBy ? dimensionOf(drill.source, drill.splitBy) : null;
+
+      return (
+        and(
+          source.inCirculation,
+          block.tree ? filterToSql(source, block.tree) : undefined,
+          block.extra,
+          itemCondition(dimension, drill.key),
+          itemCondition(split, drill.key2),
+        ) ?? sql`1 = 1`
+      );
+    });
+  }
+
+  /**
+   * O RECORTE DE UM BLOCO — o filtro salvo (com o "eu" já trocado por quem vê), os filtros de
+   * campo do painel, o período e a pessoa. Os filtros de campo entram como mais um grupo E na
+   * mesma árvore: a pergunta do bloco continua uma consulta só, e o campo passa pela mesma
+   * validação do filtro salvo.
+   */
+  private async blockOf(
+    user: RequestUser,
+    query: WidgetQuery,
+    directory: Map<string, PersonKeys>,
+  ): Promise<{ tree: FilterGroup | null; extra: SQL | undefined }> {
     const viewer = keysOf(user);
     const saved = query.filterId
       ? (await this.usableFilter(user, query.filterId, query.source)).tree
       : null;
     const source = SOURCE_TABLES[query.source];
     const bound = saved ? bindViewer(saved, personFieldsOf(source), viewer, directory) : null;
-    /* Os filtros de campo do painel entram como mais um grupo E na mesma árvore: a pergunta do
-       bloco continua uma consulta só, e o campo passa pela mesma validação do filtro salvo. */
-    const tree = withMatches(bound, query.matches);
     const person = personOf(query, viewer, directory);
 
-    try {
-      const counted = await this.repository.countBy(source, {
-        tree,
-        extra: scopeCondition(source, query, viewer, person),
-        dimension: query.groupBy ? dimensionOf(query.source, query.groupBy) : null,
-        split: query.splitBy ? dimensionOf(query.source, query.splitBy) : null,
-      });
-
-      return toWidgetData(counted, query, labeler(source, directory));
-    } catch (error) {
-      if (error instanceof InvalidFilterError) throw new UnprocessableEntityException(error.message);
-      throw error;
-    }
+    return {
+      tree: withMatches(bound, query.matches),
+      extra: scopeCondition(source, query, viewer, person),
+    };
   }
 
   async filters(user: RequestUser, archived: ArchivedFilter): Promise<SavedFilter[]> {
@@ -186,10 +232,15 @@ export class DashboardBoardsService {
   }
 
   /** O filtro que a pessoa pode usar num bloco: visível para ela, em uso, e da mesma fonte. */
-  private async usableFilter(user: RequestUser, id: string, source: string): Promise<SavedFilterRow> {
+  private async usableFilter(
+    user: RequestUser,
+    id: string,
+    source: string,
+  ): Promise<SavedFilterRow> {
     const row = await this.repository.findFilter(id);
     if (!row || !canSeeFilter(user, row)) throw filterNotFound();
-    if (row.archivedAt) throw new UnprocessableEntityException(`O filtro "${row.name}" está arquivado.`);
+    if (row.archivedAt)
+      throw new UnprocessableEntityException(`O filtro "${row.name}" está arquivado.`);
     if (row.source !== source) {
       throw new UnprocessableEntityException(`O filtro "${row.name}" é de outra fonte de dados.`);
     }
@@ -307,7 +358,9 @@ function scopeCondition(
 function mineCondition(source: SourceTable, viewer: PersonKeys): SQL {
   const column = source.personField ? source.fields[source.personField] : undefined;
   if (!column?.person) {
-    throw new UnprocessableEntityException('Esta fonte não tem pessoa: "só os meus" não vale aqui.');
+    throw new UnprocessableEntityException(
+      'Esta fonte não tem pessoa: "só os meus" não vale aqui.',
+    );
   }
 
   return sql`${column.expression} = ${viewer[column.person]}`;
@@ -320,14 +373,18 @@ function mineCondition(source: SourceTable, viewer: PersonKeys): SQL {
 export function windowCondition(source: SourceTable, query: WidgetQuery): SQL | undefined {
   if (!query.window) return undefined;
   const date = query.groupBy ? source.dayDates?.[query.groupBy] : undefined;
-  if (!date) throw new UnprocessableEntityException('A janela da agenda só vale agrupando por dia.');
+  if (!date)
+    throw new UnprocessableEntityException('A janela da agenda só vale agrupando por dia.');
   const range = windowRange(query.window, todayIso());
 
   return sql`${date} between ${range.from} and ${range.to}`;
 }
 
 /** A árvore do bloco com os filtros de campo do painel: os dois precisam valer (E). */
-export function withMatches(tree: FilterGroup | null, matches: readonly BoardMatch[]): FilterGroup | null {
+export function withMatches(
+  tree: FilterGroup | null,
+  matches: readonly BoardMatch[],
+): FilterGroup | null {
   const group = boardMatchGroup(matches);
   if (!group) return tree;
   if (!tree) return group;
@@ -374,6 +431,23 @@ function toWidgetData(
       value: cell.value,
     })),
   };
+}
+
+/** O item clicado: a expressão do agrupamento igual à chave. Sem agrupamento ou sem chave, nada. */
+function itemCondition(dimension: CountDimension | null, key: string | null): SQL | undefined {
+  if (!dimension || key === null) return undefined;
+
+  return sql`${dimension.expression} = ${key}`;
+}
+
+/** O filtro que o banco não aceita vira a frase dele, com 422 — e não um erro 500. */
+async function translating<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (error) {
+    if (error instanceof InvalidFilterError) throw new UnprocessableEntityException(error.message);
+    throw error;
+  }
 }
 
 function filterNotFound(): NotFoundException {

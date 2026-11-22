@@ -31,7 +31,8 @@ export type AzuosStackedBarChartProps = {
   };
   state?: { isLoading?: boolean };
   ui?: { emptyLabel?: string; heightClass?: string };
-  actions?: { onSelect?: (label: string) => void };
+  /** `onSelect`: a categoria clicada e, quando o clique foi numa pilha, o nome da série dela. */
+  actions?: { onSelect?: (label: string, series?: string) => void };
 };
 
 const ROW_HEIGHT = 30;
@@ -53,7 +54,11 @@ export function AzuosStackedBarChart({ data, state, ui, actions }: AzuosStackedB
           scrollHeight: data.categories.length * ROW_HEIGHT + 8,
         }}
         state={{ isLoading: state?.isLoading, isEmpty: data.categories.length === 0 }}
-        actions={{ onSelect: onSelect ? (selection) => onSelect(selection.name) : undefined }}
+        actions={{
+          onSelect: onSelect
+            ? (selection) => onSelect(selection.name, selection.series)
+            : undefined,
+        }}
       />
     </div>
   );

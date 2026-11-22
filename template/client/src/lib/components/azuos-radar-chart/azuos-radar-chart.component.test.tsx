@@ -1,7 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { AzuosRadarChart, RADAR_MAX_SLICES, shortenAxis } from './azuos-radar-chart.component';
+import {
+  AzuosRadarChart,
+  RADAR_MAX_SLICES,
+  radarLabelOf,
+  radarOption,
+  shortenAxis,
+} from './azuos-radar-chart.component';
 
 const SLICES = [
   { label: 'Comercial', value: 18 },
@@ -77,5 +83,36 @@ describe('AzuosRadarChart', () => {
     );
 
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+  });
+});
+
+describe('radarLabelOf', () => {
+  const LONG = [{ label: 'Departamento Jurídico Tributário', value: 3 }, ...SLICES];
+
+  // feliz
+  it('finds the whole category name from the cut name on the axis', () => {
+    expect(radarLabelOf(LONG, shortenAxis('Departamento Jurídico Tributário'))).toBe(
+      'Departamento Jurídico Tributário',
+    );
+    expect(radarLabelOf(LONG, 'Comercial')).toBe('Comercial');
+  });
+
+  // triste
+  it('is no category when the click was on the web itself', () => {
+    expect(radarLabelOf(LONG, 'Tarefas')).toBeNull();
+  });
+});
+
+describe('radarOption', () => {
+  // feliz
+  it('lets the axis names answer the click only when there is a detail to open', () => {
+    const theme = { border: '#ddd', muted: '#666' };
+
+    expect(radarOption(SLICES, 'Tarefas', '#000', theme, true).radar).toMatchObject({
+      triggerEvent: true,
+    });
+    expect(radarOption(SLICES, 'Tarefas', '#000', theme).radar).toMatchObject({
+      triggerEvent: false,
+    });
   });
 });

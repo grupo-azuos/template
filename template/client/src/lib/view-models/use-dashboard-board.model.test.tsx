@@ -8,6 +8,7 @@ import {
   DEFAULT_WINDOW,
   EMPTY_BOARD_FILTER_VALUES,
   type Widget,
+  widgetQueryOf,
 } from '@template/shared/schemas/dashboard-board.schema';
 import { type UserRole } from '@template/shared/schemas/user.schema';
 
@@ -18,12 +19,14 @@ import {
   activeValues,
   compactIdsOf,
   normalizeLayout,
-  queryOf,
   saveErrorOf,
   upsertWidget,
   useDashboardBoardModel,
   visibleScopes,
 } from './use-dashboard-board.model';
+
+const navigate = vi.fn();
+vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
 
 vi.mock('../api/dashboard-boards.api', () => ({
   dashboardBoardsApi: {
@@ -102,7 +105,7 @@ describe('useDashboardBoardModel', () => {
     await waitFor(() => expect(result.current.data.results.a?.data?.total).toBe(3));
     expect(result.current.data.widgets).toEqual([LIST]);
     expect(result.current.state.canEdit).toBe(true);
-    expect(dashboardBoardsApi.data).toHaveBeenCalledWith(queryOf(LIST));
+    expect(dashboardBoardsApi.data).toHaveBeenCalledWith(widgetQueryOf(LIST));
   });
 
   // feliz
@@ -166,7 +169,7 @@ describe('useDashboardBoardModel', () => {
     act(() => result.current.actions.onPreviewChange({ ...fresh, groupBy: 'createdBy' }));
     await waitFor(() => expect(result.current.data.preview?.data?.total).toBe(3));
     expect(dashboardBoardsApi.data).toHaveBeenCalledWith(
-      queryOf({ ...fresh, groupBy: 'createdBy' }),
+      widgetQueryOf({ ...fresh, groupBy: 'createdBy' }),
     );
   });
 
@@ -201,7 +204,7 @@ describe('useDashboardBoardModel', () => {
     act(() => result.current.actions.onFilterValueChange({ period, person: 'u-ana' }));
     await waitFor(() =>
       expect(dashboardBoardsApi.data).toHaveBeenCalledWith(
-        queryOf(LIST, { ...EMPTY_BOARD_FILTER_VALUES, period }),
+        widgetQueryOf(LIST, { ...EMPTY_BOARD_FILTER_VALUES, period }),
       ),
     );
     expect(result.current.data.filterValues).toEqual({ ...EMPTY_BOARD_FILTER_VALUES, period });
@@ -267,7 +270,9 @@ describe('board layout', () => {
   // feliz
   it('builds the block query from the whole scope, not the title', () => {
     expect(
-      queryOf(widgetFixture({ onlyMine: true, period: 'today', splitBy: 'createdBy', title: 'X' })),
+      widgetQueryOf(
+        widgetFixture({ onlyMine: true, period: 'today', splitBy: 'createdBy', title: 'X' }),
+      ),
     ).toEqual({
       source: 'tasks',
       groupBy: 'status',
@@ -286,9 +291,9 @@ describe('board layout', () => {
   it('keeps the chosen person on a source with a person, and drops the values of absent filters', () => {
     const values = { ...EMPTY_BOARD_FILTER_VALUES, person: 'u-ana' };
 
-    expect(queryOf(widgetFixture({ source: 'activity', groupBy: 'actor' }), values).person).toBe(
-      'u-ana',
-    );
+    expect(
+      widgetQueryOf(widgetFixture({ source: 'activity', groupBy: 'actor' }), values).person,
+    ).toBe('u-ana');
     expect(
       activeValues([], { ...EMPTY_BOARD_FILTER_VALUES, person: 'u-ana', period: DEFAULT_WINDOW }),
     ).toEqual(EMPTY_BOARD_FILTER_VALUES);
@@ -298,9 +303,11 @@ describe('board layout', () => {
   it('sends a field filter only to blocks whose source has the field', () => {
     const values = { ...EMPTY_BOARD_FILTER_VALUES, taskStatus: 'done' };
 
-    expect(queryOf(widgetFixture(), values).matches).toEqual([{ field: 'status', value: 'done' }]);
+    expect(widgetQueryOf(widgetFixture(), values).matches).toEqual([
+      { field: 'status', value: 'done' },
+    ]);
     expect(
-      queryOf(widgetFixture({ source: 'activity', groupBy: 'actor' }), values).matches,
+      widgetQueryOf(widgetFixture({ source: 'activity', groupBy: 'actor' }), values).matches,
     ).toEqual([]);
   });
 

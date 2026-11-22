@@ -1,311 +1,240 @@
-import { CalendarRange, Filter, Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
-import { todayIso } from '@template/shared/domain/calendar-date.util';
 import {
-  BOARD_FILTER_FIELDS,
   BOARD_FILTER_KIND_LABELS,
   BOARD_FILTER_KINDS,
-  type BoardFieldFilterKind,
   type BoardFilter,
+  type BoardFilterDisplay,
   type BoardFilterKind,
+  type BoardFilterPlace,
   type BoardFilterValues,
-  DATA_SOURCES,
-  type DataField,
-  type DataSourceKey,
-  isFieldFilterKind,
-  MAX_WINDOW_DAYS,
-  ME_VALUE,
-  type WidgetWindow,
-  windowLabel,
-  windowRange,
+  type BoardFilterWidth,
+  placedBoardFilters,
 } from '@template/shared/schemas/dashboard-board.schema';
 
 import { AzuosActionButton } from '../../../../lib/components/azuos-action-button/azuos-action-button.component';
-import { AzuosComboboxField } from '../../../../lib/components/azuos-combobox-field/azuos-combobox-field.component';
-import { AzuosDateRangeField } from '../../../../lib/components/azuos-date-range-field/azuos-date-range-field.component';
-import { AzuosFilterField } from '../../../../lib/components/azuos-filter-field/azuos-filter-field.component';
+import { AzuosCardSurface } from '../../../../lib/components/azuos-card-surface/azuos-card-surface.component';
+import { AzuosClearFiltersButton } from '../../../../lib/components/azuos-clear-filters-button/azuos-clear-filters-button.component';
+import { AzuosCollapsible } from '../../../../lib/components/azuos-collapsible/azuos-collapsible.component';
+import { cn } from '../../../../lib/utils/cn.util';
 import {
-  AzuosPersonPickerField,
-  type AzuosPersonPickerPerson,
-} from '../../../../lib/components/azuos-person-picker-field/azuos-person-picker-field.component';
-import { AzuosSelectField } from '../../../../lib/components/azuos-select-field/azuos-select-field.component';
-import { optionLabel } from '../azuos-filter-builder-screen/azuos-filter-builder-screen.component';
+  type BoardFilterPlaceChange,
+  type FilterCounts,
+} from '../../../../lib/view-models/use-dashboard-board.model';
+import { type PersonOption } from '../../../../lib/view-models/use-people.model';
+import { BoardFilterControl } from './board-filter-control';
+import { BoardFilterListEditor } from './board-filter-list-editor';
+import { activeSummary, readingOrder, toolbarDisplayOf } from './board-filter.util';
 
 /**
- * OS FILTROS DO PAINEL — a faixa no alto do dashboard que recorta TODOS os blocos de uma vez:
- * "Pessoa" (cada bloco que tem responsável ou quem fez) e "Período" (no lugar do período de
- * cada bloco, até 90 dias). Inspirado nas variáveis do Grafana, mas com dois filtros fechados:
- * a pessoa escolhe um valor, não escreve consulta.
+ * OS FILTROS DO PAINEL, no estilo do Grafana — uma BARRA compacta acima dos blocos, que recorta
+ * TODOS de uma vez, na ordem que quem montou escolheu. Cada filtro é uma peça só ("Status da
+ * tarefa | Todos ▾"), num cartão, em grade que se ajusta à largura. O Período é o seletor de tempo,
+ * no canto de cima do painel (`ui.part`).
  *
- * Vendo, só os campos. Montando, cada filtro ganha o "tirar", e os que faltam aparecem para pôr.
+ * O valor escolhido é de quem está vendo, e não se grava.
+ *
+ * Montando, a barra aparece como fica e, embaixo, a lista dos filtros (como as variáveis do
+ * Grafana): arrastar para ordenar, escolher o desenho e a largura, tirar; e os que faltam, para
+ * pôr.
  */
 export type AzuosBoardFilterBarProps = {
   data: {
     filters: BoardFilter[];
     values: BoardFilterValues;
-    /** Quem o filtro "Pessoa" oferece — com foto; o filtro guarda o id. */
-    people: AzuosPersonPickerPerson[];
+    /** Quem o filtro "Responsável" oferece — com foto; o filtro guarda o id. */
+    people: PersonOption[];
+    /** Os números dos filtros em "Cards", pelo id do filtro: quantos há em cada opção. */
+    counts?: Record<string, FilterCounts>;
+    /** Os filtros que dá para pôr. Sem a lista, todos. */
+    kinds?: readonly BoardFilterKind[];
   };
-  state?: { isEditing?: boolean };
+  /**
+   * `part`: qual pedaço da barra desenhar. `period` é o seletor de tempo do Grafana, no canto de
+   * cima do painel; `fields` são os outros filtros, na faixa acima dos blocos. Sem ele, todos.
+   */
+  ui?: { part?: 'fields' | 'period' };
+  /** `isListOpen`: montando, a lista dos filtros já nasce aberta (nas configurações do painel). */
+  state?: { isEditing?: boolean; isListOpen?: boolean };
   actions: {
     onChange: (patch: Partial<BoardFilterValues>) => void;
+    /** "Limpar filtros": todos voltam a "todos". Sem ela, o botão não aparece. */
+    onClear?: () => void;
     onAdd?: (kind: BoardFilterKind) => void;
     onRemove?: (id: string) => void;
+    /** Montando: troca o desenho do filtro. */
+    onDisplayChange?: (id: string, display: BoardFilterDisplay) => void;
+    /** Montando: o filtro numa peça ou na linha inteira. */
+    onWidthChange?: (id: string, width: BoardFilterWidth) => void;
+    /** Montando: a ordem nova dos filtros na barra. */
+    onPlaceChange?: (places: readonly BoardFilterPlaceChange[]) => void;
   };
 };
 
-export function AzuosBoardFilterBar({ data, state, actions }: AzuosBoardFilterBarProps) {
-  const isEditing = !!state?.isEditing;
-  const missing = BOARD_FILTER_KINDS.filter(
-    (kind) => !data.filters.some((filter) => filter.kind === kind),
-  );
-  if (data.filters.length === 0 && !isEditing) return null;
+type PlacedFilter = BoardFilter & { place: BoardFilterPlace };
+
+export function AzuosBoardFilterBar({ data, ui, state, actions }: AzuosBoardFilterBarProps) {
+  const ordered = orderedFilters(data.filters, ui?.part);
+  if (state?.isEditing) {
+    return <FilterSettings data={{ ...data, ordered }} state={state} actions={actions} />;
+  }
+  if (ordered.length === 0) return null;
+  if (ui?.part === 'period') {
+    /* O SELETOR DE TEMPO, no canto de cima, ao lado do "Atualizar" — sem cartão: é um controle
+       da barra de cima, como no Grafana. */
+    return (
+      <div role="group" aria-label="Período do painel" className="flex flex-wrap items-start gap-2">
+        {ordered.map((filter) => (
+          <div key={filter.id} className="w-72 max-w-full">
+            <Control data={data} filter={filter} actions={actions} />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <section
-      aria-label="Filtros do painel"
-      className="rounded-surface bg-card shadow-card flex flex-wrap items-end gap-3 p-4"
-    >
-      <span className="text-ink-700 flex items-center gap-2 self-center text-sm font-semibold">
-        <Filter className="size-4" aria-hidden="true" />
-        Filtros
-      </span>
-      {data.filters.map((filter) => (
-        <div key={filter.id} className="flex items-end gap-1">
-          <FilterControl
-            data={{ filter, values: data.values, people: data.people }}
-            actions={actions}
-          />
-          {isEditing && actions.onRemove ? (
-            <AzuosActionButton
-              data={{ label: `Tirar o filtro ${filter.label}` }}
-              ui={{ variant: 'ghost', icon: X, isIconOnly: true, size: 'lg' }}
-              actions={{ onClick: () => actions.onRemove?.(filter.id) }}
-            />
-          ) : null}
-        </div>
-      ))}
-      {isEditing && actions.onAdd
-        ? missing.map((kind) => (
-            <AzuosActionButton
-              key={kind}
-              data={{ label: BOARD_FILTER_KIND_LABELS[kind] }}
-              ui={{ variant: 'secondary', icon: Plus, size: 'lg' }}
-              actions={{ onClick: () => actions.onAdd?.(kind) }}
-            />
-          ))
-        : null}
-      {isEditing && data.filters.length === 0 ? (
-        <p className="text-ink-500 self-center text-xs">
-          Ponha um filtro para quem vê recortar todos os blocos de uma vez.
-        </p>
-      ) : null}
+    <section aria-label="Filtros do painel">
+      <Toolbar data={{ ...data, ordered }} state={{ isEditing: false }} actions={actions} />
     </section>
   );
 }
 
-function FilterControl({
+/** Os filtros na ordem da barra, só os do pedaço pedido. */
+function orderedFilters(
+  filters: readonly BoardFilter[],
+  part: 'fields' | 'period' | undefined,
+): PlacedFilter[] {
+  return readingOrder(placedBoardFilters(filters)).filter((filter) => {
+    if (part === 'period') return filter.kind === 'period';
+    if (part === 'fields') return filter.kind !== 'period';
+
+    return true;
+  });
+}
+
+/**
+ * O cartão que junta os filtros numa faixa só. Dentro, uma GRADE que se ajusta à largura: cada
+ * peça tem no mínimo 18rem e as colunas se dividem por igual — no celular, uma por linha; numa
+ * tela larga, todas lado a lado, sem sobra torta no fim. A ordem é a da lista de quem montou.
+ */
+function Toolbar({
   data,
+  state,
   actions,
 }: {
-  data: { filter: BoardFilter; values: BoardFilterValues; people: AzuosPersonPickerPerson[] };
-  actions: Pick<AzuosBoardFilterBarProps['actions'], 'onChange'>;
+  data: AzuosBoardFilterBarProps['data'] & { ordered: PlacedFilter[] };
+  state: { isEditing: boolean };
+  actions: AzuosBoardFilterBarProps['actions'];
 }) {
-  const { kind } = data.filter;
-  if (isFieldFilterKind(kind)) {
-    return (
-      <FieldControl
-        data={{
-          label: data.filter.label,
-          value: data.values[kind],
-          options: fieldFilterOptions(kind),
-        }}
-        actions={{ onChange: (value) => actions.onChange({ [kind]: value || null }) }}
-      />
-    );
-  }
-  if (kind === 'person') {
-    return (
-      <PersonControl
-        data={{ label: data.filter.label, value: data.values.person, people: data.people }}
-        actions={actions}
-      />
-    );
-  }
+  const active = activeSummary(data);
 
   return (
-    <PeriodControl
-      data={{ label: data.filter.label, value: data.values.period }}
-      actions={actions}
+    <AzuosCardSurface ui={{ className: 'flex flex-col gap-2 p-3 sm:flex-row sm:items-start' }}>
+      <div className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2">
+        {data.ordered.map((filter) => (
+          /* "Linha inteira" (e os cards, que são uma faixa): a peça ocupa a linha toda, sozinha. */
+          <div
+            key={filter.id}
+            className={cn(
+              'min-w-0',
+              (filter.width === 'full' || toolbarDisplayOf(filter) === 'cards') && 'col-span-full',
+            )}
+          >
+            <Control data={data} filter={filter} actions={actions} />
+          </div>
+        ))}
+      </div>
+      {actions.onClear && !state.isEditing && active.length > 0 ? (
+        <div className="flex shrink-0 items-center justify-end sm:h-10">
+          <AzuosClearFiltersButton
+            state={{ hasFilter: true }}
+            actions={{ onClear: actions.onClear }}
+          />
+        </div>
+      ) : null}
+    </AzuosCardSurface>
+  );
+}
+
+function Control({
+  data,
+  filter,
+  actions,
+}: {
+  data: AzuosBoardFilterBarProps['data'];
+  filter: BoardFilter;
+  actions: AzuosBoardFilterBarProps['actions'];
+}) {
+  return (
+    <BoardFilterControl
+      data={{
+        filter,
+        display: toolbarDisplayOf(filter),
+        values: data.values,
+        people: data.people,
+        counts: data.counts?.[filter.id] ?? null,
+      }}
+      actions={{ onChange: actions.onChange }}
     />
   );
 }
 
-/** "Pessoa": todas, eu, ou alguém da lista. "Eu" serve a todo mundo, cada um vê o seu. */
-function PersonControl({
-  data,
-  actions,
-}: {
-  data: { label: string; value: string | null; people: AzuosPersonPickerPerson[] };
-  actions: Pick<AzuosBoardFilterBarProps['actions'], 'onChange'>;
-}) {
-  return (
-    <AzuosFilterField data={{ label: data.label }} ui={{ className: 'w-60' }}>
-      <AzuosPersonPickerField
-        data={{
-          value: data.value ?? '',
-          people: data.people,
-          leading: [
-            { value: '', label: 'Todas as pessoas' },
-            { value: ME_VALUE, label: 'Eu' },
-          ],
-        }}
-        ui={{ ariaLabel: data.label, placeholder: 'Todas as pessoas', className: 'w-full' }}
-        actions={{ onChange: (person) => actions.onChange({ person: person || null }) }}
-      />
-    </AzuosFilterField>
-  );
-}
-
-/** Mais que isto, a lista ganha busca (regra `select-standard`: acima de 10 opções). */
-const MAX_PLAIN_OPTIONS = 10;
-
-/** Os valores de cada filtro de campo, com o rótulo em português. */
-export function fieldFilterOptions(kind: BoardFieldFilterKind): { value: string; label: string }[] {
-  const [source, field] = Object.entries(BOARD_FILTER_FIELDS[kind])[0] as [DataSourceKey, string];
-  const options = (DATA_SOURCES[source].fields as Record<string, DataField>)[field]?.options ?? [];
-
-  return options.map((option) => ({ value: option, label: optionLabel(source, option) }));
-}
-
-/** Um filtro de campo: "Todos", ou um valor. Lista longa ganha busca. */
-function FieldControl({
-  data,
-  actions,
-}: {
-  data: { label: string; value: string | null; options: { value: string; label: string }[] };
-  actions: { onChange: (value: string) => void };
-}) {
-  const options = [{ value: '', label: 'Todos' }, ...data.options];
-
-  return (
-    <AzuosFilterField data={{ label: data.label }} ui={{ className: 'w-52' }}>
-      {data.options.length > MAX_PLAIN_OPTIONS ? (
-        <AzuosComboboxField
-          data={{ value: data.value ?? '', options }}
-          ui={{
-            ariaLabel: data.label,
-            placeholder: 'Todos',
-            searchPlaceholder: 'Buscar...',
-            className: 'w-full',
-          }}
-          actions={actions}
-        />
-      ) : (
-        <AzuosSelectField
-          data={{ value: data.value ?? '', options }}
-          ui={{ ariaLabel: data.label, className: 'w-full' }}
-          actions={actions}
-        />
-      )}
-    </AzuosFilterField>
-  );
-}
-
-const relative = (
-  direction: 'next' | 'last',
-  count: number,
-  unit: 'day' | 'week' | 'month',
-): WidgetWindow => ({ mode: 'relative', direction, count, unit });
-
-/** Os períodos prontos — o que mais se pergunta, sem abrir calendário. */
-export const PERIOD_PRESETS: { value: string; label: string; window: WidgetWindow | null }[] = [
-  { value: 'each', label: 'O de cada bloco', window: null },
-  { value: 'last-7-day', label: 'Últimos 7 dias', window: relative('last', 7, 'day') },
-  { value: 'last-30-day', label: 'Últimos 30 dias', window: relative('last', 30, 'day') },
-  { value: 'last-90-day', label: 'Últimos 90 dias', window: relative('last', 90, 'day') },
-  { value: 'last-1-month', label: 'Este mês', window: relative('last', 1, 'month') },
-  { value: 'next-30-day', label: 'Próximos 30 dias', window: relative('next', 30, 'day') },
-  { value: 'custom', label: 'Datas exatas', window: null },
-];
-
-/** Qual opção pronta é a janela escolhida — `custom` para datas exatas. */
-export function presetOf(window: WidgetWindow | null): string {
-  if (!window) return 'each';
-  if (window.mode === 'custom') return 'custom';
-
-  return `${window.direction}-${window.count}-${window.unit}`;
-}
-
-/** A janela de uma opção pronta. "Datas exatas" nasce nos últimos 30 dias, para ajustar. */
-export function windowOfPreset(value: string, today: string): WidgetWindow | null {
-  if (value === 'custom') {
-    return { mode: 'custom', ...windowRange(relative('last', 30, 'day'), today) };
-  }
-
-  return PERIOD_PRESETS.find((preset) => preset.value === value)?.window ?? null;
-}
-
 /**
- * Datas exatas nunca passam de 90 dias: a data final escolhida longe demais é puxada para o
- * 90º dia — melhor que recusar sem dizer o que fazer.
+ * MONTANDO: a barra como quem vê vai encontrá-la e, embaixo, a lista para ajustar — a ordem, o
+ * desenho, a largura —, com os filtros que faltam para pôr.
  */
-export function clampRange(from: string, to: string): { from: string; to: string } {
-  const [start, end] = from <= to ? [from, to] : [to, from];
-  const limit = new Date(`${start}T00:00:00.000Z`);
-  limit.setUTCDate(limit.getUTCDate() + MAX_WINDOW_DAYS - 1);
-  const last = limit.toISOString().slice(0, 10);
-
-  return { from: start, to: end > last ? last : end };
-}
-
-function PeriodControl({
+function FilterSettings({
   data,
+  state,
   actions,
 }: {
-  data: { label: string; value: WidgetWindow | null };
-  actions: Pick<AzuosBoardFilterBarProps['actions'], 'onChange'>;
+  data: AzuosBoardFilterBarProps['data'] & { ordered: PlacedFilter[] };
+  state: NonNullable<AzuosBoardFilterBarProps['state']>;
+  actions: AzuosBoardFilterBarProps['actions'];
 }) {
-  const preset = presetOf(data.value);
+  const missing = (data.kinds ?? BOARD_FILTER_KINDS).filter(
+    (kind) => !data.filters.some((filter) => filter.kind === kind),
+  );
+  const canAdd = Boolean(actions.onAdd) && missing.length > 0;
 
   return (
-    <div className="flex flex-wrap items-end gap-2">
-      <AzuosFilterField data={{ label: data.label }} ui={{ className: 'w-48' }}>
-        <AzuosSelectField
-          data={{
-            value: preset,
-            options: PERIOD_PRESETS.map(({ value, label }) => ({ value, label })),
-          }}
-          ui={{ ariaLabel: data.label, className: 'w-full' }}
-          actions={{
-            onChange: (value) => actions.onChange({ period: windowOfPreset(value, todayIso()) }),
-          }}
-        />
-      </AzuosFilterField>
-      {data.value?.mode === 'custom' ? (
-        <AzuosDateRangeField
-          data={{
-            label: `Entre (até ${MAX_WINDOW_DAYS} dias)`,
-            name: 'boardPeriod',
-            value: { from: data.value.from, to: data.value.to },
-          }}
-          ui={{ className: 'w-64' }}
-          actions={{
-            onChange: (range) => {
-              if (data.value?.mode !== 'custom') return;
-              const from = range.from ?? data.value.from;
-              const to = range.to ?? data.value.to;
-              actions.onChange({ period: { mode: 'custom', ...clampRange(from, to) } });
-            },
-          }}
-        />
+    <section aria-label="Filtros do painel" className="flex flex-col gap-4">
+      {data.ordered.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <span className="text-muted-foreground text-sm font-medium">Como a barra aparece</span>
+          <Toolbar data={data} state={{ isEditing: true }} actions={actions} />
+        </div>
       ) : null}
-      {data.value ? (
-        <p className="text-ink-500 flex items-center gap-1 pb-2.5 text-xs">
-          <CalendarRange className="size-3.5" aria-hidden="true" />
-          {windowLabel(data.value)}
+      {data.ordered.length > 0 || canAdd ? (
+        <AzuosCollapsible
+          data={{ title: `Ajustar os filtros (${data.ordered.length})` }}
+          state={{ isOpen: state.isListOpen }}
+        >
+          <div className="flex flex-col gap-3">
+            {data.ordered.length > 0 ? (
+              <BoardFilterListEditor data={{ filters: data.ordered }} actions={actions} />
+            ) : null}
+            {canAdd ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {missing.map((kind) => (
+                  <AzuosActionButton
+                    key={kind}
+                    data={{ label: BOARD_FILTER_KIND_LABELS[kind] }}
+                    ui={{ variant: 'secondary', icon: Plus }}
+                    actions={{ onClick: () => actions.onAdd?.(kind) }}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </AzuosCollapsible>
+      ) : null}
+      {data.filters.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          Ponha um filtro para quem vê recortar todos os blocos de uma vez.
         </p>
       ) : null}
-    </div>
+    </section>
   );
 }
