@@ -69,7 +69,7 @@ describe('HistoryReadService', () => {
 
     const page = await service.list(ana, historyQuerySchema.parse({ actor: 'me' }));
 
-    expect(list).toHaveBeenCalledWith(expect.anything(), 'ana');
+    expect(list).toHaveBeenCalledWith(expect.anything(), 'ana', undefined);
     expect(page.items[0]).toMatchObject({ id: '3', actor: { name: 'ana@empresa.com.br' } });
   });
 

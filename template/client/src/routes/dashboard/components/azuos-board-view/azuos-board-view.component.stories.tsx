@@ -45,10 +45,13 @@ const meta = {
       updatedAt: '2026-11-06T18:30:00.000Z',
       filters: [],
       boardFilters: [
-        { id: 'pessoa', kind: 'person', label: 'Pessoa' },
+        { id: 'pessoa', kind: 'person', label: 'Responsável' },
         { id: 'periodo', kind: 'period', label: 'Período' },
       ],
       filterValues: EMPTY_BOARD_FILTER_VALUES,
+      filterCounts: {},
+      weight: 4,
+      refreshEvery: '300000',
       people: PEOPLE_FIXTURE,
     },
     state: {
@@ -78,6 +81,13 @@ const meta = {
       onFilterValueChange: fn(),
       onAddBoardFilter: fn(),
       onRemoveBoardFilter: fn(),
+      onClearFilterValues: fn(),
+      onBoardFilterDisplayChange: fn(),
+      onBoardFilterWidthChange: fn(),
+      onBoardFilterPlaceChange: fn(),
+      onDuplicateWidget: fn(),
+      onRefreshEveryChange: fn(),
+      onOpenItem: fn(),
     },
   },
 } satisfies Meta<typeof AzuosBoardView>;

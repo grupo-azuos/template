@@ -32,6 +32,9 @@ function makeProps(overrides: Partial<AzuosBoardViewProps['state']> = {}): Azuos
       filters: [],
       boardFilters: [{ id: 'periodo', kind: 'period', label: 'Período' }],
       filterValues: EMPTY_BOARD_FILTER_VALUES,
+      filterCounts: {},
+      weight: 4,
+      refreshEvery: '300000',
       people: [],
     },
     state: {
@@ -62,6 +65,13 @@ function makeProps(overrides: Partial<AzuosBoardViewProps['state']> = {}): Azuos
       onFilterValueChange: vi.fn(),
       onAddBoardFilter: vi.fn(),
       onRemoveBoardFilter: vi.fn(),
+      onClearFilterValues: vi.fn(),
+      onBoardFilterDisplayChange: vi.fn(),
+      onBoardFilterWidthChange: vi.fn(),
+      onBoardFilterPlaceChange: vi.fn(),
+      onDuplicateWidget: vi.fn(),
+      onRefreshEveryChange: vi.fn(),
+      onOpenItem: vi.fn(),
     },
   };
 }
@@ -80,38 +90,64 @@ describe('AzuosBoardView', () => {
     expect(props.actions.onScopeChange).toHaveBeenCalledWith('manager');
     expect(props.actions.onRefresh).toHaveBeenCalled();
     expect(props.actions.onStartEdit).toHaveBeenCalled();
-    expect(screen.getByRole('region', { name: 'Filtros do painel' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Período do painel' })).toBeInTheDocument();
   });
 
   // feliz
-  it('opens the full-screen builder with kinds, filters, restore and save while editing', () => {
+  it('puts the time picker and the "refresh every" at the top, as in Grafana', () => {
+    const props = makeProps();
+    render(<AzuosBoardView {...props} />);
+
+    expect(screen.getByRole('group', { name: 'Período do painel' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('combobox', { name: 'Atualizar a cada' }));
+    fireEvent.click(screen.getByRole('option', { name: '1 minuto' }));
+
+    expect(props.actions.onRefreshEveryChange).toHaveBeenCalledWith('60000');
+  });
+
+  // feliz
+  it('builds the board in place, with add, settings, discard and save on a toolbar', () => {
     const props = makeProps({ isEditing: true });
     render(<AzuosBoardView {...props} />);
 
-    expect(screen.getByRole('dialog', { name: 'Montar o painel Equipe' })).toBeInTheDocument();
-    expect(screen.getByText(/^\d+ de 24 pontos$/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Pôr bloco Rosca' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Montar filtros' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Restaurar' }));
-    expect(props.actions.onNewWidget).toHaveBeenCalledWith('donut', { x: 0, y: 2, w: 2, h: 2 });
-    expect(props.actions.onOpenFilters).toHaveBeenCalled();
+    expect(screen.getByRole('toolbar', { name: 'Montando o painel' })).toHaveTextContent(
+      'Editando o painel Equipe · 4 de 24 pontos',
+    );
+    expect(screen.queryByRole('button', { name: 'Editar painel' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Bloco' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Responsável' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar painel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
+
+    expect(props.actions.onNewWidget).toHaveBeenCalled();
+    expect(props.actions.onAddBoardFilter).toHaveBeenCalledWith('person');
     expect(props.actions.onSave).toHaveBeenCalled();
     expect(props.actions.onCancelEdit).toHaveBeenCalled();
-    expect(screen.getByRole('region', { name: 'Mais usados' })).toBeInTheDocument();
+  });
+
+  // feliz
+  it('opens the board settings on the side, with the list of filters', () => {
+    render(<AzuosBoardView {...makeProps({ isEditing: true })} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Configurações' }));
+
+    expect(screen.getByRole('dialog', { name: 'Configurações do painel' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('list', { name: 'Os filtros do painel, na ordem da barra' }),
+    ).toBeInTheDocument();
   });
 
   // triste
-  it('lets read-only users only view, and locks the kinds at the block limit', () => {
+  it('lets read-only users only view, and locks a new block at the quota', () => {
     const { rerender } = render(<AzuosBoardView {...makeProps({ canEdit: false })} />);
     expect(screen.queryByRole('button', { name: 'Editar painel' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('toolbar')).not.toBeInTheDocument();
 
     rerender(<AzuosBoardView {...makeProps({ isEditing: true, canAdd: false })} />);
-    expect(screen.getByRole('button', { name: 'Pôr bloco Colunas' })).toBeDisabled();
-    expect(
-      screen.getByText('O painel usou a cota toda. Tire ou troque um bloco para pôr outro.'),
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+    expect(screen.getByRole('menuitem', { name: 'Bloco' })).toBeDisabled();
   });
 
   // triste

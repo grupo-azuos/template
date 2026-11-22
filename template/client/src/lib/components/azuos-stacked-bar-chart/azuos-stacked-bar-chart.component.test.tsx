@@ -78,7 +78,7 @@ describe('AzuosStackedBarChart', () => {
 });
 
 const THEME = { foreground: themeColor('--foreground'), muted: themeColor('--muted-foreground') };
-const DATA = { categories: CATEGORIES, series: SERIES, seriesLabel: 'Alvarás' };
+const DATA = { categories: CATEGORIES, series: SERIES, seriesLabel: 'Tarefas' };
 
 type StackSeries = { label?: { formatter: (params: unknown) => string } };
 
@@ -118,7 +118,10 @@ describe('AzuosStackedBarChart selection', () => {
     const click = await chartClick();
 
     act(() => click({ name: 'BOMBEIRO' }));
+    /* Na pilha, também a série clicada — o segundo valor dos blocos de par do painel. */
+    act(() => click({ name: 'BOMBEIRO', seriesName: 'Concluído' }));
 
-    expect(onSelect).toHaveBeenCalledWith('BOMBEIRO');
+    expect(onSelect).toHaveBeenNthCalledWith(1, 'BOMBEIRO', undefined);
+    expect(onSelect).toHaveBeenNthCalledWith(2, 'BOMBEIRO', 'Concluído');
   });
 });

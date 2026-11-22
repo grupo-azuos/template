@@ -92,9 +92,7 @@ describe('AzuosBoardWidget', () => {
     const onChangeKind = vi.fn();
     render(<AzuosBoardWidget {...props} actions={{ ...props.actions, onChangeKind }} />);
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Trocar o gráfico de Por quem cadastrou' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Trocar o gráfico de Por quem cadastrou' }));
     expect(screen.getByRole('radio', { name: 'Ranking' })).toHaveAttribute('aria-checked', 'true');
     fireEvent.click(screen.getByRole('radio', { name: 'Rosca' }));
 
@@ -114,20 +112,39 @@ describe('AzuosBoardWidget', () => {
   });
 
   // feliz
-  it('expands the chart full screen outside edit mode', () => {
+  it('opens the chart full screen from "Ver" in the block menu', () => {
     render(<AzuosBoardWidget {...makeProps()} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Expandir Por quem cadastrou' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Menu de Por quem cadastrou' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Ver' }));
 
     expect(screen.getByRole('dialog', { name: 'Por quem cadastrou' })).toBeInTheDocument();
   });
 
+  // feliz
+  it('offers edit, duplicate and remove in the block menu to whoever can build the board', () => {
+    const props = makeProps();
+    const onDuplicate = vi.fn();
+    render(
+      <AzuosBoardWidget
+        {...props}
+        state={{ isEditing: false, canEdit: true }}
+        actions={{ ...props.actions, onDuplicate }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu de Por quem cadastrou' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Duplicar' }));
+
+    expect(onDuplicate).toHaveBeenCalledWith(props.data.widget.id);
+  });
+
   // triste
-  it('does not expand inside the editor preview', () => {
+  it('has no block menu inside the editor preview', () => {
     const props = makeProps();
     render(<AzuosBoardWidget {...props} state={{ isEditing: false, isPreview: true }} />);
 
-    expect(screen.queryByRole('button', { name: /^Expandir/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Menu de/ })).not.toBeInTheDocument();
   });
 
   // feliz
