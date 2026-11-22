@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { PencilLine } from 'lucide-react';
 import { fn } from 'storybook/test';
 
 import { type SavedFilter } from '@template/shared/schemas/dashboard-board.schema';
 
+import { OpenButtonDemo } from '../../../../../.storybook/open-button-demo';
 import { widgetFixture } from '../../../../lib/utils/dashboard-fixture.util';
 import { AzuosWidgetEditorDialog } from './azuos-widget-editor-dialog.component';
 
@@ -48,6 +50,31 @@ const meta = {
     },
     actions: { onClose: fn(), onSubmit: fn(), onOpenFilters: fn() },
   },
+  /* Como na tela: começa fechado, o botão abre, e fechar ou aplicar fecha de fato. */
+  render: (args) => (
+    <OpenButtonDemo
+      label={args.data.editing?.isNew ? 'Novo bloco' : 'Editar bloco'}
+      icon={PencilLine}
+    >
+      {(isOpen, close) => (
+        <AzuosWidgetEditorDialog
+          {...args}
+          data={{ ...args.data, editing: isOpen ? args.data.editing : null }}
+          actions={{
+            ...args.actions,
+            onClose: () => {
+              args.actions.onClose();
+              close();
+            },
+            onSubmit: (widget) => {
+              args.actions.onSubmit(widget);
+              close();
+            },
+          }}
+        />
+      )}
+    </OpenButtonDemo>
+  ),
 } satisfies Meta<typeof AzuosWidgetEditorDialog>;
 
 export default meta;
