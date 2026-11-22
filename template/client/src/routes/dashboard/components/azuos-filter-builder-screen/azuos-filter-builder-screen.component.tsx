@@ -250,9 +250,13 @@ export function AzuosFilterBuilderScreen({ data, state, actions }: AzuosFilterBu
                 listsAsArrays
                 showNotToggle
                 resetOnFieldChange
+                /* O grupo não tem fundo: os campos são cinza cheio (`bg-muted`) e, sobre um grupo
+                   cinza, sumiam no claro e no escuro. O grupo de dentro se marca por um fio à
+                   esquerda, como a régua de um índice; a moldura do CSS da biblioteca sai (`!`). */
                 controlClassnames={{
                   queryBuilder: 'flex flex-col gap-3',
-                  ruleGroup: 'bg-muted rounded-box flex flex-col gap-3 p-3',
+                  ruleGroup:
+                    'flex flex-col gap-3 border-0! p-0! [&_.ruleGroup]:border-border [&_.ruleGroup]:border-l-2! [&_.ruleGroup]:pl-3!',
                   header: 'flex flex-wrap items-center gap-2',
                   body: 'flex flex-col gap-2 pl-4',
                   rule: 'flex flex-wrap items-center gap-2',
