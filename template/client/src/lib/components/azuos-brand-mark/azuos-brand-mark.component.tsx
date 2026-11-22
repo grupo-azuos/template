@@ -1,5 +1,4 @@
-import azuosIcon from './assets/azuos-icon.svg';
-import azuosLogoWhite from './assets/azuos-logo-oficial-white.png';
+import { brandAssetUrl } from '../../utils/brand-asset.util';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -7,7 +6,7 @@ import { cn } from '../../utils/cn.util';
  *
  * O PNG branco mantém o contraste sobre a barra azul. O ícone SVG oficial identifica a
  * marca quando a barra está recolhida, sem comprimir o nome inteiro em poucos pixels.
- * Os dois arquivos vêm do pacote azuos-brand.
+ * Os dois arquivos vêm da CDN da marca, publicados pelo app brand.
  */
 export type AzuosBrandMarkProps = {
   ui?: {
@@ -21,11 +20,14 @@ export type AzuosBrandMarkProps = {
 const WIDTHS = { sm: 84, md: 110, lg: 180 } as const;
 const ICON_WIDTHS = { sm: 28, md: 36, lg: 48 } as const;
 
+const ICON_SRC = brandAssetUrl('logo/svg/icon.svg');
+const LOGO_SRC = brandAssetUrl('logo/png/azuos-logo-oficial-white.png');
+
 export function AzuosBrandMark({ ui }: AzuosBrandMarkProps) {
   const variant = ui?.variant ?? 'full';
   const size = ui?.size ?? 'md';
   const width = variant === 'icon' ? ICON_WIDTHS[size] : WIDTHS[size];
-  const src = variant === 'icon' ? azuosIcon : azuosLogoWhite;
+  const src = variant === 'icon' ? ICON_SRC : LOGO_SRC;
 
   return (
     <img
