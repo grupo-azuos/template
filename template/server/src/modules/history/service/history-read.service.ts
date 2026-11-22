@@ -1,11 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { type HistoryDrillQuery } from '@template/shared/schemas/board-drill.schema';
+import { type DataSourceKey } from '@template/shared/schemas/dashboard-board.schema';
 import { type Paginated } from '@template/shared/schemas/pagination.schema';
-import { type HistoryEntry, type HistoryQuery } from '@template/shared/schemas/history.schema';
+import { type HistoryEntry } from '@template/shared/schemas/history.schema';
+import { type SQL } from 'drizzle-orm';
 
 import { type RequestUser } from '../../../lib/auth/request-user.type';
 import { type HistoryRow } from '../../../lib/db/schema/history.schema';
 import { assertCanRead } from '../../../lib/policy/policy-assert.util';
+import { BOARD_DRILL, type BoardDrillResolver } from '../../dashboard-boards/board-drill.token';
 import { HistoryRepository } from '../repository/history.repository';
+
+/** A fonte do painel que esta lista sabe recortar: o movimento, que é o próprio histórico. */
+const HISTORY_DRILL_SOURCES: readonly DataSourceKey[] = ['activity'];
 
 /**
  * A LEITURA DO HISTÓRICO — a tela Histórico. Toda a equipe lê: é a resposta de "quem mudou
@@ -16,12 +23,15 @@ import { HistoryRepository } from '../repository/history.repository';
  */
 @Injectable()
 export class HistoryReadService {
-  constructor(private readonly repository: HistoryRepository) {}
+  constructor(
+    private readonly repository: HistoryRepository,
+    @Optional() @Inject(BOARD_DRILL) private readonly drills?: BoardDrillResolver,
+  ) {}
 
-  async list(user: RequestUser, query: HistoryQuery): Promise<Paginated<HistoryEntry>> {
+  async list(user: RequestUser, query: HistoryDrillQuery): Promise<Paginated<HistoryEntry>> {
     assertCanRead(user.role, 'o histórico');
     const actorId = query.actor === 'me' ? user.id : null;
-    const page = await this.repository.list(query, actorId);
+    const page = await this.repository.list(query, actorId, await this.drillOf(user, query));
 
     return {
       items: page.rows.map(toHistoryEntry),
@@ -29,6 +39,13 @@ export class HistoryReadService {
       page: query.page,
       pageSize: query.pageSize,
     };
+  }
+
+  /** O recorte de um clique no painel em SQL — sem recorte (ou sem o painel), nada. */
+  private async drillOf(user: RequestUser, query: HistoryDrillQuery): Promise<SQL | undefined> {
+    if (!query.drill || !this.drills) return undefined;
+
+    return this.drills.drillCondition(user, query.drill, HISTORY_DRILL_SOURCES);
   }
 }
 
