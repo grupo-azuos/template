@@ -28,6 +28,8 @@ import { AzuosEchart } from '../azuos-echart/azuos-echart.component';
 export type AzuosAreaChartProps = {
   data: { points: readonly TimePoint[]; series: readonly TimeSeriesDef[] };
   state?: { isLoading?: boolean };
+  /** `onSelect`: o clique num ponto do tempo, com o instante dele (`TimePoint.at`). */
+  actions?: { onSelect?: (at: string) => void };
   ui?: {
     emptyLabel?: string;
     className?: string;
@@ -53,8 +55,9 @@ function percentScale(isPercent: boolean | undefined) {
   return { min: 0, max: 105, interval: 25 };
 }
 
-export function AzuosAreaChart({ data, state, ui }: AzuosAreaChartProps) {
+export function AzuosAreaChart({ data, state, ui, actions }: AzuosAreaChartProps) {
   const rows = toTimeRows(data.points, data.series);
+  const onSelect = actions?.onSelect;
 
   return (
     <div className={cn('flex flex-col gap-2', ui?.className)}>
@@ -67,6 +70,14 @@ export function AzuosAreaChart({ data, state, ui }: AzuosAreaChartProps) {
         }}
         ui={{ heightClass: ui?.heightClass, emptyLabel: ui?.emptyLabel }}
         state={{ isLoading: state?.isLoading, isEmpty: rows.length === 0 }}
+        actions={{
+          onAxisSelect: onSelect
+            ? (index) => {
+                const row = rows[index];
+                if (row) onSelect(row.at.toISOString());
+              }
+            : undefined,
+        }}
       />
     </div>
   );
