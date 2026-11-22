@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { TASK_STATUSES } from '../domain/task-status.util';
+import { boardDrillParamSchema } from './board-drill.schema';
 import { paginationQuerySchema } from './pagination.schema';
 
 /**
@@ -91,6 +92,8 @@ export type UpdateTaskInput = z.input<typeof updateTaskSchema>;
 export const taskListQuerySchema = paginationQuerySchema.extend({
   search: z.string().trim().optional(),
   status: taskStatusSchema.optional(),
+  /** O recorte de um clique no painel (`board-drill.schema`): estreita a lista ao item clicado. */
+  drill: boardDrillParamSchema.optional(),
 });
 
 export type TaskListQuery = z.infer<typeof taskListQuerySchema>;

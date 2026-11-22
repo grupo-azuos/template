@@ -2,15 +2,10 @@ import { z } from 'zod';
 
 import { archiveSchema } from './archive.schema';
 import { type DataDimension, type DataField } from './dashboard-source.types';
-import { BOARD_FIELD_FILTERS, DATA_SOURCES } from './dashboard-sources';
+import { BOARD_FIELD_FILTERS, BOARD_FILTER_CARDS, DATA_SOURCES } from './dashboard-sources';
 import { listSchema, resourceSchema } from './envelope.schema';
 
-export type {
-  DataDimension,
-  DataField,
-  DataFieldType,
-  DataSource,
-} from './dashboard-source.types';
+export type { DataDimension, DataField, DataFieldType, DataSource } from './dashboard-source.types';
 export { DATA_SOURCES } from './dashboard-sources';
 
 /**
@@ -573,6 +568,11 @@ function statsGroupProblem(
   return 'Os cards agrupam por categoria';
 }
 
+/** O clique num item abre a lista da fonte? Ausente é sim — os painéis já salvos também. */
+export function widgetIsClickable(widget: Pick<Widget, 'isClickable'>): boolean {
+  return widget.isClickable ?? true;
+}
+
 export const widgetSchema = z
   .object({
     id: z.string().min(1).max(40),
@@ -588,6 +588,11 @@ export const widgetSchema = z
     period: widgetPeriodSchema.default('all'),
     /** A janela da agenda (até 90 dias). Nula nos outros blocos — e nos painéis já salvos. */
     window: widgetWindowSchema.nullable().default(null),
+    /**
+     * Clicar num item (barra, fatia, linha, card, dia) abre a lista da fonte com o recorte do
+     * bloco e o valor clicado. Ausente é clicável (`widgetIsClickable`).
+     */
+    isClickable: z.boolean().optional(),
   })
   .superRefine((widget, context) => {
     const problem = groupProblem(widget);
@@ -663,7 +668,8 @@ export const boardFilterKindSchema = z.enum(
 export type BoardFilterKind = 'person' | 'period' | BoardFieldFilterKind;
 
 export const BOARD_FILTER_KIND_LABELS = {
-  person: 'Pessoa',
+  /* "Responsável", e não "Pessoa": o filtro recorta por quem cuida (ou por quem fez). */
+  person: 'Responsável',
   period: 'Período',
   ...Object.fromEntries(
     BOARD_FIELD_FILTER_KINDS.map((kind) => [kind, BOARD_FIELD_FILTERS[kind].label]),
@@ -678,13 +684,160 @@ export function isFieldFilterKind(kind: BoardFilterKind): kind is BoardFieldFilt
   return kind in BOARD_FILTER_FIELDS;
 }
 
+/**
+ * COMO O FILTRO APARECE NA BARRA — quem monta o painel escolhe o desenho de cada filtro: a lista
+ * suspensa, a busca, ou os cards (uma opção por quadro, com quantos há nela). Os outros desenhos
+ * (etiquetas, lista aberta, fotos) não cabem numa peça da barra: um painel gravado com eles cai na
+ * lista suspensa, ou na busca para pessoa.
+ */
+export const BOARD_FILTER_DISPLAYS = [
+  'select',
+  'search',
+  'chips',
+  'list',
+  'avatars',
+  'cards',
+] as const;
+export const boardFilterDisplaySchema = z.enum(BOARD_FILTER_DISPLAYS);
+export type BoardFilterDisplay = z.infer<typeof boardFilterDisplaySchema>;
+
+export const BOARD_FILTER_DISPLAY_LABELS: Record<BoardFilterDisplay, string> = {
+  select: 'Lista suspensa',
+  search: 'Busca',
+  chips: 'Etiquetas',
+  list: 'Lista aberta',
+  avatars: 'Fotos',
+  cards: 'Cards',
+};
+
+/**
+ * DE ONDE VEM O NÚMERO DE CADA CARD — o filtro em "Cards" mostra cada opção com quantos há nela,
+ * e esse número é a mesma conta de um bloco: a fonte agrupada pelo campo do filtro. As de cada
+ * sistema moram em `dashboard-sources.ts`; filtro sem entrada lá não tem cards.
+ */
+export const BOARD_FILTER_CARD_SOURCES = BOARD_FILTER_CARDS as Partial<
+  Record<BoardFilterKind, { source: DataSourceKey; groupBy: string }>
+>;
+
+/** Os desenhos que cada filtro aceita — o primeiro é o padrão. */
+export function boardFilterDisplaysOf(kind: BoardFilterKind): BoardFilterDisplay[] {
+  const cards: BoardFilterDisplay[] = BOARD_FILTER_CARD_SOURCES[kind] ? ['cards'] : [];
+  if (kind === 'person') return ['search', 'avatars', 'chips', ...cards];
+  if (kind === 'period') return ['select', 'chips'];
+
+  return ['select', 'search', 'chips', 'list', ...cards];
+}
+
+/** O desenho que vale: o escolhido, se o filtro o aceita; senão, o padrão do filtro. */
+export function boardFilterDisplay(filter: {
+  kind: BoardFilterKind;
+  display?: BoardFilterDisplay;
+}): BoardFilterDisplay {
+  const allowed = boardFilterDisplaysOf(filter.kind);
+  if (filter.display && allowed.includes(filter.display)) return filter.display;
+
+  return allowed[0]!;
+}
+
+/**
+ * A ORDEM DOS FILTROS NA BARRA mora numa grade de 4 colunas: a barra lê da esquerda para a
+ * direita e de cima para baixo (`placedBoardFilters`).
+ */
+export const FILTER_GRID_COLUMNS = GRID_COLUMNS;
+export const FILTER_GRID_MAX_ROWS = 4;
+
+/** Onde o filtro fica e o tamanho dele, na grade dos filtros. */
+export const boardFilterPlaceSchema = z
+  .object({
+    x: z
+      .number()
+      .int()
+      .min(0)
+      .max(FILTER_GRID_COLUMNS - 1),
+    y: z.number().int().min(0).max(MAX_GRID_ROWS),
+    w: z.number().int().min(1).max(FILTER_GRID_COLUMNS),
+    h: z.number().int().min(1).max(FILTER_GRID_MAX_ROWS),
+  })
+  .refine((place) => place.x + place.w <= FILTER_GRID_COLUMNS, {
+    message: 'O filtro passa da borda',
+  });
+
+export type BoardFilterPlace = z.infer<typeof boardFilterPlaceSchema>;
+
+/**
+ * A LARGURA do filtro na barra: `auto`, uma peça da grade, como as outras; `full`, a linha
+ * inteira, sozinho — para um filtro de nome ou valor longo, que numa peça só fica espremido.
+ */
+export const BOARD_FILTER_WIDTHS = ['auto', 'full'] as const;
+
+export type BoardFilterWidth = (typeof BOARD_FILTER_WIDTHS)[number];
+
+export const BOARD_FILTER_WIDTH_LABELS: Record<BoardFilterWidth, string> = {
+  auto: 'Normal',
+  full: 'Linha inteira',
+};
+
 export const boardFilterSchema = z.object({
   id: z.string().min(1).max(40),
   kind: boardFilterKindSchema,
   label: z.string().trim().min(1, 'Dê um nome ao filtro').max(40),
+  /* Os painéis gravados antes da escolha não têm o campo: ficam no desenho padrão. */
+  display: boardFilterDisplaySchema.optional(),
+  /* Os painéis gravados antes da escolha não têm o campo (nem um valor que se perdeu): normal. */
+  width: z.enum(BOARD_FILTER_WIDTHS).optional().catch(undefined),
+  /* Os painéis gravados antes da ordem não têm o campo: os filtros ficam na ordem em que foram
+     postos (`placedBoardFilters`). Um lugar que não cabe na grade é esquecido, em vez de recusar
+     o painel inteiro. */
+  place: boardFilterPlaceSchema.optional().catch(undefined),
 });
 
 export type BoardFilter = z.infer<typeof boardFilterSchema>;
+
+/**
+ * Cada filtro com o seu lugar: o gravado, ou — sem um — a próxima casa livre, da esquerda para a
+ * direita e de cima para baixo.
+ */
+export function placedBoardFilters(
+  filters: readonly BoardFilter[],
+): (BoardFilter & { place: BoardFilterPlace })[] {
+  const taken: BoardFilterPlace[] = filters.flatMap((filter) =>
+    filter.place ? [filter.place] : [],
+  );
+
+  return filters.map((filter) => {
+    if (filter.place) return { ...filter, place: filter.place };
+    const place = firstFreePlace(taken);
+    taken.push(place);
+
+    return { ...filter, place };
+  });
+}
+
+function firstFreePlace(taken: readonly BoardFilterPlace[]): BoardFilterPlace {
+  for (let y = 0; ; y += 1) {
+    const place = freePlaceInRow(taken, y);
+    if (place) return place;
+  }
+}
+
+/** A primeira casa livre de uma linha, da esquerda para a direita; nenhuma, `null`. */
+function freePlaceInRow(taken: readonly BoardFilterPlace[], y: number): BoardFilterPlace | null {
+  for (let x = 0; x < FILTER_GRID_COLUMNS; x += 1) {
+    const place = { x, y, w: 1, h: 1 };
+    if (!taken.some((other) => overlaps(place, other))) return place;
+  }
+
+  return null;
+}
+
+function overlaps(one: BoardFilterPlace, other: BoardFilterPlace): boolean {
+  return (
+    one.x < other.x + other.w &&
+    other.x < one.x + one.w &&
+    one.y < other.y + other.h &&
+    other.y < one.y + one.h
+  );
+}
 
 /** Um de cada tipo: duas "Pessoa" no mesmo painel seriam duas respostas para a mesma pergunta. */
 export const MAX_BOARD_FILTERS = BOARD_FILTER_KINDS.length;
@@ -821,6 +974,29 @@ export const widgetQuerySchema = z.object({
 
 export type WidgetQuery = z.infer<typeof widgetQuerySchema>;
 export type WidgetQueryInput = z.input<typeof widgetQuerySchema>;
+
+/**
+ * A pergunta de um bloco — a mesma pergunta em dois blocos usa a mesma consulta em cache. Os
+ * filtros do painel entram só onde valem: "Pessoa" num bloco sem pessoa ficaria na chave do cache
+ * sem mudar a resposta, e faria o bloco recarregar à toa.
+ */
+export function widgetQueryOf(
+  widget: Widget,
+  values: BoardFilterValues = EMPTY_BOARD_FILTER_VALUES,
+): WidgetQuery {
+  return {
+    source: widget.source,
+    groupBy: widget.groupBy,
+    splitBy: widget.splitBy,
+    filterId: widget.filterId,
+    onlyMine: widget.onlyMine,
+    period: widget.period,
+    window: widget.window,
+    person: boardFilterApplies('person', widget.source) ? values.person : null,
+    boardPeriod: values.period,
+    matches: boardMatches(values, widget.source),
+  };
+}
 
 export const widgetDataSchema = z.object({
   /** Quantos há no recorte (com o filtro). */
