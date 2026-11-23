@@ -7,9 +7,12 @@ import { DRAG_HANDLE } from '../azuos-board-widget/azuos-board-widget.component'
 import {
   AzuosBoardCanvas,
   type AzuosBoardCanvasProps,
+  fitLayout,
   KIND_DRAG_TYPE,
   kindDragTypeOf,
   kindOf,
+  naturalHeightOf,
+  rowsToFit,
   slotRows,
 } from './azuos-board-canvas.component';
 
@@ -104,6 +107,118 @@ describe('AzuosBoardCanvas', () => {
 
     rerender(<AzuosBoardCanvas {...makeProps(true)} data={empty} />);
     expect(screen.queryByText('Este painel ainda não tem blocos.')).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * O jsdom não mede nada: a altura natural (a caixa em `auto`) vem daqui — `px` para quem mede o
+ * conteúdo, zero para o resto, como o jsdom devolve.
+ */
+function mockNaturalHeight(px: number) {
+  return vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    return this.style.height === 'auto' ? px : 0;
+  });
+}
+
+function heroProps(kind: 'hero' | 'column' = 'hero'): AzuosBoardCanvasProps {
+  const props = makeProps();
+
+  return {
+    ...props,
+    data: {
+      ...props.data,
+      widgets: [widgetFixture({ id: 'h', kind, title: 'Destaque', groupBy: 'status' })],
+      layout: [{ i: 'h', x: 0, y: 0, w: 4, h: 2 }],
+      results: { h: widgetResultFixture() },
+    },
+  };
+}
+
+const cellOf = (id: string) => document.querySelector<HTMLElement>(`[data-widget-id="${id}"]`);
+
+describe('AzuosBoardCanvas — a casa cresce com o conteúdo', () => {
+  // feliz
+  it('grows the hero cell to fit its content instead of scrolling inside it', () => {
+    const height = mockNaturalHeight(312);
+    render(<AzuosBoardCanvas {...heroProps()} />);
+
+    /* 312px não cabem em dois andares (296px): a casa vai a três (3 × 140 + 2 × 16). */
+    expect(cellOf('h')?.style.height).toBe('452px');
+    expect(document.querySelector('[data-slot="azuos-dashboard-hero-card"]')).not.toHaveClass(
+      'overflow-y-auto',
+    );
+    height.mockRestore();
+  });
+
+  // triste
+  it('keeps the saved size when the content fits, and never grows a chart', () => {
+    const height = mockNaturalHeight(200);
+    const { unmount } = render(<AzuosBoardCanvas {...heroProps()} />);
+    expect(cellOf('h')?.style.height).toBe('296px');
+    unmount();
+
+    height.mockImplementation(() => 900);
+    render(<AzuosBoardCanvas {...heroProps('column')} />);
+    expect(cellOf('h')?.style.height).toBe('296px');
+    height.mockRestore();
+  });
+});
+
+describe('rowsToFit', () => {
+  // feliz
+  it('counts the rows the content needs, with the gaps between them', () => {
+    expect(rowsToFit(288, 16)).toBe(2);
+    expect(rowsToFit(312, 16)).toBe(3);
+    /* Montando, o vão entre andares é maior: os mesmos 312px cabem em dois. */
+    expect(rowsToFit(312, 80)).toBe(2);
+  });
+
+  // triste
+  it('never asks for less than one row nor more than the block ceiling', () => {
+    expect(rowsToFit(0, 16)).toBe(1);
+    expect(rowsToFit(5000, 16)).toBe(8);
+  });
+});
+
+describe('fitLayout', () => {
+  // feliz
+  it('raises a block to the rows its content needs, as the resize minimum too', () => {
+    const [item] = fitLayout([{ i: 'h', x: 0, y: 0, w: 4, h: 2 }], { h: 3 });
+
+    expect(item).toEqual({ i: 'h', x: 0, y: 0, w: 4, h: 3, minH: 3, maxH: 8 });
+  });
+
+  // triste
+  it('never shrinks a block the person made taller, nor touches unmeasured ones', () => {
+    const layout = [
+      { i: 'h', x: 0, y: 0, w: 4, h: 4 },
+      { i: 'c', x: 0, y: 4, w: 2, h: 2 },
+    ];
+
+    expect(fitLayout(layout, { h: 3 }).map((item) => item.h)).toEqual([4, 2]);
+  });
+});
+
+describe('naturalHeightOf', () => {
+  // feliz
+  it('reads the content height with the box released, and puts the box back', () => {
+    const height = mockNaturalHeight(312);
+    const box = document.createElement('div');
+    box.style.height = '296px';
+
+    expect(naturalHeightOf(box)).toBe(312);
+    expect(box.style.height).toBe('296px');
+    height.mockRestore();
+  });
+
+  // triste
+  it('restores an empty inline height (the class decides it again)', () => {
+    const box = document.createElement('div');
+
+    expect(naturalHeightOf(box)).toBe(0);
+    expect(box.style.height).toBe('');
   });
 });
 

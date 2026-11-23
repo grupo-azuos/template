@@ -1,7 +1,15 @@
 import 'react-grid-layout/css/styles.css';
 
 import gsap from 'gsap';
-import { type CSSProperties, type ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { GridLayout, type Layout, useContainerWidth } from 'react-grid-layout';
 
 import {
@@ -86,6 +94,12 @@ const MAX_ROWS_PER_WIDGET = 8;
 /** Andares vazios abaixo do último bloco: espaço visível para onde arrastar o próximo. */
 const SPARE_ROWS = 2;
 const EMPTY_RESULT: WidgetState = { data: null, isLoading: true, error: null };
+/**
+ * Os blocos de ALTURA PRÓPRIA — o texto e os cards do destaque, dos números e do card com anel: a
+ * casa cresce até caber o conteúdo, e o bloco nunca ganha rolagem por dentro. Os gráficos se
+ * esticam na casa que tiverem, e a lista rola por dentro de propósito: esses ficam no tamanho dado.
+ */
+const CONTENT_FIT_KINDS: readonly Widget['kind'][] = ['stats', 'hero', 'ringCard'];
 
 /* A sombra de onde o bloco vai cair: o padrão da biblioteca é um retângulo vermelho de canto
    vivo. Aqui é a casa da grade, arredondada, num azul da marca bem claro — o tom escuro de antes
@@ -139,10 +153,20 @@ const RESIZE_HANDLES = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'] as const;
 export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps) {
   const { width, containerRef, mounted } = useContainerWidth();
   const follow = useDragScrollFollow();
-  const layout = data.layout.map((item) => ({ ...item, maxH: MAX_ROWS_PER_WIDGET }));
   /* Os blocos que já estavam quando o canvas abriu: só os outros pousam com animação. */
   const [firstIds] = useState(() => new Set(data.widgets.map((widget) => widget.id)));
   const { gap, rowGap, style } = spacingOf(state.isEditing);
+  /* O conteúdo que passa dos andares gravados (cards em duas fileiras, uma nota a mais em cima)
+     faz a casa crescer: o bloco não ganha rolagem por dentro. */
+  const contentRows = useContentRows(containerRef, {
+    rowGap,
+    width,
+    mounted,
+    layout: data.layout,
+    widgets: data.widgets,
+    results: data.results,
+  });
+  const layout = fitLayout(data.layout, contentRows);
 
   if (data.widgets.length === 0 && !state.isEditing) {
     return (
@@ -159,7 +183,7 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
       style={style}
     >
       {mounted && state.isEditing ? (
-        <SlotGrid data={{ layout: data.layout, width }} ui={{ gap, rowGap }} />
+        <SlotGrid data={{ layout, width }} ui={{ gap, rowGap }} />
       ) : null}
       {mounted ? (
         <GridLayout
@@ -206,7 +230,10 @@ export function AzuosBoardCanvas({ data, state, actions }: AzuosBoardCanvasProps
             <div key={widget.id} data-widget-id={widget.id}>
               {/* Só MONTANDO: trocar de aba (Equipe → Gestor) traz blocos de outro painel, que não
                   "pousaram" — aparecem. */}
-              <Landing state={{ isNew: state.isEditing && !firstIds.has(widget.id) }}>
+              <Landing
+                data={{ fitId: CONTENT_FIT_KINDS.includes(widget.kind) ? widget.id : undefined }}
+                state={{ isNew: state.isEditing && !firstIds.has(widget.id) }}
+              >
                 <AzuosBoardWidget
                   data={{
                     widget,
@@ -314,13 +341,128 @@ function isKind(value: string | undefined): value is Widget['kind'] {
 }
 
 /**
+ * Quantos andares o conteúdo de um bloco pede: a altura dele, mais o vão entre os andares que ele
+ * atravessa — de um andar até o teto de um bloco.
+ */
+export function rowsToFit(contentPx: number, rowGap: number): number {
+  const rows = Math.ceil((contentPx + rowGap) / (ROW_HEIGHT + rowGap));
+
+  return Math.min(MAX_ROWS_PER_WIDGET, Math.max(1, rows));
+}
+
+/**
+ * A grade que a biblioteca desenha: cada bloco no tamanho gravado, ou mais alto quando o conteúdo
+ * pede (`fitted`). O que cresce aqui só vale para a tela — vendo, nada se grava; montando, o
+ * conteúdo vira o MÍNIMO do puxador, e o painel grava o que a pessoa vê.
+ */
+export function fitLayout(
+  layout: readonly LayoutItem[],
+  fitted: Readonly<Record<string, number>>,
+): (LayoutItem & { minH: number; maxH: number })[] {
+  return layout.map((item) => {
+    const fit = fitted[item.i] ?? 1;
+
+    return { ...item, h: Math.max(item.h, fit), minH: fit, maxH: MAX_ROWS_PER_WIDGET };
+  });
+}
+
+/**
+ * A altura NATURAL do conteúdo: por um instante, a caixa perde a altura da casa (`auto`), e quem
+ * estava esticado nela (`h-full`) volta ao tamanho do que tem dentro. Lido e desfeito antes da
+ * pintura — ninguém vê. Medir a caixa esticada não servia: ela só diz a altura da casa, e o bloco
+ * que cresceu numa tela estreita nunca mais encolhia.
+ */
+export function naturalHeightOf(element: HTMLElement): number {
+  const before = element.style.height;
+  element.style.height = 'auto';
+  const height = element.offsetHeight;
+  element.style.height = before;
+
+  return height;
+}
+
+/**
+ * OS ANDARES QUE O CONTEÚDO PEDE, por bloco de altura própria (`data-fit-id`). Mede antes da
+ * pintura, sempre que muda o que mexe na altura do conteúdo: a largura do painel (tela, menu
+ * aberto), o vão entre os andares (vendo ou montando), a largura de cada bloco, os blocos e os
+ * números que chegam. A altura natural não depende da altura da casa, então crescer não pede outra
+ * medida — sem laço.
+ */
+function useContentRows(
+  containerRef: RefObject<HTMLDivElement | null>,
+  watch: {
+    rowGap: number;
+    width: number;
+    /** A grade só se desenha depois de medir a largura: antes, não há bloco para medir. */
+    mounted: boolean;
+    /** Mudar a largura de um bloco (montando) muda a altura do que cabe nele. */
+    layout: readonly LayoutItem[];
+    widgets: readonly Widget[];
+    results: Readonly<Record<string, WidgetState>>;
+  },
+): Record<string, number> {
+  const [rows, setRows] = useState<Record<string, number>>({});
+  const { rowGap, width, mounted, layout, widgets, results } = watch;
+
+  useLayoutEffect(() => {
+    const root = containerRef.current;
+    if (root && mounted) setRows(remeasured(root, rowGap));
+  }, [containerRef, rowGap, width, mounted, layout, widgets, results]);
+
+  /* A casa muda de largura DESLIZANDO (a transição da grade, 220ms): a medida do desenho pega o
+     começo dela. Quem vê a largura final é o observador de tamanho de cada caixa. */
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root || !mounted || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => setRows(remeasured(root, rowGap)));
+    for (const element of root.querySelectorAll('[data-fit-id]')) observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [containerRef, rowGap, mounted, widgets]);
+
+  return rows;
+}
+
+/** A troca dos andares medidos — a mesma lista de antes, se nada mudou (sem desenho à toa). */
+function remeasured(root: HTMLElement, rowGap: number) {
+  const next = measureRows(root, rowGap);
+
+  return (current: Record<string, number>) => (sameRows(current, next) ? current : next);
+}
+
+function measureRows(root: HTMLElement, rowGap: number): Record<string, number> {
+  const rows: Record<string, number> = {};
+  for (const element of root.querySelectorAll<HTMLElement>('[data-fit-id]')) {
+    const id = element.dataset.fitId;
+    if (id) rows[id] = rowsToFit(naturalHeightOf(element), rowGap);
+  }
+
+  return rows;
+}
+
+function sameRows(a: Record<string, number>, b: Record<string, number>): boolean {
+  const keys = Object.keys(a);
+
+  return keys.length === Object.keys(b).length && keys.every((key) => a[key] === b[key]);
+}
+
+/**
  * O POUSO: o bloco que acabou de entrar no painel (solto da lateral ou posto com um clique)
  * cresce a partir de 92% e acende — o olho acha onde ele caiu. A animação roda na MONTAGEM do
  * próprio bloco, que é quando a grade o desenha (um quadro depois da mudança dos dados), antes
  * da pintura: sem piscar. Os blocos do primeiro desenho não se mexem; quem pede menos
  * movimento não vê animação.
  */
-function Landing({ state, children }: { state: { isNew: boolean }; children: ReactNode }) {
+function Landing({
+  data,
+  state,
+  children,
+}: {
+  /** `fitId`: o bloco é de altura própria — a caixa é a que se mede (`useContentRows`). */
+  data: { fitId?: string };
+  state: { isNew: boolean };
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -335,7 +477,7 @@ function Landing({ state, children }: { state: { isNew: boolean }; children: Rea
   }, [state.isNew]);
 
   return (
-    <div ref={ref} className="h-full">
+    <div ref={ref} data-fit-id={data.fitId} className="h-full">
       {children}
     </div>
   );
