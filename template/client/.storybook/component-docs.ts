@@ -315,6 +315,21 @@ export const COMPONENT_DOCS: Record<string, ComponentDoc> = {
     use: ['Carteira por responsável, desempenho da equipe.'],
     avoid: ['Lista simples de pessoas: use o `AzuosPersonAvatar` numa tabela.'],
   },
+  AzuosRecordCard: {
+    summary:
+      'O card PADRÃO de registro do grupo: faixa de situação com selo de pendência, cabeçalho com ícone (ou foto), números, e o rodapé com o rosto da pessoa sempre com a foto.',
+    use: ['Toda grade de cards de registros: empresas, máquinas, chamados, produtos, sistemas.'],
+    avoid: [
+      'Número de painel: use o `AzuosStatCard`.',
+      'Card montado à mão sobre o `AzuosCardSurface`.',
+    ],
+  },
+  AzuosActionMenu: {
+    summary:
+      'As ações secundárias num menu de três pontinhos, com teclado; a confirmação fica com a tela.',
+    use: ['Ação de linha de tabela e de card (editar, arquivar, excluir).'],
+    avoid: ['A ação principal da tela: use o `AzuosActionButton`.'],
+  },
   AzuosStatCard: {
     summary:
       'O card de painel: o número que se lê de relance, com o ícone cheio na cor do assunto e o rótulo em frase. Clicável, vira filtro.',
@@ -490,7 +505,8 @@ export const COMPONENT_DOCS: Record<string, ComponentDoc> = {
     avoid: ['Listas e tabelas: prefira esqueletos do tamanho real da linha.'],
   },
   AzuosPersonAvatar: {
-    summary: 'A pessoa em duas letras (ou na foto): o olho acha "MR" antes de ler o nome.',
+    summary:
+      'A pessoa SEMPRE com a foto: sem `avatarUrl`, acha a foto no diretório de pessoas pelo `personId` (ou pelo nome). As iniciais só quando a pessoa não tem foto.',
     use: ['Responsável em linhas, cards e chips.'],
     avoid: ['Perfil completo: use o `AzuosMyProfileView`.'],
   },

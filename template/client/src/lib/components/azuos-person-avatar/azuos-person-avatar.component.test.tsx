@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { setPeopleDirectory } from '../../utils/people-directory.util';
 import { AzuosPersonAvatar } from './azuos-person-avatar.component';
 
 /**
@@ -25,6 +26,34 @@ class InstantLoadImage {
 describe('AzuosPersonAvatar', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    setPeopleDirectory([]);
+  });
+
+  // feliz
+  /* Regra do grupo: o registro que só guardou o nome ("Wellington Queiroz") mostra a foto. */
+  it('finds the photo in the people directory by the name when no photo is given', async () => {
+    vi.stubGlobal('Image', InstantLoadImage);
+    setPeopleDirectory([
+      { id: 'wq', name: 'Wellington Queiroz', avatarUrl: 'https://example.com/wq.jpg' },
+    ]);
+
+    const { container } = render(<AzuosPersonAvatar name="wellington queiroz" />);
+
+    const image = await vi.waitUntil(() => container.querySelector('[data-slot="avatar-image"]'));
+    expect(image).toHaveAttribute('src', 'https://example.com/wq.jpg');
+  });
+
+  // feliz
+  it('finds the photo by the person id', async () => {
+    vi.stubGlobal('Image', InstantLoadImage);
+    setPeopleDirectory([
+      { id: 'wq', name: 'Wellington Queiroz', avatarUrl: 'https://example.com/wq.jpg' },
+    ]);
+
+    const { container } = render(<AzuosPersonAvatar name="W. Queiroz" personId="wq" />);
+
+    const image = await vi.waitUntil(() => container.querySelector('[data-slot="avatar-image"]'));
+    expect(image).toHaveAttribute('src', 'https://example.com/wq.jpg');
   });
 
   // feliz

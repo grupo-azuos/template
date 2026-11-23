@@ -277,6 +277,9 @@ O menu (app-shell) e a tela "Meu perfil" são **iguais nos 13 sistemas do Grupo 
   borda ou no número. Hover destaca (sobe, sombra, véu neutro) e **nunca cobre informação**.
   Borda colorida é proibida; borda só como divisória.
 - **Nunca `<select>` nativo**: sempre o combobox/seletor do projeto.
+- **Pessoa sempre com a foto**: o rosto é o `AzuosPersonAvatar`, que acha a foto no diretório de
+  pessoas pelo id (ou pelo nome, quando o registro só guardou o nome). Nunca `avatarUrl: null` à mão
+  nem rosto montado com `ui/avatar` — a regra `person-photo` do `check:design` recusa.
 - **Ações duplas em arquivos (Download + Abrir via hyperlink)**: sempre que houver função de
   arquivo, o sistema deve fornecer duas ações: download (`download={fileName}`) e abrir via
   hyperlink em nova aba (`target="_blank" rel="noopener noreferrer"`). Componentes canônicos:
