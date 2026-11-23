@@ -32,7 +32,8 @@ import { activeSummary, readingOrder, toolbarDisplayOf } from './board-filter.ut
  * tarefa | Todos ▾"), num cartão, em grade que se ajusta à largura. O Período é o seletor de tempo,
  * no canto de cima do painel (`ui.part`).
  *
- * O valor escolhido é de quem está vendo, e não se grava.
+ * O valor escolhido é de quem está vendo, e não se grava. A faixa abre e fecha pela seta dos
+ * "Filtros", no cabeçalho do cartão, com o "Limpar filtros" na outra ponta; nasce aberta.
  *
  * Montando, a barra aparece como fica e, embaixo, a lista dos filtros (como as variáveis do
  * Grafana): arrastar para ordenar, escolher o desenho e a largura, tirar; e os que faltam, para
@@ -54,12 +55,17 @@ export type AzuosBoardFilterBarProps = {
    * cima do painel; `fields` são os outros filtros, na faixa acima dos blocos. Sem ele, todos.
    */
   ui?: { part?: 'fields' | 'period' };
-  /** `isListOpen`: montando, a lista dos filtros já nasce aberta (nas configurações do painel). */
-  state?: { isEditing?: boolean; isListOpen?: boolean };
+  /**
+   * `isListOpen`: montando, a lista dos filtros já nasce aberta (nas configurações do painel).
+   * `isOpen`: a faixa dos filtros nasce aberta (o padrão) ou fechada — a escolha lembrada.
+   */
+  state?: { isEditing?: boolean; isListOpen?: boolean; isOpen?: boolean };
   actions: {
     onChange: (patch: Partial<BoardFilterValues>) => void;
     /** "Limpar filtros": todos voltam a "todos". Sem ela, o botão não aparece. */
     onClear?: () => void;
+    /** A seta dos "Filtros" abriu ou fechou a faixa — para a tela lembrar. */
+    onOpenChange?: (isOpen: boolean) => void;
     onAdd?: (kind: BoardFilterKind) => void;
     onRemove?: (id: string) => void;
     /** Montando: troca o desenho do filtro. */
@@ -81,11 +87,14 @@ export function AzuosBoardFilterBar({ data, ui, state, actions }: AzuosBoardFilt
   if (ordered.length === 0) return null;
   if (ui?.part === 'period') {
     /* O SELETOR DE TEMPO, no canto de cima, ao lado do "Atualizar" — sem cartão: é um controle
-       da barra de cima, como no Grafana. */
+       da barra de cima, como no Grafana. Em "Datas exatas", as datas entram ao lado dele, na
+       mesma fileira (a peça cresce para caber as duas). */
+    const isExactDates = data.values.period?.mode === 'custom';
+
     return (
       <div role="group" aria-label="Período do painel" className="flex flex-wrap items-start gap-2">
         {ordered.map((filter) => (
-          <div key={filter.id} className="w-72 max-w-full">
+          <div key={filter.id} className={cn('max-w-full min-w-0', !isExactDates && 'w-72')}>
             <Control data={data} filter={filter} actions={actions} />
           </div>
         ))}
@@ -95,7 +104,11 @@ export function AzuosBoardFilterBar({ data, ui, state, actions }: AzuosBoardFilt
 
   return (
     <section aria-label="Filtros do painel">
-      <Toolbar data={{ ...data, ordered }} state={{ isEditing: false }} actions={actions} />
+      <Toolbar
+        data={{ ...data, ordered }}
+        state={{ isEditing: false, isOpen: state?.isOpen }}
+        actions={actions}
+      />
     </section>
   );
 }
@@ -114,9 +127,14 @@ function orderedFilters(
 }
 
 /**
- * O cartão que junta os filtros numa faixa só. Dentro, uma GRADE que se ajusta à largura: cada
- * peça tem no mínimo 18rem e as colunas se dividem por igual — no celular, uma por linha; numa
- * tela larga, todas lado a lado, sem sobra torta no fim. A ordem é a da lista de quem montou.
+ * O cartão que junta os filtros numa faixa só. No alto, o cabeçalho: "Filtros" com a seta, que
+ * abre e fecha a faixa, e o selo de quantos estão ligados — fechada, a pessoa ainda sabe que o
+ * painel está recortado; na outra ponta, o "Limpar filtros". Ele mora no cabeçalho, e não na
+ * grade: como célula, empurrava as peças e quebrava a faixa dos cards.
+ *
+ * Dentro, uma GRADE que se ajusta à largura: cada peça tem no mínimo 18rem e as colunas se dividem
+ * por igual — no celular, uma por linha; numa tela larga, todas lado a lado, sem sobra torta no
+ * fim. A ordem é a da lista de quem montou.
  */
 function Toolbar({
   data,
@@ -124,37 +142,54 @@ function Toolbar({
   actions,
 }: {
   data: AzuosBoardFilterBarProps['data'] & { ordered: PlacedFilter[] };
-  state: { isEditing: boolean };
+  state: { isEditing: boolean; isOpen?: boolean };
   actions: AzuosBoardFilterBarProps['actions'];
 }) {
   const active = activeSummary(data);
+  const canClear = Boolean(actions.onClear) && !state.isEditing && active.length > 0;
 
   return (
-    <AzuosCardSurface ui={{ className: 'flex flex-col gap-2 p-3 sm:flex-row sm:items-start' }}>
-      <div className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2">
-        {data.ordered.map((filter) => (
-          /* "Linha inteira" (e os cards, que são uma faixa): a peça ocupa a linha toda, sozinha. */
-          <div
-            key={filter.id}
-            className={cn(
-              'min-w-0',
-              (filter.width === 'full' || toolbarDisplayOf(filter) === 'cards') && 'col-span-full',
-            )}
-          >
-            <Control data={data} filter={filter} actions={actions} />
-          </div>
-        ))}
-      </div>
-      {actions.onClear && !state.isEditing && active.length > 0 ? (
-        <div className="flex shrink-0 items-center justify-end sm:h-10">
+    <AzuosCardSurface>
+      {/* O bloco que abre e fecha é transparente: o cartão é a superfície (card dentro de card não). */}
+      <AzuosCollapsible
+        data={{ title: 'Filtros', badge: activeBadge(active.length) }}
+        ui={{ className: 'rounded-none bg-transparent shadow-none' }}
+        state={{ isOpen: state.isOpen ?? true }}
+        actions={{ onOpenChange: actions.onOpenChange }}
+        /* Sempre no cabeçalho (some sozinho sem filtro ligado): a seta fica junto do título, e não
+           pula de ponta quando o "Limpar" aparece. */
+        aside={
           <AzuosClearFiltersButton
-            state={{ hasFilter: true }}
-            actions={{ onClear: actions.onClear }}
+            state={{ hasFilter: canClear }}
+            actions={{ onClear: () => actions.onClear?.() }}
           />
+        }
+      >
+        <div className="grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2">
+          {data.ordered.map((filter) => (
+            /* "Linha inteira" (e os cards, que são uma faixa): a peça ocupa a linha toda, sozinha. */
+            <div
+              key={filter.id}
+              className={cn(
+                'min-w-0',
+                (filter.width === 'full' || toolbarDisplayOf(filter) === 'cards') &&
+                  'col-span-full',
+              )}
+            >
+              <Control data={data} filter={filter} actions={actions} />
+            </div>
+          ))}
         </div>
-      ) : null}
+      </AzuosCollapsible>
     </AzuosCardSurface>
   );
+}
+
+/** O selo do cabeçalho: quantos filtros estão ligados; sem nenhum, selo nenhum. */
+export function activeBadge(count: number): string | undefined {
+  if (count === 0) return undefined;
+
+  return count === 1 ? '1 ativo' : `${count} ativos`;
 }
 
 function Control({

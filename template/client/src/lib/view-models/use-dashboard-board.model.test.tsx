@@ -221,6 +221,23 @@ describe('useDashboardBoardModel', () => {
     expect(result.current.data.filterValues.period).toBeNull();
   });
 
+  // feliz
+  it('opens the filters by default and remembers closing them for that board only', async () => {
+    window.localStorage.clear();
+    const { result } = renderHook(useDashboardBoardModel, { wrapper: wrapperFor() });
+
+    const first = result.current.data.scope;
+    expect(result.current.state.isFiltersOpen).toBe(true);
+    act(() => result.current.actions.onFiltersOpenChange(false));
+    expect(result.current.state.isFiltersOpen).toBe(false);
+
+    act(() => result.current.actions.onScopeChange('personal'));
+    expect(result.current.state.isFiltersOpen).toBe(true);
+    act(() => result.current.actions.onScopeChange(first));
+    expect(result.current.state.isFiltersOpen).toBe(false);
+    window.localStorage.clear();
+  });
+
   // triste
   it('hides the manager board from a user, even when forced', async () => {
     const { result } = renderHook(useDashboardBoardModel, { wrapper: wrapperFor('user') });

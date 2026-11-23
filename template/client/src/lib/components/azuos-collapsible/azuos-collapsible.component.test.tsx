@@ -41,6 +41,32 @@ describe('AzuosCollapsible', () => {
     expect(screen.getByText('Prazo e responsável')).toBeInTheDocument();
   });
 
+  it('shows the badge beside the title and keeps the aside action out of the toggle', async () => {
+    const onOpenChange = vi.fn();
+    const onClear = vi.fn();
+    render(
+      <AzuosCollapsible
+        data={{ title: 'Filtros', badge: '2 ativos' }}
+        state={{ isOpen: true }}
+        actions={{ onOpenChange }}
+        aside={
+          <button type="button" onClick={onClear}>
+            Limpar filtros
+          </button>
+        }
+      >
+        <p>Prazo e responsável</p>
+      </AzuosCollapsible>,
+    );
+
+    expect(screen.getByRole('button', { name: /Filtros.*2 ativos/ })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Limpar filtros' }));
+
+    expect(onClear).toHaveBeenCalledOnce();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByText('Prazo e responsável')).toBeInTheDocument();
+  });
+
   // triste
   /* Desabilitado tem de recusar o clique: um bloco que abre vazio enquanto os filtros carregam faz
      a pessoa concluir que não existe filtro nenhum. */
@@ -60,6 +86,12 @@ describe('AzuosCollapsible', () => {
 
     expect(screen.queryByText('Prazo e responsável')).not.toBeInTheDocument();
     expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('draws no badge when there is nothing to count', () => {
+    render(<AzuosCollapsible data={{ title: 'Filtros', badge: '' }} />);
+
+    expect(screen.getByRole('button', { name: 'Filtros' })).toBeInTheDocument();
   });
 
   it('still draws the block when it has no content yet', () => {

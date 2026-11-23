@@ -27,7 +27,7 @@ const meta = {
       ],
     },
     ui: { part: 'fields' },
-    actions: { onChange: fn(), onClear: fn() },
+    actions: { onChange: fn(), onClear: fn(), onOpenChange: fn() },
   },
 } satisfies Meta<typeof AzuosBoardFilterBar>;
 
@@ -40,7 +40,10 @@ export const Default: Story = {};
 /** O seletor de tempo, no canto de cima do painel. */
 export const TimePicker: Story = { args: { ui: { part: 'period' } } };
 
-/** Com valores escolhidos: o "Limpar filtros" aparece na ponta da barra. */
+/**
+ * Com valores escolhidos: o selo "2 ativos" ao lado de "Filtros" e o "Limpar filtros" na ponta
+ * direita do cabeçalho do cartão.
+ */
 export const Chosen: Story = {
   args: {
     data: {
@@ -50,7 +53,7 @@ export const Chosen: Story = {
   },
 };
 
-/** Datas exatas: as datas abrem logo abaixo do período. */
+/** Datas exatas: as datas entram ao lado do período, na mesma fileira e na mesma altura. */
 export const ExactDates: Story = {
   args: {
     ui: { part: 'period' },
@@ -62,6 +65,23 @@ export const ExactDates: Story = {
       },
     },
   },
+};
+
+/** Caso limite: datas exatas numa largura de celular — as datas quebram para a linha de baixo. */
+export const ExactDatesNarrow: Story = {
+  args: ExactDates.args,
+  decorators: [
+    (Story) => (
+      <div className="w-80">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+/** A faixa fechada pela seta: o cabeçalho fica, com o selo dos filtros ligados e o "Limpar". */
+export const Collapsed: Story = {
+  args: { ...Chosen.args, state: { isOpen: false } },
 };
 
 const STATUS_COUNTS = {
