@@ -59,26 +59,37 @@ const ICONS: Partial<Record<BoardFilterKind, LucideIcon>> = {
   period: CalendarRange,
 };
 
-/** Uma célula da grade da barra: a peça e, no período "entre datas", as datas logo abaixo. */
+/**
+ * Uma célula da grade da barra: a peça e, no período "Datas exatas", as datas LOGO AO LADO, na
+ * mesma fileira e na mesma altura — sem rótulo em cima, que descia o campo para baixo da barra de
+ * cima. O "até 90 dias" segue no nome acessível do campo e na dica ao passar o mouse. Sem espaço
+ * (celular, célula estreita), as datas quebram para a linha de baixo, inteiras.
+ */
 export function BoardFilterControl({ data, actions }: BoardFilterControlProps) {
   const { kind } = data.filter;
   const period = data.values.period;
+  const isExactDates = kind === 'period' && period?.mode === 'custom';
+
+  if (data.display === 'cards') return <FilterCards data={data} actions={actions} />;
+  if (!isExactDates) return <FilterPiece data={data} actions={actions} />;
+
+  const rangeLabel = `Entre (até ${MAX_WINDOW_DAYS} dias)`;
 
   return (
-    <div className="flex min-w-0 flex-col gap-2">
-      {data.display === 'cards' ? (
-        <FilterCards data={data} actions={actions} />
-      ) : (
+    <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <div className="w-72 max-w-full min-w-0">
         <FilterPiece data={data} actions={actions} />
-      )}
-      {kind === 'period' && period?.mode === 'custom' ? (
+      </div>
+      <div className="w-64 max-w-full min-w-0" title={rangeLabel}>
         <AzuosDateRangeField
           data={{
-            label: `Entre (até ${MAX_WINDOW_DAYS} dias)`,
+            label: rangeLabel,
             name: 'boardPeriod',
             value: { from: period.from, to: period.to },
           }}
-          ui={{ className: 'w-full' }}
+          /* O rótulo fica só para o leitor de tela: à vista, a peça "Período" ao lado já diz o que
+             são as datas. */
+          ui={{ className: 'w-full gap-0 [&>label]:sr-only' }}
           actions={{
             onChange: (range) =>
               actions.onChange({
@@ -89,7 +100,7 @@ export function BoardFilterControl({ data, actions }: BoardFilterControlProps) {
               }),
           }}
         />
-      ) : null}
+      </div>
     </div>
   );
 }

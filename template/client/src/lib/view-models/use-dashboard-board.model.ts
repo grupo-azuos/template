@@ -42,6 +42,7 @@ import { hasRoleAtLeast } from '@template/shared/schemas/user.schema';
 import { dashboardBoardsApi } from '../api/dashboard-boards.api';
 import { ApiError, readError } from '../api/http-client';
 import { mockAuth } from '../auth/mock-user';
+import { readBoardFiltersOpen, writeBoardFiltersOpen } from '../utils/board-filters-open.util';
 import { type BoardItem, boardLinkOf } from '../utils/board-link.util';
 import { type PersonOption, usePeopleModel } from './use-people.model';
 
@@ -89,6 +90,8 @@ export type DashboardBoardModel = {
     canEdit: boolean;
     canAdd: boolean;
     error: string | null;
+    /** A faixa de filtros do painel aberta — escolha de quem vê, lembrada por painel. */
+    isFiltersOpen: boolean;
   };
   actions: {
     onScopeChange: (scope: string) => void;
@@ -116,6 +119,8 @@ export type DashboardBoardModel = {
     onFilterValueChange: (patch: Partial<BoardFilterValues>) => void;
     /** "Limpar filtros": todos os filtros do painel voltam a "todos". */
     onClearFilterValues: () => void;
+    /** A seta dos "Filtros": abriu ou fechou a faixa — fica lembrado para este painel. */
+    onFiltersOpenChange: (isOpen: boolean) => void;
     /** Montando: põe um filtro no painel (um de cada tipo) ou tira. */
     onAddBoardFilter: (kind: BoardFilterKind) => void;
     onRemoveBoardFilter: (id: string) => void;
@@ -166,6 +171,7 @@ export function useDashboardBoardModel(): DashboardBoardModel {
   const [editing, setEditing] = useState<DashboardBoardModel['data']['editing']>(null);
   const [chosen, setChosen] = useState<BoardFilterValues>(EMPTY_BOARD_FILTER_VALUES);
   const [refreshEvery, setRefreshEvery] = useState<string>(String(REFRESH_MS));
+  const [filtersOpen, setFiltersOpen] = useState<Partial<Record<DashboardScope, boolean>>>({});
   const refetchInterval = refreshIntervalOf(refreshEvery);
   const people = usePeopleModel();
 
@@ -219,6 +225,7 @@ export function useDashboardBoardModel(): DashboardBoardModel {
       // Cabe mais um bloco enquanto sobra ao menos 1 ponto (o peso do mais leve) na cota.
       canAdd: boardWeight(shown.widgets) < MAX_BOARD_WEIGHT,
       error: readError(board.error) ?? saveErrorOf(save.error, shown.widgets, shown.layout),
+      isFiltersOpen: filtersOpen[scope] ?? readBoardFiltersOpen(scope),
     },
     actions: {
       onScopeChange: (next) => {
@@ -266,6 +273,10 @@ export function useDashboardBoardModel(): DashboardBoardModel {
       onPreviewChange: preview.onChange,
       onFilterValueChange: (patch) => setChosen((current) => ({ ...current, ...patch })),
       onClearFilterValues: () => setChosen(EMPTY_BOARD_FILTER_VALUES),
+      onFiltersOpenChange: (isOpen) => {
+        writeBoardFiltersOpen(scope, isOpen);
+        setFiltersOpen((current) => ({ ...current, [scope]: isOpen }));
+      },
       onAddBoardFilter: (kind) => edit((current) => addBoardFilter(current, kind)),
       onRemoveBoardFilter: (id) =>
         edit((current) => ({

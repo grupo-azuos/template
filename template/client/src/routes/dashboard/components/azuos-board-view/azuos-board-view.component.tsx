@@ -112,12 +112,16 @@ export function AzuosBoardView({ data, state, actions }: AzuosBoardViewProps) {
         <AzuosLoadingState data={{ label: 'Carregando o painel…' }} />
       ) : (
         <>
+          {/* Uma faixa por painel: trocar de painel abre a faixa como ele a deixou (`key`). */}
           <AzuosBoardFilterBar
+            key={data.scope}
             data={filterBarData}
             ui={{ part: 'fields' }}
+            state={{ isOpen: state.isFiltersOpen }}
             actions={{
               onChange: actions.onFilterValueChange,
               onClear: actions.onClearFilterValues,
+              onOpenChange: actions.onFiltersOpenChange,
             }}
           />
           <AzuosBoardCanvas

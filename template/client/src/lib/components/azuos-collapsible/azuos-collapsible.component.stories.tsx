@@ -1,6 +1,7 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import { fn } from 'storybook/test';
 
+import { AzuosClearFiltersButton } from '../azuos-clear-filters-button/azuos-clear-filters-button.component';
 import { AzuosCollapsible } from './azuos-collapsible.component';
 
 const meta = {
@@ -28,6 +29,20 @@ export const StartsOpen: Story = {
     ui: { className: 'w-96' },
     state: { isOpen: true },
     children: <p>Prazo, responsável e etiquetas entram aqui.</p>,
+  },
+};
+
+/**
+ * Com selo e ação no cabeçalho: o selo diz que há algo dentro mesmo fechado, e a ação ("Limpar
+ * filtros") fica na ponta direita, fora do botão que abre e fecha — a seta vai para junto do título.
+ */
+export const WithBadgeAndAside: Story = {
+  args: {
+    data: { title: 'Filtros', badge: '2 ativos' },
+    ui: { className: 'w-[32rem]' },
+    state: { isOpen: true },
+    aside: <AzuosClearFiltersButton state={{ hasFilter: true }} actions={{ onClear: fn() }} />,
+    children: <p>Responsável, situação e prioridade entram aqui.</p>,
   },
 };
 
