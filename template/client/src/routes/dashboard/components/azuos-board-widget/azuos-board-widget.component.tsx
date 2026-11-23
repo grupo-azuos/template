@@ -421,7 +421,9 @@ const BODIES: Record<Widget['kind'], (props: BodyProps) => ReactNode> = {
      dele — a grade do hero põe três por linha; aqui a linha é nossa, para caberem os quatro.
      Compacto para caber em DOIS andares: o nome do bloco vai embaixo do total (e não numa linha
      própria), os cards têm folga menor, e o que sobra de altura fica entre o topo e os cards
-     (`justify-between`) — bloco mais alto não deixa faixa vazia no pé. */
+     (`justify-between`) — bloco mais alto não deixa faixa vazia no pé. Sem rolagem própria: se o
+     conteúdo passa dos andares (cards em duas fileiras, uma nota a mais), quem cresce é a casa
+     da grade (`CONTENT_FIT_KINDS` do canvas) — a barra de rolagem por dentro cortava os cards. */
   hero: ({ widget, result, series, slices, noun, onItem }) => {
     const total = (result.data?.total ?? 0).toLocaleString('pt-BR');
     const cards = widget.groupBy ? slices.slice(0, 4) : [];
@@ -437,7 +439,7 @@ const BODIES: Record<Widget['kind'], (props: BodyProps) => ReactNode> = {
           zuzu: { pose: 'alert', size: 112 },
         }}
         ui={{
-          className: 'h-full justify-between gap-4 overflow-y-auto p-5 sm:p-5',
+          className: 'h-full justify-between gap-4 p-5 sm:p-5',
           children: cards.length ? (
             <StatRow data={{ cards }} ui={{ cardClassName: 'p-3' }} actions={{ onCard }} />
           ) : null,
