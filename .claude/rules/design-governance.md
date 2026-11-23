@@ -48,6 +48,8 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
   o botão e no máximo `26rem`. Menu com busca começa em `14rem`, para caber o campo.
 - Proibido: gradiente, vidro (`backdrop-blur`), transparência solta em card
   (`brand/no-gradients-or-glass`, `brand/no-card-opacity`).
+- Todo card de REGISTRO numa grade (empresa, máquina, chamado, produto) é o `<AzuosRecordCard>`,
+  o card padrão do grupo: faixa de situação, cabeçalho, números e rodapé com o rosto (com a foto).
 - Todo card é feito sobre `<AzuosCardSurface>` (ou um dos formatos que o usam): `AzuosStatCard`,
   `AzuosMiniStatCard`, `AzuosContentCard`, `AzuosPanelCard` e o hero com Zuzu
   (`AzuosDashboardHeroCard`). Card montado à mão não entra.
@@ -100,6 +102,17 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
 - Nunca `<select>` nativo: sempre o seletor do projeto. Com 15 opções ou mais, combobox com busca
   e "Cadastrar «termo»" quando der (skill `select-standard`). Pessoa é sempre
   `AzuosPersonPickerField`.
+
+## 7.1 Pessoa sempre com a foto
+
+- Onde aparece uma pessoa (card, lista, quadro, ficha, menu), aparece a **foto** dela. O rosto é
+  sempre o `AzuosPersonAvatar`.
+- O rosto acha a foto sozinho no **diretório de pessoas** (carregado uma vez com a casca): pelo
+  `personId`, ou pelo nome quando o registro só guardou o nome. Passe o `id` sempre que tiver.
+- As iniciais só aparecem quando a pessoa não tem foto mesmo. "Sem responsável" não é pessoa:
+  ícone neutro, nunca iniciais.
+- Proibido: `avatarUrl: null` escrito à mão e rosto montado com o `ui/avatar` ou iniciais
+  próprias (`person-photo`, sem exceção).
 
 ## 8. Listas e tabelas
 
