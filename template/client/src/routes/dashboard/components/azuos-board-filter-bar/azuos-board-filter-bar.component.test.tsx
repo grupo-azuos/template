@@ -33,6 +33,7 @@ function makeProps(
     actions: {
       onChange: vi.fn(),
       onClear: vi.fn(),
+      onOpenChange: vi.fn(),
       onAdd: vi.fn(),
       onRemove: vi.fn(),
       onDisplayChange: vi.fn(),
@@ -77,7 +78,7 @@ describe('AzuosBoardFilterBar', () => {
   });
 
   // feliz
-  it('opens the exact dates under the period when they are chosen', () => {
+  it('opens the exact dates beside the period, in the same row, still named for screen readers', () => {
     render(
       <AzuosBoardFilterBar
         {...makeProps({
@@ -86,10 +87,18 @@ describe('AzuosBoardFilterBar', () => {
             period: { mode: 'custom', from: '2026-11-01', to: '2026-11-30' },
           },
         })}
+        ui={{ part: 'period' }}
       />,
     );
 
-    expect(screen.getByText(/Entre \(até 90 dias\)/)).toBeInTheDocument();
+    const range = screen.getByRole('button', { name: 'Entre (até 90 dias)' });
+    const piece = screen.getByRole('group', { name: 'Período' });
+    expect(range).toHaveTextContent('01/11/2026 até 30/11/2026');
+    expect(range.closest('[title]')).toHaveAttribute('title', 'Entre (até 90 dias)');
+    // A mesma fileira: a peça e as datas são irmãs, e o rótulo não ocupa linha própria.
+    expect(piece.parentElement?.parentElement).toBe(range.closest('[title]')?.parentElement);
+    // O rótulo fica só para o leitor de tela (escondido pela classe do campo).
+    expect(screen.getByText('Entre (até 90 dias)').parentElement).toHaveClass('[&>label]:sr-only');
   });
 
   // feliz
@@ -118,12 +127,45 @@ describe('AzuosBoardFilterBar', () => {
   });
 
   // feliz
-  it('offers "Limpar filtros" only once something is chosen', () => {
+  it('offers "Limpar filtros" in the header, outside the grid, once something is chosen', () => {
     const props = makeProps({ values: { ...EMPTY_BOARD_FILTER_VALUES, person: ME_VALUE } });
-    render(<AzuosBoardFilterBar {...props} />);
+    render(<AzuosBoardFilterBar {...props} ui={{ part: 'fields' }} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Limpar filtros' }));
+    expect(screen.getByRole('button', { name: /Filtros.*1 ativo/ })).toBeInTheDocument();
+    const clear = screen.getByRole('button', { name: 'Limpar filtros' });
+    expect(clear.closest('.grid')).toBeNull();
+    fireEvent.click(clear);
     expect(props.actions.onClear).toHaveBeenCalled();
+    expect(props.actions.onOpenChange).not.toHaveBeenCalled();
+  });
+
+  // feliz
+  it('collapses and expands the filters with the arrow, telling the screen to remember', () => {
+    const props = makeProps();
+    render(<AzuosBoardFilterBar {...props} ui={{ part: 'fields' }} />);
+
+    const toggle = screen.getByRole('button', { name: 'Filtros' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('group', { name: 'Responsável' })).toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    expect(props.actions.onOpenChange).toHaveBeenCalledWith(false);
+    expect(screen.queryByRole('group', { name: 'Responsável' })).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    expect(props.actions.onOpenChange).toHaveBeenCalledWith(true);
+    expect(screen.getByRole('group', { name: 'Responsável' })).toBeInTheDocument();
+  });
+
+  // triste
+  it('starts collapsed when the remembered choice says so, keeping the header in sight', () => {
+    render(<AzuosBoardFilterBar {...makeProps({}, { isOpen: false })} ui={{ part: 'fields' }} />);
+
+    expect(screen.getByRole('button', { name: 'Filtros' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(screen.queryByRole('group', { name: 'Responsável' })).not.toBeInTheDocument();
   });
 
   // triste
@@ -131,6 +173,7 @@ describe('AzuosBoardFilterBar', () => {
     render(<AzuosBoardFilterBar {...makeProps()} />);
 
     expect(screen.queryByRole('button', { name: 'Limpar filtros' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Filtros' })).toBeInTheDocument();
   });
 
   // triste
