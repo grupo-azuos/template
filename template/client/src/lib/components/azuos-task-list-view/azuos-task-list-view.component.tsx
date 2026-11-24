@@ -8,16 +8,16 @@ import {
 import { type Task } from '@template/shared/schemas/task.schema';
 import { Check, ListChecks, Pencil, Plus, RotateCcw, SearchX, Trash2 } from 'lucide-react';
 
-import { cn } from '../../utils/cn.util';
 import { formatDateTime } from '../../utils/format-date.util';
 import { Skeleton } from '../ui/skeleton';
 import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
+import { type AzuosActionMenuItem } from '../azuos-action-menu/azuos-action-menu.component';
 import { AzuosEmptyState } from '../azuos-empty-state/azuos-empty-state.component';
 import { AzuosErrorState } from '../azuos-error-state/azuos-error-state.component';
 import { AzuosPageHeader } from '../azuos-page-header/azuos-page-header.component';
 import { AzuosProgressBar } from '../azuos-progress-bar/azuos-progress-bar.component';
+import { AzuosRecordCard } from '../azuos-record-card/azuos-record-card.component';
 import { AzuosSelectField } from '../azuos-select-field/azuos-select-field.component';
-import { AzuosStatusBadge } from '../azuos-status-badge/azuos-status-badge.component';
 import { AzuosTextField } from '../azuos-text-field/azuos-text-field.component';
 
 /**
@@ -191,7 +191,7 @@ function TaskListBody({ data, state, actions }: AzuosTaskListViewProps) {
         </p>
       ) : null}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.tasks.map((task) => (
           <TaskItem key={task.id} data={{ task }} state={state} actions={actions} />
         ))}
@@ -200,6 +200,46 @@ function TaskListBody({ data, state, actions }: AzuosTaskListViewProps) {
   );
 }
 
+/* O que cada item do menu do card faz — a ação de linha mora no menu (padrão do grupo). */
+const TASK_MENU_ACTIONS: Record<
+  string,
+  (actions: AzuosTaskListViewProps['actions'], task: Task) => void
+> = {
+  toggle: (actions, task) => actions.onToggleDone(task),
+  edit: (actions, task) => actions.onEdit(task),
+  delete: (actions, task) => actions.onAskDelete(task),
+};
+
+/** O menu do card: concluir ou reabrir, editar e, para quem pode, excluir. */
+export function taskMenuItems(task: Task, canDelete: boolean): AzuosActionMenuItem[] {
+  const isDone = task.status === 'done';
+
+  return [
+    {
+      id: 'toggle',
+      label: isDone ? 'Reabrir tarefa' : 'Marcar como concluída',
+      icon: isDone ? RotateCcw : Check,
+    },
+    { id: 'edit', label: 'Editar tarefa', icon: Pencil },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            label: 'Excluir tarefa',
+            icon: Trash2,
+            isDestructive: true,
+            separatorBefore: true,
+          },
+        ]
+      : []),
+  ];
+}
+
+/**
+ * A TAREFA no card padrão do grupo (`AzuosRecordCard`): a situação na faixa, o título, a
+ * descrição, e no rodapé quem criou (com a foto) e quando. Abrir o card edita a tarefa; concluir,
+ * editar e excluir ficam no menu de três pontinhos.
+ */
 function TaskItem({
   data,
   state,
@@ -210,69 +250,43 @@ function TaskItem({
   actions: AzuosTaskListViewProps['actions'];
 }) {
   const { task } = data;
-  const isDone = task.status === 'done';
   const canEdit = state.canEdit ?? true;
 
   return (
-    <li className="bg-card shadow-card rounded-surface flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-start">
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <p
-            className={cn(
-              'text-foreground min-w-0 font-semibold [overflow-wrap:anywhere] break-words',
-              isDone && 'text-muted-foreground line-through',
-            )}
-          >
-            {task.title}
-          </p>
-          <AzuosStatusBadge
-            data={{ label: TASK_STATUS_LABELS[task.status] }}
-            ui={{ tone: taskStatusTone(task.status), size: 'sm', className: 'shrink-0' }}
-          />
-        </div>
-        {task.description ? (
-          <p className="text-muted-foreground mt-1 text-sm [overflow-wrap:anywhere] break-words whitespace-pre-line">
-            {task.description}
-          </p>
-        ) : null}
-        <p className="text-muted-foreground mt-2 text-xs">
-          Criada em {formatDateTime(task.createdAt)} por {task.createdBy}
-        </p>
-      </div>
-
-      {canEdit ? (
-        <div className="flex shrink-0 items-center gap-1 sm:self-start">
-          <AzuosActionButton
-            data={{ label: isDone ? 'Reabrir tarefa' : 'Marcar como concluída' }}
-            ui={{
-              icon: isDone ? RotateCcw : Check,
-              isIconOnly: true,
-              variant: 'ghost',
-              size: 'sm',
-            }}
-            state={{ isLoading: state.updatingTaskId === task.id }}
-            actions={{ onClick: () => actions.onToggleDone(task) }}
-          />
-          <AzuosActionButton
-            data={{ label: 'Editar tarefa' }}
-            ui={{ icon: Pencil, isIconOnly: true, variant: 'ghost', size: 'sm' }}
-            actions={{ onClick: () => actions.onEdit(task) }}
-          />
-          {(state.canDelete ?? true) ? (
-            <AzuosActionButton
-              data={{ label: 'Excluir tarefa' }}
-              ui={{
-                icon: Trash2,
-                isIconOnly: true,
-                variant: 'ghost',
-                size: 'sm',
-                className: 'text-destructive hover:text-destructive/80',
-              }}
-              actions={{ onClick: () => actions.onAskDelete(task) }}
-            />
-          ) : null}
-        </div>
-      ) : null}
+    <li className="flex">
+      <AzuosRecordCard
+        data={{
+          label: `Abrir a tarefa ${task.title}`,
+          title: task.title,
+          status: { label: TASK_STATUS_LABELS[task.status], tone: taskStatusTone(task.status) },
+          footer: {
+            title: `Criada em ${formatDateTime(task.createdAt)}`,
+            subtitle: task.createdBy,
+            person: { name: task.createdBy },
+          },
+          menu: canEdit
+            ? {
+                label: `Ações da tarefa ${task.title}`,
+                items: taskMenuItems(task, state.canDelete ?? true),
+              }
+            : null,
+        }}
+        ui={{
+          icon: ListChecks,
+          iconTone: taskStatusTone(task.status),
+          className: 'w-full',
+          body: task.description ? (
+            <p className="text-muted-foreground line-clamp-3 text-sm [overflow-wrap:anywhere] break-words whitespace-pre-line">
+              {task.description}
+            </p>
+          ) : null,
+        }}
+        state={{ isMenuDisabled: state.updatingTaskId === task.id }}
+        actions={{
+          onOpen: canEdit ? () => actions.onEdit(task) : undefined,
+          onMenuSelect: (id) => TASK_MENU_ACTIONS[id]?.(actions, task),
+        }}
+      />
     </li>
   );
 }
@@ -280,11 +294,17 @@ function TaskItem({
 /** O esqueleto tem a FORMA da lista: sem isso, a tela pula quando o conteúdo chega. */
 function TaskListSkeleton() {
   return (
-    <div className="flex flex-col gap-2" aria-busy="true" aria-label="Carregando tarefas">
-      {Array.from({ length: 4 }, (_, index) => (
-        <div key={index} className="bg-card shadow-card rounded-surface p-4">
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      aria-busy="true"
+      aria-label="Carregando tarefas"
+    >
+      {Array.from({ length: 6 }, (_, index) => (
+        <div key={index} className="bg-card shadow-card rounded-surface flex flex-col gap-3 p-4">
+          <Skeleton className="h-3 w-1/4" />
           <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="mt-2 h-3 w-1/3" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="mt-4 h-6 w-1/2" />
         </div>
       ))}
     </div>
