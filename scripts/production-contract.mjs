@@ -36,7 +36,7 @@ function containerRules(project, compose) {
     ...required.filter((token) => !compose.includes(token)).map((token) => `Container contract missing ${token}`),
     ...rule(['[[build]]', '[[stack]]', '[[procedure]]', 'sh docker/komodo.sh'].every((token) => toml.includes(token)), 'Declare Build, Stack and Procedure in the Komodo TOML, with the steps in docker/komodo.sh'),
     ...rule(toml.includes('"--resolve-image", "never"') && toml.includes('"--detach=false"'), 'Deploy through native Swarm updates'),
-    ...rule(komodo.includes('infisical run') && komodo.includes('--expand=false') && komodo.includes('--skip-interpolation'), 'Inject Infisical only in the docker/komodo.sh steps, never in the stored stack config'),
+    ...rule(komodo.includes('auth/approle/login') && komodo.includes('--skip-interpolation'), 'Inject Vault secrets only in the docker/komodo.sh steps, never in the stored stack config'),
     ...rule(!/python|ghcr\.io|docker push/.test(toml + compose + komodo), 'Do not use Python controllers, GHCR or image publishing'),
   ];
 }
@@ -58,7 +58,7 @@ function caddyRules(project, compose) {
 function sourceRules(project) {
   return files(join(project, 'template/server/src'))
     .filter((path) => path.endsWith('.ts'))
-    .flatMap((path) => rule(!/infisical\s+(run|export|login)\b/.test(readFileSync(path, 'utf8')), 'Do not fetch Infisical secrets in application code'));
+    .flatMap((path) => rule(!/infisical\s+(run|export|login)\b|auth\/approle\/login/.test(readFileSync(path, 'utf8')), 'Do not fetch Vault or Infisical secrets in application code'));
 }
 
 function driverRules(project) {
