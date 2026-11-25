@@ -137,7 +137,7 @@ describe('AzuosContentCard', () => {
     const { container } = render(
       <AzuosContentCard
         data={{
-          label: 'Abertos 12: filtrar a lista',
+          label: 'Abertos',
           title: 'Abertos',
           highlight: { value: 12, hint: 'exclui 3 arquivados' },
         }}
@@ -150,11 +150,11 @@ describe('AzuosContentCard', () => {
     expect(container.querySelector('[data-slot="content-card-highlight"]')).toHaveTextContent(
       '12exclui 3 arquivados',
     );
-    expect(screen.getByRole('group', { name: 'Abertos 12: filtrar a lista' })).toHaveAttribute(
+    expect(screen.getByRole('group', { name: 'Abertos 12: tirar o filtro' })).toHaveAttribute(
       'data-selected',
       'true',
     );
-    await userEvent.click(screen.getByRole('button', { name: 'Abertos 12: filtrar a lista' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Abertos 12: tirar o filtro' }));
     expect(onOpen).toHaveBeenCalledOnce();
   });
 
@@ -182,6 +182,6 @@ describe('AzuosContentCard', () => {
     );
 
     expect(container.querySelector('[data-slot="content-card-highlight"]')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Abertos' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Abertos 12: filtrar a lista' })).toBeDisabled();
   });
 });

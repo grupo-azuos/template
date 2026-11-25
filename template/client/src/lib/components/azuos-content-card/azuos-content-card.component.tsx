@@ -135,7 +135,7 @@ export function AzuosContentCard({ data, ui, state, actions }: AzuosContentCardP
 
   return (
     <AzuosCardSurface
-      data={{ label: data.label }}
+      data={{ label: accessibleNameOf(data, state, actions) }}
       ui={{ className: cn('flex flex-col text-left', ui?.className) }}
       state={{ isSelected: state?.isSelected, isDisabled: state?.isLoading }}
       actions={openActionOf(actions)}
@@ -149,6 +149,21 @@ export function AzuosContentCard({ data, ui, state, actions }: AzuosContentCardP
       <ContentCardFooter data={data} ui={ui} actions={actions} slot={slot} />
     </AzuosCardSurface>
   );
+}
+
+/**
+ * O nome lido do card. No card de painel que filtra, o número entra no nome e o nome diz o que o
+ * próximo clique faz: "Hoje 2: filtrar a lista", "Hoje 2: tirar o filtro".
+ */
+export function accessibleNameOf(
+  data: AzuosContentCardProps['data'],
+  state: AzuosContentCardProps['state'],
+  actions: AzuosContentCardProps['actions'],
+): string {
+  if (!data.highlight || !actions?.onOpen) return data.label;
+  const named = `${data.label} ${data.highlight.value}`;
+
+  return state?.isSelected ? `${named}: tirar o filtro` : `${named}: filtrar a lista`;
 }
 
 function openActionOf(actions: AzuosContentCardProps['actions']) {
@@ -182,10 +197,10 @@ function ContentCardStrip({ data, ui, slot }: PartProps) {
   return (
     <div
       data-slot={`${slot}-strip`}
-      className="bg-muted flex items-center justify-between gap-2 px-4 py-1.5 text-xs font-semibold"
+      className="flex items-center justify-between gap-2 bg-muted px-4 py-1.5 text-xs font-semibold"
     >
       <ContentCardStatus status={data.status ?? null} />
-      <span className="text-muted-foreground flex min-w-0 items-center gap-2">
+      <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
         {(data.tags ?? []).map((tag) => (
           <ContentCardTag key={tag.label} tag={tag} />
         ))}
@@ -270,7 +285,7 @@ function ContentCardLeading({ data, ui, slot }: PartProps) {
       alt={`Foto de ${data.title}`}
       loading="lazy"
       data-slot={`${slot}-thumbnail`}
-      className="rounded-icon bg-muted size-12 shrink-0 object-cover shadow-xs"
+      className="size-12 shrink-0 rounded-icon bg-muted object-cover shadow-xs"
     />
   );
 }
@@ -286,7 +301,7 @@ function ContentCardIcon({ ui }: Pick<AzuosContentCardProps, 'ui'>) {
       aria-label={label}
       aria-hidden={label ? undefined : true}
       className={cn(
-        'rounded-icon inline-flex size-9 shrink-0 items-center justify-center shadow-xs',
+        'inline-flex size-9 shrink-0 items-center justify-center rounded-icon shadow-xs',
         cardToneClasses(ui?.iconTone).dot,
       )}
     >
@@ -310,12 +325,7 @@ function ContentCardHeader({ data, ui, state, actions }: PartProps) {
     >
       <ContentCardLeading data={data} ui={ui} slot={ui?.slot ?? 'content-card'} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <h3
-          className="group-data-[selected=true]/card:text-on-card-selected line-clamp-2 text-sm leading-tight font-semibold break-words"
-          title={data.title}
-        >
-          {data.title}
-        </h3>
+        <ContentCardTitle data={data} actions={actions} />
         <ContentCardCode data={data} />
         <ContentCardMeta meta={data.meta} />
       </div>
@@ -325,14 +335,27 @@ function ContentCardHeader({ data, ui, state, actions }: PartProps) {
   );
 }
 
+/**
+ * O título. Cortado, mostra o inteiro no balão do projeto, nunca no `title` do navegador. O balão
+ * fica acima do botão do card (`z-20`), e o clique no título abre o registro igual.
+ */
+function ContentCardTitle({ data, actions }: Pick<PartProps, 'data' | 'actions'>) {
+  return (
+    <AzuosTooltip data={{ content: data.title }}>
+      <h3
+        className="relative z-20 line-clamp-2 w-fit text-sm leading-tight font-semibold break-words group-data-[selected=true]/card:text-on-card-selected"
+        onClick={actions?.onOpen}
+      >
+        {data.title}
+      </h3>
+    </AzuosTooltip>
+  );
+}
+
 function ContentCardMeta({ meta }: { meta?: string | null }) {
   if (!meta) return null;
 
-  return (
-    <span className="text-muted-foreground truncate text-xs" title={meta}>
-      {meta}
-    </span>
-  );
+  return <span className="truncate text-xs text-muted-foreground">{meta}</span>;
 }
 
 /** O menu de três pontinhos mora no canto do cabeçalho, acima do botão do card. */
@@ -378,11 +401,11 @@ function ContentCardHighlight({
       data-slot={`${slot}-highlight`}
       className="flex flex-wrap items-baseline gap-x-2 px-4 pt-3"
     >
-      <p className="text-foreground group-data-[selected=true]/card:text-on-card-selected text-3xl font-bold tracking-tight tabular-nums">
+      <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums group-data-[selected=true]/card:text-on-card-selected">
         {data.highlight.value}
       </p>
       {data.highlight.hint ? (
-        <p className="text-muted-foreground group-data-[selected=true]/card:text-on-card-selected text-xs">
+        <p className="text-xs text-muted-foreground group-data-[selected=true]/card:text-on-card-selected">
           {data.highlight.hint}
         </p>
       ) : null}
@@ -394,7 +417,7 @@ function ContentCardCode({ data }: Pick<AzuosContentCardProps, 'data'>) {
   if (!data.code) return null;
   if (!data.codeHref)
     return (
-      <span className="text-muted-foreground mt-0.5 truncate font-mono text-xs">{data.code}</span>
+      <span className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{data.code}</span>
     );
 
   return (
@@ -402,7 +425,7 @@ function ContentCardCode({ data }: Pick<AzuosContentCardProps, 'data'>) {
       href={data.codeHref}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-muted-foreground hover:text-foreground relative z-20 mt-0.5 truncate font-mono text-xs hover:underline"
+      className="relative z-20 mt-0.5 truncate font-mono text-xs text-muted-foreground hover:text-foreground hover:underline"
     >
       {data.code}
     </a>
@@ -420,21 +443,21 @@ function ContentCardMetrics({ data, ui, slot }: PartProps) {
         <span
           key={cell.key}
           data-slot={`${slot}-${cell.key}`}
-          className="rounded-control bg-muted flex min-w-0 flex-col items-center py-1.5"
+          className="flex min-w-0 flex-col items-center rounded-control bg-muted py-1.5"
         >
           {cell.isText ? (
             /* A palavra quebra em até duas linhas (com hífen) em vez de virar "Infraestr…". */
-            <span className="flex min-h-8 max-w-full items-center px-1" title={cell.value}>
-              <span className="text-foreground line-clamp-2 text-center text-xs leading-tight font-semibold break-words hyphens-auto">
+            <span className="flex min-h-8 max-w-full items-center px-1">
+              <span className="line-clamp-2 text-center text-xs leading-tight font-semibold break-words hyphens-auto text-foreground">
                 {cell.value}
               </span>
             </span>
           ) : (
-            <span className="text-foreground max-w-full truncate px-1 text-base font-bold tabular-nums">
+            <span className="max-w-full truncate px-1 text-base font-bold text-foreground tabular-nums">
               {cell.value}
             </span>
           )}
-          <span className="text-muted-foreground flex max-w-full items-center gap-1 px-1 text-xs">
+          <span className="flex max-w-full items-center gap-1 px-1 text-xs text-muted-foreground">
             <span
               aria-hidden="true"
               className={cn(
@@ -488,7 +511,7 @@ function ContentCardFooter({ data, ui, actions, slot }: PartProps) {
   return (
     <div
       data-slot={`${slot}-footer`}
-      className="border-border mt-3 flex items-center gap-2.5 border-t px-4 py-3"
+      className="mt-3 flex items-center gap-2.5 border-t border-border px-4 py-3"
     >
       {/* Sem ícone, o rosto abre o rodapé; com ícone, o rosto fica depois do texto. */}
       <ContentCardFooterLead icon={icon} person={person} />
@@ -516,7 +539,7 @@ function ContentCardFooterLead({
   icon?: LucideIcon;
   person: AzuosContentCardPerson | null;
 }) {
-  if (Icon) return <Icon aria-hidden="true" className="text-muted-foreground size-4 shrink-0" />;
+  if (Icon) return <Icon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />;
   if (!person) return null;
 
   return <ContentCardFace person={person} />;
@@ -548,12 +571,10 @@ function ContentCardFooterText({
 
   return (
     <span className="flex min-w-0 flex-1 flex-col">
-      <span className="truncate text-xs font-semibold" title={footer.title}>
-        {footer.title}
-      </span>
+      <span className="truncate text-xs font-semibold">{footer.title}</span>
       {/* Quebra em vez de cortar: no cartão estreito a data perdia o ano. */}
       {footer.subtitle ? (
-        <span className="text-muted-foreground text-xs leading-tight break-words">
+        <span className="text-xs leading-tight break-words text-muted-foreground">
           {footer.subtitle}
         </span>
       ) : null}
@@ -566,7 +587,7 @@ function ContentCardPill({ label }: { label: string }) {
   return (
     <span
       aria-hidden="true"
-      className="control-sm rounded-button bg-muted text-muted-foreground inline-flex shrink-0 items-center gap-1 px-2.5 text-xs font-medium"
+      className="inline-flex control-sm shrink-0 items-center gap-1 rounded-button bg-muted px-2.5 text-xs font-medium text-muted-foreground"
     >
       {label}
       <ArrowRight className="size-3.5" />
