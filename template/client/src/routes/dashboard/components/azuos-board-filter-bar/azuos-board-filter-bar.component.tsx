@@ -13,7 +13,7 @@ import {
 } from '@template/shared/schemas/dashboard-board.schema';
 
 import { AzuosActionButton } from '../../../../lib/components/azuos-action-button/azuos-action-button.component';
-import { AzuosCardSurface } from '../../../../lib/components/azuos-card-surface/azuos-card-surface.component';
+import { AzuosContentCard } from '../../../../lib/components/azuos-content-card/azuos-content-card.component';
 import { AzuosClearFiltersButton } from '../../../../lib/components/azuos-clear-filters-button/azuos-clear-filters-button.component';
 import { AzuosCollapsible } from '../../../../lib/components/azuos-collapsible/azuos-collapsible.component';
 import { cn } from '../../../../lib/utils/cn.util';
@@ -149,39 +149,46 @@ function Toolbar({
   const canClear = Boolean(actions.onClear) && !state.isEditing && active.length > 0;
 
   return (
-    <AzuosCardSurface>
-      {/* O bloco que abre e fecha é transparente: o cartão é a superfície (card dentro de card não). */}
-      <AzuosCollapsible
-        data={{ title: 'Filtros', badge: activeBadge(active.length) }}
-        ui={{ className: 'rounded-none bg-transparent shadow-none' }}
-        state={{ isOpen: state.isOpen ?? true }}
-        actions={{ onOpenChange: actions.onOpenChange }}
-        /* Sempre no cabeçalho (some sozinho sem filtro ligado): a seta fica junto do título, e não
-           pula de ponta quando o "Limpar" aparece. */
-        aside={
-          <AzuosClearFiltersButton
-            state={{ hasFilter: canClear }}
-            actions={{ onClear: () => actions.onClear?.() }}
-          />
-        }
-      >
-        <div className="grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2">
-          {data.ordered.map((filter) => (
-            /* "Linha inteira" (e os cards, que são uma faixa): a peça ocupa a linha toda, sozinha. */
-            <div
-              key={filter.id}
-              className={cn(
-                'min-w-0',
-                (filter.width === 'full' || toolbarDisplayOf(filter) === 'cards') &&
-                  'col-span-full',
-              )}
+    <AzuosContentCard
+      data={{ label: 'Filtros', title: '' }}
+      ui={{
+        body: (
+          <>
+            {/* O bloco que abre e fecha é transparente: o cartão é a superfície (card dentro de card não). */}
+            <AzuosCollapsible
+              data={{ title: 'Filtros', badge: activeBadge(active.length) }}
+              ui={{ className: 'rounded-none bg-transparent shadow-none' }}
+              state={{ isOpen: state.isOpen ?? true }}
+              actions={{ onOpenChange: actions.onOpenChange }}
+              /* Sempre no cabeçalho (some sozinho sem filtro ligado): a seta fica junto do título, e não
+                 pula de ponta quando o "Limpar" aparece. */
+              aside={
+                <AzuosClearFiltersButton
+                  state={{ hasFilter: canClear }}
+                  actions={{ onClear: () => actions.onClear?.() }}
+                />
+              }
             >
-              <Control data={data} filter={filter} actions={actions} />
-            </div>
-          ))}
-        </div>
-      </AzuosCollapsible>
-    </AzuosCardSurface>
+              <div className="grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2">
+                {data.ordered.map((filter) => (
+                  /* "Linha inteira" (e os cards, que são uma faixa): a peça ocupa a linha toda, sozinha. */
+                  <div
+                    key={filter.id}
+                    className={cn(
+                      'min-w-0',
+                      (filter.width === 'full' || toolbarDisplayOf(filter) === 'cards') &&
+                        'col-span-full',
+                    )}
+                  >
+                    <Control data={data} filter={filter} actions={actions} />
+                  </div>
+                ))}
+              </div>
+            </AzuosCollapsible>
+          </>
+        ),
+      }}
+    />
   );
 }
 

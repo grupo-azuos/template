@@ -1,41 +1,134 @@
 import { type Meta, type StoryObj } from '@storybook/react';
-import { CheckCircle2, Hourglass } from 'lucide-react';
+import { Building2, CalendarDays, Pencil, Trash2 } from 'lucide-react';
 
 import { AzuosContentCard } from './azuos-content-card.component';
 
 const meta = {
   title: 'Cards/AzuosContentCard',
   component: AzuosContentCard,
-  args: {
-    data: { label: 'Clínica Sorriso' },
-    ui: { tone: 'copper', icon: Hourglass, className: 'w-64 min-h-44' },
-    children: (
-      <>
-        <h3 className="text-sm font-bold">CLÍNICA ODONTO SORRISO PLENO LTDA</h3>
-        <p className="font-mono text-xs text-muted-foreground">39.099.603/0001-28</p>
-        <p className="text-xs text-muted-foreground">Fortaleza · Marina Prado</p>
-      </>
+  decorators: [
+    (Story) => (
+      <div className="w-80">
+        <Story />
+      </div>
     ),
+  ],
+  args: {
+    data: {
+      label: 'Abrir Padaria Bom Dia',
+      title: 'Padaria Bom Dia',
+      code: '12.345.678/0001-90',
+      meta: 'Simples Nacional',
+      status: { label: 'Ativa', tone: 'green' },
+      tags: [{ label: 'Matriz' }],
+      metrics: [
+        { key: 'open', label: 'Abertos', value: '3', tone: 'blue' },
+        { key: 'late', label: 'Atrasados', value: '0', tone: 'red', isOn: false },
+        { key: 'kind', label: 'Regime', value: 'Simples', isText: true },
+      ],
+      footer: {
+        title: 'Ana Souza',
+        subtitle: 'Responsável',
+        person: { id: 'p-ana', name: 'Ana Souza' },
+      },
+      openLabel: 'Abrir',
+      menu: {
+        label: 'Ações da empresa',
+        items: [
+          { id: 'edit', label: 'Editar', icon: Pencil },
+          {
+            id: 'delete',
+            label: 'Excluir',
+            icon: Trash2,
+            isDestructive: true,
+            separatorBefore: true,
+          },
+        ],
+      },
+    },
+    ui: { icon: Building2, iconTone: 'blue' },
+    actions: { onOpen: () => {}, onMenuSelect: () => {} },
   },
 } satisfies Meta<typeof AzuosContentCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** O card padrão: faixa, cabeçalho com ícone, números e o rodapé com o rosto (com a foto). */
 export const Default: Story = {};
 
-/** Hover na cor do sotaque. */
-export const HoverColored: Story = {
+/** A pendência: o selo vermelho que pisca, com a explicação no balão. */
+export const WithAlert: Story = {
+  args: { data: { ...meta.args.data, alert: { count: 4, message: '4 obrigações vencidas' } } },
+};
+
+/** A foto do registro no lugar do ícone. */
+export const WithThumbnail: Story = {
+  args: { ui: { thumbnailUrl: 'https://picsum.photos/seed/azuos/96' } },
+};
+
+/** Com ícone no rodapé, o rosto da pessoa vai para depois do texto. */
+export const WithFooterIcon: Story = {
   args: {
-    ui: { tone: 'green', icon: CheckCircle2, isHoverColored: true, className: 'w-64 min-h-44' },
+    data: {
+      ...meta.args.data,
+      footer: { title: 'Vence em 28/11/2026', person: { id: 'p-ana', name: 'Ana Souza' } },
+    },
+    ui: { icon: Building2, iconTone: 'blue', footerIcon: CalendarDays },
   },
 };
 
-export const Clickable: Story = {
-  args: { actions: { onClick: () => {} } },
+/** Caso limite: título longo (corta em duas linhas) e só o cabeçalho, sem faixa nem rodapé. */
+export const Minimal: Story = {
+  args: {
+    data: {
+      label: 'Abrir registro',
+      title:
+        'Associação Comercial e Industrial dos Lojistas do Centro-Oeste e Entorno do Distrito Federal',
+    },
+    actions: {},
+  },
 };
 
-/** Sem ícone: só a superfície. */
-export const WithoutIcon: Story = {
-  args: { ui: { className: 'w-64' } },
+/** O card de painel: o número grande abaixo do cabeçalho, com a ressalva ao lado. */
+export const Dashboard: Story = {
+  args: {
+    data: {
+      label: 'Abertos 12: filtrar a lista',
+      title: 'Chamados abertos',
+      highlight: { value: 12, hint: 'exclui 3 arquivados' },
+    },
+    ui: { icon: Building2, iconTone: 'blue' },
+    actions: { onOpen: () => {} },
+  },
+};
+
+/** O card de painel escolhido: o filtro que ele liga já está valendo. */
+export const DashboardSelected: Story = {
+  args: {
+    data: { label: 'Atrasados', title: 'Atrasados', highlight: { value: 4 } },
+    ui: { icon: CalendarDays, iconTone: 'red' },
+    state: { isSelected: true },
+    actions: { onOpen: () => {} },
+  },
+};
+
+/** Carregando: o esqueleto no lugar do número. */
+export const DashboardLoading: Story = {
+  args: {
+    data: { label: 'Abertos', title: 'Chamados abertos', highlight: { value: 0 } },
+    ui: { icon: Building2, iconTone: 'blue' },
+    state: { isLoading: true },
+  },
+};
+
+/** O bloco de conteúdo: título e explicação no cabeçalho, o recorte no canto, o conteúdo livre. */
+export const Block: Story = {
+  args: {
+    data: { label: 'Receitas por mês', title: 'Receitas por mês', meta: 'Os últimos 12 meses' },
+    ui: {
+      tools: <span className="text-muted-foreground text-xs">Semana</span>,
+      body: <p className="text-muted-foreground text-sm">O gráfico ou a lista do bloco.</p>,
+    },
+  },
 };

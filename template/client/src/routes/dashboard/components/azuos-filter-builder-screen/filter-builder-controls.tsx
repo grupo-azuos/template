@@ -196,7 +196,7 @@ function DateValue(props: ValueEditorProps) {
         onChange={(event) => props.handleOnChange([event.target.value, to])}
         className="w-44"
       />
-      <span className="text-sm text-ink-500">até</span>
+      <span className="text-ink-500 text-sm">até</span>
       <Input
         type="date"
         aria-label="Até"

@@ -48,9 +48,18 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
   o botão e no máximo `26rem`. Menu com busca começa em `14rem`, para caber o campo.
 - Proibido: gradiente, vidro (`backdrop-blur`), transparência solta em card
   (`brand/no-gradients-or-glass`, `brand/no-card-opacity`).
-- Todo card é feito sobre `<AzuosCardSurface>` (ou um dos formatos que o usam): `AzuosStatCard`,
-  `AzuosMiniStatCard`, `AzuosContentCard`, `AzuosPanelCard` e o hero com Zuzu
-  (`AzuosDashboardHeroCard`). Card montado à mão não entra.
+- **UM CARD SÓ: o card de conteúdo (`<AzuosContentCard>`).** Não existe outro formato de card.
+  Ele é: faixa de situação em cima, ícone cheio do assunto À ESQUERDA com título, código e linha
+  de apoio, as caixinhas de número e o rodapé com o rosto (com a foto) e a ação.
+  - **Card de registro clicável** (empresa, máquina, chamado, produto, tarefa): `actions.onOpen`
+    abre o registro; o card inteiro é o botão.
+  - **Card de painel** (o número do topo da tela e do dashboard): `data.highlight` é o número
+    grande; com `actions.onOpen` vira filtro e `state.isSelected` pinta o escolhido.
+  - **Bloco de conteúdo** (uma seção de tela, um gráfico do painel): título e `data.meta` no
+    cabeçalho, o conteúdo em `ui.body`, o recorte em `ui.tools`.
+- Proibido: ícone grande no canto (marca d'água), card de número com ícone à direita, card
+  tingido, hero escuro, e card montado à mão sobre `AzuosCardSurface` — ela é só a base do card de
+  conteúdo.
 
 ## 4. Cor: no ícone, no status e no gráfico — nunca no fundo
 
@@ -76,8 +85,8 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
 
 ## 6. Hover, foco e movimento
 
-- O hover **destaca, nunca esconde**. Card clicável sobe 2px e a sombra cresce
-  (`hover:shadow-card-hover motion-safe:hover:-translate-y-0.5`, já no `AzuosCardSurface`). Painel
+- **O card não se mexe no hover**: não sobe, a sombra não cresce, nada aparece por cima — clicável,
+  só o cursor diz que ele abre (já no `AzuosContentCard`). Painel
   que desliza por cima do conteúdo é recusado (`apple/hover-never-covers`).
 - Linha de lista ou tabela: véu neutro (`hover:bg-hover-veil`) com **respiro** — a linha tem
   padding lateral e canto (`rounded-control`), o véu nunca cola no texto.
@@ -100,6 +109,17 @@ código (hook do Claude e CI); o resto está aqui e no Storybook.
 - Nunca `<select>` nativo: sempre o seletor do projeto. Com 15 opções ou mais, combobox com busca
   e "Cadastrar «termo»" quando der (skill `select-standard`). Pessoa é sempre
   `AzuosPersonPickerField`.
+
+## 7.1 Pessoa sempre com a foto
+
+- Onde aparece uma pessoa (card, lista, quadro, ficha, menu), aparece a **foto** dela. O rosto é
+  sempre o `AzuosPersonAvatar`.
+- O rosto acha a foto sozinho no **diretório de pessoas** (carregado uma vez com a casca): pelo
+  `personId`, ou pelo nome quando o registro só guardou o nome. Passe o `id` sempre que tiver.
+- As iniciais só aparecem quando a pessoa não tem foto mesmo. "Sem responsável" não é pessoa:
+  ícone neutro, nunca iniciais.
+- Proibido: `avatarUrl: null` escrito à mão e rosto montado com o `ui/avatar` ou iniciais
+  próprias (`person-photo`, sem exceção).
 
 ## 8. Listas e tabelas
 

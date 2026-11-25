@@ -111,7 +111,12 @@ export const ScopedList: Story = {
     data: {
       ...meta.args.data,
       filterName: 'Atrasadas',
-      widget: widgetFixture({ kind: 'list', groupBy: 'createdBy', onlyMine: true, period: 'month' }),
+      widget: widgetFixture({
+        kind: 'list',
+        groupBy: 'createdBy',
+        onlyMine: true,
+        period: 'month',
+      }),
     },
   },
 };

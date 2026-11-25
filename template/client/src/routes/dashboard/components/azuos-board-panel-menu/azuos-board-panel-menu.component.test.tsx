@@ -6,13 +6,7 @@ import { AzuosBoardPanelMenu } from './azuos-board-panel-menu.component';
 
 function setup(canEdit: boolean) {
   const actions = { onView: vi.fn(), onEdit: vi.fn(), onDuplicate: vi.fn(), onRemove: vi.fn() };
-  render(
-    <AzuosBoardPanelMenu
-      data={{ title: 'Tarefas' }}
-      state={{ canEdit }}
-      actions={actions}
-    />,
-  );
+  render(<AzuosBoardPanelMenu data={{ title: 'Tarefas' }} state={{ canEdit }} actions={actions} />);
 
   return actions;
 }

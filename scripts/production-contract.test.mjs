@@ -27,7 +27,7 @@ function fixture() {
   write('template/docker/dockerfile', DOCKERFILE);
   write('template/server/package.json', JSON.stringify({ dependencies: {}, scripts: { build: 'rspack build -c rspack.config.ts' } }));
   write('template/client/package.json', JSON.stringify({ scripts: { build: 'tsc --noEmit && rsbuild build' } }));
-  write('template/docker/komodo.sh', 'infisical run --expand=false; docker stack config --skip-interpolation\nSTACK_NAME="${DEPLOY_ENV}_${APP_NAME}"\n');
+  write('template/docker/komodo.sh', 'auth/approle/login; docker stack config --skip-interpolation\nSTACK_NAME="${DEPLOY_ENV}_${APP_NAME}"\n');
   return { root, write, dispose: () => rmSync(root, { recursive: true }) };
 }
 

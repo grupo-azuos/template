@@ -3,7 +3,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AzuosTaskListView, type AzuosTaskListViewProps } from './azuos-task-list-view.component';
+import {
+  AzuosTaskListView,
+  type AzuosTaskListViewProps,
+  taskMenuItems,
+} from './azuos-task-list-view.component';
 
 const task: Task = {
   id: 1,
@@ -73,12 +77,26 @@ describe('AzuosTaskListView', () => {
     expect(actions.onCreate).toHaveBeenCalledOnce();
   });
 
+  it('opens the task to edit from the card itself', async () => {
+    const actions = renderView();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Abrir a tarefa Ligar para o cliente' }),
+    );
+
+    expect(actions.onEdit).toHaveBeenCalledWith(task);
+  });
+
   it('passes the task to edit, toggle and delete', async () => {
     const actions = renderView();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Editar tarefa' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Marcar como concluída' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Excluir tarefa' }));
+    const menu = 'Ações da tarefa Ligar para o cliente';
+    await userEvent.click(screen.getByRole('button', { name: menu }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Editar tarefa' }));
+    await userEvent.click(screen.getByRole('button', { name: menu }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Marcar como concluída' }));
+    await userEvent.click(screen.getByRole('button', { name: menu }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Excluir tarefa' }));
 
     expect(actions.onEdit).toHaveBeenCalledWith(task);
     expect(actions.onToggleDone).toHaveBeenCalledWith(task);
@@ -116,7 +134,12 @@ describe('AzuosTaskListView', () => {
     renderView({ state: { canEdit: false } });
 
     expect(screen.queryByRole('button', { name: 'Nova tarefa' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Editar tarefa' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Ações da tarefa Ligar para o cliente' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Abrir a tarefa Ligar para o cliente' }),
+    ).not.toBeInTheDocument();
   });
 
   it('says the list was cut when more matched than came back', () => {
@@ -133,11 +156,12 @@ describe('AzuosTaskListView', () => {
       },
     });
 
-    const titleEl = screen.getByText(longTitle);
+    const titleEl = screen.getByRole('heading', { name: longTitle });
     expect(titleEl).toHaveClass('break-words');
-    expect(titleEl).toHaveClass('[overflow-wrap:anywhere]');
-    expect(titleEl).toHaveClass('min-w-0');
-    expect(screen.getByRole('button', { name: 'Editar tarefa' })).toBeInTheDocument();
+    expect(titleEl).toHaveClass('line-clamp-2');
+    expect(
+      screen.getByRole('button', { name: `Ações da tarefa ${longTitle}` }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Em andamento')).toBeInTheDocument();
   });
 
@@ -156,5 +180,12 @@ describe('AzuosTaskListView', () => {
     renderView({ data: { tasks: [], total: 0 }, state: { isEmpty: true } });
 
     expect(screen.getByText(/Nenhuma tarefa/)).toBeInTheDocument();
+  });
+
+  // triste
+  it('offers reopening for a finished task and no delete to who cannot delete', () => {
+    const items = taskMenuItems({ ...task, status: 'done' }, false);
+
+    expect(items.map((item) => item.label)).toEqual(['Reabrir tarefa', 'Editar tarefa']);
   });
 });

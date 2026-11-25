@@ -118,5 +118,11 @@ export const Empty: Story = {
 
 /* Clique em "Ver todas": a falha aparece no lugar da lista, sem barra de páginas. */
 export const Failed: Story = {
-  args: { state: { ...STATE, isExpanded: true, error: 'O servidor não respondeu a tempo. Tente de novo em instantes.' } },
+  args: {
+    state: {
+      ...STATE,
+      isExpanded: true,
+      error: 'O servidor não respondeu a tempo. Tente de novo em instantes.',
+    },
+  },
 };

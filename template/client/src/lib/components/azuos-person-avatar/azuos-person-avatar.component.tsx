@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { usePersonPhoto } from '../../hooks/use-person-photo/use-person-photo';
 import { cn } from '../../utils/cn.util';
 
 /**
@@ -14,6 +15,8 @@ export type AzuosPersonAvatarProps = {
    * carregar, ficam as iniciais.
    */
   avatarUrl?: string | null;
+  /** O id da pessoa no diretório: sem `avatarUrl`, o rosto acha a foto por ele. */
+  personId?: string | null;
   ui?: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string };
 };
 
@@ -35,8 +38,15 @@ export function initialsOf(name: string): string {
     .toUpperCase();
 }
 
-export function AzuosPersonAvatar({ name, avatarUrl, ui }: AzuosPersonAvatarProps) {
+/**
+ * REGRA DO GRUPO: onde aparece uma pessoa, aparece a FOTO dela. Sem `avatarUrl`, o rosto procura
+ * a foto no diretório de pessoas pelo `personId` — ou pelo `name`, quando o registro só guardou o
+ * nome. As iniciais só aparecem quando a pessoa não tem foto mesmo.
+ */
+export function AzuosPersonAvatar({ name, avatarUrl, personId, ui }: AzuosPersonAvatarProps) {
   const size = ui?.size ?? 'sm';
+  const directoryPhoto = usePersonPhoto({ id: personId, name });
+  const photo = avatarUrl || directoryPhoto;
 
   return (
     <Avatar
@@ -46,9 +56,9 @@ export function AzuosPersonAvatar({ name, avatarUrl, ui }: AzuosPersonAvatarProp
         ui?.className,
       )}
     >
-      {avatarUrl ? (
+      {photo ? (
         <AvatarImage
-          src={avatarUrl}
+          src={photo}
           alt={name}
           className="aspect-square size-full rounded-full object-cover"
         />
@@ -59,7 +69,7 @@ export function AzuosPersonAvatar({ name, avatarUrl, ui }: AzuosPersonAvatarProp
           que a lista passa de umas poucas linhas. */}
       <AvatarFallback
         className={cn(
-          'flex aspect-square size-full items-center justify-center rounded-full bg-primary font-bold text-primary-foreground select-none',
+          'bg-primary text-primary-foreground flex aspect-square size-full items-center justify-center rounded-full font-bold select-none',
           SIZE_CLASS[size],
         )}
       >

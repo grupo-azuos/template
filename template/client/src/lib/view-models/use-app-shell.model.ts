@@ -8,6 +8,7 @@ import { useTheme } from '../theme/theme';
 import { sidebarOpenFromCookie } from '../utils/sidebar-state.util';
 import { useAccountSessionModel } from './use-account-session.model';
 import { useAppShellNavigationModel } from './use-app-shell-navigation.model';
+import { usePeopleDirectoryModel } from './use-people-directory.model';
 
 /**
  * O que a casca padrão precisa DESTE sistema: quem está usando, os contadores do menu e a
@@ -29,13 +30,19 @@ export function useAppShellModel() {
     staleTime: 5 * 60 * 1000,
     retry: false,
   });
+  /* A foto de cada pessoa, para o rosto de qualquer tela achar (regra do grupo: pessoa com foto). */
+  usePeopleDirectoryModel();
   const navigation = useAppShellNavigationModel(NAVIGATION, { isAdmin: user.role === 'admin' });
   const session = useAccountSessionModel();
 
   return {
     data: {
       ...navigation.data,
-      user: { name: user.name, role: USER_ROLE_LABELS[user.role], avatarUrl: account.data?.profile.avatarUrl ?? null },
+      user: {
+        name: user.name,
+        role: USER_ROLE_LABELS[user.role],
+        avatarUrl: account.data?.profile.avatarUrl ?? null,
+      },
       badges: {},
     },
     state: {

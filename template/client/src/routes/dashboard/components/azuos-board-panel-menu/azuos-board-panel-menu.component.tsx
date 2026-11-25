@@ -53,11 +53,17 @@ export function AzuosBoardPanelMenu({ data, state, actions }: AzuosBoardPanelMen
         align="end"
         role="menu"
         aria-label={`Menu de ${data.title}`}
-        className="w-52 max-w-[calc(100vw-2rem)] rounded-surface border-transparent bg-popover p-1.5 shadow-xl ring-1 ring-foreground/8"
+        className="rounded-surface bg-popover ring-foreground/8 w-52 max-w-[calc(100vw-2rem)] border-transparent p-1.5 shadow-xl ring-1"
       >
-        <MenuItem data={{ label: 'Ver', icon: Maximize2 }} actions={{ onClick: pick(actions.onView) }} />
+        <MenuItem
+          data={{ label: 'Ver', icon: Maximize2 }}
+          actions={{ onClick: pick(actions.onView) }}
+        />
         {canEdit && actions.onEdit ? (
-          <MenuItem data={{ label: 'Editar', icon: Pencil }} actions={{ onClick: pick(actions.onEdit) }} />
+          <MenuItem
+            data={{ label: 'Editar', icon: Pencil }}
+            actions={{ onClick: pick(actions.onEdit) }}
+          />
         ) : null}
         {canEdit && actions.onDuplicate ? (
           <MenuItem
@@ -67,7 +73,7 @@ export function AzuosBoardPanelMenu({ data, state, actions }: AzuosBoardPanelMen
         ) : null}
         {canEdit && actions.onRemove ? (
           <>
-            <div role="separator" className="-mx-1.5 my-1 h-px bg-border" />
+            <div role="separator" className="bg-border -mx-1.5 my-1 h-px" />
             <MenuItem
               data={{ label: 'Remover', icon: Trash2 }}
               ui={{ isDestructive: true }}

@@ -29,7 +29,7 @@ const CountsContext = createContext<Counts>({ byDay: new Map(), max: 0, seriesLa
 
 export function AzuosAgendaCalendar({ data, state }: AzuosAgendaCalendarProps) {
   if (state?.isLoading) {
-    return <div aria-busy="true" className="h-full min-h-40 animate-pulse rounded-box bg-muted" />;
+    return <div aria-busy="true" className="rounded-box bg-muted h-full min-h-40 animate-pulse" />;
   }
   const counts = countsOf(data.days, data.seriesLabel);
   const from = dateOf(data.range.from);
@@ -76,9 +76,9 @@ function AgendaDay({ day, modifiers, children, className, ...props }: DayProps) 
       {...props}
       className={cn(
         className,
-        'flex min-h-11 flex-col items-center justify-center rounded-box text-sm leading-none',
+        'rounded-box flex min-h-11 flex-col items-center justify-center text-sm leading-none',
         LEVEL_LOOK[level],
-        modifiers.today && 'ring-2 ring-ink-900 ring-inset',
+        modifiers.today && 'ring-ink-900 ring-2 ring-inset',
       )}
       aria-label={labelOf(day.isoDate, count, counts.seriesLabel, isOff)}
     >
