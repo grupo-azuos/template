@@ -1,67 +1,37 @@
-import { type LucideIcon } from 'lucide-react';
-import { type CSSProperties, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
-import { type AzuosCardTone, cardToneClasses, cardToneVeilOf } from '../../utils/card-tone.util';
 import { cn } from '../../utils/cn.util';
 
 /**
- * A SUPERFÍCIE de todo card do grupo — o andar de baixo dos quatro formatos (card de painel,
- * filtro pequeno, filtro grande com ícone e card de conteúdo).
+ * A SUPERFÍCIE do card de conteúdo (`AzuosContentCard`) — o andar de baixo do único card do grupo.
+ * Não é um formato de card: tela nenhuma monta card direto sobre ela.
  *
  * - Fundo: a superfície (`bg-card`) SEM borda; o que separa o card do fundo é o fio de 1px e a
  *   sombra difusa do `--elevation-card` (padrão Apple). A cor entra no ícone cheio do assunto
  *   (`lib/utils/card-tone.util.ts`), nunca no fundo do card.
- * - Hover: clicável, o card sobe 2px e a sombra cresce; o véu neutro (`--hover-veil`), ou no tom
- *   com `ui.isHoverColored`, aparece por cima. Nada aparece cobrindo o conteúdo.
- * - Marca d'água: `ui.mark` desenha o ícone grande no canto, no sotaque de `ui.markTone`, como no
- *   hero card. Fica atrás do texto.
+ * - Hover: NADA se mexe. O card não sobe, a sombra não cresce, nada aparece por cima — clicável,
+ *   só o cursor diz que ele abre.
  * - Escolhido: o azul claro da marca (`bg-card-selected`) com texto branco. Quem está dentro lê o
- *   estado por `group-data-[selected=true]/card:` para inverter a bolinha do ícone.
+ *   estado por `group-data-[selected=true]/card:` para inverter o texto.
  * - Clicável: um botão de verdade cobre o card inteiro, alcançável pelo teclado.
  *
- * Nunca borda colorida, nunca fundo pastel ou cheio no tom.
+ * Nunca borda colorida, nunca fundo pastel ou cheio no tom, nunca ícone grande no canto.
  */
 export type AzuosCardSurfaceProps = {
   data?: { label?: string };
-  ui?: {
-    className?: string;
-    /** O card fica tingido, o tempo todo, na cor de `hoverTone`. Sem a flag, só o véu neutro no hover. */
-    isHoverColored?: boolean;
-    hoverTone?: AzuosCardTone;
-    /** O ícone grande no canto, como marca d'água. */
-    mark?: LucideIcon;
-    markTone?: AzuosCardTone;
-  };
+  ui?: { className?: string };
   /** `isDisabled`: o botão do card não responde (enquanto carrega, por exemplo). */
   state?: { isSelected?: boolean; isDisabled?: boolean };
   actions?: { onClick?: () => void };
   children: ReactNode;
 };
 
-/** A cor do véu: o sotaque a 16%, ou o véu neutro do tema — o mesmo das linhas de lista. */
-function washColorOf(ui: AzuosCardSurfaceProps['ui']): string {
-  if (ui?.isHoverColored && ui.hoverTone) return cardToneVeilOf(ui.hoverTone);
-
-  return 'var(--hover-veil)';
-}
-
-/** O véu aparece só no hover: neutro, ou no tom do card com `ui.isHoverColored`. */
-function washClassOf(): string {
-  return cn('pointer-events-none absolute inset-0 -z-10', 'group-hover/card:bg-(--card-veil)');
-}
-
-/**
- * A casca no padrão Apple: superfície sem borda, com o fio de 1px e a sombra difusa do
- * `--elevation-card`. Clicável, ela sobe 2px e a sombra cresce no hover — sem cobrir nada.
- */
+/** A casca no padrão Apple: superfície sem borda, com o fio de 1px e a sombra difusa. Parada. */
 function surfaceClassOf(props: { isSelected: boolean; isClickable: boolean; className?: string }) {
   return cn(
     'group/card rounded-surface shadow-card relative isolate overflow-hidden',
-    /* A borda NEUTRA separa o card do fundo da página, que no claro é quase do mesmo branco. */
     props.isSelected ? 'bg-card-selected text-on-card-selected' : 'bg-card text-card-foreground',
-    props.isClickable &&
-      'hover:shadow-card-hover cursor-pointer transition-[transform,box-shadow] duration-200 motion-safe:hover:-translate-y-0.5',
-    props.isSelected && props.isClickable && 'hover:bg-card-selected-hover',
+    props.isClickable && 'cursor-pointer',
     props.className,
   );
 }
@@ -88,14 +58,6 @@ export function AzuosCardSurface({ data, ui, state, actions, children }: AzuosCa
       data-selected={flags.isSelected ? 'true' : undefined}
       className={surfaceClassOf({ ...flags, className: ui?.className })}
     >
-      {/* O véu cobre o card inteiro: sempre no card com tom, só no hover no neutro. */}
-      <span
-        aria-hidden="true"
-        data-slot="card-wash"
-        className={washClassOf()}
-        style={{ '--card-veil': washColorOf(ui) } as CSSProperties}
-      />
-      <CardMark ui={ui} />
       <CardClickTarget data={data} state={flags} actions={actions} />
       {children}
     </div>
@@ -123,24 +85,5 @@ function CardClickTarget({
       onClick={actions.onClick}
       className="rounded-surface focus-visible:ring-ring absolute inset-0 z-10 cursor-pointer focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
     />
-  );
-}
-
-/** O ícone grande no canto, no sotaque, atrás do texto. Traço fino para não pesar. */
-function CardMark({ ui }: { ui: AzuosCardSurfaceProps['ui'] }) {
-  const Icon = ui?.mark;
-  if (!Icon) return null;
-
-  return (
-    <span
-      aria-hidden="true"
-      data-slot="card-mark"
-      className={cn(
-        'group-data-[selected=true]/card:text-on-card-selected pointer-events-none absolute -right-5 -bottom-5 -z-10 size-31',
-        cardToneClasses(ui.markTone).text,
-      )}
-    >
-      <Icon className="block size-full stroke-1" />
-    </span>
   );
 }

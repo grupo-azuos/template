@@ -1,10 +1,9 @@
 import { type Meta, type StoryObj } from '@storybook/react';
-import { Hourglass } from 'lucide-react';
 
 import { AzuosCardSurface } from './azuos-card-surface.component';
 
 const meta = {
-  title: 'Cards/AzuosCardSurface',
+  title: 'Cards/AzuosCardSurface (base do card de conteúdo)',
   component: AzuosCardSurface,
   args: { data: { label: 'Card' }, children: <p className="p-5 text-sm">Conteúdo do card</p> },
 } satisfies Meta<typeof AzuosCardSurface>;
@@ -12,18 +11,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A superfície da marca, com o hover neutro do GSAP. */
+/** A superfície do card de conteúdo: parada, sem borda, com o fio e a sombra difusa. */
 export const Default: Story = {};
-
-/** O hover entra na cor do sotaque: precisa da flag e do tom. */
-export const HoverColored: Story = {
-  args: { ui: { isHoverColored: true, hoverTone: 'copper' } },
-};
-
-/** O ícone grande no canto, no sotaque, atrás do texto. */
-export const WithMark: Story = {
-  args: { ui: { mark: Hourglass, markTone: 'copper', className: 'min-h-40' } },
-};
 
 export const Clickable: Story = {
   args: { actions: { onClick: () => {} } },

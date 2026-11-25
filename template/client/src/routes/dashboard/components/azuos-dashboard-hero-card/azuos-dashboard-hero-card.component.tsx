@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { type AzuosCardTone } from '../../../../lib/utils/card-tone.util';
-import { AzuosStatCard } from '../../../../lib/components/azuos-stat-card/azuos-stat-card.component';
+import { AzuosContentCard } from '../../../../lib/components/azuos-content-card/azuos-content-card.component';
 import { cn } from '../../../../lib/utils/cn.util';
 import {
   AzuosZuzu,
@@ -56,40 +56,20 @@ export type AzuosDashboardHeroCardProps = {
   };
 };
 
-/** Cada indicador do hero é um card de painel (`AzuosStatCard`): superfície da marca, sotaque
-    na bolinha e no número, escolhido no azul claro da marca. */
+/** Cada indicador do destaque é o card de conteúdo de painel: o número grande, e clicável vira
+    filtro (o escolhido fica no azul claro da marca). */
 function StatPill({ stat }: { stat: AzuosDashboardHeroCardStat }) {
   return (
-    <AzuosStatCard
-      data={{ label: stat.label, value: stat.value, hint: stat.hint }}
-      ui={{ tone: stat.tone, icon: stat.icon, className: 'p-4 text-left' }}
+    <AzuosContentCard
+      data={{
+        label: stat.label,
+        title: stat.label,
+        highlight: { value: stat.value, hint: stat.hint },
+      }}
+      ui={{ icon: stat.icon, iconTone: stat.tone }}
       state={{ isSelected: stat.isActive }}
-      actions={stat.onClick ? { onClick: stat.onClick } : undefined}
+      actions={stat.onClick ? { onOpen: stat.onClick } : undefined}
     />
-  );
-}
-
-function DashboardEyebrowHeader({
-  eyebrow,
-  timestamp,
-  Icon,
-}: {
-  eyebrow?: string;
-  timestamp?: string;
-  Icon?: LucideIcon;
-}) {
-  if (!eyebrow && !timestamp) return null;
-
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
-      {Icon ? <Icon size={18} className="shrink-0 text-accent-hero" aria-hidden="true" /> : null}
-      {eyebrow ? <span className="text-on-dark">{eyebrow}</span> : null}
-      {timestamp ? (
-        <span className="font-normal tracking-normal text-on-dark/80 normal-case">
-          — {timestamp}
-        </span>
-      ) : null}
-    </div>
   );
 }
 
@@ -100,39 +80,27 @@ function HighlightedTitle({ data }: { data: { text: string; highlight?: string |
   return (
     <>
       {data.text.slice(0, at)}
-      <span className="text-accent-hero">{data.highlight}</span>
+      <span className="text-primary">{data.highlight}</span>
       {data.text.slice(at + data.highlight.length)}
     </>
   );
 }
 
-function DashboardHeroBody({ data }: { data: AzuosDashboardHeroCardProps['data'] }) {
-  const zuzuPose = data.zuzu?.pose ?? 'alert';
-  const zuzuSize = data.zuzu?.size ?? 128;
-
+/** O que o Zuzu fala: a frase do dia (com o trecho que importa em destaque) e a explicação. */
+function HeroMessage({ data }: { data: AzuosDashboardHeroCardProps['data'] }) {
   return (
-    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start sm:gap-6">
-      <div data-slot="dashboard-zuzu" className="shrink-0 select-none" aria-hidden="true">
-        <AzuosZuzu data={{ pose: zuzuPose }} ui={{ size: zuzuSize }} />
-      </div>
-
-      <div className="flex min-h-[120px] min-w-0 flex-1 flex-col justify-center gap-2 text-center sm:text-left">
-        <h2 className="text-xl leading-snug font-bold tracking-tight text-on-dark sm:text-2xl">
-          <HighlightedTitle data={{ text: data.title, highlight: data.titleHighlight }} />
-        </h2>
-        {data.description ? (
-          <p className="text-sm leading-relaxed font-normal text-on-dark/80 sm:text-base">
-            {data.description}
-          </p>
-        ) : null}
-        {data.badge ? (
-          <div className="mt-1 flex items-center justify-center sm:justify-start">
-            <span className="inline-flex items-center rounded-chip bg-accent-hero px-2.5 py-1 text-xs font-bold text-accent-hero-foreground shadow-xs">
-              {data.badge}
-            </span>
-          </div>
-        ) : null}
-      </div>
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <h2 className="text-foreground text-xl leading-snug font-bold tracking-tight">
+        <HighlightedTitle data={{ text: data.title, highlight: data.titleHighlight }} />
+      </h2>
+      {data.description ? (
+        <p className="text-muted-foreground text-sm leading-relaxed">{data.description}</p>
+      ) : null}
+      {data.badge ? (
+        <span className="rounded-chip bg-muted text-foreground w-fit px-2.5 py-1 text-xs font-semibold">
+          {data.badge}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -149,28 +117,39 @@ function DashboardStatsGrid({ stats }: { stats?: AzuosDashboardHeroCardStat[] })
   );
 }
 
+/**
+ * O DESTAQUE DO PAINEL — o Zuzu falando o alerta do dia, no card de conteúdo (o único card do
+ * grupo): o Zuzu no lugar do ícone, a frase no corpo, e os números do dia em cards de painel
+ * LOGO ABAIXO (nunca dentro: card não vai dentro de card).
+ */
 export function AzuosDashboardHeroCard({ data, ui }: AzuosDashboardHeroCardProps) {
+  const name = data.eyebrow ?? data.title;
+
   return (
     <div
       role="region"
-      aria-label={data.eyebrow ?? data.title}
+      aria-label={name}
       data-slot="azuos-dashboard-hero-card"
-      className={cn(
-        'relative flex w-full flex-col gap-6 overflow-hidden rounded-surface bg-brand-blue-900 p-6 text-on-dark shadow-card sm:p-7',
-        ui?.className,
-      )}
+      className={cn('flex w-full flex-col gap-3', ui?.className)}
     >
-      <DashboardEyebrowHeader
-        eyebrow={data.eyebrow}
-        timestamp={data.timestamp}
-        Icon={data.eyebrowIcon}
+      <AzuosContentCard
+        data={{ label: name, title: data.eyebrow ?? 'Alerta do dia', meta: data.timestamp ?? null }}
+        ui={{ leading: <HeroZuzu zuzu={data.zuzu} />, body: <HeroMessage data={data} /> }}
       />
-
-      <DashboardHeroBody data={data} />
-
       <DashboardStatsGrid stats={data.stats} />
-
       {ui?.children ? <div>{ui.children}</div> : null}
     </div>
+  );
+}
+
+/** O Zuzu no lugar do ícone: estático, sem moldura, no tamanho que cabe no cabeçalho. */
+function HeroZuzu({ zuzu }: { zuzu: AzuosDashboardHeroCardProps['data']['zuzu'] }) {
+  return (
+    <span data-slot="dashboard-zuzu" aria-hidden="true" className="shrink-0 select-none">
+      <AzuosZuzu
+        data={{ pose: zuzu?.pose ?? 'alert' }}
+        ui={{ size: Math.min(zuzu?.size ?? 72, 72) }}
+      />
+    </span>
   );
 }

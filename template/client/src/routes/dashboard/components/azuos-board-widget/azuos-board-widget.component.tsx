@@ -26,7 +26,7 @@ import { AzuosRadarChart } from '../../../../lib/components/azuos-radar-chart/az
 import { AzuosRadialChart } from '../../../../lib/components/azuos-radial-chart/azuos-radial-chart.component';
 import { AzuosSankeyChart } from '../../../../lib/components/azuos-sankey-chart/azuos-sankey-chart.component';
 import { AzuosStackedBarChart } from '../../../../lib/components/azuos-stacked-bar-chart/azuos-stacked-bar-chart.component';
-import { AzuosStatCard } from '../../../../lib/components/azuos-stat-card/azuos-stat-card.component';
+import { AzuosContentCard } from '../../../../lib/components/azuos-content-card/azuos-content-card.component';
 import { AzuosTreemapChart } from '../../../../lib/components/azuos-treemap-chart/azuos-treemap-chart.component';
 import { AzuosExpandableScreen } from '../../../../lib/components/azuos-expandable-screen/azuos-expandable-screen.component';
 import {
@@ -113,47 +113,47 @@ export function AzuosBoardWidget({ data, state, actions }: AzuosBoardWidgetProps
      do bloco dentro dela — nada solto embaixo (conectividade uniforme). Montando, quem desenha a
      seleção é o canvas (o contorno tracejado e os puxadores). */
   return (
-    <section
-      aria-label={widget.title}
-      className="rounded-surface bg-card shadow-card relative flex h-full min-h-0 flex-col"
-    >
+    <section aria-label={widget.title} className="relative h-full min-h-0">
       {state.isEditing ? <EditBar data={data} actions={actions} /> : null}
-      <header
-        className={cn(
-          'border-border flex items-start gap-3 border-b px-4 pt-3.5 pb-3',
-          state.isEditing && cn(DRAG_HANDLE, 'cursor-grab active:cursor-grabbing'),
-        )}
-      >
-        <span className="rounded-box bg-primary-soft text-primary flex size-10 shrink-0 items-center justify-center">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <h3 className="text-ink-900 truncate text-sm font-bold tracking-tight">{widget.title}</h3>
-          <span className="text-ink-500 block truncate text-xs">{measureOf(data)}</span>
-          <ScopeChips data={data} />
-        </span>
-        <span className={cn('flex shrink-0 items-center gap-1', NO_DRAG)}>
-          {!state.isEditing && !state.isPreview ? (
-            /* O menu do título, como no Grafana: Ver, e — para quem monta — Editar, Duplicar e
-               Remover. */
-            <AzuosBoardPanelMenu
-              data={{ title: widget.title }}
-              state={{ canEdit: state.canEdit }}
-              actions={{
-                onView: () => setIsExpanded(true),
-                onEdit: () => actions.onEdit(widget.id),
-                onDuplicate: actions.onDuplicate
-                  ? () => actions.onDuplicate?.(widget.id)
-                  : undefined,
-                onRemove: () => actions.onRemove(widget.id),
-              }}
-            />
-          ) : null}
-        </span>
-      </header>
-      <div className="min-h-0 flex-1 p-4">
-        <WidgetBody data={data} actions={actions} />
-      </div>
+      <AzuosContentCard
+        data={{ label: widget.title, title: widget.title, meta: measureOf(data) }}
+        ui={{
+          icon: Icon,
+          iconTone: 'blue',
+          className: 'h-full min-h-0',
+          headerClassName: state.isEditing
+            ? cn(DRAG_HANDLE, 'cursor-grab active:cursor-grabbing')
+            : undefined,
+          tools:
+            !state.isEditing && !state.isPreview ? (
+              /* O menu do título, como no Grafana: Ver, e — para quem monta — Editar, Duplicar e
+                 Remover. */
+              <span className={NO_DRAG}>
+                <AzuosBoardPanelMenu
+                  data={{ title: widget.title }}
+                  state={{ canEdit: state.canEdit }}
+                  actions={{
+                    onView: () => setIsExpanded(true),
+                    onEdit: () => actions.onEdit(widget.id),
+                    onDuplicate: actions.onDuplicate
+                      ? () => actions.onDuplicate?.(widget.id)
+                      : undefined,
+                    onRemove: () => actions.onRemove(widget.id),
+                  }}
+                />
+              </span>
+            ) : null,
+          isBodyFilling: true,
+          body: (
+            <div className="flex min-h-0 flex-1 flex-col gap-2 pb-4">
+              <ScopeChips data={data} />
+              <div className="min-h-0 flex-1">
+                <WidgetBody data={data} actions={actions} />
+              </div>
+            </div>
+          ),
+        }}
+      />
       <AzuosExpandableScreen
         data={{ title: widget.title, description: measureOf(data) }}
         state={{ isOpen: isExpanded }}
@@ -439,10 +439,8 @@ const BODIES: Record<Widget['kind'], (props: BodyProps) => ReactNode> = {
           zuzu: { pose: 'alert', size: 112 },
         }}
         ui={{
-          className: 'h-full justify-between gap-4 p-5 sm:p-5',
-          children: cards.length ? (
-            <StatRow data={{ cards }} ui={{ cardClassName: 'p-3' }} actions={{ onCard }} />
-          ) : null,
+          className: 'h-full',
+          children: cards.length ? <StatRow data={{ cards }} actions={{ onCard }} /> : null,
         }}
       />
     );
@@ -627,13 +625,16 @@ function RingCardBody({
 
   return (
     <div className="relative h-full">
-      <AzuosStatCard
+      <AzuosContentCard
         data={{
           label: data.title,
-          value: formatCount(data.count),
-          hint: `de ${formatCount(data.total)} ${data.noun}`,
+          title: data.title,
+          highlight: {
+            value: formatCount(data.count),
+            hint: `de ${formatCount(data.total)} ${data.noun}`,
+          },
         }}
-        ui={{ tone: RING_TONE, icon: Hash, className: 'h-full pr-32' }}
+        ui={{ icon: Hash, iconTone: RING_TONE, className: 'h-full pr-32' }}
         state={{ isLoading: state.isLoading }}
       />
       <div className="absolute top-1/2 right-5 size-24 -translate-y-1/2">
@@ -818,12 +819,15 @@ function StatsBody({
 /** O aviso no lugar dos cards vazios: na superfície do card, para o bloco não sumir da grade. */
 function StatsEmpty({ data }: { data: { title: string } }) {
   return (
-    <div
-      role="status"
-      className="rounded-surface bg-card shadow-card flex h-full flex-col items-center justify-center gap-1 p-4 text-center"
-    >
-      <span className="text-ink-900 text-sm font-semibold">{data.title}</span>
-      <span className="text-ink-500 text-sm">Sem dados para mostrar neste recorte.</span>
+    <div role="status" className="h-full">
+      <AzuosContentCard
+        data={{
+          label: data.title,
+          title: data.title,
+          meta: 'Sem dados para mostrar neste recorte.',
+        }}
+        ui={{ icon: Hash, className: 'h-full' }}
+      />
     </div>
   );
 }
@@ -857,15 +861,19 @@ function StatRow({
     <div className={cn('@container', ui?.className)} style={columns}>
       <div className="grid h-full grid-cols-[repeat(var(--stat-columns-narrow),minmax(0,1fr))] gap-3 @3xl:grid-cols-[repeat(var(--stat-columns),minmax(0,1fr))]">
         {data.cards.map((card, index) => (
-          <AzuosStatCard
+          <AzuosContentCard
             key={card.label}
-            data={{ label: card.label, value: card.value.toLocaleString('pt-BR') }}
-            ui={{
-              tone: STAT_HUES[index % STAT_HUES.length],
-              icon: Hash,
-              className: cn('h-full p-4', ui?.cardClassName),
+            data={{
+              label: card.label,
+              title: card.label,
+              highlight: { value: card.value.toLocaleString('pt-BR') },
             }}
-            actions={{ onClick: onCard ? () => onCard(card.label) : undefined }}
+            ui={{
+              icon: Hash,
+              iconTone: STAT_HUES[index % STAT_HUES.length],
+              className: cn('h-full', ui?.cardClassName),
+            }}
+            actions={onCard ? { onOpen: () => onCard(card.label) } : undefined}
           />
         ))}
       </div>

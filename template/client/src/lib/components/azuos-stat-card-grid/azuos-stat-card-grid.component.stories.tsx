@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import { CheckCircle2, Clock, ListChecks, TriangleAlert } from 'lucide-react';
 
-import { AzuosStatCard } from '../azuos-stat-card/azuos-stat-card.component';
+import { AzuosContentCard } from '../azuos-content-card/azuos-content-card.component';
 import { AzuosStatCardGrid } from './azuos-stat-card-grid.component';
 
 const meta = {
@@ -16,15 +16,21 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <AzuosStatCardGrid>
-      <AzuosStatCard data={{ label: 'Total', value: 128 }} ui={{ icon: ListChecks }} />
-      <AzuosStatCard data={{ label: 'A fazer', value: 41 }} ui={{ tone: 'warning', icon: Clock }} />
-      <AzuosStatCard
-        data={{ label: 'Concluídas', value: 74 }}
-        ui={{ tone: 'success', icon: CheckCircle2 }}
+      <AzuosContentCard
+        data={{ label: 'Total', title: 'Total', highlight: { value: 128 } }}
+        ui={{ icon: ListChecks }}
       />
-      <AzuosStatCard
-        data={{ label: 'Atrasadas', value: 13 }}
-        ui={{ tone: 'danger', icon: TriangleAlert }}
+      <AzuosContentCard
+        data={{ label: 'A fazer', title: 'A fazer', highlight: { value: 41 } }}
+        ui={{ icon: Clock, iconTone: 'yellow' }}
+      />
+      <AzuosContentCard
+        data={{ label: 'Concluídas', title: 'Concluídas', highlight: { value: 74 } }}
+        ui={{ icon: CheckCircle2, iconTone: 'green' }}
+      />
+      <AzuosContentCard
+        data={{ label: 'Atrasadas', title: 'Atrasadas', highlight: { value: 13 } }}
+        ui={{ icon: TriangleAlert, iconTone: 'red' }}
       />
     </AzuosStatCardGrid>
   ),
@@ -34,8 +40,14 @@ export const Default: Story = {
 export const TwoCards: Story = {
   render: () => (
     <AzuosStatCardGrid>
-      <AzuosStatCard data={{ label: 'Abertas', value: 7 }} ui={{ tone: 'info' }} />
-      <AzuosStatCard data={{ label: 'Fechadas', value: 92 }} ui={{ tone: 'success' }} />
+      <AzuosContentCard
+        data={{ label: 'Abertas', title: 'Abertas', highlight: { value: 7 } }}
+        ui={{ iconTone: 'blue' }}
+      />
+      <AzuosContentCard
+        data={{ label: 'Fechadas', title: 'Fechadas', highlight: { value: 92 } }}
+        ui={{ iconTone: 'green' }}
+      />
     </AzuosStatCardGrid>
   ),
 };
@@ -48,7 +60,10 @@ export const FiveCardsWrap: Story = {
   render: () => (
     <AzuosStatCardGrid>
       {['Total', 'A fazer', 'Em andamento', 'Concluídas', 'Atrasadas'].map((label, index) => (
-        <AzuosStatCard key={label} data={{ label, value: (index + 1) * 11 }} />
+        <AzuosContentCard
+          key={label}
+          data={{ label: label, title: label, highlight: { value: (index + 1) * 11 } }}
+        />
       ))}
     </AzuosStatCardGrid>
   ),

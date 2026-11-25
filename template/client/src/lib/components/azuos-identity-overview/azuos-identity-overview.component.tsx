@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react';
 
 import { AzuosActionButton } from '../azuos-action-button/azuos-action-button.component';
 import { AzuosPageHeader } from '../azuos-page-header/azuos-page-header.component';
-import { AzuosPanelCard } from '../azuos-panel-card/azuos-panel-card.component';
+import { AzuosContentCard } from '../azuos-content-card/azuos-content-card.component';
 import { AzuosPersonAvatar } from '../azuos-person-avatar/azuos-person-avatar.component';
 import { AzuosThemeToggle } from '../azuos-theme-toggle/azuos-theme-toggle.component';
 
@@ -53,22 +53,33 @@ export function AzuosIdentityOverview({
       />
       {identity ?? <AzuosIdentityHeader person={person} details={details} />}
 
-      <AzuosPanelCard
+      <AzuosContentCard
         data={{
+          label: 'Dados da conta',
           title: 'Dados da conta',
-          hint: 'Nome, e-mail e perfil são mantidos na conta do grupo.',
+          meta: 'Nome, e-mail e perfil são mantidos na conta do grupo.',
         }}
-      >
-        <AccountFacts person={person} details={details} />
-        <AccountLink url={data.accountUrl} />
-      </AzuosPanelCard>
+        ui={{
+          body: (
+            <div className="flex flex-col gap-3 pb-1">
+              <AccountFacts person={person} details={details} />
+              <AccountLink url={data.accountUrl} />
+            </div>
+          ),
+        }}
+      />
 
-      <AzuosPanelCard data={{ title: 'Preferências', hint: 'Valem só neste navegador.' }}>
-        <div className="flex items-center justify-between gap-4 text-sm">
-          <span className="text-muted-foreground">Tema</span>
-          <AzuosThemeToggle />
-        </div>
-      </AzuosPanelCard>
+      <AzuosContentCard
+        data={{ label: 'Preferências', title: 'Preferências', meta: 'Valem só neste navegador.' }}
+        ui={{
+          body: (
+            <div className="flex items-center justify-between gap-4 pb-1 text-sm">
+              <span className="text-muted-foreground">Tema</span>
+              <AzuosThemeToggle />
+            </div>
+          ),
+        }}
+      />
       {children}
     </section>
   );

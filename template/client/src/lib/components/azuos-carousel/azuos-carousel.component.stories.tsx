@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import { Tags } from 'lucide-react';
 
-import { AzuosStatCard } from '../azuos-stat-card/azuos-stat-card.component';
+import { AzuosContentCard } from '../azuos-content-card/azuos-content-card.component';
 import { AzuosCarousel } from './azuos-carousel.component';
 
 const meta = {
@@ -34,7 +34,11 @@ export const Default: Story = {
   render: (args) => (
     <AzuosCarousel {...args}>
       {LABELS.map((label, index) => (
-        <AzuosStatCard key={label} data={{ label, value: index * 3 }} ui={{ icon: Tags }} />
+        <AzuosContentCard
+          key={label}
+          data={{ label: label, title: label, highlight: { value: index * 3 } }}
+          ui={{ icon: Tags }}
+        />
       ))}
     </AzuosCarousel>
   ),
@@ -51,8 +55,14 @@ export const FitsWithoutSliding: Story = {
   args: { ui: { ariaLabel: 'Poucos indicadores', itemClassName: 'basis-1/4' } },
   render: (args) => (
     <AzuosCarousel {...args}>
-      <AzuosStatCard data={{ label: 'Total', value: 12 }} ui={{ tone: 'brand', icon: Tags }} />
-      <AzuosStatCard data={{ label: 'Concluído', value: 4 }} ui={{ tone: 'success', icon: Tags }} />
+      <AzuosContentCard
+        data={{ label: 'Total', title: 'Total', highlight: { value: 12 } }}
+        ui={{ icon: Tags, iconTone: 'blue' }}
+      />
+      <AzuosContentCard
+        data={{ label: 'Concluído', title: 'Concluído', highlight: { value: 4 } }}
+        ui={{ icon: Tags, iconTone: 'green' }}
+      />
     </AzuosCarousel>
   ),
 };
