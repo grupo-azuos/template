@@ -24,7 +24,7 @@ import { AzuosFilterField } from '../../../../lib/components/azuos-filter-field/
 import { Input } from '../../../../lib/components/azuos-input/azuos-input';
 import { AzuosNotificationCard } from '../../../../lib/components/azuos-notification-card/azuos-notification-card.component';
 import { AzuosPaginationBar } from '../../../../lib/components/azuos-pagination-bar/azuos-pagination-bar.component';
-import { AzuosPanelCard } from '../../../../lib/components/azuos-panel-card/azuos-panel-card.component';
+import { AzuosContentCard } from '../../../../lib/components/azuos-content-card/azuos-content-card.component';
 import { AzuosSegmentedControl } from '../../../../lib/components/azuos-segmented-control/azuos-segmented-control.component';
 import { AzuosSelectField } from '../../../../lib/components/azuos-select-field/azuos-select-field.component';
 import { notificationLook } from '../../../../lib/utils/notification-style.util';
@@ -121,23 +121,27 @@ function RecentNotifications({ data, state, actions }: AzuosNotificationHistoryV
   const { items, total } = data.recent;
 
   return (
-    <AzuosPanelCard
-      data={{ title: 'Notificações', hint: 'As mais recentes.' }}
-      ui={{ bodyClassName: 'flex flex-col gap-3' }}
-    >
-      <NotificationList
-        data={{ items }}
-        state={{ isLoading: state.isRecentLoading, error: null, hasFilters: false }}
-        actions={actions}
-      />
-      {total > items.length ? (
-        <AzuosActionButton
-          data={{ label: `Ver todas (${total})` }}
-          ui={{ variant: 'secondary', icon: Maximize2, className: 'self-start' }}
-          actions={{ onClick: actions.onExpand }}
-        />
-      ) : null}
-    </AzuosPanelCard>
+    <AzuosContentCard
+      data={{ label: 'Notificações', title: 'Notificações', meta: 'As mais recentes.' }}
+      ui={{
+        body: (
+          <div className="flex flex-col gap-3 pb-1">
+            <NotificationList
+              data={{ items }}
+              state={{ isLoading: state.isRecentLoading, error: null, hasFilters: false }}
+              actions={actions}
+            />
+            {total > items.length ? (
+              <AzuosActionButton
+                data={{ label: `Ver todas (${total})` }}
+                ui={{ variant: 'secondary', icon: Maximize2, className: 'self-start' }}
+                actions={{ onClick: actions.onExpand }}
+              />
+            ) : null}
+          </div>
+        ),
+      }}
+    />
   );
 }
 

@@ -63,7 +63,9 @@ describe('AzuosBoardCanvas', () => {
   // feliz
   it('makes the whole header a handle while editing, with the tools floating above the block', () => {
     render(<AzuosBoardCanvas {...makeProps(true)} />);
-    const header = screen.getByRole('heading', { name: 'Por tipo' }).closest('header');
+    const header = screen
+      .getByRole('heading', { name: 'Por tipo' })
+      .closest('[data-slot="content-card-header"]');
 
     expect(header).toHaveClass(DRAG_HANDLE);
     expect(screen.getByRole('button', { name: 'Arrastar Por tipo' })).toHaveClass(DRAG_HANDLE);

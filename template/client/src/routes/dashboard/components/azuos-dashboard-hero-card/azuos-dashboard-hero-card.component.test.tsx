@@ -21,7 +21,7 @@ describe('AzuosDashboardHeroCard', () => {
     expect(screen.getByText(/30\/10\/2026, 12:20/)).toBeInTheDocument();
   });
 
-  it('renders a big Zuzu on the left without a round frame or ball', () => {
+  it('puts the Zuzu in the place of the icon, without a round frame or ball', () => {
     const { container } = render(
       <AzuosDashboardHeroCard
         data={{
@@ -40,13 +40,14 @@ describe('AzuosDashboardHeroCard', () => {
     const img = zuzuSlot?.querySelector('img');
     expect(img).toBeInTheDocument();
     expect(img?.getAttribute('src')).toContain('alerta');
-    expect(img?.width).toBe(136);
+    /* No cabeçalho do card de conteúdo, o Zuzu cabe em até 72px. */
+    expect(img?.width).toBe(72);
 
     // Garante que não está envolvido em uma bola/círculo (rounded-full)
     expect(zuzuSlot?.parentElement?.querySelector('.rounded-full')).toBeNull();
   });
 
-  it('renders title, description and badge with high contrast on a dark background', () => {
+  it('renders title, description and badge on the content card, never a dark block', () => {
     const { container } = render(
       <AzuosDashboardHeroCard
         data={{
@@ -62,7 +63,8 @@ describe('AzuosDashboardHeroCard', () => {
     expect(screen.getByText('Parabéns!')).toBeInTheDocument();
 
     const root = container.querySelector('[data-slot="azuos-dashboard-hero-card"]');
-    expect(root).toHaveClass('bg-brand-blue-900', 'text-on-dark');
+    expect(root?.querySelector('[data-slot="azuos-card-surface"]')).toHaveClass('bg-card');
+    expect(root?.className).not.toMatch(/bg-brand-blue-900/);
   });
 
   it('renders the stats grid with colors and values', () => {
@@ -207,7 +209,7 @@ describe('AzuosDashboardHeroCard', () => {
       />,
     );
 
-    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-accent-hero');
+    expect(screen.getByText('3 alvarás vencidos')).toHaveClass('text-primary');
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
       'Bom dia! Acumulou 3 alvarás vencidos.',
     );
@@ -221,6 +223,6 @@ describe('AzuosDashboardHeroCard', () => {
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toHaveTextContent('Dia tranquilo.');
-    expect(heading.querySelector('.text-accent-hero')).toBeNull();
+    expect(heading.querySelector('.text-primary')).toBeNull();
   });
 });

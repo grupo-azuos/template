@@ -16,7 +16,7 @@ import { AzuosEmptyState } from '../azuos-empty-state/azuos-empty-state.componen
 import { AzuosErrorState } from '../azuos-error-state/azuos-error-state.component';
 import { AzuosPageHeader } from '../azuos-page-header/azuos-page-header.component';
 import { AzuosProgressBar } from '../azuos-progress-bar/azuos-progress-bar.component';
-import { AzuosRecordCard } from '../azuos-record-card/azuos-record-card.component';
+import { AzuosContentCard } from '../azuos-content-card/azuos-content-card.component';
 import { AzuosSelectField } from '../azuos-select-field/azuos-select-field.component';
 import { AzuosTextField } from '../azuos-text-field/azuos-text-field.component';
 
@@ -236,7 +236,7 @@ export function taskMenuItems(task: Task, canDelete: boolean): AzuosActionMenuIt
 }
 
 /**
- * A TAREFA no card padrão do grupo (`AzuosRecordCard`): a situação na faixa, o título, a
+ * A TAREFA no card padrão do grupo (`AzuosContentCard`): a situação na faixa, o título, a
  * descrição, e no rodapé quem criou (com a foto) e quando. Abrir o card edita a tarefa; concluir,
  * editar e excluir ficam no menu de três pontinhos.
  */
@@ -254,7 +254,7 @@ function TaskItem({
 
   return (
     <li className="flex">
-      <AzuosRecordCard
+      <AzuosContentCard
         data={{
           label: `Abrir a tarefa ${task.title}`,
           title: task.title,

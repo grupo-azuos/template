@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Building2 } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AzuosCardSurface } from './azuos-card-surface.component';
@@ -15,80 +14,22 @@ describe('AzuosCardSurface', () => {
     expect(card.className).not.toMatch(/border-(?!border)|bg-hue/);
   });
 
-  /* O hover é um véu PARADO que cobre o card inteiro: a mancha que crescia do mouse saiu. */
-  it('covers the whole card with a still veil that only shows on hover', () => {
-    const { container } = render(
-      <AzuosCardSurface data={{ label: 'Empresa' }}>x</AzuosCardSurface>,
-    );
-    const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-
-    expect(wash).toHaveClass('inset-0', 'group-hover/card:bg-(--card-veil)');
-    expect(wash.className).not.toMatch(/rounded-full/);
-  });
-
-  it('paints the veil in the accent only when the flag is on', () => {
-    const { container, rerender } = render(
-      <AzuosCardSurface ui={{ hoverTone: 'red' }}>x</AzuosCardSurface>,
-    );
-    const wash = () => container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-    const veil = () => wash().style.getPropertyValue('--card-veil');
-    expect(veil()).toContain('--hover-veil');
-
-    rerender(
-      <AzuosCardSurface ui={{ hoverTone: 'red', isHoverColored: true }}>x</AzuosCardSurface>,
-    );
-    expect(veil()).toContain('--hue-red');
-  });
-
-  /* Padrão Apple: o card nunca fica tingido parado; o véu (no tom, se pedido) só no hover. */
-  it('shows the tone veil only on hover, even on a coloured card', () => {
-    const { container } = render(
-      <AzuosCardSurface ui={{ hoverTone: 'red', isHoverColored: true }}>x</AzuosCardSurface>,
-    );
-
-    const wash = container.querySelector('[data-slot="card-wash"]') as HTMLElement;
-    expect(wash).toHaveClass('group-hover/card:bg-(--card-veil)');
-  });
-
-  /* Clicável, o card sobe 2px e a sombra cresce; a marca d'água e o véu não se mexem. */
-  it('lifts the clickable card on hover, and only the card', () => {
-    const { container } = render(
-      <AzuosCardSurface
-        data={{ label: 'Parado' }}
-        ui={{ mark: Building2 }}
-        actions={{ onClick: vi.fn() }}
-      >
-        x
-      </AzuosCardSurface>,
-    );
-
-    expect(screen.getByRole('group', { name: 'Parado' })).toHaveClass(
-      'hover:shadow-card-hover',
-      'motion-safe:hover:-translate-y-0.5',
-    );
-    const all = [
-      container.querySelector('[data-slot="card-wash"]'),
-      container.querySelector('[data-slot="card-mark"]'),
-    ].map((node) => node?.className ?? '');
-    for (const className of all) {
-      expect(className).not.toMatch(/translate|scale|shadow-xl|transition|duration/);
-    }
-  });
-
-  it('draws the mark icon in the accent, and turns into a real button when clickable', async () => {
+  /* O card não se mexe no hover: nem sobe, nem muda a sombra, nem ganha véu ou ícone no canto. */
+  it('stays still on hover, and turns into a real button when clickable', async () => {
     const onClick = vi.fn();
     const { container } = render(
-      <AzuosCardSurface
-        data={{ label: 'Abrir' }}
-        ui={{ mark: Building2, markTone: 'green' }}
-        actions={{ onClick }}
-      >
+      <AzuosCardSurface data={{ label: 'Abrir empresa' }} actions={{ onClick }}>
         x
       </AzuosCardSurface>,
     );
 
-    expect(container.querySelector('[data-slot="card-mark"]')).toHaveClass('text-hue-green');
-    await userEvent.click(screen.getByRole('button', { name: 'Abrir' }));
+    const card = screen.getByRole('group', { name: 'Abrir empresa' });
+    expect(card).toHaveClass('cursor-pointer');
+    expect(card.className).not.toMatch(/hover:|translate|transition|duration|shadow-card-hover/);
+    expect(container.querySelector('[data-slot="card-wash"]')).toBeNull();
+    expect(container.querySelector('[data-slot="card-mark"]')).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir empresa' }));
     expect(onClick).toHaveBeenCalledOnce();
   });
 
