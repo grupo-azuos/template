@@ -1,6 +1,6 @@
 {
   "name": "template-workspace",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Template de MVP — Nest de um lado, React do outro, SQLite no meio.",
   "engines": {

@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "SPA React do template — rota compõe, view-model decide, view desenha.",
   "type": "module",
