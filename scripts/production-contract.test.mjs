@@ -22,12 +22,16 @@ function fixture() {
   write('template/server/src/main.ts', 'packageVersion(); setupOpenApiDocs(app, document);');
   write('template/server/src/lib/http/openapi-document.ts', 'PUBLISHED_MAJORS; docs/v${major}-json; filter: true');
   write('template/docker/caddy/caddyfile', ':8080 {\n respond 200\n}\n');
-  write('template/docker/compose.yml', 'healthcheck:\nresources:\nlimits:\nmemory:\ncpus:\nstop_grace_period:\nazuos-edge\n./caddy/caddyfile\n- VALKEY_KEY_PREFIX=${APP_NAME:?}:${DEPLOY_ENV:?}\n');
+  write('template/docker/compose.yml', 'healthcheck:\nresources:\nlimits:\nmemory:\ncpus:\nstop_grace_period:\nazuos-edge\n./caddy/caddyfile\n- VALKEY_KEY_PREFIX=${APP_NAME:?}:${DEPLOY_ENV:?}\nazuos.version: ${APP_VERSION:?}\n');
   write('.komodo/komodo.toml', KOMODO_TOML);
   write('template/docker/dockerfile', DOCKERFILE);
   write('template/server/package.json', JSON.stringify({ dependencies: {}, scripts: { build: 'rspack build -c rspack.config.ts' } }));
   write('template/client/package.json', JSON.stringify({ scripts: { build: 'tsc --noEmit && rsbuild build' } }));
-  write('template/docker/komodo.sh', 'auth/approle/login; docker stack config --skip-interpolation\nSTACK_NAME="${DEPLOY_ENV}_${APP_NAME}"\n');
+  write('template/docker/komodo.sh', 'auth/approle/login; docker stack config --skip-interpolation\nSTACK_NAME="${DEPLOY_ENV}_${APP_NAME}"\nAPP_VERSION="1.0.0"\n--env APP_VERSION\n');
+  /* A versão única (release-standard): script, trava do pre-push e label no deploy. */
+  write('scripts/release.mjs', '');
+  write('template/scripts/git/release-guard.sh', '');
+  write('template/.husky/pre-push', 'sh template/scripts/git/release-guard.sh\nsh template/scripts/git/branch-guard.sh push\n');
   return { root, write, dispose: () => rmSync(root, { recursive: true }) };
 }
 

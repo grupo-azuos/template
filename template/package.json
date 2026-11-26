@@ -1,6 +1,6 @@
 {
   "name": "template-workspace",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Template de MVP — Nest de um lado, React do outro, SQLite no meio.",
   "engines": {
@@ -24,6 +24,7 @@
     "storybook": "npm run storybook -w client",
     "storybook:deploy": "npm run storybook:deploy -w client",
     "check:design": "node ../.claude/hooks/design/check-design.mjs",
+    "release": "node ../scripts/release.mjs",
     "check:design:test": "node --test \"../.claude/hooks/design/*.test.mjs\"",
     "api:docs": "npm run docs -w server",
     "api:client": "npm run api:client -w client",

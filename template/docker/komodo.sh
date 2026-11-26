@@ -7,7 +7,7 @@
 #   sh docker/komodo.sh post-deploy <app> <prod|homo>            rota no Caddy de borda
 #
 # O Komodo passa VAULT_ADDR, VAULT_ROLE_ID e VAULT_SECRET_ID (AppRole do ambiente). A imagem do app vem do
-# Build do Komodo, com a tag `<hash curto do commit>-<ambiente>`.
+# Build do Komodo, com a tag `<hash curto do commit>-<ambiente>` e o label `azuos.version`.
 #
 # Nomes: o stack é `<ambiente>_<app>` (homo_template) e o Docker completa os serviços com
 # `_<serviço>` (homo_template_app). É o mesmo nome dos recursos no Komodo.
@@ -28,10 +28,12 @@ esac
 
 RUNTIME_DIR="$(git rev-parse --show-toplevel)/.komodo/runtime"
 APP_REVISION="$(git rev-parse --short HEAD)"
+# A versão do app é a do package.json da pasta do app: a mesma da tag prod/vX.Y.Z (scripts/release.mjs).
+APP_VERSION="$(sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p' package.json | head -n 1)"
 APP_IMAGE="azuos/$APP_NAME:$APP_REVISION-$DEPLOY_ENV"
 STACK_NAME="${DEPLOY_ENV}_${APP_NAME}"
 DEPLOY_NODE_ID="$(docker node inspect self --format '{{.ID}}')"
-export APP_NAME DEPLOY_ENV APP_REVISION APP_IMAGE STACK_NAME DEPLOY_NODE_ID
+export APP_NAME DEPLOY_ENV APP_REVISION APP_VERSION APP_IMAGE STACK_NAME DEPLOY_NODE_ID
 
 # Imagens auxiliares, construídas uma vez por host e reaproveitadas por todos os apps.
 build_runtime_images() {
@@ -65,6 +67,7 @@ with_secrets() {
     --env APP_NAME \
     --env DEPLOY_ENV \
     --env APP_REVISION \
+    --env APP_VERSION \
     --env APP_IMAGE \
     --env STACK_NAME \
     --env DEPLOY_NODE_ID \

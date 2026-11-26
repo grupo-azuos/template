@@ -9,14 +9,16 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { sql } from 'drizzle-orm';
 import { DB } from '../db/db.token';
 import { type Database } from '../db/db.type';
+import { packageVersion } from './api-version';
 @ApiTags('Saúde')
 @Controller({ path: 'health', version: VERSION_NEUTRAL })
 export class HealthController {
   constructor(@Inject(DB) private readonly db: Database) {}
   @Get()
-  @ApiOperation({ summary: 'Saúde do processo' })
+  @ApiOperation({ summary: 'Saúde do processo e versão do build' })
   live() {
-    return { status: 'ok' };
+    /* A versão é a do package.json, a mesma da tag prod/vX.Y.Z: diz qual build está respondendo. */
+    return { status: 'ok', version: packageVersion() };
   }
   @Get('ready')
   @ApiOperation({ summary: 'Readiness do banco local do MVP' })

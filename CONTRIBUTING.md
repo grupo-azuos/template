@@ -473,7 +473,7 @@ git config commit.template .gitmessage
 
 O fluxo é o **Git-Flow do Tower**, instalado em todas as máquinas. O `npm install` configura o
 Git-Flow sozinho (`scripts/git/setup-git.mjs`): `main`, `develop`, prefixos `feature/`,
-`bugfix/`, `release/`, `hotfix/` e tag com `v`. O Tower abre o repositório já inicializado.
+`bugfix/`, `release/`, `hotfix/` e tag com `prod/v`. O Tower abre o repositório já inicializado.
 
 | Branch | Quem mexe | Sai de | Volta para |
 |---|---|---|---|
@@ -510,7 +510,7 @@ valem no terminal, no Claude e no Tower:
 |---|---|
 | `pre-commit` | commit na `main`; commit direto na `develop` (concluir um merge é permitido) |
 | `pre-merge-commit` | merge na `main` |
-| `pre-push` | envio para a `main` |
+| `pre-push` | envio para a `main`; tag fora de `prod/vX.Y.Z`, tag leve, tag com versão diferente dos arquivos ou fora da main (`scripts/git/release-guard.sh`, vale até para quem administra) |
 
 A mensagem de recusa diz, em português, o que fazer — e que nada foi perdido.
 
@@ -527,6 +527,15 @@ mantidas sempre que cabem juntas. Quando não cabem, quem decide é a pessoa, co
 frente dela. A skill `resolve-conflict` faz isso.
 
 A skill `git-flow` conduz o ciclo inteiro a partir de um pedido em português.
+
+### Versão e tag
+
+A versão do sistema é uma só e anda junta em três lugares: `package.json` (e lock), Build do Komodo
+e tag `prod/vX.Y.Z` na `main`. Quem administra lança com `npm run release -- X.Y.Z --notes "o que
+mudou"` (skill `release-standard`): o script grava a versão nos arquivos e commita na develop
+(`[chore](release): Versão X.Y.Z`), leva a develop para a main por `--no-ff`
+(`[merge](release): vX.Y.Z na main`), cria a tag anotada com `<Sistema> X.Y.Z: o que mudou.` e
+`Canal: prod.`, e envia. Tag à mão não sai da máquina.
 
 ---
 

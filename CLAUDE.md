@@ -39,7 +39,8 @@ Este repositório tem dois modos de operação para o git e para o Claude:
      - Pode alternar, commitar, mesclar e fazer push diretamente na branch `main`.
      - Pode commitar direto na `develop` ou criar releases/hotfixes conforme o Git-Flow.
      - Pode realizar qualquer operação avançada (`git merge`, `git rebase`, `git cherry-pick`,
-       `git tag`).
+       `git tag`). Versão nova e tag seguem a skill `release-standard` (`npm run release`): a tag
+       é sempre `prod/vX.Y.Z`, criada pelo script, e o pre-push recusa outra.
      - A validação de identidade e métricas não pode ser desativada, inclusive em modo admin.
      - Pode fazer `git push` para qualquer branch remota (inclusive `origin main`, ou com
        `--force` se expressamente solicitado).
@@ -145,6 +146,7 @@ Antes de começar uma tarefa, veja se há skill para ela em `.claude/skills/` e 
 | Erro de ambiente, porta ocupada, instalação                                | `troubleshoot`                                    | `/socorro`           |
 | Login, usuários, senha, dados em outro PC, servidor, internet              | `mvp-limits`                                      | `/limites-do-mvp`    |
 | Erro estrutural grande, bloqueio de arquivo de estrutura                   | `support`                                         | `/suporte`           |
+| **Versão nova, release, tag, "sobe para produção"** (só quem administra)   | `release-standard`                                | `/lancar-versao`     |
 | **Qualquer campo de escolher** (select, combobox, pessoa, várias pessoas)  | `select-standard`                                 | —                    |
 | Dashboard, gráfico, bloco, "mostrar no painel", fonte de dados             | `dashboard-standard`                              | —                    |
 | **Qualquer escrita** (cadastrar, alterar, arquivar); "quem mudou isso?"    | `history-standard`                                | —                    |
