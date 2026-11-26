@@ -64,7 +64,10 @@ export function AzuosAgendaCalendar({ data, state }: AzuosAgendaCalendarProps) {
   );
 }
 
-/** Um dia: o número do dia e, embaixo, quantos itens caem nele. */
+/**
+ * Um dia: o número do dia e, embaixo, quantos itens caem nele. É uma CÉLULA (`td`): o calendário é
+ * uma tabela, e `div` dentro da linha é HTML inválido — o React avisa no console de toda tela.
+ */
 function AgendaDay({ day, modifiers, children, className, ...props }: DayProps) {
   const counts = useContext(CountsContext);
   const count = counts.byDay.get(day.isoDate) ?? 0;
@@ -72,7 +75,7 @@ function AgendaDay({ day, modifiers, children, className, ...props }: DayProps) 
   const level = isOff ? 'off' : levelOf(count, counts.max);
 
   return (
-    <div
+    <td
       {...props}
       className={cn(
         className,
@@ -86,7 +89,7 @@ function AgendaDay({ day, modifiers, children, className, ...props }: DayProps) 
       {count > 0 && !isOff ? (
         <span className="mt-0.5 text-xs font-bold tabular-nums">{count}</span>
       ) : null}
-    </div>
+    </td>
   );
 }
 
