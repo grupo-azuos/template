@@ -18,9 +18,13 @@ export function writeDragItem(event: DragEventLike, id: string): void {
   event.dataTransfer.effectAllowed = 'move';
 }
 
+/* Os sistemas do grupo identificam registro por UUID ou por número sequencial (os mais antigos):
+   os dois viajam no arrasto. Qualquer outro texto solto na tela não é um item. */
+const SEQUENTIAL_ID = /^[1-9]\d{0,15}$/;
+
 /** O identificador arrastado, ou `null` quando o que chegou não veio de um item da tela. */
 export function readDragItem(event: DragEventLike): string | null {
   const raw = event.dataTransfer.getData(FORMAT);
 
-  return isUuid(raw) ? raw : null;
+  return isUuid(raw) || SEQUENTIAL_ID.test(raw) ? raw : null;
 }
