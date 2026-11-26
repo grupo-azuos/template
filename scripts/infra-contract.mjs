@@ -159,14 +159,15 @@ function releaseRules(project, appDir, codeDir, toml) {
  * A pasta do CÓDIGO (package.json com os workspaces, `.husky`): quase sempre a do build. Num app
  * aninhado o build é a pasta de fora (o docker fica nela) e o código numa subpasta — o certmonitor
  * tem `certmonitor/docker` e `certmonitor/system`. Sem achar o código ali, as regras de build e de
- * versão passariam sem conferir nada.
+ * versão passariam sem conferir nada. App de pasta única (a shared-api) não tem workspaces: o
+ * `.husky` ao lado do package.json é o que diz que a subpasta é a do código.
  */
 function codeDirOf(appDir) {
   if (existsSync(join(appDir, 'package.json'))) return appDir;
   const nested = readdirSync(appDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => join(appDir, entry.name))
-    .find((dir) => existsSync(join(dir, 'package.json')) && 'workspaces' in JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')));
+    .find((dir) => existsSync(join(dir, 'package.json')) && ('workspaces' in JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) || existsSync(join(dir, '.husky'))));
   return nested ?? appDir;
 }
 
