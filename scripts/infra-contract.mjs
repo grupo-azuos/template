@@ -136,30 +136,46 @@ function schemaRules(appDir) {
 }
 
 /* A versão é uma só: package.json, Build do Komodo e tag prod/vX.Y.Z andam juntos (release-standard). */
-function releaseRules(project, appDir, toml) {
+function releaseRules(project, appDir, codeDir, toml) {
   const read = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : '');
-  const manifest = join(appDir, 'package.json');
+  const manifest = join(codeDir, 'package.json');
   const version = existsSync(manifest) ? JSON.parse(readFileSync(manifest, 'utf8')).version : undefined;
   const builds = [...toml.matchAll(/^\[build\.config\]\n((?:(?!\[).*\n?)*)/gm)].map((match) => match[1]);
   const buildVersions = new Set(builds.map((build) => /^version = "([^"]+)"/m.exec(build)?.[1]));
-  const prePush = read(join(appDir, '.husky/pre-push'));
+  const prePush = read(join(codeDir, '.husky/pre-push'));
   const komodo = read(join(appDir, 'docker/komodo.sh'));
   const compose = read(join(appDir, 'docker/compose.yml'));
   return [
     ...rule(existsSync(join(project, 'scripts/release.mjs')), 'scripts/release.mjs releases the version (copy it from the template)'),
     ...rule(!existsSync(join(project, '.github/workflows/release-bump.yml')), 'The Release/Bump workflow is gone: the version is written locally by scripts/release.mjs'),
-    ...rule(existsSync(join(appDir, 'scripts/git/release-guard.sh')) && prePush.includes('release-guard.sh'), 'The pre-push hook runs scripts/git/release-guard.sh before branch-guard.sh'),
+    ...rule(existsSync(join(codeDir, 'scripts/git/release-guard.sh')) && prePush.includes('release-guard.sh'), 'The pre-push hook runs scripts/git/release-guard.sh before branch-guard.sh'),
     ...rule(!version || (buildVersions.size === 1 && buildVersions.has(version)), `Komodo builds must be at version ${version}, the same as package.json (run npm run release)`),
     ...rule(komodo.includes('APP_VERSION=') && komodo.includes('--env APP_VERSION'), 'docker/komodo.sh exports APP_VERSION from package.json'),
     ...rule(compose.includes('azuos.version: ${APP_VERSION:?}'), 'docker/compose.yml labels the service with azuos.version: ${APP_VERSION:?}'),
   ];
 }
 
+/**
+ * A pasta do CÓDIGO (package.json com os workspaces, `.husky`): quase sempre a do build. Num app
+ * aninhado o build é a pasta de fora (o docker fica nela) e o código numa subpasta — o certmonitor
+ * tem `certmonitor/docker` e `certmonitor/system`. Sem achar o código ali, as regras de build e de
+ * versão passariam sem conferir nada.
+ */
+function codeDirOf(appDir) {
+  if (existsSync(join(appDir, 'package.json'))) return appDir;
+  const nested = readdirSync(appDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join(appDir, entry.name))
+    .find((dir) => existsSync(join(dir, 'package.json')) && 'workspaces' in JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')));
+  return nested ?? appDir;
+}
+
 export function violations(project) {
   const toml = readFileSync(join(project, '.komodo/komodo.toml'), 'utf8');
   const app = /image_name = "azuos\/([a-z0-9-]+)"/.exec(toml)?.[1] ?? '';
   const appDir = join(project, /build_path = "([^"]+)"/.exec(toml)?.[1] ?? '.');
-  return [...new Set([...komodoRules(toml, app), ...dockerRules(appDir), ...buildRules(appDir), ...schemaRules(appDir), ...releaseRules(project, appDir, toml)])];
+  const codeDir = codeDirOf(appDir);
+  return [...new Set([...komodoRules(toml, app), ...dockerRules(appDir), ...buildRules(codeDir), ...schemaRules(appDir), ...releaseRules(project, appDir, codeDir, toml)])];
 }
 
 function main() {
