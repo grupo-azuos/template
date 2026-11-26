@@ -194,3 +194,44 @@ test('requires the release script, the pre-push guard and the version in the dep
     project.dispose();
   }
 });
+
+/* O app aninhado: o docker na pasta do build e o código numa subpasta (o certmonitor tem
+   `certmonitor/docker` e `certmonitor/system`). */
+function nestedFixture() {
+  const project = fixture();
+  const move = (path) => {
+    cpSync(join(project.root, APP_DIR, path), join(project.root, APP_DIR, 'system', path), { recursive: true });
+    rmSync(join(project.root, APP_DIR, path), { recursive: true });
+  };
+  for (const path of ['.husky', 'scripts', 'package.json', 'server', 'client']) {
+    try {
+      move(path);
+    } catch {
+      /* app sem esse workspace */
+    }
+  }
+  return project;
+}
+
+// feliz
+test('accepts an app whose code lives in a folder inside the build folder', () => {
+  const project = nestedFixture();
+  try {
+    assert.deepEqual(violations(project.root), []);
+  } finally {
+    project.dispose();
+  }
+});
+
+// triste
+test('still checks the pre-push guard and the version of a nested app', () => {
+  const project = nestedFixture();
+  try {
+    project.write(`${APP_DIR}/system/.husky/pre-push`, 'sh scripts/git/branch-guard.sh push\n');
+    assert.ok(failsWith(project, 'release-guard.sh before branch-guard.sh'));
+    project.write('.komodo/komodo.toml', TOML.replace(/^version = "[^"]+"/m, 'version = "0.0.1"'));
+    assert.ok(failsWith(project, 'the same as package.json'));
+  } finally {
+    project.dispose();
+  }
+});
