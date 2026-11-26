@@ -25,6 +25,14 @@ describe('drag item', () => {
     expect(event.dataTransfer.effectAllowed).toBe('move');
   });
 
+  it('also carries the sequential id of the older systems', () => {
+    const event = transfer();
+
+    writeDragItem(event, '42');
+
+    expect(readDragItem(event)).toBe('42');
+  });
+
   // triste
   it('ignores a drop that did not come from a card of the screen', () => {
     expect(readDragItem(transfer())).toBeNull();
@@ -32,5 +40,9 @@ describe('drag item', () => {
     const text = transfer();
     text.dataTransfer.setData('text/plain', 'um texto qualquer');
     expect(readDragItem(text)).toBeNull();
+
+    const zero = transfer();
+    zero.dataTransfer.setData('text/plain', '0');
+    expect(readDragItem(zero)).toBeNull();
   });
 });
