@@ -212,6 +212,27 @@ test("bumps the version in every manifest, lock and Komodo build", () => {
   }
 });
 
+// triste
+/* O artefato com versão própria fora da pasta do Build (o agente do chamados) não é tocado. */
+test("leaves alone a manifest outside the Komodo build folder", () => {
+  const repo = repository();
+  try {
+    repo.write(".komodo/komodo.toml", `build_path = "server"\n${KOMODO}`);
+    repo.write(
+      "agent/package.json",
+      '{\n  "name": "agent",\n  "version": "9.0.0"\n}\n',
+    );
+    git(repo.root, "add", ".");
+    git(repo.root, "commit", "-q", "-m", "agent");
+    assert.equal(currentVersion(repo.root), "1.0.0");
+    bumpVersion(repo.root, "1.1.0");
+    assert.equal(JSON.parse(repo.read("server/package.json")).version, "1.1.0");
+    assert.equal(JSON.parse(repo.read("agent/package.json")).version, "9.0.0");
+  } finally {
+    repo.dispose();
+  }
+});
+
 test("reads the system name from the browser title before the API title", () => {
   const repo = repository();
   try {
