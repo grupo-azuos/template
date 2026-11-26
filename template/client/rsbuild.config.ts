@@ -63,6 +63,12 @@ export default defineConfig({
       '/api': { target: `http://localhost:${apiPort}`, changeOrigin: true },
     },
   },
+  dev: {
+    /* Compilação preguiçosa desligada no `npm run dev`: com ela, a tela que importa um gráfico
+       (ECharts) direto na rota quebrava ao abrir ("reading 'call'"), porque o pedaço do ECharts
+       chegava antes dos módulos de que ele depende. O build de produção não usa isso. */
+    lazyCompilation: false,
+  },
   output: {
     distPath: { root: 'dist' },
     sourceMap: { js: 'source-map', css: true },
