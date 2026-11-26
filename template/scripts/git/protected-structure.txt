@@ -6,6 +6,7 @@
 ^SUPORTE\.md$
 ^\.claude/
 ^\.github/
+^scripts/[^/]+\.mjs$
 ^template/\.husky/
 ^template/scripts/git/
 ^template/scripts/tsconfig\.json$

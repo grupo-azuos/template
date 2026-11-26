@@ -45,6 +45,7 @@ labels = """
 org.opencontainers.image.source=https://github.com/grupo-azuos/template
 azuos.app=template
 azuos.environment=homo
+azuos.version=1.0.0
 """
 links = ["https://template.homo.grupoazuos.com.br"]
 
@@ -160,6 +161,7 @@ labels = """
 org.opencontainers.image.source=https://github.com/grupo-azuos/template
 azuos.app=template
 azuos.environment=prod
+azuos.version=1.0.0
 """
 links = ["https://template.grupoazuos.com.br"]
 

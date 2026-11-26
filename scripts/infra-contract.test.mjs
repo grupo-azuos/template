@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -17,6 +17,9 @@ function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'azuos-infra-rule-'));
   cpSync(join(repository, '.komodo'), join(root, '.komodo'), { recursive: true });
   cpSync(join(repository, APP_DIR, 'docker'), join(root, APP_DIR, 'docker'), { recursive: true });
+  cpSync(join(repository, APP_DIR, '.husky'), join(root, APP_DIR, '.husky'), { recursive: true });
+  cpSync(join(repository, APP_DIR, 'scripts/git'), join(root, APP_DIR, 'scripts/git'), { recursive: true });
+  cpSync(join(repository, 'scripts/release.mjs'), join(root, 'scripts/release.mjs'));
   for (const workspace of ['server', 'client', '.']) {
     try {
       cpSync(join(repository, APP_DIR, workspace, 'package.json'), join(root, APP_DIR, workspace, 'package.json'));
@@ -24,7 +27,10 @@ function fixture() {
       /* app sem esse workspace */
     }
   }
-  const write = (path, content) => writeFileSync(join(root, path), content);
+  const write = (path, content) => {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), content);
+  };
   const read = (path) => readFileSync(join(root, path), 'utf8');
   return { root, write, read, dispose: () => rmSync(root, { recursive: true }) };
 }
@@ -152,6 +158,38 @@ test('rejects a runtime image that copies node_modules', () => {
     const dockerfile = project.read(`${APP_DIR}/docker/dockerfile`);
     project.write(`${APP_DIR}/docker/dockerfile`, `${dockerfile}COPY --from=deps /repo/node_modules node_modules\n`);
     assert.ok(failsWith(project, 'not node_modules'));
+  } finally {
+    project.dispose();
+  }
+});
+
+test('requires the Komodo build version, the label and the auto increment off', () => {
+  const project = fixture();
+  try {
+    project.write('.komodo/komodo.toml', TOML.replace(/^auto_increment_version = false\n/m, ''));
+    assert.ok(failsWith(project, 'auto_increment_version = false'));
+    project.write('.komodo/komodo.toml', TOML.replace(/^azuos\.version=.*\n/m, ''));
+    assert.ok(failsWith(project, 'azuos.version=<the same version>'));
+    project.write('.komodo/komodo.toml', TOML.replace(/^version = "[^"]+"/m, 'version = "0.0.1"'));
+    assert.ok(failsWith(project, 'the same as package.json'));
+  } finally {
+    project.dispose();
+  }
+});
+
+test('requires the release script, the pre-push guard and the version in the deploy', () => {
+  const project = fixture();
+  try {
+    project.write('.github/workflows/release-bump.yml', 'name: Release/Bump\n');
+    assert.ok(failsWith(project, 'Release/Bump workflow is gone'));
+    project.write(`${APP_DIR}/.husky/pre-push`, 'sh scripts/git/branch-guard.sh push\n');
+    assert.ok(failsWith(project, 'release-guard.sh before branch-guard.sh'));
+    project.write(`${APP_DIR}/docker/komodo.sh`, project.read(`${APP_DIR}/docker/komodo.sh`).replace('--env APP_VERSION', '--env OTHER'));
+    assert.ok(failsWith(project, 'exports APP_VERSION'));
+    project.write(`${APP_DIR}/docker/compose.yml`, project.read(`${APP_DIR}/docker/compose.yml`).replace('azuos.version: ${APP_VERSION:?}', ''));
+    assert.ok(failsWith(project, 'azuos.version: ${APP_VERSION:?}'));
+    rmSync(join(project.root, 'scripts/release.mjs'));
+    assert.ok(failsWith(project, 'scripts/release.mjs releases the version'));
   } finally {
     project.dispose();
   }

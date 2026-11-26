@@ -1,2 +1,4 @@
-sh template/scripts/git/branch-guard.sh push
+input=$(cat)
+printf '%s\n' "$input" | sh template/scripts/git/release-guard.sh || exit $?
+printf '%s\n' "$input" | sh template/scripts/git/branch-guard.sh push || exit $?
 cd template && npm run check:design
