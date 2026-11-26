@@ -123,6 +123,29 @@ function trackedFiles(root, name) {
 }
 
 /**
+ * Os arquivos da versão do SISTEMA: os da raiz e os que moram na pasta de um Build do Komodo. Um
+ * artefato com versão e tag próprias fora dela (o agente Windows do chamados, em `chamados/agent`,
+ * com a tag `agent/v`) não anda junto com a tag `prod/v`.
+ */
+function versionFiles(root, name) {
+  const buildPaths = trackedFiles(root, "komodo.toml").flatMap((toml) =>
+    [
+      ...readFileSync(join(root, toml), "utf8").matchAll(
+        /^build_path = "([^"]+)"/gm,
+      ),
+    ].map((match) => match[1]),
+  );
+  const files = trackedFiles(root, name);
+  if (buildPaths.length === 0 || buildPaths.includes(".")) return files;
+
+  return files.filter(
+    (file) =>
+      dirname(file) === "." ||
+      buildPaths.some((path) => file.startsWith(`${path}/`)),
+  );
+}
+
+/**
  * Em cada `[build.config]` do Komodo: `version` igual à tag, `auto_increment_version = false`
  * (sem isso o Komodo soma 1 no patch a cada build e a versão dele descola da tag) e o label
  * `azuos.version` na imagem, para o `docker image inspect` dizer qual versão está rodando.
@@ -150,7 +173,7 @@ export function setKomodoVersion(toml, version) {
 
 /** O maior `version` entre os package.json do repositório: a versão em que a branch está. */
 export function currentVersion(root) {
-  return trackedFiles(root, "package.json")
+  return versionFiles(root, "package.json")
     .map(
       (file) =>
         JSON.parse(readFileSync(join(root, file), "utf8")).version ?? "0.0.0",
@@ -164,7 +187,7 @@ export function currentVersion(root) {
 
 /** Grava a versão em todos os arquivos e devolve os que mudaram. */
 export function bumpVersion(root, version) {
-  const manifests = trackedFiles(root, "package.json");
+  const manifests = versionFiles(root, "package.json");
   for (const file of manifests) {
     updateJson(join(root, file), (data) => {
       data.version = version;
@@ -172,7 +195,7 @@ export function bumpVersion(root, version) {
   }
 
   /* No lock, a raiz e cada workspace (pela pasta do package.json dele) levam a versão nova. */
-  for (const lock of trackedFiles(root, "package-lock.json")) {
+  for (const lock of versionFiles(root, "package-lock.json")) {
     const lockDir = dirname(lock);
     const workspaces = manifests
       .map((file) => relative(lockDir, dirname(file)).replaceAll("\\", "/"))
