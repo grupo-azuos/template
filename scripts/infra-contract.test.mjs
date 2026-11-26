@@ -1,28 +1,30 @@
 import assert from 'node:assert/strict';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { violations } from './infra-contract.mjs';
+import { codeDirOf, violations } from './infra-contract.mjs';
 
 const repository = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TOML = readFileSync(join(repository, '.komodo/komodo.toml'), 'utf8');
 const APP = /image_name = "azuos\/([a-z0-9-]+)"/.exec(TOML)[1];
 const APP_DIR = /build_path = "([^"]+)"/.exec(TOML)[1];
+/* O código pode morar numa subpasta do build (app aninhado): a cópia sai de onde ele está. */
+const CODE_DIR = relative(repository, codeDirOf(join(repository, APP_DIR))) || '.';
 
 /* Cópia do que o contrato lê (TOML e docker/ e package.json do app), para estragar à vontade. */
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'azuos-infra-rule-'));
   cpSync(join(repository, '.komodo'), join(root, '.komodo'), { recursive: true });
   cpSync(join(repository, APP_DIR, 'docker'), join(root, APP_DIR, 'docker'), { recursive: true });
-  cpSync(join(repository, APP_DIR, '.husky'), join(root, APP_DIR, '.husky'), { recursive: true });
-  cpSync(join(repository, APP_DIR, 'scripts/git'), join(root, APP_DIR, 'scripts/git'), { recursive: true });
+  cpSync(join(repository, CODE_DIR, '.husky'), join(root, CODE_DIR, '.husky'), { recursive: true });
+  cpSync(join(repository, CODE_DIR, 'scripts/git'), join(root, CODE_DIR, 'scripts/git'), { recursive: true });
   cpSync(join(repository, 'scripts/release.mjs'), join(root, 'scripts/release.mjs'));
   for (const workspace of ['server', 'client', '.']) {
     try {
-      cpSync(join(repository, APP_DIR, workspace, 'package.json'), join(root, APP_DIR, workspace, 'package.json'));
+      cpSync(join(repository, CODE_DIR, workspace, 'package.json'), join(root, CODE_DIR, workspace, 'package.json'));
     } catch {
       /* app sem esse workspace */
     }
@@ -182,7 +184,7 @@ test('requires the release script, the pre-push guard and the version in the dep
   try {
     project.write('.github/workflows/release-bump.yml', 'name: Release/Bump\n');
     assert.ok(failsWith(project, 'Release/Bump workflow is gone'));
-    project.write(`${APP_DIR}/.husky/pre-push`, 'sh scripts/git/branch-guard.sh push\n');
+    project.write(`${CODE_DIR}/.husky/pre-push`, 'sh scripts/git/branch-guard.sh push\n');
     assert.ok(failsWith(project, 'release-guard.sh before branch-guard.sh'));
     project.write(`${APP_DIR}/docker/komodo.sh`, project.read(`${APP_DIR}/docker/komodo.sh`).replace('--env APP_VERSION', '--env OTHER'));
     assert.ok(failsWith(project, 'exports APP_VERSION'));

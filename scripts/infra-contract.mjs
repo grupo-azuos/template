@@ -162,7 +162,7 @@ function releaseRules(project, appDir, codeDir, toml) {
  * versão passariam sem conferir nada. App de pasta única (a shared-api) não tem workspaces: o
  * `.husky` ao lado do package.json é o que diz que a subpasta é a do código.
  */
-function codeDirOf(appDir) {
+export function codeDirOf(appDir) {
   if (existsSync(join(appDir, 'package.json'))) return appDir;
   const nested = readdirSync(appDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
