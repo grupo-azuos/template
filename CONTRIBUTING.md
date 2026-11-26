@@ -438,6 +438,7 @@ Formato obrigatório, sem variação:
 | `docs` | `docs/` e documentação `.md` na raiz |
 | `deps` | Atualização de dependência |
 | `claude` | `.claude/` e `CLAUDE.md` |
+| `release` | Versão nova e tag `prod/vX.Y.Z` (só pelo `npm run release`) |
 
 **Mensagem** — em português, primeira letra maiúscula, sem ponto final, no que a mudança
 **faz** e não no que você mexeu. `Resolve o erro X` é melhor que `Alterações no service`.
