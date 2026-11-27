@@ -28,10 +28,20 @@ esac
 
 RUNTIME_DIR="$(git rev-parse --show-toplevel)/.komodo/runtime"
 APP_REVISION="$(git rev-parse --short HEAD)"
-# A versão do app é a do package.json da pasta do app: a mesma da tag prod/vX.Y.Z (scripts/release.mjs).
-APP_VERSION="$(sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p' package.json | head -n 1)"
 APP_IMAGE="azuos/$APP_NAME:$APP_REVISION-$DEPLOY_ENV"
 STACK_NAME="${DEPLOY_ENV}_${APP_NAME}"
+# A versão do app é a do package.json da pasta do stack: a mesma da tag prod/vX.Y.Z
+# (scripts/release.mjs). App que guarda o package.json numa subpasta (o certmonitor, em
+# `system/`) lê a do Build deste ambiente no .komodo/komodo.toml, que o contrato de infra
+# mantém igual à do package.json. Sem versão o compose recusa o deploy (`${APP_VERSION:?}`).
+APP_VERSION="$(sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p' package.json 2>/dev/null | head -n 1)"
+if [ -z "$APP_VERSION" ]; then
+  APP_VERSION="$(awk -v build="name = \"$STACK_NAME\"" '
+    /^\[\[/ { section = $0; found = 0 }
+    section == "[[build]]" && $0 == build { found = 1 }
+    found && /^version = / { gsub(/"/, "", $3); print $3; exit }
+  ' "$(git rev-parse --show-toplevel)/.komodo/komodo.toml")"
+fi
 DEPLOY_NODE_ID="$(docker node inspect self --format '{{.ID}}')"
 export APP_NAME DEPLOY_ENV APP_REVISION APP_VERSION APP_IMAGE STACK_NAME DEPLOY_NODE_ID
 
