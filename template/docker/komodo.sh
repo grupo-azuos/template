@@ -45,6 +45,9 @@ build_runtime_images() {
 
 # Entra no Vault pelo AppRole do ambiente, exporta os segredos de <ambiente>/<app> e roda o comando.
 # O token só serve para esta leitura e é revogado logo em seguida; nenhum valor passa pelo log.
+# As variáveis do comando são lidas pelo shell do container, não por este: aspas simples de
+# propósito, para nada se expandir aqui.
+# shellcheck disable=SC2016
 VAULT_RUN='set -eu
 token=$(jq -n --arg r "$VAULT_ROLE_ID" --arg s "$VAULT_SECRET_ID" "{role_id: \$r, secret_id: \$s}" \
   | curl -fsS --data @- "$VAULT_ADDR/v1/auth/approle/login" | jq -r .auth.client_token)
